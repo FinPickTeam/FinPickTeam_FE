@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import ArsAuth from '../pages/ArsAuth.vue';
+import ArsAuth from '../pages/ars/ArsAuth.vue';
+import ArsVerification from '../pages/ars/ArsVerification.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -8,6 +9,11 @@ const router = createRouter({
       path: '/',
       name: 'ARSAuth',
       component: ArsAuth,
+    },
+    {
+      path: '/ars/verification',
+      name: 'ArsVerification',
+      component: ArsVerification,
     },
   ],
 });

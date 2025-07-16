@@ -1,0 +1,284 @@
+<template>
+  <div class="ars_bg">
+    <div class="ars_outer_box">
+      <div class="ars_header">
+        <div class="logo">FinPick</div>
+        <div class="subtitle">ARS 인증 진행 중</div>
+      </div>
+      <div class="ars_verification_wrapper">
+        <div class="ars_card">
+          <div class="ars_info">
+            <div class="ars_call_msg">ARS 전화가 발신되었습니다</div>
+            <div class="ars_desc">
+              전화를 받으신 후 아래 인증번호를 입력해 주세요
+            </div>
+            <div class="ars_code_box">
+              <div class="ars_label">인증번호</div>
+              <div class="ars_code">3847</div>
+              <div class="ars_code_desc">
+                위 4자리 숫자를 전화에서 입력하세요
+              </div>
+            </div>
+            <div class="ars_waiting">
+              <span class="waiting_icon">📞</span>
+              <span class="waiting_label">통화 대기 중</span>
+              <span class="waiting_timer">2:53</span>
+            </div>
+            <ul class="ars_guide_list">
+              <li>전화를 받으신 후 안내에 따라 인증번호를 입력하세요</li>
+              <li>인증번호 입력 후 통화가 자동으로 종료됩니다</li>
+              <li>3분 이내에 인증을 완료해주세요</li>
+            </ul>
+          </div>
+        </div>
+        <button class="ars_next_btn">다음 단계로 진행</button>
+        <div class="ars_warning_box">
+          <div class="warning_title">
+            <span class="warning_icon">⚠️</span>
+            <span>주의사항</span>
+          </div>
+          <ul class="warning_list">
+            <li>전화번호가 정확한지 다시 한번 확인해주세요</li>
+            <li>인증번호가 맞지 않을 경우 접수 시 다시 시도해주세요</li>
+            <li>인증번호는 정확히 입력해야 합니다</li>
+          </ul>
+        </div>
+        <div class="ars_help_group">
+          <div class="ars_help">전화가 오지 않나요?</div>
+          <a href="#" class="ars_help_link">고객센터 문의</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+// 추후 인증번호, 타이머 등은 props 또는 상태로 관리 가능
+</script>
+
+<style scoped>
+:global(html),
+:global(body),
+.ars_bg {
+  overflow-x: hidden !important;
+  overflow-y: hidden !important;
+}
+.ars_bg {
+  width: 100vw;
+  height: 100vh;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.ars_outer_box {
+  width: 540px;
+  height: 960px;
+  background: #fff;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+.ars_header {
+  width: 100%;
+  padding-top: 48px;
+  padding-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.logo {
+  font-size: 36px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #4318d1 0%, #8e74e3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  margin-bottom: 0;
+}
+.subtitle {
+  font-size: 16px;
+  color: #888;
+  margin-top: 4px;
+  margin-bottom: 24px;
+}
+.ars_verification_wrapper {
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  position: relative;
+  padding-top: 0;
+  padding-bottom: 24px;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.ars_card,
+.ars_next_btn,
+.ars_warning_box {
+  width: 485px;
+  max-width: 100%;
+  margin: 0 auto 18px auto;
+  box-sizing: border-box;
+}
+.ars_card {
+  background: #fafbfc;
+  border: 1.5px solid #e5e6ea;
+  border-radius: 12px;
+  box-shadow: none;
+  padding: 36px 24px 24px 24px;
+  margin-bottom: 24px;
+}
+.ars_info {
+  text-align: center;
+}
+.ars_call_msg {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #222;
+}
+.ars_desc {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 20px;
+}
+.ars_code_box {
+  border: 2px solid #a084e8;
+  border-radius: 10px;
+  padding: 18px 0 10px 0;
+  margin-bottom: 18px;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+.ars_label {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 8px;
+}
+.ars_code {
+  font-size: 38px;
+  font-weight: bold;
+  color: #7c4dff;
+  letter-spacing: 16px;
+  margin-bottom: 8px;
+}
+.ars_code_desc {
+  font-size: 12px;
+  color: #888;
+}
+.ars_waiting {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin: 16px 0 8px 0;
+  font-size: 14px;
+}
+.waiting_icon {
+  font-size: 16px;
+  color: #222;
+  margin-right: 2px;
+}
+.waiting_label {
+  color: #7c4dff;
+  font-weight: 600;
+}
+.waiting_timer {
+  color: #222;
+  font-weight: 600;
+}
+.ars_guide_list {
+  text-align: left;
+  font-size: 12.5px;
+  color: #444;
+  margin-bottom: 0;
+  padding-left: 18px;
+  line-height: 1.7;
+}
+.ars_next_btn {
+  background: #a084e8;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  padding: 0;
+  height: 58px;
+  cursor: pointer;
+  transition: background 0.2s;
+  letter-spacing: 0.5px;
+  display: block;
+}
+.ars_next_btn:hover {
+  background: #7c4dff;
+}
+.ars_warning_box {
+  background: #fffbe7;
+  border-radius: 8px;
+  padding: 12px 14px;
+  text-align: center;
+  border: 1px solid #ffe082;
+  margin-bottom: 0;
+}
+.warning_title {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 6px;
+  color: #444;
+  font-size: 14px;
+  font-weight: 600;
+}
+.warning_icon {
+  margin-right: 6px;
+  font-size: 16px;
+}
+.warning_list {
+  text-align: left;
+  padding-left: 96px;
+  margin: 0 auto;
+  display: block;
+  font-size: 12px;
+}
+.warning_list li {
+  display: list-item;
+  text-align: left;
+  color: #666666;
+  list-style-position: outside;
+}
+.ars_help_group {
+  width: 485px;
+  max-width: 100%;
+  margin: 12px auto 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.ars_help {
+  font-size: 13px;
+  color: #888;
+}
+.ars_help_link {
+  color: #7c4dff;
+  margin-left: 4px;
+  text-decoration: underline;
+  font-weight: 600;
+  font-size: 13px;
+}
+</style>
