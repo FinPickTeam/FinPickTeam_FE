@@ -56,18 +56,15 @@
 }
 html,
 body {
-  width: 100vw;
-  height: 100vh;
-  min-width: 100vw;
-  min-height: 100vh;
+  width: 100%;
+  height: 100%;
   background: #fff;
   margin: 0;
   padding: 0;
+  overflow-x: hidden;
 }
 .wrap {
-  width: 100vw;
-  height: 100vh;
-  min-width: 100vw;
+  width: 100%;
   min-height: 100vh;
   background: #fff;
   margin: 0;
@@ -77,9 +74,9 @@ body {
   flex-direction: column;
 }
 .title {
-  margin-top: 3rem;
-  margin-bottom: 1rem;
-  font-size: 2rem;
+  margin-top: clamp(2rem, 8vh, 4rem);
+  margin-bottom: clamp(0.5rem, 2vh, 1.5rem);
+  font-size: clamp(1.5rem, 6vw, 2.5rem);
   font-weight: 900;
   background: linear-gradient(to right, #4318d1 0%, #8e74e3 100%);
   -webkit-background-clip: text;
@@ -89,7 +86,8 @@ body {
 }
 .ars_message {
   color: #666666;
-  margin-bottom: 2rem;
+  margin-bottom: clamp(1rem, 4vh, 2.5rem);
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
 }
 .content {
   flex: 1;
@@ -98,83 +96,87 @@ body {
   justify-content: flex-start;
   align-items: center;
   width: 100%;
-  max-width: 540px;
+  max-width: min(540px, 90vw);
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 clamp(1rem, 4vw, 2rem);
 }
 .form_group {
   width: 100%;
   max-width: 100%;
-  margin-bottom: 1.5rem;
+  margin-bottom: clamp(1rem, 3vh, 1.5rem);
   display: flex;
   flex-direction: column;
   align-items: stretch;
 }
 input {
   width: 100%;
-  height: 48px;
+  height: clamp(44px, 6vh, 52px);
   border: 1px solid #e5e5e5;
-  border-radius: 10px;
-  padding: 0 1rem;
-  font-size: 1rem;
+  border-radius: clamp(8px, 1.5vw, 12px);
+  padding: 0 clamp(0.8rem, 2vw, 1.2rem);
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   background: #fff;
   box-sizing: border-box;
 }
 .carrier_options {
   display: flex;
-  gap: 0.5rem;
+  gap: clamp(0.3rem, 1vw, 0.8rem);
   width: 100%;
 }
 .carrier_options button {
   flex: 1;
-  height: 48px;
+  height: clamp(44px, 6vh, 52px);
   border: 1px solid #e5e5e5;
-  border-radius: 10px;
+  border-radius: clamp(8px, 1.5vw, 12px);
   background: #fff;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   color: #333;
 }
 .confirm_button {
   width: 100%;
-  height: 58px;
+  height: clamp(52px, 7vh, 64px);
   border: none;
-  border-radius: 10px;
+  border-radius: clamp(8px, 1.5vw, 12px);
   background: #8e74e3;
   color: #fff;
-  font-size: 1.1rem;
+  font-size: clamp(1rem, 2.8vw, 1.3rem);
   font-weight: 700;
-  margin-top: 1rem;
-  margin-bottom: 1rem;
+  margin-top: clamp(0.8rem, 2vh, 1.2rem);
+  margin-bottom: clamp(0.8rem, 2vh, 1.2rem);
 }
 .helper_text {
   color: #666;
-  font-size: 0.95rem;
-  margin-bottom: 1.5rem;
+  font-size: clamp(0.85rem, 2.2vw, 1rem);
+  margin-bottom: clamp(1rem, 3vh, 1.5rem);
 }
 .label_text {
   text-align: left;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
   color: #333333;
-  margin-bottom: 0.5rem;
-  margin-top: 0.5rem;
+  margin-bottom: clamp(0.3rem, 1vh, 0.6rem);
+  margin-top: clamp(0.3rem, 1vh, 0.6rem);
 }
 .small,
 .small_2 {
   text-align: left;
-  font-size: 0.8rem;
+  font-size: clamp(0.75rem, 2vw, 0.9rem);
   color: #666666;
-  margin-top: 0.2rem;
+  margin-top: clamp(0.1rem, 0.5vh, 0.3rem);
 }
-@media (min-width: 541px) {
-  html,
-  body,
+/* 태블릿 이상에서 최대 너비 제한 */
+@media (min-width: 768px) {
+  .content {
+    max-width: 540px;
+    padding: 0 2rem;
+  }
+}
+
+/* 매우 큰 화면에서 중앙 정렬 */
+@media (min-width: 1200px) {
   .wrap {
-    width: 540px;
-    height: 960px;
-    min-width: 540px;
-    min-height: 960px;
+    max-width: 540px;
     margin: 0 auto;
-    background: #fff;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
   }
 }
 </style>
