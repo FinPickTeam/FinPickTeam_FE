@@ -2,7 +2,9 @@
   <div class="profile-step-container">
     <!-- 상단 네비게이션 -->
     <div class="nav-bar">
-      <span class="back-btn" @click="goBack">←</span>
+      <span class="back-btn" @click="goBack">
+        <i class="fa-solid fa-angle-left"></i>
+      </span>
       <span class="title">투자 성향 분석</span>
     </div>
     <!-- 진행 바 -->
