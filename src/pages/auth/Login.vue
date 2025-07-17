@@ -100,10 +100,16 @@ label {
 input {
   width: 100%;
   padding: 12px 40px 12px 12px;
-  border: 1px solid #eee;
+  border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 16px;
   outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+input:focus {
+  outline: none;
+  border-color: #6b46c1;
 }
 .icon {
   position: absolute;
