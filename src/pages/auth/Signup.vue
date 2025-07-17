@@ -70,13 +70,12 @@
       </div>
 
       <!-- 회원가입 버튼 -->
-      <button type="submit" class="signup-btn" :disabled="!isFormValid">
-        회원가입
-      </button>
+      <button type="submit" class="signup-btn">회원가입</button>
+      <div v-if="warningMessage" class="warning-message">
+        {{ warningMessage }}
+      </div>
     </form>
-
-    <!-- 로그인 링크 -->
-    <div class="login-link">
+    <div class="login-link-middle">
       이미 계정이 있으신가요?
       <router-link to="/login">로그인</router-link>
     </div>
@@ -102,9 +101,11 @@ const errors = reactive({
 });
 
 const isEmailChecked = ref(false);
+const warningMessage = ref('');
+let warningTimeout = null;
 
 const validateEmail = () => {
-  const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!form.email) {
     errors.email = '';
   } else if (!emailRegex.test(form.email)) {
@@ -116,7 +117,7 @@ const validateEmail = () => {
 
 const validatePassword = () => {
   const passwordRegex =
-    /^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$/;
+    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   if (!form.password) {
     errors.password = '';
   } else if (form.password.length < 8) {
@@ -146,23 +147,33 @@ const checkEmailDuplicate = async () => {
   alert('사용 가능한 이메일입니다.');
 };
 
-const isFormValid = computed(
-  () =>
+const isFormValid = computed(() => {
+  const isValid =
     form.email &&
     form.password &&
     form.confirmPassword &&
     !errors.email &&
     !errors.password &&
-    !errors.confirmPassword &&
-    isEmailChecked.value
-);
+    !errors.confirmPassword;
+  return isValid;
+});
 
 const handleSignup = async () => {
-  if (!isFormValid.value) return;
+  if (!isFormValid.value) {
+    warningMessage.value = '모든 항목을 올바르게 입력해주세요.';
+    if (warningTimeout) clearTimeout(warningTimeout);
+    warningTimeout = setTimeout(() => {
+      warningMessage.value = '';
+    }, 2000);
+    return;
+  }
   // TODO: 실제 회원가입 API 연동
   await new Promise((resolve) => setTimeout(resolve, 500));
-  alert('회원가입이 완료되었습니다!');
-  router.push('/login');
+  // 회원가입 완료 페이지로 이동 (사용자 이름을 쿼리 파라미터로 전달)
+  router.push({
+    path: '/signup-complete',
+    query: { userName: form.email.split('@')[0] }, // 이메일에서 사용자명 추출
+  });
 };
 </script>
 
@@ -238,15 +249,18 @@ input.error {
 }
 .check-btn {
   padding: 12px 16px;
-  background-color: #8e74e3;
-  color: white;
+  background: #8e74e3;
+  color: #fff;
   border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: background-color 0.2s;
+  transition: background 0.2s;
+}
+.check-btn:hover {
+  background: #6c4cf1;
 }
 .check-btn:disabled {
   background-color: #8e74e3;
@@ -277,7 +291,7 @@ input.error {
   cursor: pointer;
   transition: background 0.2s;
 }
-.signup-btn:hover:not(:disabled) {
+.signup-btn:hover {
   background: #6c4cf1;
 }
 .signup-btn:disabled {
@@ -294,6 +308,21 @@ input.error {
   text-decoration: none;
   margin-left: 4px;
 }
+.warning-message {
+  color: #ef4444;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 14px;
+  animation: fadein 0.2s;
+}
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 @media (max-width: 480px) {
   .signup-container {
     padding: 16px;
@@ -306,6 +335,36 @@ input.error {
   }
   .check-btn {
     width: 100%;
+  }
+}
+
+.login-link-fixed {
+  text-align: center;
+  color: #666666;
+  font-size: 15px;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 32px;
+  z-index: 10;
+  background: transparent;
+}
+@media (max-width: 480px) {
+  .login-link-fixed {
+    bottom: 16px;
+  }
+}
+
+/* 스타일 */
+.login-link-middle {
+  text-align: center;
+  color: #666666;
+  font-size: 15px;
+  margin: 48px 0 0 0;
+}
+@media (max-width: 480px) {
+  .login-link-middle {
+    margin-top: 32px;
   }
 }
 </style>
