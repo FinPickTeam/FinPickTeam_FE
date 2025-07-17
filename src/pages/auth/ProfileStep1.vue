@@ -48,9 +48,9 @@ const goBack = () => {
   router.back();
 };
 const goNext = () => {
-  // TODO: 다음 단계로 이동
-  // router.push('/profile-step2');
-  alert('다음 단계로 이동!');
+  if (selected.value !== null) {
+    router.push('/profile-step-2');
+  }
 };
 </script>
 
