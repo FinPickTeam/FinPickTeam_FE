@@ -37,7 +37,7 @@
       <button class="login-btn">로그인</button>
       <div class="signup-link">
         아직 계정이 없으신가요?
-        <a href="#">회원가입</a>
+        <router-link to="/signup">회원가입</router-link>
       </div>
     </div>
   </div>
@@ -104,7 +104,6 @@ input {
   border-radius: 8px;
   font-size: 16px;
   outline: none;
-  box-sizing: border-box;
 }
 .icon {
   position: absolute;
