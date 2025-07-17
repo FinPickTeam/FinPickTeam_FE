@@ -5,6 +5,7 @@ import Login from '../pages/auth/Login.vue';
 import Signup from '../pages/auth/Signup.vue';
 import SignupComplete from '../pages/auth/SignupComplete.vue';
 import ProfileStep1 from '../pages/auth/ProfileStep1.vue';
+import ProfileStep2 from '../pages/auth/ProfileStep2.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -28,6 +29,11 @@ const router = createRouter({
       path: '/profile-step-1',
       name: 'ProfileStep1',
       component: ProfileStep1,
+    },
+    {
+      path: '/profile-step-2',
+      name: 'ProfileStep2',
+      component: ProfileStep2,
     },
     {
       path: '/ars-auth',
