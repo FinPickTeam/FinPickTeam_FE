@@ -21,7 +21,7 @@
 
     <!-- 하단 버튼 -->
     <div class="bottom-section">
-      <button class="analysis-btn" @click="goToAnalysis">
+      <button class="analysis-btn" @click="goToProfile">
         투자 성향 분석하러 가기
       </button>
     </div>
@@ -47,9 +47,8 @@ onMounted(() => {
 });
 
 // 투자 성향 분석 페이지로 이동
-const goToAnalysis = () => {
-  // TODO: 실제 투자 성향 분석 페이지 경로로 수정
-  router.push('/analysis');
+const goToProfile = () => {
+  router.push('/profile-step-1');
 };
 </script>
 
