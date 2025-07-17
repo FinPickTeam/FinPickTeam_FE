@@ -3,6 +3,7 @@ import ArsAuth from '../pages/ars/ArsAuth.vue';
 import ArsVerification from '../pages/ars/ArsVerification.vue';
 import Login from '../pages/auth/Login.vue';
 import Signup from '../pages/auth/Signup.vue';
+import SignupComplete from '../pages/auth/SignupComplete.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -16,6 +17,11 @@ const router = createRouter({
       path: '/signup',
       name: 'Signup',
       component: Signup,
+    },
+    {
+      path: '/signup-complete',
+      name: 'SignupComplete',
+      component: SignupComplete,
     },
     {
       path: '/ars-auth',
