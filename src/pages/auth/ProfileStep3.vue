@@ -9,9 +9,9 @@
     </div>
     <!-- 진행 바 -->
     <div class="progress-bar">
+      <div class="progress"></div>
+      <div class="progress"></div>
       <div class="progress active"></div>
-      <div class="progress"></div>
-      <div class="progress"></div>
       <div class="progress"></div>
     </div>
     <!-- 질문 -->
