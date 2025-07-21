@@ -50,6 +50,7 @@ import BottomNavBar from '@/components/Navbar.vue';
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 .quiz-btn {
   width: 90%;
@@ -77,7 +78,7 @@ import BottomNavBar from '@/components/Navbar.vue';
 .floating-btn-group {
   position: absolute;
   top: 220px;
-  right: 10vw;
+  right: 20px;
   display: flex;
   flex-direction: column;
   gap: 18px;
