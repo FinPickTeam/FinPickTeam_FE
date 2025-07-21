@@ -30,8 +30,9 @@
 <style scoped>
 .bottom-nav {
   position: fixed;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100vw;
   bottom: 0;
   background: #fff;
   box-shadow: 0 -2px 12px 0 #0001;
