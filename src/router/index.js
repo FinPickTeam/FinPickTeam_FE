@@ -17,14 +17,14 @@ import ProfileView from "../pages/mypage/ProfileView.vue";
 import QuizHistoryView from "../pages/mypage/QuizHistoryView.vue";
 import DictionaryView from "../pages/mypage/DictionaryView.vue";
 import AvatarShopView from "../pages/mypage/AvatarShopView.vue";
-import Home from '../pages/home/Home.vue';
-import Notification from '../pages/home/Notification.vue';
-import Quiz from '../pages/home/Quiz.vue';
 
-import FinanceHome from '../pages/finance/FinanceHome.vue';
-import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
-import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
+import Home from "../pages/home/Home.vue";
+import Notification from "../pages/home/Notification.vue";
+import Quiz from "../pages/home/Quiz.vue";
 
+import FinanceHome from "../pages/finance/FinanceHome.vue";
+import OpenBankingHome from "../pages/openbanking/OpenBankingHome.vue";
+import ChallengeHome from "../pages/challenge/ChallengeHome.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -70,24 +70,18 @@ const router = createRouter({
       component: Home,
     },
     {
-
-      path: '/notification',
-      name: 'Notification',
+      path: "/notification",
+      name: "Notification",
       component: Notification,
     },
     {
-      path: '/mypage',
-      name: 'Mypage',
-      component: Mypage,
-    },
-    {
-      path: '/quiz',
-      name: 'Quiz',
+      path: "/quiz",
+      name: "Quiz",
       component: Quiz,
     },
     {
-      path: '/finance',
-      name: 'FinanceHome',
+      path: "/finance",
+      name: "FinanceHome",
       component: FinanceHome,
     },
     {
