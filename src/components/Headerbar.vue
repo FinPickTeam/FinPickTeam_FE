@@ -3,7 +3,7 @@
     <h1 class="logo">FinPick</h1>
     <div class="header-icons">
       <button class="icon-btn"><i class="fas fa-search"></i></button>
-      <button class="icon-btn notification-btn">
+      <button class="icon-btn notification-btn" @click="goToNotification">
         <i class="fas fa-bell"></i>
         <span class="notification-dot"></span>
       </button>
@@ -12,7 +12,13 @@
 </template>
 
 <script setup>
-// 특별한 로직 없음
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+
+const goToNotification = () => {
+  router.push('/notification');
+};
 </script>
 
 <style scoped>
