@@ -13,6 +13,7 @@ import ProfileStep4 from '../pages/auth/ProfileStep4.vue';
 import Home from '../pages/home/Home.vue';
 import Mypage from '../pages/mypage/Mypage.vue';
 import FinanceHome from '../pages/finance/FinanceHome.vue';
+import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -66,6 +67,11 @@ const router = createRouter({
       path: '/finance',
       name: 'FinanceHome',
       component: FinanceHome,
+    },
+    {
+      path: '/openbanking',
+      name: 'OpenBankingHome',
+      component: OpenBankingHome,
     },
     {
       path: '/ars-auth',

@@ -4,7 +4,7 @@
       <i class="fa-solid fa-trophy"></i>
       <span>챌린지</span>
     </RouterLink>
-    <RouterLink to="/assets" class="nav-item">
+    <RouterLink to="/openbanking" class="nav-item">
       <i class="fas fa-wallet"></i>
       <span>내 자산</span>
     </RouterLink>
