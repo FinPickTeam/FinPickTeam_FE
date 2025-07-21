@@ -1,0 +1,363 @@
+<template>
+  <div class="profile-container">
+    <Headerbar />
+    <!-- User Information Form -->
+    <div class="profile-form">
+      <div class="form-group row-group">
+        <label>닉네임</label>
+        <div class="row-flex">
+          <input
+            type="text"
+            v-model="userInfo.nickname"
+            placeholder="닉네임 입력"
+          />
+          <button class="action-btn" @click="showNicknameModal = true">
+            닉네임 변경
+          </button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>이메일</label>
+        <input type="email" v-model="userInfo.email" readonly />
+      </div>
+      <div class="form-group row-group">
+        <label>비밀번호</label>
+        <div class="row-flex">
+          <input
+            type="password"
+            v-model="userInfo.password"
+            placeholder="비밀번호"
+          />
+          <button class="action-btn" @click="showPasswordModal = true">
+            비밀번호 변경
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- 비밀번호 변경 모달 -->
+    <div
+      v-if="showPasswordModal"
+      class="modal-overlay"
+      @click="showPasswordModal = false"
+    >
+      <div class="modal-content" @click.stop>
+        <h3>비밀번호 변경</h3>
+        <div class="form-group">
+          <label>현재 비밀번호</label>
+          <input
+            type="password"
+            v-model="passwordForm.current"
+            placeholder="현재 비밀번호를 입력하세요"
+          />
+        </div>
+        <div class="form-group">
+          <label>새 비밀번호</label>
+          <input
+            type="password"
+            v-model="passwordForm.new"
+            placeholder="새 비밀번호를 입력하세요"
+          />
+          <div
+            v-if="passwordForm.new"
+            :class="[
+              'password-check-msg',
+              passwordValid === true
+                ? 'success'
+                : passwordValid === false
+                ? 'fail'
+                : '',
+            ]"
+          >
+            <template v-if="passwordValid === false">
+              8자 이상, 영문과 숫자, 특수문자를 포함해야 합니다
+            </template>
+            <template v-else-if="passwordValid === true">
+              적합한 비밀번호입니다
+            </template>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>새 비밀번호 확인</label>
+          <input
+            type="password"
+            v-model="passwordForm.confirm"
+            placeholder="새 비밀번호를 다시 입력하세요"
+          />
+        </div>
+        <div class="btn-group">
+          <button class="save-btn" @click="changePassword">변경</button>
+          <button class="cancel-btn" @click="showPasswordModal = false">
+            취소
+          </button>
+        </div>
+      </div>
+    </div>
+    <!-- 닉네임 변경 모달 -->
+    <div
+      v-if="showNicknameModal"
+      class="modal-overlay"
+      @click="showNicknameModal = false"
+    >
+      <div class="modal-content" @click.stop>
+        <h3>닉네임 변경</h3>
+        <div class="form-group">
+          <label>새 닉네임</label>
+          <input
+            type="text"
+            v-model="nicknameForm.new"
+            placeholder="새 닉네임 입력"
+          />
+        </div>
+        <div class="btn-group">
+          <button class="save-btn" @click="checkNicknameModal">중복확인</button>
+          <button class="cancel-btn" @click="showNicknameModal = false">
+            취소
+          </button>
+        </div>
+        <div
+          v-if="nicknameCheckResult"
+          :class="[
+            'nickname-check-msg',
+            {
+              success: nicknameCheckResult === '사용 가능한 닉네임입니다.',
+              fail: nicknameCheckResult !== '사용 가능한 닉네임입니다.',
+            },
+          ]"
+        >
+          {{ nicknameCheckResult }}
+        </div>
+        <div
+          v-if="nicknameCheckResult === '사용 가능한 닉네임입니다.'"
+          class="btn-group"
+        >
+          <button class="save-btn" @click="changeNickname">변경</button>
+        </div>
+      </div>
+    </div>
+    <Navbar />
+  </div>
+</template>
+
+<script setup>
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import Headerbar from "../../components/Headerbar.vue";
+import Navbar from "../../components/Navbar.vue";
+
+const router = useRouter();
+
+const userInfo = ref({
+  nickname: "핀픽인간",
+  email: "kim.finpick@email.com",
+  password: "",
+});
+
+const showPasswordModal = ref(false);
+
+const passwordForm = ref({
+  current: "",
+  new: "",
+  confirm: "",
+});
+
+const showNicknameModal = ref(false);
+const nicknameForm = ref({ new: "" });
+const nicknameCheckResult = ref("");
+
+const goBack = () => {
+  router.push("/mypage");
+};
+
+const checkNickname = () => {
+  // 닉네임 중복확인 로직 (추후 서버 연동)
+  alert("사용 가능한 닉네임입니다.");
+};
+
+function checkNicknameModal() {
+  // 닉네임 중복확인 로직 (실제 서버 연동 시 비동기 처리)
+  if (!nicknameForm.value.new.trim()) {
+    nicknameCheckResult.value = "닉네임을 입력하세요.";
+    return;
+  }
+  if (nicknameForm.value.new === "이미사용중") {
+    nicknameCheckResult.value = "이미 사용 중인 닉네임입니다.";
+  } else {
+    nicknameCheckResult.value = "사용 가능한 닉네임입니다.";
+  }
+}
+function changeNickname() {
+  userInfo.value.nickname = nicknameForm.value.new;
+  showNicknameModal.value = false;
+  nicknameCheckResult.value = "";
+  nicknameForm.value.new = "";
+}
+
+const changePassword = () => {
+  if (passwordForm.value.new !== passwordForm.value.confirm) {
+    alert("새 비밀번호가 일치하지 않습니다.");
+    return;
+  }
+  // 실제 비밀번호 변경 로직 추가 예정
+  alert("비밀번호가 변경되었습니다.");
+  showPasswordModal.value = false;
+  passwordForm.value = { current: "", new: "", confirm: "" };
+};
+
+// 비밀번호 유효성 검사
+const passwordValid = computed(() => {
+  const value = passwordForm.value.new;
+  if (!value) return null;
+  // 8자 이상, 영문, 숫자, 특수문자 포함
+  const lengthCheck = value.length >= 8;
+  const engCheck = /[a-zA-Z]/.test(value);
+  const numCheck = /[0-9]/.test(value);
+  const specialCheck = /[^a-zA-Z0-9]/.test(value);
+  return lengthCheck && engCheck && numCheck && specialCheck;
+});
+</script>
+
+<style scoped>
+.profile-container {
+  min-height: 100vh;
+  background: #fff;
+  position: relative;
+  padding-bottom: 80px;
+}
+.profile-form {
+  padding: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.form-group {
+  margin-bottom: 28px;
+}
+.form-group label {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #222;
+}
+.row-group .row-flex {
+  display: flex;
+  gap: 10px;
+}
+.row-flex input {
+  flex: 1;
+}
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+input:focus {
+  border-color: #a78bfa;
+}
+.action-btn {
+  background: #a78bfa;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0 18px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  height: 44px;
+  transition: background 0.2s;
+}
+.action-btn:hover {
+  background: #7c3aed;
+}
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.modal-content {
+  background: white;
+  border-radius: 15px;
+  max-width: 400px;
+  width: 90%;
+  padding: 30px 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+}
+.modal-content h3 {
+  margin-top: 0;
+  font-size: 20px;
+  color: #7c3aed;
+  margin-bottom: 20px;
+}
+.btn-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.save-btn {
+  background: #a78bfa;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.save-btn:hover {
+  background: #7c3aed;
+}
+.cancel-btn {
+  background: #eee;
+  color: #333;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.nickname-check-msg {
+  margin-top: 12px;
+  font-size: 15px;
+  text-align: center;
+}
+.nickname-check-msg.success {
+  color: #4caf50;
+}
+.nickname-check-msg.fail {
+  color: #e53935;
+}
+.password-check-msg {
+  margin-top: 8px;
+  font-size: 14px;
+  text-align: left;
+}
+.password-check-msg.success {
+  color: #4caf50;
+}
+.password-check-msg.fail {
+  color: #e53935;
+}
+@media (max-width: 600px) {
+  .profile-form {
+    padding: 10px;
+  }
+  .modal-content {
+    padding: 20px 10px;
+  }
+}
+</style>
