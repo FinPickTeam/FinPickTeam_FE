@@ -12,6 +12,7 @@ import ProfileStep4 from '../pages/auth/ProfileStep4.vue';
 
 import Home from '../pages/home/Home.vue';
 import Mypage from '../pages/mypage/Mypage.vue';
+import FinanceHome from '../pages/finance/FinanceHome.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -60,6 +61,11 @@ const router = createRouter({
       path: '/mypage',
       name: 'Mypage',
       component: Mypage,
+    },
+    {
+      path: '/finance',
+      name: 'FinanceHome',
+      component: FinanceHome,
     },
     {
       path: '/ars-auth',
