@@ -23,12 +23,14 @@
   align-items: center;
   position: relative;
   background: #fff;
+  padding: 16px 0;
+  min-height: 80px;
 }
 .logo {
   color: #4318d1;
-  font-size: 48px;
+  font-size: 32px;
   font-weight: 900;
-  margin-bottom: 8px;
+  margin-bottom: 0;
   letter-spacing: 1px;
 }
 .header-icons {
