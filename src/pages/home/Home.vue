@@ -3,8 +3,8 @@
     <HeaderBar />
 
     <main class="main-content">
-      <!-- 퀴즈 버튼 -->
-      <button class="quiz-btn">오늘은 퀴즈 풀어</button>
+      <!-- 캐릭터 말풍선 -->
+      <div class="quiz-bubble">오늘은 퀴즈 풀어</div>
 
       <!-- 중앙 카드 -->
       <div class="main-card"></div>
@@ -14,7 +14,9 @@
         <button class="floating-btn" @click="openQuiz">
           <i class="fas fa-piggy-bank"></i>
         </button>
-        <button class="floating-btn"><i class="fas fa-envelope"></i></button>
+        <button class="floating-btn">
+          <i class="fas fa-envelope" @click="openNewsletter"></i>
+        </button>
         <button class="floating-btn">
           <i class="fas fa-user-friends"></i>
         </button>
@@ -29,6 +31,7 @@
 
     <BottomNavBar />
     <Quiz v-if="showQuiz" @close="closeQuiz" />
+    <Newsletter v-if="showNewsletter" @close="closeNewsletter" />
   </div>
 </template>
 
@@ -36,14 +39,22 @@
 import HeaderBar from '@/components/Headerbar.vue';
 import BottomNavBar from '@/components/Navbar.vue';
 import Quiz from './Quiz.vue';
+import Newsletter from './Newsletter.vue';
 import { ref } from 'vue';
 
 const showQuiz = ref(false);
+const showNewsletter = ref(false);
 function openQuiz() {
   showQuiz.value = true;
 }
 function closeQuiz() {
   showQuiz.value = false;
+}
+function openNewsletter() {
+  showNewsletter.value = true;
+}
+function closeNewsletter() {
+  showNewsletter.value = false;
 }
 </script>
 
@@ -65,19 +76,30 @@ function closeQuiz() {
   justify-content: center;
   position: relative;
 }
-.quiz-btn {
-  width: 90%;
-  max-width: 400px;
-  margin: 0 auto;
+.quiz-bubble {
+  display: inline-block;
   background: #fff;
-  box-shadow: 0 2px 12px 0 #0001;
-  border-radius: 16px;
-  padding: 18px 0;
-  font-size: 17px;
+  color: #000000;
+  font-size: 16px;
   font-weight: 600;
+  border-radius: 20px;
+  padding: 14px 28px;
+  margin: 0 auto 32px auto;
+  box-shadow: 0 2px 12px 0 #0001;
+  position: relative;
   text-align: center;
-  margin-bottom: 32px;
-  border: none;
+}
+.quiz-bubble::after {
+  content: '';
+  position: absolute;
+  left: 32px;
+  bottom: -14px;
+  width: 18px;
+  height: 18px;
+  background: #fff;
+  border-radius: 0 0 18px 18px;
+  box-shadow: 0 2px 12px 0 #0001;
+  transform: rotate(45deg);
 }
 .main-card {
   width: 260px;
