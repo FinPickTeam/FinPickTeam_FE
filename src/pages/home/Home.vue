@@ -14,7 +14,9 @@
         <button class="floating-btn" @click="openQuiz">
           <i class="fas fa-piggy-bank"></i>
         </button>
-        <button class="floating-btn"><i class="fas fa-envelope"></i></button>
+        <button class="floating-btn">
+          <i class="fas fa-envelope" @click="openNewsletter"></i>
+        </button>
         <button class="floating-btn">
           <i class="fas fa-user-friends"></i>
         </button>
@@ -29,6 +31,7 @@
 
     <BottomNavBar />
     <Quiz v-if="showQuiz" @close="closeQuiz" />
+    <Newsletter v-if="showNewsletter" @close="closeNewsletter" />
   </div>
 </template>
 
@@ -36,14 +39,22 @@
 import HeaderBar from '@/components/Headerbar.vue';
 import BottomNavBar from '@/components/Navbar.vue';
 import Quiz from './Quiz.vue';
+import Newsletter from './Newsletter.vue';
 import { ref } from 'vue';
 
 const showQuiz = ref(false);
+const showNewsletter = ref(false);
 function openQuiz() {
   showQuiz.value = true;
 }
 function closeQuiz() {
   showQuiz.value = false;
+}
+function openNewsletter() {
+  showNewsletter.value = true;
+}
+function closeNewsletter() {
+  showNewsletter.value = false;
 }
 </script>
 
