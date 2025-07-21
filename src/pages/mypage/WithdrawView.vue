@@ -23,7 +23,10 @@
         </ul>
       </div>
       <div class="withdraw-btn-group">
-        <button class="btn cancel" @click="goBack">취소</button>
+        <button class="btn cancel" @click="goBack">
+          <font-awesome-icon :icon="['fas', 'angle-left']" />
+          취소
+        </button>
         <button class="btn withdraw" @click="handleWithdraw">회원 탈퇴</button>
       </div>
     </div>
@@ -35,6 +38,10 @@
 import { useRouter } from "vue-router";
 import Headerbar from "../../components/Headerbar.vue";
 import Navbar from "../../components/Navbar.vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+library.add(faAngleLeft);
 const router = useRouter();
 const handleWithdraw = () => {
   router.push("/withdraw-success");

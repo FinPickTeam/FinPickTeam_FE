@@ -1,6 +1,11 @@
 <template>
   <div class="profile-container">
-    <Headerbar />
+    <div class="profile-header-bar">
+      <button class="back-btn" @click="goBack">
+        <font-awesome-icon :icon="['fas', 'angle-left']" />
+      </button>
+      <span class="profile-header-title">회원정보 관리</span>
+    </div>
     <!-- User Information Form -->
     <div class="profile-form">
       <div class="form-group row-group">
@@ -141,8 +146,11 @@
 <script setup>
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
-import Headerbar from "../../components/Headerbar.vue";
 import Navbar from "../../components/Navbar.vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+library.add(faAngleLeft);
 
 const router = useRouter();
 
@@ -359,5 +367,31 @@ input:focus {
   .modal-content {
     padding: 20px 10px;
   }
+}
+.profile-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  max-width: 540px;
+  padding: 20px 0 0 0;
+}
+.profile-header-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #7c3aed;
+  cursor: pointer;
+  padding: 2px 8px 2px 2px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.back-btn:hover {
+  background: #f3e8ff;
 }
 </style>

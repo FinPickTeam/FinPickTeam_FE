@@ -21,6 +21,24 @@
         />
         <!-- 검색 버튼 제거 -->
       </div>
+      <div
+        v-if="showHistory && searchHistory.length"
+        class="search-history-box"
+      >
+        <div
+          v-for="(item, idx) in searchHistory"
+          :key="idx"
+          class="search-history-item"
+        >
+          <span @mousedown.prevent="selectHistory(item)">{{ item }}</span>
+          <button
+            class="delete-history-btn"
+            @mousedown.prevent="deleteHistory(idx)"
+          >
+            ×
+          </button>
+        </div>
+      </div>
       <div class="search-stats">
         총 {{ totalTerms }}개 용어 중 {{ filteredTerms.length }}개 검색됨
       </div>
@@ -191,6 +209,7 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import dictionaryData from "./financial_dictionary_parsed.json";
+// import Headerbar from "../../components/Headerbar.vue"; // 제거
 import Navbar from "../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -249,6 +268,14 @@ const selectHistory = (item) => {
   searchTerm.value = item;
   filterTerms();
   showHistory.value = false;
+};
+
+const deleteHistory = (idx) => {
+  searchHistory.value.splice(idx, 1);
+  localStorage.setItem(
+    "dictionary_search_history",
+    JSON.stringify(searchHistory.value)
+  );
 };
 
 const filterTerms = () => {
@@ -336,14 +363,6 @@ const onBlurInput = (e) => {
   }, 100);
 };
 
-const deleteHistory = (idx) => {
-  searchHistory.value.splice(idx, 1);
-  localStorage.setItem(
-    "dictionary_search_history",
-    JSON.stringify(searchHistory.value)
-  );
-};
-
 const goBack = () => {
   window.history.length > 1 ? window.history.back() : router.push("/mypage");
 };
@@ -357,33 +376,25 @@ const goBack = () => {
   font-family: "Noto Sans KR", sans-serif;
 }
 
-.dictionary-header-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 18px;
-  max-width: 540px;
+.dictionary-header {
+  text-align: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 15px;
 }
 
-.dictionary-header-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
+.dictionary-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 2.5rem;
+  font-weight: 700;
 }
 
-.back-btn {
-  background: none;
-  border: none;
-  font-size: 22px;
-  color: #7c3aed;
-  cursor: pointer;
-  padding: 2px 8px 2px 2px;
-  border-radius: 8px;
-  transition: background 0.15s;
-}
-
-.back-btn:hover {
-  background: #f3e8ff;
+.dictionary-header p {
+  margin: 0;
+  font-size: 1.1rem;
+  opacity: 0.9;
 }
 
 .search-section {
@@ -410,6 +421,21 @@ const goBack = () => {
 .search-input:focus {
   border-color: #667eea;
 }
+
+/* .search-button {
+  padding: 15px 25px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+  background: #5a6fd8;
+} */
 
 .search-stats {
   text-align: center;
@@ -623,6 +649,70 @@ const goBack = () => {
   color: white;
 }
 
+.search-history-box {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #e1e5e9;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 540px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.search-history-item {
+  padding: 10px 18px;
+  cursor: pointer;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.search-history-item:hover {
+  background: #f0f4ff;
+}
+
+.delete-history-btn {
+  background: none;
+  border: none;
+  color: #bbb;
+  font-size: 18px;
+  margin-left: 8px;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.2s;
+}
+.delete-history-btn:hover {
+  color: #e11d48;
+}
+
+.dictionary-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  max-width: 540px;
+}
+.dictionary-header-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #7c3aed;
+  cursor: pointer;
+  padding: 2px 8px 2px 2px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.back-btn:hover {
+  background: #f3e8ff;
+}
+
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .dictionary-container {
@@ -662,47 +752,5 @@ const goBack = () => {
   .modal-body {
     padding: 20px;
   }
-}
-
-.search-history-box {
-  position: absolute;
-  background: #fff;
-  border: 1px solid #e1e5e9;
-  border-radius: 8px;
-  width: 100%;
-  max-width: 540px;
-  max-height: 200px;
-  overflow-y: auto;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-.search-history-item {
-  padding: 10px 18px;
-  cursor: pointer;
-  color: #333;
-}
-.search-history-item:hover {
-  background: #f0f4ff;
-}
-.search-box {
-  position: relative;
-}
-.delete-history-btn {
-  background: none;
-  border: none;
-  color: #bbb;
-  font-size: 18px;
-  margin-left: 8px;
-  cursor: pointer;
-  padding: 0 4px;
-  transition: color 0.2s;
-}
-.delete-history-btn:hover {
-  color: #e11d48;
-}
-.search-history-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
 </style>

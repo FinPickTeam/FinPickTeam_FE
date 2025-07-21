@@ -12,6 +12,18 @@
             class="shirt-img"
             alt="상의"
           />
+          <img
+            v-if="wearingPants"
+            :src="pantsImg"
+            class="pants-img"
+            alt="바지"
+          />
+          <img
+            v-if="wearingAcc"
+            :src="sunglassImg"
+            class="acc-img"
+            alt="액세서리"
+          />
         </div>
         <button class="profile-edit-btn" @click="goToAvatarShop">
           <span class="hanger-icon">🧥</span>
@@ -26,7 +38,7 @@
         <div class="info-subtitle">나의 투자성향</div>
       </div>
       <div class="info-item">
-        <div class="info-value">5,400</div>
+        <div class="info-value">{{ coin.value }}</div>
         <div class="info-subtitle">
           <span class="coin-icon">🪙</span> 포인트
         </div>
@@ -48,10 +60,11 @@
             display: flex;
             align-items: center;
             width: 100%;
+            justify-content: space-between;
           "
         >
           <span>회원정보 관리</span>
-          <span class="chevron">&gt;</span>
+          <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
         </router-link>
       </div>
       <div class="menu-item" @click="goToQuizHistory">
@@ -82,14 +95,39 @@
             display: flex;
             align-items: center;
             width: 100%;
+            justify-content: space-between;
           "
         >
           <span>회원탈퇴</span>
-          <span class="chevron">&gt;</span>
+          <font-awesome-icon
+            class="chevron danger-chevron"
+            :icon="['fas', 'angle-right']"
+          />
         </router-link>
       </div>
     </div>
-    <Navbar />
+    <nav class="bottom-nav">
+      <RouterLink to="/challenge" class="nav-item">
+        <i class="fa-solid fa-trophy"></i>
+        <span>챌린지</span>
+      </RouterLink>
+      <RouterLink to="/openbanking" class="nav-item">
+        <i class="fas fa-wallet"></i>
+        <span>내 자산</span>
+      </RouterLink>
+      <RouterLink to="/home" class="nav-item">
+        <i class="fas fa-home"></i>
+        <span>홈</span>
+      </RouterLink>
+      <RouterLink to="/finance" class="nav-item">
+        <i class="fas fa-chart-line"></i>
+        <span>재테크</span>
+      </RouterLink>
+      <RouterLink to="/mypage" class="nav-item">
+        <i class="fas fa-user"></i>
+        <span>마이페이지</span>
+      </RouterLink>
+    </nav>
   </div>
 </template>
 
@@ -98,16 +136,24 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAvatarStore } from "../../stores/avatar.js";
-import baseAvatar from "./avatar-base.png";
-import shirtImg from "./shirt-yellow.png";
+import baseAvatar from "./avatar/avatar-base.png";
+import shirtImg from "./avatar/shirt-yellow.png";
+import pantsImg from "./avatar/pants.png";
+import sunglassImg from "./avatar/sunglass.png";
 import Headerbar from "../../components/Headerbar.vue";
 import Navbar from "../../components/Navbar.vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+
+library.add(faAngleRight);
 
 const router = useRouter();
 const pushEnabled = ref(true);
 
 const avatarStore = useAvatarStore();
-const { wearingShirt } = storeToRefs(avatarStore);
+const { wearingShirt, wearingPants, wearingAcc, coin } =
+  storeToRefs(avatarStore);
 
 const handleLogout = () => {
   // 로그아웃 로직 (필요시 추가)
@@ -244,6 +290,26 @@ const goToAvatarShop = () => {
   z-index: 2;
   pointer-events: none;
 }
+.pants-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 90px;
+  height: 90px;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+}
+.acc-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 90px;
+  height: 90px;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+}
 .profile-edit-btn {
   position: absolute;
   bottom: 8px;
@@ -365,29 +431,44 @@ const goToAvatarShop = () => {
 }
 .bottom-nav {
   position: fixed;
-  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 100vw;
+  bottom: 0;
   max-width: 540px;
-  background: white;
-  border-top: 1px solid #e0e0e0;
+  width: 100%;
+  background: #fff;
+  box-shadow: 0 -2px 12px 0 #0001;
   display: flex;
   justify-content: space-around;
-  padding: 8px 0;
+  align-items: center;
+  padding: 10px 0 20px 0;
   z-index: 100;
+}
+@media (max-width: 540px) {
+  .bottom-nav {
+    left: 0;
+    right: 0;
+    transform: none;
+    max-width: 100%;
+  }
 }
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  color: #9c27b0;
+  color: #a78bfa;
   font-size: 12px;
-  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
 }
-.nav-item.active {
-  color: #4a148c;
+.nav-item i {
+  font-size: 22px;
+  margin-bottom: 2px;
+}
+.nav-item.router-link-exact-active,
+.nav-item.router-link-active {
+  color: #4318d1;
 }
 .nav-icon {
   font-size: 20px;
@@ -406,5 +487,8 @@ const goToAvatarShop = () => {
     max-width: 100vw;
     width: 100vw;
   }
+}
+.danger-chevron {
+  color: #f44336 !important;
 }
 </style>

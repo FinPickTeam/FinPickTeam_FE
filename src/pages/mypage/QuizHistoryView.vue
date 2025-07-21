@@ -1,10 +1,17 @@
 <template>
   <div class="quiz-history-container">
-    <Headerbar />
+    <div class="quiz-header-bar">
+      <button class="back-btn" @click="goBack">
+        <font-awesome-icon :icon="['fas', 'angle-left']" />
+      </button>
+      <span class="quiz-header-title">금융 퀴즈 히스토리</span>
+    </div>
     <!-- Quiz History Card -->
     <div class="quiz-history-card">
       <div class="card-header">
-        <button class="back-btn" @click="goBack">←</button>
+        <button class="back-btn" @click="goBack">
+          <font-awesome-icon :icon="['fas', 'angle-left']" />
+        </button>
         <h2 class="card-title">금융 퀴즈 히스토리</h2>
       </div>
 
@@ -102,8 +109,11 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import Headerbar from "../../components/Headerbar.vue";
 import Navbar from "../../components/Navbar.vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+library.add(faAngleLeft);
 
 const router = useRouter();
 const selectedQuiz = ref(null);
@@ -465,5 +475,32 @@ const goBack = () => {
 
 .nav-label {
   font-size: 10px;
+}
+
+.quiz-header-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  max-width: 540px;
+  padding: 20px 0 0 0;
+}
+.quiz-header-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+}
+.back-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #7c3aed;
+  cursor: pointer;
+  padding: 2px 8px 2px 2px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.back-btn:hover {
+  background: #f3e8ff;
 }
 </style>

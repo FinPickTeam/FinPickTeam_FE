@@ -7,7 +7,29 @@
       <div class="quiz-bubble">오늘은 퀴즈 풀어</div>
 
       <!-- 중앙 카드 -->
-      <div class="main-card"></div>
+      <div class="main-card">
+        <div class="avatar-img-wrap">
+          <img :src="baseAvatar" class="avatar-img" alt="아바타" />
+          <img
+            v-if="wearingShirt"
+            :src="shirtImg"
+            class="shirt-img"
+            alt="상의"
+          />
+          <img
+            v-if="wearingPants"
+            :src="pantsImg"
+            class="pants-img"
+            alt="바지"
+          />
+          <img
+            v-if="wearingAcc"
+            :src="sunglassImg"
+            class="acc-img"
+            alt="액세서리"
+          />
+        </div>
+      </div>
 
       <!-- 오른쪽 플로팅 버튼 그룹 -->
       <div class="floating-btn-group">
@@ -36,11 +58,17 @@
 </template>
 
 <script setup>
-import HeaderBar from '@/components/Headerbar.vue';
-import BottomNavBar from '@/components/Navbar.vue';
-import Quiz from './Quiz.vue';
-import Newsletter from './Newsletter.vue';
-import { ref } from 'vue';
+import HeaderBar from "@/components/Headerbar.vue";
+import BottomNavBar from "@/components/Navbar.vue";
+import Quiz from "./Quiz.vue";
+import Newsletter from "./Newsletter.vue";
+import { ref } from "vue";
+import { useAvatarStore } from "../../stores/avatar.js";
+import baseAvatar from "../mypage/avatar/avatar-base.png";
+import shirtImg from "../mypage/avatar/shirt-yellow.png";
+import pantsImg from "../mypage/avatar/pants.png";
+import sunglassImg from "../mypage/avatar/sunglass.png";
+import { storeToRefs } from "pinia";
 
 const showQuiz = ref(false);
 const showNewsletter = ref(false);
@@ -56,6 +84,9 @@ function openNewsletter() {
 function closeNewsletter() {
   showNewsletter.value = false;
 }
+
+const avatarStore = useAvatarStore();
+const { wearingShirt, wearingPants, wearingAcc } = storeToRefs(avatarStore);
 </script>
 
 <style scoped>
@@ -90,7 +121,7 @@ function closeNewsletter() {
   text-align: center;
 }
 .quiz-bubble::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 32px;
   bottom: -14px;
@@ -109,6 +140,42 @@ function closeNewsletter() {
   margin: 0 auto;
   margin-bottom: 16px;
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar-img-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar-img {
+  width: 100px;
+  height: 100px;
+  z-index: 1;
+}
+.shirt-img,
+.pants-img,
+.acc-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100px;
+  height: 100px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.shirt-img {
+  z-index: 2;
+}
+.pants-img {
+  z-index: 2;
+}
+.acc-img {
+  z-index: 3;
 }
 .floating-btn-group {
   position: absolute;
