@@ -11,7 +11,9 @@
 
       <!-- 오른쪽 플로팅 버튼 그룹 -->
       <div class="floating-btn-group">
-        <button class="floating-btn"><i class="fas fa-piggy-bank"></i></button>
+        <button class="floating-btn" @click="openQuiz">
+          <i class="fas fa-piggy-bank"></i>
+        </button>
         <button class="floating-btn"><i class="fas fa-envelope"></i></button>
         <button class="floating-btn">
           <i class="fas fa-user-friends"></i>
@@ -26,12 +28,23 @@
     </main>
 
     <BottomNavBar />
+    <Quiz v-if="showQuiz" @close="closeQuiz" />
   </div>
 </template>
 
 <script setup>
 import HeaderBar from '@/components/Headerbar.vue';
 import BottomNavBar from '@/components/Navbar.vue';
+import Quiz from './Quiz.vue';
+import { ref } from 'vue';
+
+const showQuiz = ref(false);
+function openQuiz() {
+  showQuiz.value = true;
+}
+function closeQuiz() {
+  showQuiz.value = false;
+}
 </script>
 
 <style scoped>
