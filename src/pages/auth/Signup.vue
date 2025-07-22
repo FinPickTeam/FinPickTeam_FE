@@ -1,7 +1,7 @@
 <template>
   <div class="signup-container">
     <!-- 앱 브랜딩 -->
-    <div class="logo">
+    <div class="signup-logo">
       <h1>FinPick</h1>
       <p>금융 생활의 새로운 시작</p>
     </div>
@@ -186,6 +186,7 @@ const handleSignup = async () => {
 }
 .status-bar {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   font-size: 14px;
@@ -196,19 +197,24 @@ const handleSignup = async () => {
   display: flex;
   gap: 8px;
 }
-.logo {
+.signup-logo {
   text-align: center;
   margin-bottom: 40px;
 }
-.logo h1 {
+.signup-logo h1 {
   color: #4318d1;
   font-size: 48px;
   font-weight: 900;
   margin-bottom: 8px;
 }
-.logo p {
-  color: #666;
-  font-size: 16px;
+.signup-logo p {
+  color: #888;
+  font-size: 15px;
+  text-align: center;
+  font-weight: 400;
+  margin-top: 4px;
+  margin-bottom: 0;
+  letter-spacing: 0;
 }
 .signup-form {
   max-width: 400px;
