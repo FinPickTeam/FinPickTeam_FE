@@ -227,9 +227,10 @@ const passwordValid = computed(() => {
 <style scoped>
 .profile-container {
   min-height: 100vh;
-  background: #fff;
+  background: var(--color-bg);
   position: relative;
   padding-bottom: 80px;
+  font-family: var(--font-main);
 }
 .profile-form {
   padding: 20px;
@@ -244,7 +245,7 @@ const passwordValid = computed(() => {
   font-size: 16px;
   font-weight: 600;
   margin-bottom: 8px;
-  color: #222;
+  color: var(--color-text);
 }
 .row-group .row-flex {
   display: flex;
@@ -258,17 +259,18 @@ input[type="email"],
 input[type="password"] {
   width: 100%;
   padding: 12px 16px;
-  border: 1.5px solid #e0e0e0;
+  border: 1.5px solid var(--color-border-dark);
   border-radius: 8px;
   font-size: 16px;
   outline: none;
   transition: border-color 0.2s;
+  font-family: var(--font-main);
 }
 input:focus {
-  border-color: #a78bfa;
+  border-color: var(--color-main-dark);
 }
 .action-btn {
-  background: #a78bfa;
+  background: var(--color-main-light);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -280,7 +282,7 @@ input:focus {
   transition: background 0.2s;
 }
 .action-btn:hover {
-  background: #7c3aed;
+  background: var(--color-main-dark);
 }
 /* 모달 스타일 */
 .modal-overlay {
@@ -296,7 +298,7 @@ input:focus {
   z-index: 1000;
 }
 .modal-content {
-  background: white;
+  background: var(--color-bg);
   border-radius: 15px;
   max-width: 400px;
   width: 90%;
@@ -306,7 +308,7 @@ input:focus {
 .modal-content h3 {
   margin-top: 0;
   font-size: 20px;
-  color: #7c3aed;
+  color: var(--color-main-light);
   margin-bottom: 20px;
 }
 .btn-group {
@@ -315,7 +317,7 @@ input:focus {
   margin-top: 20px;
 }
 .save-btn {
-  background: #a78bfa;
+  background: var(--color-main-light);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -326,11 +328,11 @@ input:focus {
   transition: background 0.2s;
 }
 .save-btn:hover {
-  background: #7c3aed;
+  background: var(--color-main-dark);
 }
 .cancel-btn {
-  background: #eee;
-  color: #333;
+  background: var(--color-bg-light);
+  color: var(--color-text);
   border: none;
   border-radius: 8px;
   padding: 10px 20px;
@@ -347,7 +349,7 @@ input:focus {
   color: #4caf50;
 }
 .nickname-check-msg.fail {
-  color: #e53935;
+  color: var(--color-accent);
 }
 .password-check-msg {
   margin-top: 8px;
@@ -358,7 +360,7 @@ input:focus {
   color: #4caf50;
 }
 .password-check-msg.fail {
-  color: #e53935;
+  color: var(--color-accent);
 }
 @media (max-width: 600px) {
   .profile-form {
@@ -379,19 +381,19 @@ input:focus {
 .profile-header-title {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #333;
+  color: var(--color-text);
 }
 .back-btn {
   background: none;
   border: none;
   font-size: 22px;
-  color: #7c3aed;
+  color: var(--color-main-light);
   cursor: pointer;
   padding: 2px 8px 2px 2px;
   border-radius: 8px;
   transition: background 0.15s;
 }
 .back-btn:hover {
-  background: #f3e8ff;
+  background: var(--color-bg-accent);
 }
 </style>

@@ -45,11 +45,11 @@
 
 <script>
 export default {
-  name: 'Login',
+  name: "Login",
   data() {
     return {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
       showPassword: false,
     };
   },
@@ -99,7 +99,7 @@ label {
 }
 input {
   width: 100%;
-  padding: 12px 40px 12px 12px;
+  padding: 12px 120px 12px 12px;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 16px;

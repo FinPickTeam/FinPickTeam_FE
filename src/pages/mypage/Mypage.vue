@@ -69,7 +69,7 @@
       </div>
       <div class="menu-item" @click="goToQuizHistory">
         <span>금융 퀴즈 히스토리</span>
-        <span class="chevron">&gt;</span>
+        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </div>
       <div class="menu-item">
         <span>푸시알림</span>
@@ -80,11 +80,11 @@
       </div>
       <div class="menu-item">
         <span>알림 상세설정</span>
-        <span class="chevron">&gt;</span>
+        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </div>
       <div class="menu-item" @click="handleLogout">
         <span>로그아웃</span>
-        <span class="chevron">&gt;</span>
+        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </div>
       <div class="menu-item danger">
         <router-link

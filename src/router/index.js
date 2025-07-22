@@ -10,7 +10,7 @@ import ProfileStep2 from "../pages/auth/ProfileStep2.vue";
 import ProfileStep3 from "../pages/auth/ProfileStep3.vue";
 import ProfileStep4 from "../pages/auth/ProfileStep4.vue";
 
-import Mypage from "../pages/mypage/Mypage.vue";
+import Mypage from "../pages/mypage/MyPage.vue";
 import Withdraw from "../pages/mypage/Withdraw.vue";
 import WithdrawSuccess from "../pages/mypage/WithdrawSuccess.vue";
 import Profile from "../pages/mypage/Profile.vue";

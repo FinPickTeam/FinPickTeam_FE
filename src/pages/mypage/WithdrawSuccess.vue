@@ -24,21 +24,22 @@ function goToLogin() {
 .withdraw-success-container {
   min-height: 100vh;
   display: flex;
-  flex-direction: column; /* Added to stack header, content, and footer */
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: var(--color-bg);
+  font-family: var(--font-main);
 }
 .success-content {
   text-align: center;
-  flex-grow: 1; /* Allow content to grow and take available space */
-  padding: 20px; /* Add some padding to the content area */
+  flex-grow: 1;
+  padding: 20px;
 }
 .success-icon {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: #4a148c;
+  background: var(--color-main);
   color: #fff;
   display: flex;
   align-items: center;
@@ -48,18 +49,23 @@ function goToLogin() {
 }
 .success-message {
   font-size: 18px;
-  color: #333;
+  color: var(--color-text);
   margin-bottom: 40px;
   line-height: 1.5;
 }
 .confirm-btn {
   padding: 16px 48px;
-  background: #eee;
-  color: #333;
+  background: var(--color-bg-light);
+  color: var(--color-text);
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+  transition: background 0.2s;
+}
+.confirm-btn:hover {
+  background: var(--color-main-light);
+  color: #fff;
 }
 </style>
