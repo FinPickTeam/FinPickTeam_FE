@@ -29,6 +29,7 @@ import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // 로그인, 회원가입
     {
       path: '/login',
       name: 'Login',
@@ -64,10 +65,17 @@ const router = createRouter({
       name: 'ProfileStep4',
       component: ProfileStep4,
     },
+
+    // 홈
     {
-      path: '/home',
+      path: '/',
       name: 'Home',
       component: Home,
+    },
+    {
+      path: '/dictionary',
+      name: 'dictionary',
+      component: DictionaryView,
     },
     {
       path: '/notification',
@@ -79,21 +87,29 @@ const router = createRouter({
       name: 'Quiz',
       component: Quiz,
     },
+
+    // 재테크
     {
       path: '/finance',
       name: 'FinanceHome',
       component: FinanceHome,
     },
+
+    // 내 자산
     {
       path: '/openbanking',
       name: 'OpenBankingHome',
       component: OpenBankingHome,
     },
+
+    // 챌린지
     {
       path: '/challenge',
       name: 'ChallengeHome',
       component: ChallengeHome,
     },
+
+    // ARS
     {
       path: '/ars-auth',
       name: 'ARSAuth',
@@ -104,6 +120,8 @@ const router = createRouter({
       name: 'ArsVerification',
       component: ArsVerification,
     },
+
+    // 마이페이지
     {
       path: '/mypage',
       name: 'mypage',
@@ -128,11 +146,6 @@ const router = createRouter({
       path: '/quiz-history',
       name: 'quiz-history',
       component: QuizHistoryView,
-    },
-    {
-      path: '/dictionary',
-      name: 'dictionary',
-      component: DictionaryView,
     },
     {
       path: '/avatar-shop',

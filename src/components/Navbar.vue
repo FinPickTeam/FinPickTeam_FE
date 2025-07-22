@@ -8,7 +8,7 @@
       <i class="fas fa-wallet"></i>
       <span>내 자산</span>
     </RouterLink>
-    <RouterLink to="/home" class="nav-item">
+    <RouterLink to="/" class="nav-item">
       <i class="fas fa-home"></i>
       <span>홈</span>
     </RouterLink>
