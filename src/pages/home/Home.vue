@@ -58,17 +58,17 @@
 </template>
 
 <script setup>
-import HeaderBar from "@/components/Headerbar.vue";
-import BottomNavBar from "@/components/Navbar.vue";
-import Quiz from "./Quiz.vue";
-import Newsletter from "./Newsletter.vue";
-import { ref } from "vue";
-import { useAvatarStore } from "../../stores/avatar.js";
-import baseAvatar from "../mypage/avatar/avatar-base.png";
-import shirtImg from "../mypage/avatar/shirt-yellow.png";
-import pantsImg from "../mypage/avatar/pants.png";
-import sunglassImg from "../mypage/avatar/sunglass.png";
-import { storeToRefs } from "pinia";
+import HeaderBar from '@/components/Headerbar.vue';
+import BottomNavBar from '@/components/Navbar.vue';
+import Quiz from './Quiz.vue';
+import Newsletter from './Newsletter.vue';
+import { ref } from 'vue';
+import { useAvatarStore } from '../../stores/avatar.js';
+import baseAvatar from '../mypage/avatar/avatar-base.png';
+import shirtImg from '../mypage/avatar/shirt-yellow.png';
+import pantsImg from '../mypage/avatar/pants.png';
+import sunglassImg from '../mypage/avatar/sunglass.png';
+import { storeToRefs } from 'pinia';
 
 const showQuiz = ref(false);
 const showNewsletter = ref(false);
@@ -95,10 +95,12 @@ const { wearingShirt, wearingPants, wearingAcc } = storeToRefs(avatarStore);
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  max-width: 390px;
+  margin: 0 auto;
 }
 .main-content {
   width: 100%;
-  max-width: 480px;
+  max-width: 390px;
   margin: 0 auto;
   flex: 1;
   display: flex;
@@ -121,7 +123,7 @@ const { wearingShirt, wearingPants, wearingAcc } = storeToRefs(avatarStore);
   text-align: center;
 }
 .quiz-bubble::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 32px;
   bottom: -14px;
@@ -217,19 +219,5 @@ const { wearingShirt, wearingPants, wearingAcc } = storeToRefs(avatarStore);
   color: #666;
   font-size: 13px;
   margin-top: 2px;
-}
-@media (max-width: 480px) {
-  .main-card {
-    width: 90vw;
-    height: 48vw;
-    min-width: 180px;
-    min-height: 180px;
-    max-width: 320px;
-    max-height: 320px;
-  }
-  .floating-btn-group {
-    right: 4vw;
-    top: 38vw;
-  }
 }
 </style>
