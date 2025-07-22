@@ -37,6 +37,11 @@ const goToDictionary = () => {
   padding: 16px 0;
   min-height: 80px;
 }
+.logo {
+  align-self: center;
+  margin-top: 0;
+  margin-bottom: 0;
+}
 .header-icons {
   position: absolute;
   right: 24px;
