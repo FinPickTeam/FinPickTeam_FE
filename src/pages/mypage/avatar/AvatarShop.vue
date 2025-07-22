@@ -97,12 +97,12 @@
 
 <script setup>
 import { useRouter } from "vue-router";
-import { useAvatarStore } from "../../stores/avatar.js";
-import baseAvatar from "./avatar/avatar-base.png";
-import shirtImg from "./avatar/shirt-yellow.png";
-import pantsImg from "./avatar/pants.png";
-import sunglassImg from "./avatar/sunglass.png";
-import Navbar from "../../components/Navbar.vue";
+import { useAvatarStore } from "../../../stores/avatar.js";
+import baseAvatar from "./avatar-base.png";
+import shirtImg from "./shirt-yellow.png";
+import pantsImg from "./pants.png";
+import sunglassImg from "./sunglass.png";
+import Navbar from "../../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleLeft, faCheckCircle } from "@fortawesome/free-solid-svg-icons";
