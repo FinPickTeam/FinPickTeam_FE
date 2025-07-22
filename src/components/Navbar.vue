@@ -18,7 +18,7 @@
     </RouterLink>
     <RouterLink to="/mypage" class="nav-item">
       <i class="fas fa-user"></i>
-      <span>마이페이지</span>
+      <span>내 페이지</span>
     </RouterLink>
   </nav>
 </template>
