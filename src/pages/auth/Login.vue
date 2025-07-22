@@ -1,6 +1,6 @@
 <template>
   <div class="login-container">
-    <div class="logo">
+    <div class="login-logo">
       <h1>FinPick</h1>
       <p>금융 생활의 새로운 시작</p>
     </div>
@@ -45,11 +45,11 @@
 
 <script>
 export default {
-  name: "Login",
+  name: 'Login',
   data() {
     return {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
       showPassword: false,
     };
   },
@@ -70,19 +70,24 @@ export default {
   flex-direction: column;
   align-items: center;
 }
-.logo {
+.login-logo {
   text-align: center;
   margin-bottom: 40px;
 }
-.logo h1 {
+.login-logo h1 {
   color: #4318d1;
   font-size: 48px;
   font-weight: 900;
   margin-bottom: 8px;
 }
-.logo p {
-  color: #666;
-  font-size: 16px;
+.login-logo p {
+  color: #888;
+  font-size: 15px;
+  text-align: center;
+  font-weight: 400;
+  margin-top: 4px;
+  margin-bottom: 0;
+  letter-spacing: 0;
 }
 .form {
   width: 100%;
