@@ -35,7 +35,7 @@
   bottom: 0;
   max-width: 540px;
   width: 100%;
-  background: #fff;
+  background: #fff; /* 디자인 유지 위해 직접 지정 */
   box-shadow: 0 -2px 12px 0 #0001;
   display: flex;
   justify-content: space-around;
@@ -58,9 +58,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #a78bfa;
+  color: #8e74e3;
   font-size: 12px;
-  text-decoration: none;
+  text-decoration: none; /* 디자인 유지 위해 직접 지정 */
   font-weight: 500;
   transition: color 0.2s;
 }
