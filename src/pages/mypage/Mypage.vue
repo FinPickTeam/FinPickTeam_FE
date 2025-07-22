@@ -69,7 +69,7 @@
       </div>
       <div class="menu-item" @click="goToQuizHistory">
         <span>금융 퀴즈 히스토리</span>
-        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
+        <span class="chevron">&gt;</span>
       </div>
       <div class="menu-item">
         <span>푸시알림</span>
@@ -80,11 +80,11 @@
       </div>
       <div class="menu-item">
         <span>알림 상세설정</span>
-        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
+        <span class="chevron">&gt;</span>
       </div>
       <div class="menu-item" @click="handleLogout">
         <span>로그아웃</span>
-        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
+        <span class="chevron">&gt;</span>
       </div>
       <div class="menu-item danger">
         <router-link
@@ -132,19 +132,19 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { storeToRefs } from "pinia";
-import { useAvatarStore } from "../../stores/avatar.js";
-import baseAvatar from "./avatar/avatar-base.png";
-import shirtImg from "./avatar/shirt-yellow.png";
-import pantsImg from "./avatar/pants.png";
-import sunglassImg from "./avatar/sunglass.png";
-import Headerbar from "../../components/Headerbar.vue";
-import Navbar from "../../components/Navbar.vue";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useAvatarStore } from '../../stores/avatar.js';
+import baseAvatar from './avatar/avatar-base.png';
+import shirtImg from './avatar/shirt-yellow.png';
+import pantsImg from './avatar/pants.png';
+import sunglassImg from './avatar/sunglass.png';
+import Headerbar from '../../components/Headerbar.vue';
+import Navbar from '../../components/Navbar.vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faAngleRight);
 
@@ -160,15 +160,15 @@ const handleLogout = () => {
   // 예: 로컬 스토리지 클리어, 세션 삭제 등
 
   // 로그인 페이지로 이동
-  router.push("/login");
+  router.push('/login');
 };
 
 const goToQuizHistory = () => {
-  router.push("/quiz-history");
+  router.push('/quiz-history');
 };
 
 const goToAvatarShop = () => {
-  router.push("/avatar-shop");
+  router.push('/avatar-shop');
 };
 </script>
 

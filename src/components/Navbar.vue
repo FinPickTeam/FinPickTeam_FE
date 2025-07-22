@@ -33,7 +33,7 @@
   left: 50%;
   transform: translateX(-50%);
   bottom: 0;
-  max-width: 540px;
+  max-width: 390px;
   width: 100%;
   background: #fff; /* 디자인 유지 위해 직접 지정 */
   box-shadow: 0 -2px 12px 0 #0001;
@@ -45,7 +45,7 @@
 }
 
 /* 모바일에서는 전체 너비 사용 */
-@media (max-width: 540px) {
+@media (max-width: 390px) {
   .bottom-nav {
     left: 0;
     right: 0;
