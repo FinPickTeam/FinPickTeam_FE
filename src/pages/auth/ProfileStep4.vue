@@ -49,7 +49,7 @@ const goBack = () => {
 };
 const goNext = () => {
   if (selected.value !== null) {
-    router.push('/home');
+    router.push('/');
   }
 };
 </script>
