@@ -54,20 +54,19 @@ h3 {
 }
 
 .logo {
-  /* FinPick 로고 텍스트 컬러 그라데이션 */
   font-size: 40px;
+  font-weight: 900;
+  letter-spacing: 1px;
   background: linear-gradient(
     90deg,
-    var(--color-main) 100%,
+    var(--color-main) 0%,
     var(--color-main-light) 100%
   );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  /* text-fill-color: transparent; */
-  font-weight: 500;
-  /* color: var(--color-main); */
-  margin-bottom: 8px;
+  color: transparent;
+  margin-bottom: 0;
 }
 
 button,
