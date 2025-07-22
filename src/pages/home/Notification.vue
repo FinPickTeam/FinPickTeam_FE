@@ -190,7 +190,7 @@ function markAllAsRead() {
   font-size: 15px;
   font-weight: 600;
   color: #888;
-  margin: 24px 0 10px 20px;
+  margin: 0px 0 10px 20px;
 }
 .notification-card {
   display: flex;
