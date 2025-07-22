@@ -1,10 +1,12 @@
 <script setup>
-import { RouterView } from 'vue-router';
+import { RouterView } from "vue-router";
+import Navbar from "./components/Navbar.vue";
 </script>
 
 <template>
   <div class="app-container">
     <router-view />
+    <Navbar />
   </div>
 </template>
 
@@ -17,7 +19,7 @@ import { RouterView } from 'vue-router';
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .app-container {

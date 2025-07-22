@@ -15,7 +15,7 @@ import Withdraw from "../pages/mypage/Withdraw.vue";
 import WithdrawSuccess from "../pages/mypage/WithdrawSuccess.vue";
 import Profile from "../pages/mypage/Profile.vue";
 import QuizHistory from "../pages/mypage/QuizHistory.vue";
-import Dictionary from "../pages/home/dictionary/Dictionary.vue";
+import Dictionary from "../pages/home/Dictionary.vue";
 import AvatarShop from "../pages/mypage/avatar/AvatarShop.vue";
 
 import Home from "../pages/home/Home.vue";
