@@ -14,15 +14,15 @@
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 
 const goToNotification = () => {
-  router.push("/notification");
+  router.push('/notification');
 };
 const goToDictionary = () => {
-  router.push("/dictionary");
+  router.push('/dictionary');
 };
 </script>
 
@@ -33,16 +33,9 @@ const goToDictionary = () => {
   justify-content: center;
   align-items: center;
   position: relative;
-  background: #fff;
+  background: var(--color-bg);
   padding: 16px 0;
   min-height: 80px;
-}
-.logo {
-  color: #4318d1;
-  font-size: 32px;
-  font-weight: 900;
-  margin-bottom: 0;
-  letter-spacing: 1px;
 }
 .header-icons {
   position: absolute;
@@ -56,7 +49,7 @@ const goToDictionary = () => {
   background: none;
   border: none;
   font-size: 22px;
-  color: #4318d1;
+  color: var(--color-main);
   cursor: pointer;
   position: relative;
 }
@@ -69,7 +62,7 @@ const goToDictionary = () => {
   right: 2px;
   width: 8px;
   height: 8px;
-  background: #e11d48;
+  background: var(--color-accent);
   border-radius: 50%;
   border: 2px solid #fff;
   display: inline-block;
