@@ -174,87 +174,76 @@ const goBack = () => {
 <style scoped>
 .quiz-history-container {
   min-height: 100vh;
-  background: #f5f5f5;
+  background: var(--color-bg-light);
   position: relative;
   padding-bottom: 80px;
+  font-family: var(--font-main);
 }
-
 .quiz-history-card {
   margin: 20px;
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
-
 .card-header {
   display: flex;
   align-items: center;
   padding: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border);
 }
-
 .card-title {
   flex: 1;
   font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: var(--color-text);
   margin: 0;
   text-align: center;
 }
-
 .back-btn {
   background: none;
   border: none;
   font-size: 22px;
-  color: #7c3aed;
+  color: var(--color-main-light);
   cursor: pointer;
   margin-right: 8px;
   padding: 2px 8px 2px 2px;
   border-radius: 8px;
   transition: background 0.15s;
 }
-
 .back-btn:hover {
-  background: #f3e8ff;
+  background: var(--color-bg-accent);
 }
-
 .quiz-list {
   max-height: 60vh;
   overflow-y: auto;
 }
-
 .quiz-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--color-border);
   cursor: pointer;
   transition: background-color 0.2s;
 }
-
 .quiz-item:hover {
-  background-color: #f8f8f8;
+  background-color: var(--color-bg-accent);
 }
-
 .quiz-item:last-child {
   border-bottom: none;
 }
-
 .question-text {
   flex: 1;
   font-size: 14px;
-  color: #333;
+  color: var(--color-text);
   line-height: 1.4;
   margin-right: 15px;
 }
-
 .answer-status {
   display: flex;
   align-items: center;
 }
-
 .status-circle {
   width: 24px;
   height: 24px;
@@ -264,17 +253,14 @@ const goBack = () => {
   justify-content: center;
   font-size: 12px;
   font-weight: bold;
-  color: white;
+  color: #fff;
 }
-
 .status-circle.correct {
   background: #4caf50;
 }
-
 .status-circle.incorrect {
-  background: #f44336;
+  background: var(--color-accent);
 }
-
 /* Modal Styles */
 .modal-overlay {
   position: fixed;
@@ -288,9 +274,8 @@ const goBack = () => {
   justify-content: center;
   z-index: 1000;
 }
-
 .quiz-detail-modal {
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 12px;
   width: 90%;
   max-width: 400px;
@@ -298,147 +283,124 @@ const goBack = () => {
   overflow-y: auto;
   padding: 20px;
 }
-
 .modal-header {
   text-align: center;
   margin-bottom: 20px;
 }
-
 .modal-header h3 {
   font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: var(--color-text);
   margin: 0;
 }
-
 .question-section {
   margin-bottom: 20px;
 }
-
 .question {
   font-size: 16px;
-  color: #333;
+  color: var(--color-text);
   line-height: 1.5;
   margin: 0;
   text-align: center;
 }
-
 .answer-options {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
 }
-
 .answer-option {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 15px;
-  border: 2px solid #e0e0e0;
+  border: 2px solid var(--color-border);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
-
 .answer-option.correct {
   border-color: #4caf50;
   background: #e8f5e8;
 }
-
 .answer-option.selected {
   border-color: #4caf50;
 }
-
 .answer-option.wrong {
-  border-color: #f44336;
+  border-color: var(--color-accent);
   background: #ffebee;
 }
-
 .answer-icon {
   font-size: 24px;
   font-weight: bold;
   margin-bottom: 5px;
 }
-
 .answer-text {
   font-size: 14px;
   font-weight: bold;
 }
-
 .feedback-box {
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 15px;
 }
-
 .feedback-box.correct {
   background: #e8f5e8;
   border: 1px solid #4caf50;
 }
-
 .feedback-box.incorrect {
   background: #ffebee;
-  border: 1px solid #f44336;
+  border: 1px solid var(--color-accent);
 }
-
 .feedback-title {
   font-size: 14px;
   font-weight: bold;
   margin-bottom: 5px;
 }
-
 .feedback-box.correct .feedback-title {
   color: #2e7d32;
 }
-
 .feedback-box.incorrect .feedback-title {
-  color: #c62828;
+  color: var(--color-accent);
 }
-
 .feedback-content {
   font-size: 13px;
   line-height: 1.4;
 }
-
 .feedback-box.correct .feedback-content {
   color: #2e7d32;
 }
-
 .feedback-box.incorrect .feedback-content {
-  color: #c62828;
+  color: var(--color-accent);
 }
-
 .explanation-box {
-  background: #fff3cd;
+  background: var(--color-warning);
   border: 1px solid #ffeaa7;
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
 }
-
 .explanation-content {
   font-size: 13px;
   color: #856404;
   line-height: 1.4;
 }
-
 .close-modal-btn {
   width: 100%;
   padding: 12px;
-  background: #9e9e9e;
-  color: white;
+  background: var(--color-bg-light);
+  color: var(--color-text);
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
+  transition: background 0.2s;
 }
-
 .close-modal-btn:hover {
-  background: #757575;
+  background: var(--color-main-light);
+  color: #fff;
 }
-
 /* Bottom Navigation */
 .bottom-nav {
   position: fixed;
@@ -447,36 +409,31 @@ const goBack = () => {
   width: 100%;
   max-width: 540px;
   bottom: 0;
-  background: white;
-  border-top: 1px solid #e0e0e0;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
   display: flex;
   justify-content: space-around;
   padding: 8px 0;
   z-index: 100;
 }
-
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  color: #9c27b0;
+  color: var(--color-main-light);
   font-size: 12px;
   cursor: pointer;
 }
-
 .nav-item.active {
-  color: #4a148c;
+  color: var(--color-main);
 }
-
 .nav-icon {
   font-size: 20px;
 }
-
 .nav-label {
   font-size: 10px;
 }
-
 .quiz-header-bar {
   display: flex;
   align-items: center;
@@ -488,19 +445,6 @@ const goBack = () => {
 .quiz-header-title {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #333;
-}
-.back-btn {
-  background: none;
-  border: none;
-  font-size: 22px;
-  color: #7c3aed;
-  cursor: pointer;
-  padding: 2px 8px 2px 2px;
-  border-radius: 8px;
-  transition: background 0.15s;
-}
-.back-btn:hover {
-  background: #f3e8ff;
+  color: var(--color-text);
 }
 </style>
