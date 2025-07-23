@@ -9,6 +9,24 @@ export const useAvatarStore = defineStore("avatar", () => {
   const wearingPants = ref(false);
   const hasAcc = ref(false);
   const wearingAcc = ref(false);
+  // 포인트 내역
+  const coinHistory = ref([
+    {
+      type: "init",
+      amount: 1000,
+      desc: "초기 지급",
+      date: new Date().toISOString(),
+    },
+  ]);
+
+  function addCoinHistory(type, amount, desc) {
+    coinHistory.value.unshift({
+      type,
+      amount,
+      desc,
+      date: new Date().toISOString(),
+    });
+  }
 
   function buyOrToggleShirt(price = 50) {
     if (!hasShirt.value) {
@@ -16,6 +34,7 @@ export const useAvatarStore = defineStore("avatar", () => {
         coin.value -= price;
         hasShirt.value = true;
         wearingShirt.value = true;
+        addCoinHistory("사용", -price, "상의 구매");
       } else {
         alert("코인이 부족합니다!");
       }
@@ -30,6 +49,7 @@ export const useAvatarStore = defineStore("avatar", () => {
         coin.value -= price;
         hasPants.value = true;
         wearingPants.value = true;
+        addCoinHistory("사용", -price, "바지 구매");
       } else {
         alert("코인이 부족합니다!");
       }
@@ -38,12 +58,13 @@ export const useAvatarStore = defineStore("avatar", () => {
     }
   }
 
-  function buyOrToggleAcc(price = 50) {
+  function buyOrToggleAcc(price = 20000) {
     if (!hasAcc.value) {
       if (coin.value >= price) {
         coin.value -= price;
         hasAcc.value = true;
         wearingAcc.value = true;
+        addCoinHistory("사용", -price, "액세서리 구매");
       } else {
         alert("코인이 부족합니다!");
       }
@@ -60,6 +81,11 @@ export const useAvatarStore = defineStore("avatar", () => {
     wearingPants.value = false;
     hasAcc.value = false;
     wearingAcc.value = false;
+    addCoinHistory("초기화", 900, "아바타 리셋");
+  }
+
+  function getCoinHistory() {
+    return coinHistory.value;
   }
 
   return {
@@ -74,5 +100,8 @@ export const useAvatarStore = defineStore("avatar", () => {
     wearingAcc,
     buyOrToggleAcc,
     resetAvatar,
+    coinHistory,
+    addCoinHistory,
+    getCoinHistory,
   };
 });
