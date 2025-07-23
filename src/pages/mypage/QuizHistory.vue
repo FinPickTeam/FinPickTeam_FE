@@ -6,31 +6,24 @@
       </button>
       <span class="quiz-header-title">금융 퀴즈 히스토리</span>
     </div>
-    <!-- Quiz History Card -->
     <div class="quiz-history-card">
-      <div class="card-header">
-        <button class="back-btn" @click="goBack">
-          <font-awesome-icon :icon="['fas', 'angle-left']" />
-        </button>
-        <h2 class="card-title">금융 퀴즈 히스토리</h2>
-      </div>
-
       <div class="quiz-list">
+        <div class="quiz-list-header">
+          <span class="quiz-list-header-question">문제</span>
+          <span class="quiz-list-header-answer">정답여부</span>
+        </div>
         <div
           v-for="(quiz, index) in quizHistory"
           :key="index"
           class="quiz-item"
-          @click="showQuizDetail(quiz)"
         >
           <div class="question-text">{{ quiz.question }}</div>
-          <div class="answer-status">
-            <div
-              class="status-circle"
-              :class="{ correct: quiz.isCorrect, incorrect: !quiz.isCorrect }"
-            >
-              {{ quiz.isCorrect ? "O" : "X" }}
-            </div>
-          </div>
+          <span
+            class="answer-result"
+            :class="{ correct: quiz.isCorrect, incorrect: !quiz.isCorrect }"
+          >
+            {{ quiz.isCorrect ? "O" : "X" }}
+          </span>
         </div>
       </div>
     </div>
@@ -178,9 +171,11 @@ const goBack = () => {
   position: relative;
   padding-bottom: 80px;
   font-family: var(--font-main);
+  padding-left: 10px;
+  padding-right: 10px;
 }
 .quiz-history-card {
-  margin: 20px;
+  margin: 10px;
   background: var(--color-bg);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -215,51 +210,81 @@ const goBack = () => {
   background: var(--color-bg-accent);
 }
 .quiz-list {
-  max-height: 60vh;
-  overflow-y: auto;
+  border-radius: 12px;
+  border: 1px solid #ececec;
+  background: #fff;
+  overflow: hidden;
 }
-.quiz-item {
+.quiz-list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--color-border);
-  cursor: pointer;
-  transition: background-color 0.2s;
+  background: #fafafa;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #ececec;
 }
-.quiz-item:hover {
-  background-color: var(--color-bg-accent);
+.quiz-list-header-question {
+  flex: 1;
+  text-align: left;
+}
+.quiz-list-header-answer {
+  width: 60px;
+  text-align: center;
+}
+.quiz-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 12px 12px;
+  border-bottom: 1px solid #ececec;
+  font-size: 15px;
+  background: #fff;
 }
 .quiz-item:last-child {
   border-bottom: none;
 }
 .question-text {
   flex: 1;
-  font-size: 14px;
-  color: var(--color-text);
-  line-height: 1.4;
-  margin-right: 15px;
+  font-size: 15px;
+  color: #222;
+  font-weight: 400;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .answer-status {
   display: flex;
   align-items: center;
+  gap: 8px;
+  font-size: 14px;
 }
-.status-circle {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
+.answer-label {
+  color: #888;
+  font-size: 13px;
+  margin-right: 4px;
+}
+.answer-result {
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
-  font-weight: bold;
-  color: #fff;
+  border-radius: 50%;
+  background: #f3f3f3;
+  margin-left: 8px;
 }
-.status-circle.correct {
-  background: #4caf50;
+.answer-result.correct {
+  color: #22c55e;
+  background: #e8f5e8;
 }
-.status-circle.incorrect {
-  background: var(--color-accent);
+.answer-result.incorrect {
+  color: #e11d48;
+  background: #ffebee;
 }
 /* Modal Styles */
 .modal-overlay {
@@ -435,14 +460,23 @@ const goBack = () => {
   font-size: 10px;
 }
 .quiz-header-bar {
+  position: relative; /* 필요 */
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 18px;
-  max-width: 540px;
   padding: 20px 0 0 0;
+  height: 48px;
+  margin-left: 10px;
 }
+
+.back-btn {
+  position: relative;
+  z-index: 2;
+}
+
 .quiz-header-title {
+  position: absolute; /* 화면 기준 중앙 */
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 1.2rem;
   font-weight: bold;
   color: var(--color-text);
