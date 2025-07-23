@@ -69,7 +69,7 @@
       </div>
       <div class="menu-item" @click="goToQuizHistory">
         <span>금융 퀴즈 히스토리</span>
-        <span class="chevron">&gt;</span>
+        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </div>
       <div class="menu-item">
         <span>푸시알림</span>
@@ -80,11 +80,11 @@
       </div>
       <div class="menu-item">
         <span>알림 상세설정</span>
-        <span class="chevron">&gt;</span>
+        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </div>
       <div class="menu-item" @click="handleLogout">
         <span>로그아웃</span>
-        <span class="chevron">&gt;</span>
+        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </div>
       <div class="menu-item danger">
         <router-link
@@ -106,45 +106,25 @@
         </router-link>
       </div>
     </div>
-    <nav class="bottom-nav">
-      <RouterLink to="/challenge" class="nav-item">
-        <i class="fa-solid fa-trophy"></i>
-        <span>챌린지</span>
-      </RouterLink>
-      <RouterLink to="/openbanking" class="nav-item">
-        <i class="fas fa-wallet"></i>
-        <span>내 자산</span>
-      </RouterLink>
-      <RouterLink to="/home" class="nav-item">
-        <i class="fas fa-home"></i>
-        <span>홈</span>
-      </RouterLink>
-      <RouterLink to="/finance" class="nav-item">
-        <i class="fas fa-chart-line"></i>
-        <span>재테크</span>
-      </RouterLink>
-      <RouterLink to="/mypage" class="nav-item">
-        <i class="fas fa-user"></i>
-        <span>마이페이지</span>
-      </RouterLink>
-    </nav>
+    <!-- 페이지 하단에 네비게이션 바 추가 -->
+    <Navbar />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
-import { useAvatarStore } from '../../stores/avatar.js';
-import baseAvatar from './avatar/avatar-base.png';
-import shirtImg from './avatar/shirt-yellow.png';
-import pantsImg from './avatar/pants.png';
-import sunglassImg from './avatar/sunglass.png';
-import Headerbar from '../../components/Headerbar.vue';
-import Navbar from '../../components/Navbar.vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
+import { useAvatarStore } from "../../stores/avatar.js";
+import baseAvatar from "./avatar/avatar-base.png";
+import shirtImg from "./avatar/shirt-yellow.png";
+import pantsImg from "./avatar/pants.png";
+import sunglassImg from "./avatar/sunglass.png";
+import Headerbar from "@/components/Headerbar.vue";
+import Navbar from "@/components/Navbar.vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 
 library.add(faAngleRight);
 
@@ -160,15 +140,15 @@ const handleLogout = () => {
   // 예: 로컬 스토리지 클리어, 세션 삭제 등
 
   // 로그인 페이지로 이동
-  router.push('/login');
+  router.push("/login");
 };
 
 const goToQuizHistory = () => {
-  router.push('/quiz-history');
+  router.push("/quiz-history");
 };
 
 const goToAvatarShop = () => {
-  router.push('/avatar-shop');
+  router.push("/avatar-shop");
 };
 </script>
 
@@ -176,15 +156,16 @@ const goToAvatarShop = () => {
 .mypage-container {
   min-height: 100vh;
   width: 100%;
-  max-width: 540px;
+  max-width: 390px;
   margin: 0 auto;
-  background: #fff;
+  background: var(--color-bg);
   position: relative;
   padding-bottom: 80px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  font-family: var(--font-main);
 }
 .profile-section,
 .user-info-card,
@@ -193,6 +174,7 @@ const goToAvatarShop = () => {
   margin: 0;
   box-sizing: border-box;
   display: block;
+  max-width: 390px;
 }
 .profile-section {
   width: 100%;
@@ -200,6 +182,7 @@ const goToAvatarShop = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  max-width: 390px;
 }
 .profile-circle.avatar-profile {
   margin: 0 auto;
@@ -207,148 +190,62 @@ const goToAvatarShop = () => {
   align-items: center;
   justify-content: center;
   position: relative;
-}
-.avatar-img-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-.user-info-card {
-  margin-top: 18px;
-  padding: 18px 0;
-  border: 2px solid #e1bee7;
-  border-radius: 12px;
-  background: #fff;
-  text-align: center;
-  width: 100%;
-}
-.menu-list {
-  margin-top: 18px;
-  padding: 0;
-  width: 100%;
-}
-.menu-item {
-  width: 100%;
-  margin: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-.menu-item:last-child {
-  border-bottom: none;
-}
-.app-title,
-.info-label,
-.info-value,
-.info-subtitle {
-  text-align: center;
-  width: 100%;
-}
-.status-icons {
-  display: flex;
-  gap: 5px;
-}
-.app-header {
-  text-align: center;
-  padding: 18px 0 0 0;
-  max-width: 540px;
-  margin: 0 auto;
-}
-.app-title {
-  font-size: 28px;
-  font-weight: bold;
-  color: #4a148c;
-  margin: 0;
-}
-.profile-circle.avatar-profile {
-  background: #fff !important;
+  background: var(--color-bg) !important;
   border: 2px solid #e1ce93d8;
   overflow: visible;
-  position: relative;
   box-sizing: border-box;
-  width: 120px;
-  height: 120px;
-  min-width: 120px;
-  min-height: 120px;
+  width: 130px;
+  height: 130px;
+  min-width: 130px;
+  min-height: 130px;
+}
+.avatar-img-wrap {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .avatar-img {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   z-index: 1;
-  display: block;
 }
-.shirt-img {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 90px;
-  height: 90px;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  pointer-events: none;
-}
-.pants-img {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 90px;
-  height: 90px;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  pointer-events: none;
-}
+.shirt-img,
+.pants-img,
 .acc-img {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   transform: translate(-50%, -50%);
-  z-index: 3;
   pointer-events: none;
 }
-.profile-edit-btn {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: #666;
-  border: 2.5px solid #fff;
-  color: #fff;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 2px 8px rgba(80, 80, 80, 0.18);
-  cursor: pointer;
-  transition: background 0.2s, box-shadow 0.2s;
-  z-index: 10;
+.shirt-img {
+  z-index: 2;
 }
-.profile-edit-btn:hover {
-  background: #444;
-  box-shadow: 0 4px 16px rgba(80, 80, 80, 0.28);
+.pants-img {
+  z-index: 2;
 }
-.hanger-icon {
-  font-size: 22px;
-  line-height: 1;
+.acc-img {
+  z-index: 3;
 }
 .user-info-card {
-  margin: 18px 12px 0 12px;
-  padding: 18px 8px;
-  border: 2px solid #e1bee7;
+  margin-top: 14px;
+  padding: 14px 0;
+  border: 2px solid var(--color-border);
   border-radius: 12px;
+  background: var(--color-bg);
+  text-align: center;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 480px;
+  max-width: 390px;
   min-width: 0;
-  font-size: 15px;
-  background: #fff;
+  font-size: 14px;
   box-sizing: border-box;
 }
 .info-item {
@@ -358,49 +255,51 @@ const goToAvatarShop = () => {
 .info-label,
 .info-value {
   font-weight: bold;
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 4px;
+  font-size: 15px;
+  color: var(--color-text);
+  margin-bottom: 3px;
 }
 .info-subtitle {
-  font-size: 12px;
-  color: #666;
+  font-size: 11px;
+  color: var(--color-text-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
+  gap: 3px;
 }
 .coin-icon {
-  font-size: 14px;
+  font-size: 13px;
 }
 .menu-list {
-  margin: 18px 0 0 0;
-  max-width: 480px;
-  padding: 0 8px;
+  margin: 14px 0 0 0;
+  max-width: 390px;
+  padding: 0 4px;
 }
 .menu-item {
+  width: 100%;
+  margin: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 14px 0;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 16px;
-  color: #333;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 15px;
+  color: var(--color-text);
 }
 .menu-item:last-child {
   border-bottom: none;
 }
 .menu-item.danger {
-  color: #f44336;
+  color: var(--color-accent);
 }
 .chevron {
   color: #ccc;
-  font-size: 18px;
+  font-size: 17px;
 }
 .toggle-switch {
   width: 44px;
   height: 24px;
-  background: #e0e0e0;
+  background: var(--color-bg-accent);
   border-radius: 14px;
   position: relative;
   cursor: pointer;
@@ -417,64 +316,60 @@ const goToAvatarShop = () => {
   left: 2px;
   width: 20px;
   height: 20px;
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 50%;
   transition: 0.2s;
 }
 .toggle-switch .slider.active {
   left: 20px;
-  background: #4a148c;
+  background: var(--color-main);
 }
 .toggle-switch input:checked + .slider {
   left: 20px;
-  background: #4a148c;
+  background: var(--color-main);
+}
+.profile-edit-btn {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #666;
+  border: 2px solid var(--color-bg);
+  color: #fff;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(80, 80, 80, 0.18);
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  z-index: 10;
+}
+.profile-edit-btn:hover {
+  background: #444;
+  box-shadow: 0 4px 16px rgba(80, 80, 80, 0.28);
+}
+.hanger-icon {
+  font-size: 20px;
+  line-height: 1;
 }
 .bottom-nav {
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
   bottom: 0;
-  max-width: 540px;
+  max-width: 390px;
   width: 100%;
-  background: #fff;
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-border);
   box-shadow: 0 -2px 12px 0 #0001;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 10px 0 20px 0;
+  padding: 8px 0;
   z-index: 100;
-}
-@media (max-width: 540px) {
-  .bottom-nav {
-    left: 0;
-    right: 0;
-    transform: none;
-    max-width: 100%;
-  }
-}
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #a78bfa;
-  font-size: 12px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.2s;
-}
-.nav-item i {
-  font-size: 22px;
-  margin-bottom: 2px;
-}
-.nav-item.router-link-exact-active,
-.nav-item.router-link-active {
-  color: #4318d1;
-}
-.nav-icon {
-  font-size: 20px;
-}
-.nav-label {
-  font-size: 10px;
 }
 @media (max-width: 540px) {
   .mypage-container,
@@ -482,13 +377,36 @@ const goToAvatarShop = () => {
   .app-header,
   .user-info-card,
   .menu-list,
+  .menu-item {
+    max-width: 100vw;
+    width: 100vw;
+    min-width: 0 !important;
+    box-sizing: border-box;
+  }
+  .mypage-container {
+    margin: 0;
+    padding: 0 2vw;
+    overflow-x: hidden;
+  }
+  .user-info-card,
+  .menu-list {
+    padding: 0 1vw;
+    min-width: 0 !important;
+  }
   .menu-item,
+  .info-item {
+    min-width: 0 !important;
+    flex-shrink: 1;
+  }
   .bottom-nav {
+    left: 0;
+    right: 0;
+    transform: none;
     max-width: 100vw;
     width: 100vw;
   }
 }
 .danger-chevron {
-  color: #f44336 !important;
+  color: var(--color-accent) !important;
 }
 </style>

@@ -1,31 +1,31 @@
 :root {
-  /* Primary Color */
+  /* Primary Colors */
   --color-main: #4318d1;
   --color-main-light: #8e74e3;
   --color-main-dark: #6c4cf1;
 
-  /* Background Color */
+  /* Background Colors */
   --color-bg: #fff;
   --color-bg-light: #f3f4f6;
   --color-bg-accent: #dedede;
   --color-bg-border: #e5e6ea;
   --color-bg-border-dark: #e5e7eb;
 
-  /* Text Color */
+  /* Text Colors */
   --color-text: #222;
   --color-text-light: #888;
   --color-text-border-dark: #e5e7eb;
   --color-text-success: #22c55e;
 
-  /* Sementic Color */
+  /* Semantic Colors */
   --color-accent: #e11d48;
-  --color-accent-light: #fff6f6;
   --color-warning: #ffe082;
   --color-success: #22c55e;
+  --color-accent-light: #fff6f6;
   --color-success-light: #f0fdf4;
 
   /* Font */
-  --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 html,
@@ -40,9 +40,6 @@ body {
   box-sizing: border-box;
 }
 
-h1,
-h2,
-h3,
 h1 {
   font-size: 32px;
 }
