@@ -1,133 +1,116 @@
 <template>
-  <div class="mypage-container">
-    <Headerbar />
-    <!-- Profile Section -->
-    <div class="profile-section">
-      <div class="profile-circle avatar-profile">
-        <div class="avatar-img-wrap">
-          <img :src="baseAvatar" class="avatar-img" alt="아바타" />
-          <img
-            v-if="wearingShirt"
-            :src="shirtImg"
-            class="shirt-img"
-            alt="상의"
-          />
-          <img
-            v-if="wearingPants"
-            :src="pantsImg"
-            class="pants-img"
-            alt="바지"
-          />
-          <img
-            v-if="wearingAcc"
-            :src="sunglassImg"
-            class="acc-img"
-            alt="액세서리"
-          />
-        </div>
-        <button class="profile-edit-btn" @click="goToAvatarShop">
-          <span class="hanger-icon">🧥</span>
-        </button>
+  <!-- Profile Section -->
+  <div class="profile-section">
+    <div class="profile-circle avatar-profile">
+      <div class="avatar-img-wrap">
+        <img :src="baseAvatar" class="avatar-img" alt="아바타" />
+        <img v-if="wearingShirt" :src="shirtImg" class="shirt-img" alt="상의" />
+        <img v-if="wearingPants" :src="pantsImg" class="pants-img" alt="바지" />
+        <img
+          v-if="wearingAcc"
+          :src="sunglassImg"
+          class="acc-img"
+          alt="액세서리"
+        />
       </div>
+      <button class="profile-edit-btn" @click="goToAvatarShop">
+        <span class="hanger-icon">🧥</span>
+      </button>
     </div>
+  </div>
 
-    <!-- User Info Card -->
-    <div class="user-info-card">
-      <div class="info-item">
-        <div class="info-label">안정자산 추구</div>
-        <div class="info-subtitle">나의 투자성향</div>
-      </div>
-      <div class="info-item">
-        <div class="coin-stack">
-          <div class="coin-line">
-            <span class="coin-value">{{ coin }}</span>
-            <span class="coin-icon">🪙</span>
-          </div>
-          <div class="coin-label">포인트</div>
+  <!-- User Info Card -->
+  <div class="user-info-card">
+    <div class="info-item">
+      <div class="info-label">안정자산 추구</div>
+      <div class="info-subtitle">나의 투자성향</div>
+    </div>
+    <div class="info-item">
+      <div class="coin-stack">
+        <div class="coin-line">
+          <span class="coin-value">{{ coin }}</span>
+          <span class="coin-icon">🪙</span>
         </div>
-      </div>
-      <div class="info-item">
-        <div class="info-value">묵은지</div>
-        <div class="info-subtitle">레벨</div>
+        <div class="coin-label">포인트</div>
       </div>
     </div>
+    <div class="info-item">
+      <div class="info-value">묵은지</div>
+      <div class="info-subtitle">레벨</div>
+    </div>
+  </div>
 
-    <!-- Menu List -->
-    <div class="menu-list">
-      <div class="menu-item">
-        <router-link
-          to="/profile"
-          style="
-            color: inherit;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            width: 100%;
-            justify-content: space-between;
-          "
-        >
-          <span>회원정보 관리</span>
-          <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
-        </router-link>
-      </div>
-      <div class="menu-item" @click="goToQuizHistory">
-        <span>금융 퀴즈 히스토리</span>
+  <!-- Menu List -->
+  <div class="menu-list">
+    <div class="menu-item">
+      <router-link
+        to="/profile"
+        style="
+          color: inherit;
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          width: 100%;
+          justify-content: space-between;
+        "
+      >
+        <span>회원정보 관리</span>
         <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
-      </div>
-      <div class="menu-item">
-        <span>푸시알림</span>
-        <label class="toggle-switch">
-          <input type="checkbox" v-model="pushEnabled" />
-          <span class="slider" :class="{ active: pushEnabled }"></span>
-        </label>
-      </div>
-      <div class="menu-item">
-        <span>알림 상세설정</span>
-        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
-      </div>
-      <div class="menu-item" @click="handleLogout">
-        <span>로그아웃</span>
-        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
-      </div>
-      <div class="menu-item danger">
-        <router-link
-          to="/withdraw"
-          style="
-            color: inherit;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            width: 100%;
-            justify-content: space-between;
-          "
-        >
-          <span>회원탈퇴</span>
-          <font-awesome-icon
-            class="chevron danger-chevron"
-            :icon="['fas', 'angle-right']"
-          />
-        </router-link>
-      </div>
+      </router-link>
     </div>
-    <!-- 페이지 하단에 네비게이션 바 추가 -->
-    <Navbar />
+    <div class="menu-item" @click="goToQuizHistory">
+      <span>금융 퀴즈 히스토리</span>
+      <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
+    </div>
+    <div class="menu-item">
+      <span>푸시알림</span>
+      <label class="toggle-switch">
+        <input type="checkbox" v-model="pushEnabled" />
+        <span class="slider" :class="{ active: pushEnabled }"></span>
+      </label>
+    </div>
+    <div class="menu-item">
+      <span>알림 상세설정</span>
+      <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
+    </div>
+    <div class="menu-item" @click="handleLogout">
+      <span>로그아웃</span>
+      <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
+    </div>
+    <div class="menu-item danger">
+      <router-link
+        to="/withdraw"
+        style="
+          color: inherit;
+          text-decoration: none;
+          display: flex;
+          align-items: center;
+          width: 100%;
+          justify-content: space-between;
+        "
+      >
+        <span>회원탈퇴</span>
+        <font-awesome-icon
+          class="chevron danger-chevron"
+          :icon="['fas', 'angle-right']"
+        />
+      </router-link>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
-import { storeToRefs } from "pinia";
-import { useAvatarStore } from "../../stores/avatar.js";
-import baseAvatar from "../mypage/avatar/avatar-base.png";
-import shirtImg from "../mypage/avatar/shirt-yellow.png";
-import pantsImg from "../mypage/avatar/pants.png";
-import sunglassImg from "../mypage/avatar/sunglass.png";
-import Headerbar from "@/components/Headerbar.vue";
-import Navbar from "@/components/Navbar.vue";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { storeToRefs } from 'pinia';
+import { useAvatarStore } from '../../stores/avatar.js';
+import baseAvatar from '../mypage/avatar/avatar-base.png';
+import shirtImg from '../mypage/avatar/shirt-yellow.png';
+import pantsImg from '../mypage/avatar/pants.png';
+import sunglassImg from '../mypage/avatar/sunglass.png';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faAngleRight);
 
@@ -143,15 +126,15 @@ const handleLogout = () => {
   // 예: 로컬 스토리지 클리어, 세션 삭제 등
 
   // 로그인 페이지로 이동
-  router.push("/login");
+  router.push('/login');
 };
 
 const goToQuizHistory = () => {
-  router.push("/quiz-history");
+  router.push('/quiz-history');
 };
 
 const goToAvatarShop = () => {
-  router.push("/avatar-shop");
+  router.push('/avatar-shop');
 };
 </script>
 

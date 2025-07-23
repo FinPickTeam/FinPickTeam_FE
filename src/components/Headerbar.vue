@@ -34,7 +34,7 @@ const goToDictionary = () => {
   align-items: center;
   position: relative;
   background: var(--color-bg);
-  padding: 16px 0;
+  padding: 5px 0;
   min-height: 80px;
 }
 .logo {
