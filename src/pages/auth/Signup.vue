@@ -2,7 +2,7 @@
   <div class="signup-container">
     <!-- 앱 브랜딩 -->
     <div class="signup-logo">
-      <h1>FinPick</h1>
+      <h1 class="logo">FinPick</h1>
       <p>금융 생활의 새로운 시작</p>
     </div>
 
@@ -202,9 +202,6 @@ const handleSignup = async () => {
   margin-bottom: 40px;
 }
 .signup-logo h1 {
-  color: #4318d1;
-  font-size: 48px;
-  font-weight: 900;
   margin-bottom: 8px;
 }
 .signup-logo p {
