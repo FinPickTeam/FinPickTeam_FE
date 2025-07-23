@@ -16,7 +16,14 @@ import { useRoute } from 'vue-router';
 import { computed } from 'vue';
 
 const route = useRoute();
-const hideHeaderNames = ['dictionary', 'Notification'];
+const hideHeaderNames = [
+  'dictionary',
+  'Notification',
+
+  'profile',
+  'quiz-history',
+  'withdraw',
+];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);
 });
