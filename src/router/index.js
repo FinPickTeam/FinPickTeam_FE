@@ -35,10 +35,15 @@ import Stock from '../pages/finance/Stock.vue';
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
 
+// 공통 레이아웃
+import MainLayout from '../layouts/MainLayout.vue';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    // 로그인, 회원가입
+    // 로그인, 회원가입, ARS 등은 레이아웃 없이 단독 페이지로 유지
     {
       path: '/login',
       name: 'Login',
@@ -74,71 +79,6 @@ const router = createRouter({
       name: 'ProfileStep4',
       component: ProfileStep4,
     },
-
-    // 홈
-    {
-      path: '/',
-      name: 'Home',
-      component: Home,
-    },
-    {
-      path: '/dictionary',
-      name: 'dictionary',
-      component: Dictionary,
-    },
-    {
-      path: '/notification',
-      name: 'Notification',
-      component: Notification,
-    },
-    {
-      path: '/quiz',
-      name: 'Quiz',
-      component: Quiz,
-    },
-
-    // 재테크
-    {
-      path: '/finance',
-      name: 'FinanceHome',
-      component: FinanceHome,
-    },
-    {
-      path: '/finance/deposit',
-      name: 'Deposit',
-      component: Deposit,
-    },
-    {
-      path: '/finance/installment',
-      name: 'Installment',
-      component: Installment,
-    },
-    {
-      path: '/finance/fund',
-      name: 'Fund',
-      component: Fund,
-    },
-    {
-      path: '/finance/stock',
-      name: 'Stock',
-      component: Stock,
-    },
-
-    // 내 자산
-    {
-      path: '/openbanking',
-      name: 'OpenBankingHome',
-      component: OpenBankingHome,
-    },
-
-    // 챌린지
-    {
-      path: '/challenge',
-      name: 'ChallengeHome',
-      component: ChallengeHome,
-    },
-
-    // ARS
     {
       path: '/ars-auth',
       name: 'ARSAuth',
@@ -149,37 +89,45 @@ const router = createRouter({
       name: 'ArsVerification',
       component: ArsVerification,
     },
-
-    // 마이페이지
+    // 공통 레이아웃 적용 구간
     {
-      path: '/mypage',
-      name: 'mypage',
-      component: Mypage,
-    },
-    {
-      path: '/withdraw',
-      name: 'withdraw',
-      component: Withdraw,
-    },
-    {
-      path: '/withdraw-success',
-      name: 'withdraw-success',
-      component: WithdrawSuccess,
-    },
-    {
-      path: '/profile',
-      name: 'profile',
-      component: Profile,
-    },
-    {
-      path: '/quiz-history',
-      name: 'quiz-history',
-      component: QuizHistory,
-    },
-    {
-      path: '/avatar-shop',
-      name: 'avatar-shop',
-      component: AvatarShop,
+      path: '/',
+      component: MainLayout,
+      children: [
+        { path: '', name: 'Home', component: Home },
+        { path: 'dictionary', name: 'dictionary', component: Dictionary },
+        { path: 'notification', name: 'Notification', component: Notification },
+        { path: 'quiz', name: 'Quiz', component: Quiz },
+        // 재테크
+        { path: 'finance', name: 'FinanceHome', component: FinanceHome },
+        { path: 'finance/deposit', name: 'Deposit', component: Deposit },
+        {
+          path: 'finance/installment',
+          name: 'Installment',
+          component: Installment,
+        },
+        { path: 'finance/fund', name: 'Fund', component: Fund },
+        { path: 'finance/stock', name: 'Stock', component: Stock },
+        // 내 자산
+        {
+          path: 'openbanking',
+          name: 'OpenBankingHome',
+          component: OpenBankingHome,
+        },
+        // 챌린지
+        { path: 'challenge', name: 'ChallengeHome', component: ChallengeHome },
+        // 마이페이지
+        { path: 'mypage', name: 'mypage', component: Mypage },
+        { path: 'withdraw', name: 'withdraw', component: Withdraw },
+        {
+          path: 'withdraw-success',
+          name: 'withdraw-success',
+          component: WithdrawSuccess,
+        },
+        { path: 'profile', name: 'profile', component: Profile },
+        { path: 'quiz-history', name: 'quiz-history', component: QuizHistory },
+        { path: 'avatar-shop', name: 'avatar-shop', component: AvatarShop },
+      ],
     },
   ],
 });

@@ -1,65 +1,48 @@
 <template>
-  <div class="home-container">
-    <HeaderBar />
+  <main class="main-content">
+    <!-- 캐릭터 말풍선 -->
+    <div class="quiz-bubble">오늘은 퀴즈 풀어</div>
 
-    <main class="main-content">
-      <!-- 캐릭터 말풍선 -->
-      <div class="quiz-bubble">오늘은 퀴즈 풀어</div>
-
-      <!-- 중앙 카드 -->
-      <div class="main-card">
-        <div class="avatar-img-wrap">
-          <img :src="baseAvatar" class="avatar-img" alt="아바타" />
-          <img
-            v-if="wearingShirt"
-            :src="shirtImg"
-            class="shirt-img"
-            alt="상의"
-          />
-          <img
-            v-if="wearingPants"
-            :src="pantsImg"
-            class="pants-img"
-            alt="바지"
-          />
-          <img
-            v-if="wearingAcc"
-            :src="sunglassImg"
-            class="acc-img"
-            alt="액세서리"
-          />
-        </div>
+    <!-- 중앙 카드 -->
+    <div class="main-card">
+      <div class="avatar-img-wrap">
+        <img :src="baseAvatar" class="avatar-img" alt="아바타" />
+        <img v-if="wearingShirt" :src="shirtImg" class="shirt-img" alt="상의" />
+        <img v-if="wearingPants" :src="pantsImg" class="pants-img" alt="바지" />
+        <img
+          v-if="wearingAcc"
+          :src="sunglassImg"
+          class="acc-img"
+          alt="액세서리"
+        />
       </div>
+    </div>
 
-      <!-- 오른쪽 플로팅 버튼 그룹 -->
-      <div class="floating-btn-group">
-        <button class="floating-btn" @click="openQuiz">
-          <i class="fa-solid fa-lightbulb"></i>
-        </button>
-        <button class="floating-btn">
-          <i class="fas fa-envelope" @click="openNewsletter"></i>
-        </button>
-        <button class="floating-btn">
-          <i class="fas fa-user-friends"></i>
-        </button>
-      </div>
+    <!-- 오른쪽 플로팅 버튼 그룹 -->
+    <div class="floating-btn-group">
+      <button class="floating-btn" @click="openQuiz">
+        <i class="fa-solid fa-lightbulb"></i>
+      </button>
+      <button class="floating-btn">
+        <i class="fas fa-envelope" @click="openNewsletter"></i>
+      </button>
+      <button class="floating-btn">
+        <i class="fas fa-user-friends"></i>
+      </button>
+    </div>
 
-      <!-- 오늘의 금융 용어 -->
-      <div class="finance-term">
-        <span class="term-title">📘 오늘의 금융 용어: <b>예금자 보호</b></span>
-        <div class="term-desc">“최대 5천만 원까지 보호된다고?”</div>
-      </div>
-    </main>
+    <!-- 오늘의 금융 용어 -->
+    <div class="finance-term">
+      <span class="term-title">📘 오늘의 금융 용어: <b>예금자 보호</b></span>
+      <div class="term-desc">“최대 5천만 원까지 보호된다고?”</div>
+    </div>
+  </main>
 
-    <BottomNavBar />
-    <Quiz v-if="showQuiz" @close="closeQuiz" />
-    <Newsletter v-if="showNewsletter" @close="closeNewsletter" />
-  </div>
+  <Quiz v-if="showQuiz" @close="closeQuiz" />
+  <Newsletter v-if="showNewsletter" @close="closeNewsletter" />
 </template>
 
 <script setup>
-import HeaderBar from '@/components/Headerbar.vue';
-import BottomNavBar from '@/components/Navbar.vue';
 import Quiz from './Quiz.vue';
 import Newsletter from './Newsletter.vue';
 import { ref } from 'vue';

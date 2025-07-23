@@ -1,16 +1,7 @@
 <template>
-  <div class="mypage-container">
-    <HeaderBar />
-
-    <main class="main-content">
-      <h1>챌린지 홈</h1>
-    </main>
-
-    <BottomNavBar />
-  </div>
+  <main class="main-content">
+    <h1>챌린지 홈</h1>
+  </main>
 </template>
 
-<script setup>
-import HeaderBar from '@/components/Headerbar.vue';
-import BottomNavBar from '@/components/Navbar.vue';
-</script>
+<script setup></script>
