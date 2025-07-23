@@ -26,8 +26,6 @@
         <span v-if="!notification.read" class="unread-dot"></span>
       </div>
     </template>
-
-    <NotificationEmpty v-if="groupedNotifications.length === 0" />
   </div>
 </template>
 
