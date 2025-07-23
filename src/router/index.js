@@ -32,13 +32,14 @@ import Installment from '../pages/finance/Installment.vue';
 import Fund from '../pages/finance/Fund.vue';
 import Stock from '../pages/finance/Stock.vue';
 
+// components/finance
+import ProductInputForm from '../components/finance/ProductInputForm.vue';
+
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
 
 // 공통 레이아웃
 import MainLayout from '../layouts/MainLayout.vue';
-import { computed } from 'vue';
-import { useRoute } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -88,6 +89,12 @@ const router = createRouter({
       path: '/ars/verification',
       name: 'ArsVerification',
       component: ArsVerification,
+    },
+    {
+      // components/finance
+      path: '/finance/product-input-form',
+      name: 'ProductInputForm',
+      component: ProductInputForm,
     },
     // 공통 레이아웃 적용 구간
     {
