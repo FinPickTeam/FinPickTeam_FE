@@ -12,8 +12,6 @@
 
 <script setup>
 import { useRouter } from "vue-router";
-import Headerbar from "../../components/Headerbar.vue";
-import Navbar from "../../components/Navbar.vue";
 const router = useRouter();
 function goToLogin() {
   router.push("/login");

@@ -211,6 +211,8 @@ import { ref, computed, onMounted } from "vue";
 import dictionaryData from "./financial_dictionary_parsed.json";
 // import Headerbar from "../../components/Headerbar.vue"; // 제거
 import Navbar from "../../components/Navbar.vue";
+import { useRouter } from "vue-router"; // ✅ 추가
+const router = useRouter(); // ✅ 추가
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
@@ -364,7 +366,13 @@ const onBlurInput = (e) => {
 };
 
 const goBack = () => {
-  window.history.length > 1 ? window.history.back() : router.push("/mypage");
+  const prev = window.location.href;
+  window.history.back();
+  setTimeout(() => {
+    if (window.location.href === prev) {
+      router.push("/");
+    }
+  }, 500);
 };
 </script>
 
@@ -406,16 +414,21 @@ const goBack = () => {
   gap: 10px;
   margin-bottom: 10px;
   position: relative;
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto 10px auto;
 }
 
 .search-input {
   flex: 1;
+  width: 100%;
   padding: 15px 20px;
   border: 2px solid #e1e5e9;
   border-radius: 10px;
   font-size: 1rem;
   outline: none;
   transition: border-color 0.3s ease;
+  box-sizing: border-box;
 }
 
 .search-input:focus {
@@ -462,7 +475,8 @@ const goBack = () => {
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
+  color: #333;
 }
 
 .filter-btn:hover {
@@ -651,15 +665,15 @@ const goBack = () => {
 
 .search-history-box {
   position: absolute;
+  width: 92%;
   background: #fff;
   border: 1px solid #e1e5e9;
   border-radius: 8px;
-  width: 100%;
-  max-width: 540px;
   max-height: 200px;
   overflow-y: auto;
   z-index: 10;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-sizing: border-box;
 }
 .search-history-item {
   padding: 10px 18px;
@@ -688,29 +702,43 @@ const goBack = () => {
 }
 
 .dictionary-header-bar {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 8px;
+  width: 100%;
+  height: 48px;
+  padding: 0;
   margin-bottom: 18px;
-  max-width: 540px;
 }
 .dictionary-header-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.2rem;
   font-weight: bold;
   color: #333;
+  margin: 0;
 }
 .back-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   background: none;
   border: none;
   font-size: 22px;
-  color: #7c3aed;
+  color: #222;
   cursor: pointer;
   padding: 2px 8px 2px 2px;
   border-radius: 8px;
   transition: background 0.15s;
 }
 .back-btn:hover {
-  background: #f3e8ff;
+  background: #f3f3f3;
 }
 
 /* 반응형 디자인 */

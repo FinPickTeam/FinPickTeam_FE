@@ -100,17 +100,17 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { storeToRefs } from 'pinia';
-import { useAvatarStore } from '../../stores/avatar.js';
-import baseAvatar from '../mypage/avatar/avatar-base.png';
-import shirtImg from '../mypage/avatar/shirt-yellow.png';
-import pantsImg from '../mypage/avatar/pants.png';
-import sunglassImg from '../mypage/avatar/sunglass.png';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
+import { useAvatarStore } from "../../stores/avatar.js";
+import baseAvatar from "../mypage/avatar/avatar-base.png";
+import shirtImg from "../mypage/avatar/shirt-yellow.png";
+import pantsImg from "../mypage/avatar/pants.png";
+import sunglassImg from "../mypage/avatar/sunglass.png";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 
 library.add(faAngleRight);
 
@@ -126,37 +126,30 @@ const handleLogout = () => {
   // 예: 로컬 스토리지 클리어, 세션 삭제 등
 
   // 로그인 페이지로 이동
-  router.push('/login');
+  router.push("/login");
 };
 
 const goToQuizHistory = () => {
-  router.push('/quiz-history');
+  router.push("/quiz-history");
 };
 
 const goToAvatarShop = () => {
-  router.push('/avatar-shop');
+  router.push("/avatar-shop");
 };
 </script>
 
 <style scoped>
 .mypage-container {
-  min-height: auto;
-  height: auto;
+  min-height: 100vh;
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
   background: var(--color-bg);
   position: relative;
   padding-top: 0;
-  padding-bottom: 0;
+  padding-bottom: 80px;
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
   font-family: var(--font-main);
-  overflow-y: auto;
-  flex: 1;
-  justify-content: flex-start;
 }
 .profile-section,
 .user-info-card,
@@ -225,18 +218,18 @@ const goToAvatarShop = () => {
 }
 .user-info-card {
   margin-top: 8px;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin-left: 30px;
+  margin-right: 30px;
   padding: 10px 0;
   border: 2px solid #4318d1;
   border-radius: 12px;
   background: var(--color-bg);
   text-align: center;
-  width: calc(100% - 20px);
+  width: calc(100% - 60px);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 390px;
+  max-width: 330px;
   min-width: 0;
   font-size: 14px;
   box-sizing: border-box;
@@ -293,10 +286,11 @@ const goToAvatarShop = () => {
   margin: 8px 0 0 0;
   max-width: 390px;
   width: 100%;
-  padding: 0 10px;
+  padding: 0 30px 0 30px;
   box-sizing: border-box;
   overflow-x: hidden;
   margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .menu-item {
@@ -305,7 +299,7 @@ const goToAvatarShop = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 0;
+  padding: 18px 0;
   border-bottom: 1px solid var(--color-border);
   font-size: 15px;
   color: var(--color-text);
@@ -315,6 +309,8 @@ const goToAvatarShop = () => {
 }
 .menu-item:last-child {
   border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 .menu-item.danger {
   color: var(--color-accent);

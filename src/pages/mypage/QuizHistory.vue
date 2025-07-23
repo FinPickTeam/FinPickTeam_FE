@@ -199,7 +199,7 @@ const goBack = () => {
   background: none;
   border: none;
   font-size: 22px;
-  color: var(--color-main-light);
+  color: #222;
   cursor: pointer;
   margin-right: 8px;
   padding: 2px 8px 2px 2px;

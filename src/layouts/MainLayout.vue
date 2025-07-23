@@ -26,6 +26,7 @@ const hideHeaderNames = [
   "quiz-history",
   "withdraw",
   "avatar-shop",
+  "ChallengeHome",
 ];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);

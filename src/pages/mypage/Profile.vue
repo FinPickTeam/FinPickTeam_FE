@@ -310,13 +310,14 @@ input:focus {
 .modal-content h3 {
   margin-top: 0;
   font-size: 20px;
-  color: var(--color-main-light);
+  color: #222;
   margin-bottom: 20px;
 }
 .btn-group {
   display: flex;
   gap: 10px;
   margin-top: 20px;
+  justify-content: center;
 }
 .save-btn {
   background: var(--color-main-light);
@@ -392,7 +393,7 @@ input:focus {
   background: none;
   border: none;
   font-size: 22px;
-  color: var(--color-main-light);
+  color: #222;
   cursor: pointer;
   padding: 2px 8px 2px 2px;
   border-radius: 8px;
