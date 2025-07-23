@@ -231,10 +231,12 @@ const passwordValid = computed(() => {
   position: relative;
   padding-bottom: 80px;
   font-family: var(--font-main);
+  padding-left: 10px;
+  padding-right: 10px;
 }
 .profile-form {
   padding: 20px;
-  max-width: 500px;
+  max-width: 390px;
   margin: 0 auto;
 }
 .form-group {
@@ -382,6 +384,9 @@ input:focus {
   font-size: 1.2rem;
   font-weight: bold;
   color: var(--color-text);
+  width: 100%;
+  text-align: center;
+  display: block;
 }
 .back-btn {
   background: none;

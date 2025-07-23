@@ -38,9 +38,12 @@
         <div class="info-subtitle">나의 투자성향</div>
       </div>
       <div class="info-item">
-        <div class="info-value">{{ coin.value }}</div>
-        <div class="info-subtitle">
-          <span class="coin-icon">🪙</span> 포인트
+        <div class="coin-stack">
+          <div class="coin-line">
+            <span class="coin-value">{{ coin }}</span>
+            <span class="coin-icon">🪙</span>
+          </div>
+          <div class="coin-label">포인트</div>
         </div>
       </div>
       <div class="info-item">
@@ -116,10 +119,10 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAvatarStore } from "../../stores/avatar.js";
-import baseAvatar from "./avatar/avatar-base.png";
-import shirtImg from "./avatar/shirt-yellow.png";
-import pantsImg from "./avatar/pants.png";
-import sunglassImg from "./avatar/sunglass.png";
+import baseAvatar from "../mypage/avatar/avatar-base.png";
+import shirtImg from "../mypage/avatar/shirt-yellow.png";
+import pantsImg from "../mypage/avatar/pants.png";
+import sunglassImg from "../mypage/avatar/sunglass.png";
 import Headerbar from "@/components/Headerbar.vue";
 import Navbar from "@/components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -132,8 +135,8 @@ const router = useRouter();
 const pushEnabled = ref(true);
 
 const avatarStore = useAvatarStore();
-const { wearingShirt, wearingPants, wearingAcc, coin } =
-  storeToRefs(avatarStore);
+const { wearingShirt, wearingPants, wearingAcc } = storeToRefs(avatarStore);
+const coin = avatarStore.coin; // 수정됨
 
 const handleLogout = () => {
   // 로그아웃 로직 (필요시 추가)
@@ -154,18 +157,23 @@ const goToAvatarShop = () => {
 
 <style scoped>
 .mypage-container {
-  min-height: 100vh;
+  min-height: auto;
+  height: auto;
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
   background: var(--color-bg);
   position: relative;
-  padding-bottom: 80px;
+  padding-top: 0;
+  padding-bottom: 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   font-family: var(--font-main);
+  overflow-y: auto;
+  flex: 1;
+  justify-content: flex-start;
 }
 .profile-section,
 .user-info-card,
@@ -178,7 +186,7 @@ const goToAvatarShop = () => {
 }
 .profile-section {
   width: 100%;
-  margin: 0;
+  margin: 0 0 8px 0;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -233,13 +241,15 @@ const goToAvatarShop = () => {
   z-index: 3;
 }
 .user-info-card {
-  margin-top: 14px;
-  padding: 14px 0;
-  border: 2px solid var(--color-border);
+  margin-top: 8px;
+  margin-left: 10px;
+  margin-right: 10px;
+  padding: 10px 0;
+  border: 2px solid #4318d1;
   border-radius: 12px;
   background: var(--color-bg);
   text-align: center;
-  width: 100%;
+  width: calc(100% - 20px);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -247,6 +257,7 @@ const goToAvatarShop = () => {
   min-width: 0;
   font-size: 14px;
   box-sizing: border-box;
+  overflow-x: visible;
 }
 .info-item {
   text-align: center;
@@ -267,14 +278,44 @@ const goToAvatarShop = () => {
   justify-content: center;
   gap: 3px;
 }
+.coin-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.3;
+}
+
+.coin-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.coin-value {
+  font-weight: bold;
+  color: #4318d1;
+  font-size: 16px;
+}
+
 .coin-icon {
-  font-size: 13px;
+  font-size: 16px;
+}
+
+.coin-label {
+  font-size: 12px;
+  color: var(--color-text-light);
 }
 .menu-list {
-  margin: 14px 0 0 0;
+  margin: 8px 0 0 0;
   max-width: 390px;
-  padding: 0 4px;
+  width: 100%;
+  padding: 0 10px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  margin-bottom: 0;
 }
+
 .menu-item {
   width: 100%;
   margin: 0;
@@ -285,6 +326,9 @@ const goToAvatarShop = () => {
   border-bottom: 1px solid var(--color-border);
   font-size: 15px;
   color: var(--color-text);
+  box-sizing: border-box;
+  word-break: keep-all;
+  overflow-x: hidden;
 }
 .menu-item:last-child {
   border-bottom: none;
@@ -368,45 +412,10 @@ const goToAvatarShop = () => {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 8px 0;
+  padding: 10px 0 20px 0;
   z-index: 100;
 }
-@media (max-width: 540px) {
-  .mypage-container,
-  .status-bar,
-  .app-header,
-  .user-info-card,
-  .menu-list,
-  .menu-item {
-    max-width: 100vw;
-    width: 100vw;
-    min-width: 0 !important;
-    box-sizing: border-box;
-  }
-  .mypage-container {
-    margin: 0;
-    padding: 0 2vw;
-    overflow-x: hidden;
-  }
-  .user-info-card,
-  .menu-list {
-    padding: 0 1vw;
-    min-width: 0 !important;
-  }
-  .menu-item,
-  .info-item {
-    min-width: 0 !important;
-    flex-shrink: 1;
-  }
-  .bottom-nav {
-    left: 0;
-    right: 0;
-    transform: none;
-    max-width: 100vw;
-    width: 100vw;
-  }
-}
 .danger-chevron {
-  color: var(--color-accent) !important;
+  color: var(--color-accent);
 }
 </style>
