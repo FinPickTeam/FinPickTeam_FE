@@ -16,6 +16,8 @@ import { useRoute } from 'vue-router';
 import { computed } from 'vue';
 
 const route = useRoute();
+// HeaderBar를 숨길 라우트 이름 목록
+// (이 배열에 포함된 name의 페이지에서는 HeaderBar가 표시되지 않음)
 const hideHeaderNames = [
   'dictionary',
   'Notification',
