@@ -1,0 +1,29 @@
+[
+  {
+    "depositBankName": "KB국민은행",
+    "depositProductName": "일반정기예금",
+    "depositContractPeriod": "1개월 이상 60개월 이하",
+    "depositSubscriptionAmount": "10만원 이상",
+    "depositBasicRate": 2.25,
+    "depositMaxRate": 2.25,
+    "depositSummary": "목돈넣고 안정수익 마음든든"
+  },
+  {
+    "depositBankName": "KB국민은행",
+    "depositProductName": "KB Star 정기예금",
+    "depositContractPeriod": "1개월 이상 36개월 이하",
+    "depositSubscriptionAmount": "100만원 이상",
+    "depositBasicRate": 2.15,
+    "depositMaxRate": 2.45,
+    "depositSummary": " Digital KB 대표 정기예금"
+  },
+  {
+    "depositBankName": "KB국민은행",
+    "depositProductName": "국민수퍼정기예금",
+    "depositContractPeriod": "1개월 이상 36개월 이하",
+    "depositSubscriptionAmount": "100만원 이상",
+    "depositBasicRate": 1.95,
+    "depositMaxRate": 2.05,
+    "depositSummary": "가입 조건을 직접 설계하는"
+  }
+]
