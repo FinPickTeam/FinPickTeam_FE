@@ -32,8 +32,9 @@ import Installment from '../pages/finance/Installment.vue';
 import Fund from '../pages/finance/Fund.vue';
 import Stock from '../pages/finance/Stock.vue';
 
-// components/finance
+// 재테크 컴포넌트 확인
 import ProductInputForm from '../components/finance/ProductInputForm.vue';
+import ProductCard from '../components/finance/ProductCard.vue';
 
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
@@ -95,6 +96,11 @@ const router = createRouter({
       path: '/finance/product-input-form',
       name: 'ProductInputForm',
       component: ProductInputForm,
+    },
+    {
+      path: '/finance/product-card',
+      name: 'ProductCard',
+      component: ProductCard,
     },
     // 공통 레이아웃 적용 구간
     {
