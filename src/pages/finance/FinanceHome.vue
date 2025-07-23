@@ -5,10 +5,10 @@
     <main class="main-content">
       <h1>재테크 홈</h1>
       <div class="button-group">
-        <button>예산 관리</button>
-        <button>투자 내역</button>
-        <button>목표 설정</button>
-        <button>리포트 보기</button>
+        <button>예금</button>
+        <button>적금</button>
+        <button>펀트</button>
+        <button>주식</button>
       </div>
     </main>
 
