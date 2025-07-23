@@ -5,10 +5,12 @@
     <main class="main-content">
       <h1>재테크 홈</h1>
       <div class="button-group">
-        <button>예금</button>
-        <button>적금</button>
-        <button>펀트</button>
-        <button>주식</button>
+        <router-link to="/finance/deposit"><button>예금</button></router-link>
+        <router-link to="/finance/installment"
+          ><button>적금</button></router-link
+        >
+        <router-link to="/finance/fund"><button>펀드</button></router-link>
+        <router-link to="/finance/stock"><button>주식</button></router-link>
       </div>
     </main>
 

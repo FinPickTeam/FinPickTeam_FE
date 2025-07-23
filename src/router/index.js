@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import ArsAuth from '../pages/ars/ArsAuth.vue';
 import ArsVerification from '../pages/ars/ArsVerification.vue';
 
+// auth
 import Login from '../pages/auth/Login.vue';
 import Signup from '../pages/auth/Signup.vue';
 import SignupComplete from '../pages/auth/SignupComplete.vue';
@@ -10,6 +11,7 @@ import ProfileStep2 from '../pages/auth/ProfileStep2.vue';
 import ProfileStep3 from '../pages/auth/ProfileStep3.vue';
 import ProfileStep4 from '../pages/auth/ProfileStep4.vue';
 
+// mypage
 import Mypage from '../pages/mypage/Mypage.vue';
 import Withdraw from '../pages/mypage/Withdraw.vue';
 import WithdrawSuccess from '../pages/mypage/WithdrawSuccess.vue';
@@ -18,11 +20,18 @@ import QuizHistory from '../pages/mypage/QuizHistory.vue';
 import Dictionary from '../pages/home/Dictionary.vue';
 import AvatarShop from '../pages/mypage/avatar/AvatarShop.vue';
 
+// home
 import Home from '../pages/home/Home.vue';
 import Notification from '../pages/home/Notification.vue';
 import Quiz from '../pages/home/Quiz.vue';
 
+// finance
 import FinanceHome from '../pages/finance/FinanceHome.vue';
+import Deposit from '../pages/finance/Deposit.vue';
+import Installment from '../pages/finance/Installment.vue';
+import Fund from '../pages/finance/Fund.vue';
+import Stock from '../pages/finance/Stock.vue';
+
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
 
@@ -93,6 +102,26 @@ const router = createRouter({
       path: '/finance',
       name: 'FinanceHome',
       component: FinanceHome,
+    },
+    {
+      path: '/finance/deposit',
+      name: 'Deposit',
+      component: Deposit,
+    },
+    {
+      path: '/finance/installment',
+      name: 'Installment',
+      component: Installment,
+    },
+    {
+      path: '/finance/fund',
+      name: 'Fund',
+      component: Fund,
+    },
+    {
+      path: '/finance/stock',
+      name: 'Stock',
+      component: Stock,
     },
 
     // 내 자산
