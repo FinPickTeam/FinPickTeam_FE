@@ -25,7 +25,22 @@
   --color-success-light: #f0fdf4;
 
   /* Font */
-  --font-main: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+  /* Font Size */
+  --font-size-ars-large: 32px;
+  --font-size-ars-small: 22px;
+
+  --font-size-title-main: 26px; /* 상단 제목 */
+  --font-size-title-sub: 18px; /* 버튼, 섹션 제목 */
+
+  --font-size-body: 14px; /* 일반 텍스트 */
+  --font-size-caption: 12px; /* 부가정보 */
+
+  /* Font Weight */
+  --font-weight-bold: 700; /* 제목 */
+  --font-weight-medium: 500; /* 상단 제목 , 버튼, 섹션 제목 */
+  --font-weight-regular: 400; /* 일반 텍스트 */
 }
 
 html,
