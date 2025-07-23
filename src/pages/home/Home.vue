@@ -34,7 +34,7 @@
       <!-- 오른쪽 플로팅 버튼 그룹 -->
       <div class="floating-btn-group">
         <button class="floating-btn" @click="openQuiz">
-          <i class="fas fa-piggy-bank"></i>
+          <i class="fa-solid fa-lightbulb"></i>
         </button>
         <button class="floating-btn">
           <i class="fas fa-envelope" @click="openNewsletter"></i>
