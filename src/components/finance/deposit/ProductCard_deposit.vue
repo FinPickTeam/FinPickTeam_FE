@@ -1,17 +1,18 @@
+<!-- 상품 카드 컴포넌트 -->
 <template>
   <div class="product-card">
     <!-- 은행 로고 -->
     <div class="bank-logo">
       <img
-        src="@/assets/bank_logo/국민은행.png"
-        alt="KB 로고"
+        :src="getLogoUrl(product.depositBankName)"
+        :alt="`${product.depositBankName} 로고`"
         class="logo-img"
       />
     </div>
     <!-- 텍스트 정보 -->
     <div class="card-main">
       <div class="card-title-row">
-        <span class="product-title">스마트모아Dream정기예금</span>
+        <span class="product-title">{{ product.depositProductName }}</span>
         <span
           class="heart"
           :class="{ active: isFavorite }"
@@ -19,11 +20,13 @@
           >♥</span
         >
       </div>
-      <div class="product-summary">Digital KB의 대표 정기예금</div>
-      <div class="product-info-row">12개월 기준</div>
+      <div class="product-summary">{{ product.depositSummary }}</div>
+      <div class="product-info-row">
+        {{ product.depositContractPeriod }} 기준
+      </div>
       <div class="rate-row">
-        <span class="max-rate">최고 연 2.45%</span>
-        <span class="basic-rate">기본 연 2.15%</span>
+        <span class="max-rate">최고 연 {{ product.depositMaxRate }}%</span>
+        <span class="basic-rate">기본 연 {{ product.depositBasicRate }}%</span>
       </div>
     </div>
   </div>
@@ -31,10 +34,45 @@
 
 <script setup>
 import { ref } from 'vue';
+
+const props = defineProps({
+  product: Object,
+});
+
 const isFavorite = ref(false);
 function toggleFavorite() {
   isFavorite.value = !isFavorite.value;
 }
+
+const bankLogoMap = {
+  KB국민은행: 'KB국민은행.png',
+  NH농협은행: 'NH농협은행.png',
+  IBK기업은행: 'IBK기업은행.png',
+  KDB산업은행: 'KDB산업은행.png',
+  SC제일은행: 'SC제일은행.png',
+  수협은행: '수협은행.png',
+  우리은행: '우리은행.png',
+  하나은행: '하나은행.png',
+  카카오뱅크: '카카오뱅크.png',
+  케이뱅크: '케이뱅크.png',
+  토스뱅크: '토스뱅크.png',
+  iM뱅크: 'iM뱅크.png',
+  광주은행: '광주은행, 전북은행.png',
+  전북은행: '광주은행, 전북은행.png',
+  신한은행: '신한은행, 제주은행.png',
+  제주은행: '신한은행, 제주은행.png',
+  경남은행: '경남은행, 부산은행.png',
+  부산은행: '경남은행, 부산은행.png',
+};
+
+const getLogoUrl = (bankName) => {
+  const fileName = bankLogoMap[bankName];
+  if (!fileName) {
+    return new URL('../../../assets/bank_logo/KB국민은행.png', import.meta.url)
+      .href;
+  }
+  return new URL(`../../../assets/bank_logo/${fileName}`, import.meta.url).href;
+};
 </script>
 
 <style scoped>
