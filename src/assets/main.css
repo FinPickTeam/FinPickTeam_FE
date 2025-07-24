@@ -37,7 +37,7 @@
   --font-size-ars-large: 32px;
   --font-size-ars-small: 22px;
 
-  --font-size-title-main: 26px; /* 상단 제목 */
+  --font-size-title-main: 26px; /* 상단 제목 -> 22px 변경하면 어때요*/
   --font-size-title-sub: 18px; /* 버튼, 섹션 제목 */
 
   --font-size-body-large: 16px; /* 상품 카드 텍스트 */
@@ -135,7 +135,7 @@ a:hover {
   .container,
   .app-container {
     max-width: 100%;
-    padding: 0 8px;
+    /* padding: 0 8px; */
   }
   h1 {
     font-size: 24px;
