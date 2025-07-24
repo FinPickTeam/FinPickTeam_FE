@@ -1,151 +1,155 @@
-import { createRouter, createWebHistory } from "vue-router";
-import ArsAuth from "../pages/ars/ArsAuth.vue";
-import ArsVerification from "../pages/ars/ArsVerification.vue";
+import { createRouter, createWebHistory } from 'vue-router';
+import ArsAuth from '../pages/ars/ArsAuth.vue';
+import ArsVerification from '../pages/ars/ArsVerification.vue';
 
 // auth
-import Login from "../pages/auth/Login.vue";
-import Signup from "../pages/auth/Signup.vue";
-import SignupComplete from "../pages/auth/SignupComplete.vue";
-import ProfileStep1 from "../pages/auth/ProfileStep1.vue";
-import ProfileStep2 from "../pages/auth/ProfileStep2.vue";
-import ProfileStep3 from "../pages/auth/ProfileStep3.vue";
-import ProfileStep4 from "../pages/auth/ProfileStep4.vue";
+import Login from '../pages/auth/Login.vue';
+import Signup from '../pages/auth/Signup.vue';
+import SignupComplete from '../pages/auth/SignupComplete.vue';
+import ProfileStep1 from '../pages/auth/ProfileStep1.vue';
+import ProfileStep2 from '../pages/auth/ProfileStep2.vue';
+import ProfileStep3 from '../pages/auth/ProfileStep3.vue';
+import ProfileStep4 from '../pages/auth/ProfileStep4.vue';
 
 // mypage
-import Mypage from "../pages/mypage/Mypage.vue";
-import Withdraw from "../pages/mypage/Withdraw.vue";
-import WithdrawSuccess from "../pages/mypage/WithdrawSuccess.vue";
-import Profile from "../pages/mypage/Profile.vue";
-import QuizHistory from "../pages/mypage/QuizHistory.vue";
-import Dictionary from "../pages/home/Dictionary.vue";
-import AvatarShop from "../pages/mypage/avatar/AvatarShop.vue";
+import Mypage from '../pages/mypage/Mypage.vue';
+import Withdraw from '../pages/mypage/Withdraw.vue';
+import WithdrawSuccess from '../pages/mypage/WithdrawSuccess.vue';
+import Profile from '../pages/mypage/Profile.vue';
+import QuizHistory from '../pages/mypage/QuizHistory.vue';
+import Dictionary from '../pages/home/Dictionary.vue';
+import AvatarShop from '../pages/mypage/avatar/AvatarShop.vue';
 
 // home
-import Home from "../pages/home/Home.vue";
-import Notification from "../pages/home/Notification.vue";
-import Quiz from "../pages/home/Quiz.vue";
+import Home from '../pages/home/Home.vue';
+import Notification from '../pages/home/Notification.vue';
+import Quiz from '../pages/home/Quiz.vue';
 
 // finance
-import FinanceHome from "../pages/finance/FinanceHome.vue";
-import Deposit from "../pages/finance/Deposit.vue";
-import Installment from "../pages/finance/Installment.vue";
-import Fund from "../pages/finance/Fund.vue";
-import Stock from "../pages/finance/Stock.vue";
+import FinanceHome from '../pages/finance/FinanceHome.vue';
+import Deposit from '../pages/finance/Deposit.vue';
+import Installment from '../pages/finance/Installment.vue';
+import Fund from '../pages/finance/Fund.vue';
+import Stock from '../pages/finance/Stock.vue';
 
-import OpenBankingHome from "../pages/openbanking/OpenBankingHome.vue";
-import ChallengeHome from "../pages/challenge/ChallengeHome.vue";
+// 재테크 컴포넌트
+import ProductInputForm from '../components/finance/ProductInputForm.vue';
+import ProductCard from '../components/finance/ProductCard.vue';
+
+import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
+import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
 
 // 공통 레이아웃
-import MainLayout from "../layouts/MainLayout.vue";
-import { computed } from "vue";
-import { useRoute } from "vue-router";
+import MainLayout from '../layouts/MainLayout.vue';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     // 로그인, 회원가입, ARS 등은 레이아웃 없이 단독 페이지로 유지
     {
-      path: "/login",
-      name: "Login",
+      path: '/login',
+      name: 'Login',
       component: Login,
     },
     {
-      path: "/signup",
-      name: "Signup",
+      path: '/signup',
+      name: 'Signup',
       component: Signup,
     },
     {
-      path: "/signup-complete",
-      name: "SignupComplete",
+      path: '/signup-complete',
+      name: 'SignupComplete',
       component: SignupComplete,
     },
     {
-      path: "/profile-step-1",
-      name: "ProfileStep1",
+      path: '/profile-step-1',
+      name: 'ProfileStep1',
       component: ProfileStep1,
     },
     {
-      path: "/profile-step-2",
-      name: "ProfileStep2",
+      path: '/profile-step-2',
+      name: 'ProfileStep2',
       component: ProfileStep2,
     },
     {
-      path: "/profile-step-3",
-      name: "ProfileStep3",
+      path: '/profile-step-3',
+      name: 'ProfileStep3',
       component: ProfileStep3,
     },
     {
-      path: "/profile-step-4",
-      name: "ProfileStep4",
+      path: '/profile-step-4',
+      name: 'ProfileStep4',
       component: ProfileStep4,
     },
     {
-      path: "/ars-auth",
-      name: "ARSAuth",
+      path: '/ars-auth',
+      name: 'ARSAuth',
       component: ArsAuth,
     },
     {
-      path: "/ars/verification",
-      name: "ArsVerification",
+      path: '/ars/verification',
+      name: 'ArsVerification',
       component: ArsVerification,
     },
     {
       // components/finance
-      path: "/finance/product-input-form",
-      name: "ProductInputForm",
+      path: '/finance/product-input-form',
+      name: 'ProductInputForm',
       component: ProductInputForm,
     },
     {
-      path: "/finance/product-card",
-      name: "ProductCard",
+      path: '/finance/product-card',
+      name: 'ProductCard',
       component: ProductCard,
     },
     // 공통 레이아웃 적용 구간
     {
-      path: "/",
+      path: '/',
       component: MainLayout,
       children: [
-        { path: "", name: "Home", component: Home },
-        { path: "dictionary", name: "dictionary", component: Dictionary },
-        { path: "notification", name: "Notification", component: Notification },
-        { path: "quiz", name: "Quiz", component: Quiz },
+        { path: '', name: 'Home', component: Home },
+        { path: 'dictionary', name: 'dictionary', component: Dictionary },
+        { path: 'notification', name: 'Notification', component: Notification },
+        { path: 'quiz', name: 'Quiz', component: Quiz },
         // 재테크
-        { path: "finance", name: "FinanceHome", component: FinanceHome },
-        { path: "finance/deposit", name: "Deposit", component: Deposit },
+        { path: 'finance', name: 'FinanceHome', component: FinanceHome },
+        { path: 'finance/deposit', name: 'Deposit', component: Deposit },
         {
-          path: "finance/installment",
-          name: "Installment",
+          path: 'finance/installment',
+          name: 'Installment',
           component: Installment,
         },
-        { path: "finance/fund", name: "Fund", component: Fund },
-        { path: "finance/stock", name: "Stock", component: Stock },
+        { path: 'finance/fund', name: 'Fund', component: Fund },
+        { path: 'finance/stock', name: 'Stock', component: Stock },
         // 내 자산
         {
-          path: "openbanking",
-          name: "OpenBankingHome",
+          path: 'openbanking',
+          name: 'OpenBankingHome',
           component: OpenBankingHome,
         },
         // 챌린지
-        { path: "challenge", name: "ChallengeHome", component: ChallengeHome },
+        { path: 'challenge', name: 'ChallengeHome', component: ChallengeHome },
         // 마이페이지
-        { path: "mypage", name: "mypage", component: Mypage },
-        { path: "withdraw", name: "withdraw", component: Withdraw },
+        { path: 'mypage', name: 'mypage', component: Mypage },
+        { path: 'withdraw', name: 'withdraw', component: Withdraw },
         {
-          path: "withdraw-success",
-          name: "withdraw-success",
+          path: 'withdraw-success',
+          name: 'withdraw-success',
           component: WithdrawSuccess,
         },
-        { path: "profile", name: "profile", component: Profile },
-        { path: "quiz-history", name: "quiz-history", component: QuizHistory },
-        { path: "avatar-shop", name: "avatar-shop", component: AvatarShop },
+        { path: 'profile', name: 'profile', component: Profile },
+        { path: 'quiz-history', name: 'quiz-history', component: QuizHistory },
+        { path: 'avatar-shop', name: 'avatar-shop', component: AvatarShop },
       ],
     },
     // 404 Not Found catch-all
-    {
-      path: "/:pathMatch(.*)*",
-      name: "NotFound",
-      component: () => import("../pages/home/404/404.vue"),
-    },
+    // {
+    //   path: "/:pathMatch(.*)*",
+    //   name: "NotFound",
+    //   component: () => import("../pages/home/404/404.vue"),
+    // },
   ],
 });
 
