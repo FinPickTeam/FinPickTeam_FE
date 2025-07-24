@@ -34,7 +34,8 @@ import Stock from '../pages/finance/Stock.vue';
 
 // 재테크 컴포넌트
 import ProductInputForm from '../components/finance/ProductInputForm.vue';
-import ProductCard from '../components/finance/ProductCard.vue';
+import ProductCard from '../components/finance/deposit/ProductCard_deposit.vue';
+import ProductCardList_deposit from '../components/finance/deposit/ProductCardList_deposit.vue';
 
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
@@ -94,7 +95,7 @@ const router = createRouter({
       component: ArsVerification,
     },
     {
-      // components/finance
+      // 재테크 컴포넌트 테스트
       path: '/finance/product-input-form',
       name: 'ProductInputForm',
       component: ProductInputForm,
@@ -103,6 +104,11 @@ const router = createRouter({
       path: '/finance/product-card',
       name: 'ProductCard',
       component: ProductCard,
+    },
+    {
+      path: '/finance/product-card-list-deposit',
+      name: 'ProductCardList',
+      component: ProductCardList_deposit,
     },
     // 공통 레이아웃 적용 구간
     {
@@ -145,11 +151,11 @@ const router = createRouter({
       ],
     },
     // 404 Not Found catch-all
-    // {
-    //   path: "/:pathMatch(.*)*",
-    //   name: "NotFound",
-    //   component: () => import("../pages/home/404/404.vue"),
-    // },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('../pages/home/404/404.vue'),
+    },
   ],
 });
 
