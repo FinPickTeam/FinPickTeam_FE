@@ -34,6 +34,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 
+const emit = defineEmits(['show-products']);
+
 const amountRaw = ref('500000000');
 const period = ref(12);
 
@@ -47,8 +49,11 @@ function onAmountInput(e) {
 }
 
 function logValues() {
+  // 기존 콘솔 출력
   console.log('입력한 금액:', formattedAmount.value);
   console.log('입력한 기간:', period.value);
+  // 부모에게 알림
+  emit('show-products');
 }
 </script>
 
@@ -63,12 +68,13 @@ function logValues() {
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.04);
   max-width: 350px;
   margin: 0 auto;
+  margin-bottom: 14px;
 }
 .input-summary {
   color: var(--color-text);
   font-size: var(--font-size-body);
   text-align: center;
-  margin-bottom: 18px;
+  margin-bottom: 4px;
   line-height: 1.7;
 }
 .highlight {
@@ -91,7 +97,7 @@ function logValues() {
   position: relative;
   display: inline-block;
   min-width: 10ch;
-  max-width: 17ch;
+  max-width: 14ch;
   width: 100%;
   vertical-align: middle;
 }
@@ -102,12 +108,12 @@ function logValues() {
   position: relative;
   z-index: 2;
   min-width: 10ch;
-  max-width: 17ch;
+  max-width: 14ch;
   width: auto;
   background: #edeaff;
   font-weight: var(--font-weight-regular);
   border-radius: 12px;
-  padding: 2px 12px;
+  padding: 2px 5px;
   font-size: var(--font-size-body);
   margin: 0 2px;
   display: inline-block;

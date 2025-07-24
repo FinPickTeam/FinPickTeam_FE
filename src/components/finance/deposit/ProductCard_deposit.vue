@@ -84,7 +84,7 @@ const getLogoUrl = (bankName) => {
   padding: 8px 20px 10px 54px;
   width: 350px;
   font-family: var(--font-main);
-  margin-bottom: 16px;
+  margin-bottom: 10px;
 }
 .bank-logo {
   position: absolute;
@@ -110,6 +110,7 @@ const getLogoUrl = (bankName) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-bottom: -4px;
 }
 .product-title {
   font-size: var(--font-size-title-sub);
@@ -122,7 +123,7 @@ const getLogoUrl = (bankName) => {
 }
 .heart {
   color: var(--color-bg-accent);
-  font-size: 30px;
+  font-size: 26px;
   cursor: pointer;
   margin-left: 8px;
   user-select: none;
@@ -132,7 +133,7 @@ const getLogoUrl = (bankName) => {
   color: #e11d48;
 }
 .product-summary {
-  font-size: var(--font-size-body-large);
+  font-size: var(--font-size-body);
   color: #888;
   margin-bottom: 2px;
   white-space: nowrap;

@@ -20,6 +20,8 @@ const products = ref(depositData);
 .product-card-list {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0px;
+  align-items: center;
+  justify-content: center;
 }
 </style>
