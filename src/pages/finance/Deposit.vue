@@ -2,9 +2,10 @@
   <div class="deposit-container">
     <!-- 상단 탭 -->
     <div class="tab-row">
-      <span class="tab active">예/적금</span>
-      <span class="tab">주식</span>
-      <span class="tab">펀드</span>
+      <span class="tab active">예금</span>
+      <span class="tab" @click="goTo('/finance/installment')">적금</span>
+      <span class="tab" @click="goTo('/finance/fund')">펀드</span>
+      <span class="tab" @click="goTo('/finance/stock')">주식</span>
     </div>
 
     <!-- 추천/전체보기 탭 -->
@@ -26,34 +27,41 @@
 
 <script setup>
 import ProductInputForm from '@/components/finance/ProductInputForm.vue';
+import { useRouter } from 'vue-router';
+const router = useRouter();
+
+function goTo(path) {
+  router.push(path);
+}
 </script>
 
 <style scoped>
 .deposit-container {
   max-width: 390px;
   margin: 0 auto;
-  padding: 24px 16px;
+  padding: 0px 16px;
   font-family: var(--font-main);
 }
 
 .tab-row {
   display: flex;
-  gap: 16px;
-  font-size: 16px;
-  font-weight: 600;
+  gap: 12px;
+  font-size: var(font-size-body-large);
+  font-weight: var(--font-weight-medium);
   margin-bottom: 8px;
+  align-items: baseline;
 }
 
 .tab {
   color: #888;
   cursor: pointer;
   padding-bottom: 4px;
-  border-bottom: 2px solid transparent;
 }
 
 .tab.active {
   color: var(--color-main);
-  border-bottom: 2px solid var(--color-main);
+  font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-title-sub);
 }
 
 .subtab-row {
