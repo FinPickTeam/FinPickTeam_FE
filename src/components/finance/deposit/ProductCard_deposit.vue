@@ -21,9 +21,7 @@
         >
       </div>
       <div class="product-summary">{{ product.depositSummary }}</div>
-      <div class="product-info-row">
-        {{ product.depositContractPeriod }} 기준
-      </div>
+      <div class="product-info-row">12개월 기준</div>
       <div class="rate-row">
         <span class="max-rate">최고 연 {{ product.depositMaxRate }}%</span>
         <span class="basic-rate">기본 연 {{ product.depositBasicRate }}%</span>
@@ -45,10 +43,10 @@ function toggleFavorite() {
 }
 
 const bankLogoMap = {
-  KB국민은행: 'KB국민은행.png',
-  NH농협은행: 'NH농협은행.png',
+  국민은행: 'KB국민은행.png',
+  농협은행: 'NH농협은행.png',
   IBK기업은행: 'IBK기업은행.png',
-  KDB산업은행: 'KDB산업은행.png',
+  한국산업은행: 'KDB산업은행.png',
   SC제일은행: 'SC제일은행.png',
   수협은행: '수협은행.png',
   우리은행: '우리은행.png',
@@ -56,7 +54,7 @@ const bankLogoMap = {
   카카오뱅크: '카카오뱅크.png',
   케이뱅크: '케이뱅크.png',
   토스뱅크: '토스뱅크.png',
-  iM뱅크: 'iM뱅크.png',
+  IM뱅크: 'iM뱅크.png',
   광주은행: '광주은행, 전북은행.png',
   전북은행: '광주은행, 전북은행.png',
   신한은행: '신한은행, 제주은행.png',
