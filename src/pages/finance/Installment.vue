@@ -56,16 +56,19 @@ function goTo(path) {
 
 .subtab-row {
   display: flex;
-  gap: 16px;
-  font-size: 15px;
-  margin-bottom: 18px;
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .subtab {
+  flex: 1 1 0;
+  text-align: center;
   color: #888;
   cursor: pointer;
   padding-bottom: 2px;
   border-bottom: 2px solid transparent;
+  font-size: 15px;
+  /* 필요하다면 높이, 라인하이트 등 추가 */
 }
 
 .subtab.active {

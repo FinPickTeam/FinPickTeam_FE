@@ -15,20 +15,27 @@
     </div>
 
     <!-- 조건 입력 폼 -->
-    <ProductInputForm />
+    <ProductInputForm @show-products="showProducts = true" />
 
     <!-- 안내 문구 -->
-    <div class="info-text">
+    <div class="info-text" v-if="!showProducts">
       수익률 좋은 상품이 궁금하신가요?<br />
       버튼만 누르면 확인하실 수 있어요 <span class="emoji">👇</span>
     </div>
+
+    <!-- 추천 상품 리스트 -->
+    <ProductCardList_deposit v-if="showProducts" />
   </div>
 </template>
 
 <script setup>
 import ProductInputForm from '@/components/finance/ProductInputForm.vue';
+import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
 import { useRouter } from 'vue-router';
+import { ref } from 'vue';
+
 const router = useRouter();
+const showProducts = ref(false);
 
 function goTo(path) {
   router.push(path);
@@ -53,7 +60,7 @@ function goTo(path) {
 }
 
 .tab {
-  color: #888;
+  color: var(--color-text-light);
   cursor: pointer;
   padding-bottom: 4px;
 }
@@ -66,16 +73,19 @@ function goTo(path) {
 
 .subtab-row {
   display: flex;
-  gap: 16px;
-  font-size: 15px;
-  margin-bottom: 18px;
+  width: 100%;
+  margin-bottom: 10px;
 }
 
 .subtab {
+  flex: 1 1 0;
+  text-align: center;
   color: #888;
   cursor: pointer;
   padding-bottom: 2px;
   border-bottom: 2px solid transparent;
+  font-size: 15px;
+  /* 필요하다면 높이, 라인하이트 등 추가 */
 }
 
 .subtab.active {
@@ -85,10 +95,10 @@ function goTo(path) {
 
 .info-text {
   margin-top: 36px;
-  font-size: 17px;
-  color: #222;
+  font-size: var(--font-size-body-large);
+  color: var(--color-text);
   text-align: center;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   line-height: 1.6;
 }
 
