@@ -43,25 +43,25 @@ function toggleFavorite() {
   background: #fff;
   border-radius: 16px;
   box-shadow: 0 2px 8px 0 #0002;
-  padding: 8px 20px 10px 80px; /* 왼쪽 패딩을 로고 공간만큼 확보 */
+  padding: 8px 20px 10px 54px;
   width: 350px;
   font-family: var(--font-main);
   margin-bottom: 16px;
 }
 .bank-logo {
   position: absolute;
-  left: 20px;
-  top: 10px;
-  width: 48px;
-  height: 48px;
+  left: 10px;
+  top: 14px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .logo-img {
-  width: 48px;
-  height: 48px;
+  width: 36px;
+  height: 36px;
   object-fit: cover;
   border-radius: 50%;
 }
@@ -77,7 +77,6 @@ function toggleFavorite() {
   font-size: var(--font-size-title-sub);
   font-weight: var(--font-weight-bold);
   color: var(--color-text);
-  margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -95,17 +94,16 @@ function toggleFavorite() {
   color: #e11d48;
 }
 .product-summary {
-  font-size: 0.98rem;
+  font-size: var(--font-size-body-large);
   color: #888;
   margin-bottom: 2px;
-  margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 200px;
 }
 .product-info-row {
-  font-size: 0.92rem;
+  font-size: var(--font-size-body);
   color: #8e74e3;
   margin-bottom: 2px;
   margin-top: 2px;
@@ -117,13 +115,13 @@ function toggleFavorite() {
   margin-top: 2px;
 }
 .max-rate {
-  color: #7c3aed;
-  font-size: 1.02rem;
-  font-weight: 600;
+  color: var(--color-main-light);
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-bold);
 }
 .basic-rate {
-  color: #5b7fff;
-  font-size: 1.02rem;
-  font-weight: 500;
+  color: var(--color-main-light);
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-medium);
 }
 </style>
