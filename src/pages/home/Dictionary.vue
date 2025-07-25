@@ -1,208 +1,210 @@
 <template>
-  <div class="dictionary-container">
-    <div class="dictionary-header-bar">
-      <button class="back-btn" @click="goBack">
-        <font-awesome-icon :icon="['fas', 'angle-left']" />
-      </button>
-      <span class="dictionary-header-title">금융 용어 사전</span>
-    </div>
-    <!-- 검색 영역 -->
-    <div class="search-section">
-      <div class="search-box">
-        <input
-          v-model="searchTerm"
-          @input="filterTerms"
-          @keyup.enter="onEnterSearch"
-          @focus="toggleHistory"
-          @blur="onBlurInput"
-          type="text"
-          placeholder="용어를 검색해보세요..."
-          class="search-input"
-        />
-        <!-- 검색 버튼 제거 -->
+  <div class="dictionary-scroll-container">
+    <div class="dictionary-container">
+      <div class="dictionary-header-bar">
+        <button class="back-btn" @click="goBack">
+          <font-awesome-icon :icon="['fas', 'angle-left']" />
+        </button>
+        <span class="dictionary-header-title">금융 용어 사전</span>
       </div>
-      <div
-        v-if="showHistory && searchHistory.length"
-        class="search-history-box"
-      >
+      <!-- 검색 영역 -->
+      <div class="search-section">
+        <div class="search-box">
+          <input
+            v-model="searchTerm"
+            @input="filterTerms"
+            @keyup.enter="onEnterSearch"
+            @focus="toggleHistory"
+            @blur="onBlurInput"
+            type="text"
+            placeholder="용어를 검색해보세요..."
+            class="search-input"
+          />
+          <!-- 검색 버튼 제거 -->
+        </div>
         <div
-          v-for="(item, idx) in searchHistory"
-          :key="idx"
-          class="search-history-item"
+          v-if="showHistory && searchHistory.length"
+          class="search-history-box"
         >
-          <span @mousedown.prevent="selectHistory(item)">{{ item }}</span>
-          <button
-            class="delete-history-btn"
-            @mousedown.prevent="deleteHistory(idx)"
+          <div
+            v-for="(item, idx) in searchHistory"
+            :key="idx"
+            class="search-history-item"
           >
-            ×
+            <span @mousedown.prevent="selectHistory(item)">{{ item }}</span>
+            <button
+              class="delete-history-btn"
+              @mousedown.prevent="deleteHistory(idx)"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+        <div class="search-stats">
+          총 {{ totalTerms }}개 용어 중 {{ filteredTerms.length }}개 검색됨
+        </div>
+      </div>
+
+      <!-- 필터 옵션 -->
+      <div class="filter-section">
+        <div class="filter-options">
+          <button
+            @click="setFilter('all')"
+            :class="['filter-btn', { active: currentFilter === 'all' }]"
+          >
+            전체
+          </button>
+          <button
+            @click="setFilter('ㄱ')"
+            :class="['filter-btn', { active: currentFilter === 'ㄱ' }]"
+          >
+            ㄱ
+          </button>
+          <button
+            @click="setFilter('ㄴ')"
+            :class="['filter-btn', { active: currentFilter === 'ㄴ' }]"
+          >
+            ㄴ
+          </button>
+          <button
+            @click="setFilter('ㄷ')"
+            :class="['filter-btn', { active: currentFilter === 'ㄷ' }]"
+          >
+            ㄷ
+          </button>
+          <button
+            @click="setFilter('ㄹ')"
+            :class="['filter-btn', { active: currentFilter === 'ㄹ' }]"
+          >
+            ㄹ
+          </button>
+          <button
+            @click="setFilter('ㅁ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅁ' }]"
+          >
+            ㅁ
+          </button>
+          <button
+            @click="setFilter('ㅂ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅂ' }]"
+          >
+            ㅂ
+          </button>
+          <button
+            @click="setFilter('ㅅ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅅ' }]"
+          >
+            ㅅ
+          </button>
+          <button
+            @click="setFilter('ㅇ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅇ' }]"
+          >
+            ㅇ
+          </button>
+          <button
+            @click="setFilter('ㅈ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅈ' }]"
+          >
+            ㅈ
+          </button>
+          <button
+            @click="setFilter('ㅊ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅊ' }]"
+          >
+            ㅊ
+          </button>
+          <button
+            @click="setFilter('ㅋ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅋ' }]"
+          >
+            ㅋ
+          </button>
+          <button
+            @click="setFilter('ㅌ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅌ' }]"
+          >
+            ㅌ
+          </button>
+          <button
+            @click="setFilter('ㅍ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅍ' }]"
+          >
+            ㅍ
+          </button>
+          <button
+            @click="setFilter('ㅎ')"
+            :class="['filter-btn', { active: currentFilter === 'ㅎ' }]"
+          >
+            ㅎ
           </button>
         </div>
       </div>
-      <div class="search-stats">
-        총 {{ totalTerms }}개 용어 중 {{ filteredTerms.length }}개 검색됨
-      </div>
-    </div>
 
-    <!-- 필터 옵션 -->
-    <div class="filter-section">
-      <div class="filter-options">
-        <button
-          @click="setFilter('all')"
-          :class="['filter-btn', { active: currentFilter === 'all' }]"
-        >
-          전체
-        </button>
-        <button
-          @click="setFilter('ㄱ')"
-          :class="['filter-btn', { active: currentFilter === 'ㄱ' }]"
-        >
-          ㄱ
-        </button>
-        <button
-          @click="setFilter('ㄴ')"
-          :class="['filter-btn', { active: currentFilter === 'ㄴ' }]"
-        >
-          ㄴ
-        </button>
-        <button
-          @click="setFilter('ㄷ')"
-          :class="['filter-btn', { active: currentFilter === 'ㄷ' }]"
-        >
-          ㄷ
-        </button>
-        <button
-          @click="setFilter('ㄹ')"
-          :class="['filter-btn', { active: currentFilter === 'ㄹ' }]"
-        >
-          ㄹ
-        </button>
-        <button
-          @click="setFilter('ㅁ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅁ' }]"
-        >
-          ㅁ
-        </button>
-        <button
-          @click="setFilter('ㅂ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅂ' }]"
-        >
-          ㅂ
-        </button>
-        <button
-          @click="setFilter('ㅅ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅅ' }]"
-        >
-          ㅅ
-        </button>
-        <button
-          @click="setFilter('ㅇ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅇ' }]"
-        >
-          ㅇ
-        </button>
-        <button
-          @click="setFilter('ㅈ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅈ' }]"
-        >
-          ㅈ
-        </button>
-        <button
-          @click="setFilter('ㅊ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅊ' }]"
-        >
-          ㅊ
-        </button>
-        <button
-          @click="setFilter('ㅋ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅋ' }]"
-        >
-          ㅋ
-        </button>
-        <button
-          @click="setFilter('ㅌ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅌ' }]"
-        >
-          ㅌ
-        </button>
-        <button
-          @click="setFilter('ㅍ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅍ' }]"
-        >
-          ㅍ
-        </button>
-        <button
-          @click="setFilter('ㅎ')"
-          :class="['filter-btn', { active: currentFilter === 'ㅎ' }]"
-        >
-          ㅎ
-        </button>
-      </div>
-    </div>
-
-    <!-- 용어 목록 -->
-    <div class="terms-section">
-      <div class="terms-grid">
-        <div
-          v-for="term in paginatedTerms"
-          :key="term.term"
-          @click="selectTerm(term)"
-          class="term-card"
-          :class="{ selected: selectedTerm?.term === term.term }"
-        >
-          <h3 class="term-title">{{ term.term }}</h3>
-          <p class="term-preview">{{ getPreview(term.definition) }}</p>
-        </div>
-      </div>
-
-      <!-- 페이지네이션 -->
-      <div class="pagination">
-        <button
-          @click="prevPage"
-          :disabled="currentPage === 1"
-          class="page-btn"
-        >
-          이전
-        </button>
-        <span class="page-info"> {{ currentPage }} / {{ totalPages }} </span>
-        <button
-          @click="nextPage"
-          :disabled="currentPage === totalPages"
-          class="page-btn"
-        >
-          다음
-        </button>
-      </div>
-    </div>
-
-    <!-- 용어 상세 정보 모달 -->
-    <div v-if="selectedTerm" class="modal-overlay" @click="closeModal">
-      <div class="modal-content" @click.stop>
-        <div class="modal-header">
-          <h2>{{ selectedTerm.term }}</h2>
-          <button @click="closeModal" class="close-btn">×</button>
-        </div>
-        <div class="modal-body">
-          <div class="term-definition">
-            {{ selectedTerm.definition }}
+      <!-- 용어 목록 -->
+      <div class="terms-section">
+        <div class="terms-grid">
+          <div
+            v-for="term in paginatedTerms"
+            :key="term.term"
+            @click="selectTerm(term)"
+            class="term-card"
+            :class="{ selected: selectedTerm?.term === term.term }"
+          >
+            <h3 class="term-title">{{ term.term }}</h3>
+            <p class="term-preview">{{ getPreview(term.definition) }}</p>
           </div>
-          <div v-if="selectedTerm.relatedTerms" class="related-terms">
-            <h4>연관 검색어:</h4>
-            <div class="related-tags">
-              <span
-                v-for="relatedTerm in selectedTerm.relatedTerms"
-                :key="relatedTerm"
-                @click="searchRelatedTerm(relatedTerm)"
-                class="related-tag"
-              >
-                {{ relatedTerm }}
-              </span>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="pagination">
+          <button
+            @click="prevPage"
+            :disabled="currentPage === 1"
+            class="page-btn"
+          >
+            이전
+          </button>
+          <span class="page-info"> {{ currentPage }} / {{ totalPages }} </span>
+          <button
+            @click="nextPage"
+            :disabled="currentPage === totalPages"
+            class="page-btn"
+          >
+            다음
+          </button>
+        </div>
+      </div>
+
+      <!-- 용어 상세 정보 모달 -->
+      <div v-if="selectedTerm" class="modal-overlay" @click="closeModal">
+        <div class="modal-content" @click.stop>
+          <div class="modal-header">
+            <h2>{{ selectedTerm.term }}</h2>
+            <button @click="closeModal" class="close-btn">×</button>
+          </div>
+          <div class="modal-body">
+            <div class="term-definition">
+              {{ selectedTerm.definition }}
+            </div>
+            <div v-if="selectedTerm.relatedTerms" class="related-terms">
+              <h4>연관 검색어:</h4>
+              <div class="related-tags">
+                <span
+                  v-for="relatedTerm in selectedTerm.relatedTerms"
+                  :key="relatedTerm"
+                  @click="searchRelatedTerm(relatedTerm)"
+                  class="related-tag"
+                >
+                  {{ relatedTerm }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      <Navbar />
     </div>
-    <Navbar />
   </div>
 </template>
 
@@ -224,7 +226,7 @@ const searchTerm = ref("");
 const currentFilter = ref("all");
 const selectedTerm = ref(null);
 const currentPage = ref(1);
-const itemsPerPage = 20;
+const itemsPerPage = 10;
 
 const showHistory = ref(false);
 const searchHistory = ref([]);
@@ -366,17 +368,20 @@ const onBlurInput = (e) => {
 };
 
 const goBack = () => {
-  const prev = window.location.href;
-  window.history.back();
-  setTimeout(() => {
-    if (window.location.href === prev) {
-      router.push("/");
-    }
-  }, 500);
+  if (window.history.length > 1) {
+    router.back();
+  } else {
+    router.push("/");
+  }
 };
 </script>
 
 <style scoped>
+.dictionary-scroll-container {
+  max-height: 100vh;
+  overflow-y: auto;
+  padding-bottom: 80px;
+}
 .dictionary-container {
   max-width: 1200px;
   margin: 0 auto;
@@ -541,30 +546,34 @@ const goBack = () => {
   justify-content: center;
   align-items: center;
   gap: 20px;
+  min-height: 48px;
+  margin-top: 16px;
 }
-
 .page-btn {
   padding: 10px 20px;
-  border: 2px solid #e1e5e9;
-  background: white;
+  border: 2px solid #4318d1;
+  background: #fff;
   border-radius: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: #4318d1;
   cursor: pointer;
   transition: all 0.3s ease;
 }
-
 .page-btn:hover:not(:disabled) {
-  border-color: #667eea;
-  color: #667eea;
+  background: #4318d1;
+  color: #fff;
 }
-
 .page-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
-
 .page-info {
-  font-weight: 500;
-  color: #666;
+  font-weight: 700;
+  color: #222;
+  font-size: 18px;
+  min-width: 60px;
+  text-align: center;
 }
 
 /* 모달 스타일 */
@@ -709,6 +718,7 @@ const goBack = () => {
   height: 48px;
   padding: 0;
   margin-bottom: 18px;
+  z-index: 1100;
 }
 .dictionary-header-title {
   position: absolute;
@@ -736,9 +746,32 @@ const goBack = () => {
   padding: 2px 8px 2px 2px;
   border-radius: 8px;
   transition: background 0.15s;
+  position: relative;
+  z-index: 1200;
 }
 .back-btn:hover {
   background: #f3f3f3;
+}
+
+.prev-btn,
+.next-btn {
+  display: inline-block;
+  font-size: 20px;
+  font-weight: 700;
+  color: #4318d1;
+  background: #fff;
+  border: 2px solid #4318d1;
+  border-radius: 8px;
+  padding: 10px 24px;
+  margin: 16px 8px 0 8px;
+  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.prev-btn:hover,
+.next-btn:hover {
+  background: #4318d1;
+  color: #fff;
 }
 
 /* 반응형 디자인 */

@@ -27,12 +27,12 @@ const route = useRoute();
 const hideHeaderNames = [
   'dictionary',
   'Notification',
-
+  'DiaryHome',
+  'Diary',
   'profile',
   'quiz-history',
   'withdraw',
   'avatar-shop',
-
   'ChallengeHome',
 ];
 const shouldHideHeader = computed(() => {
