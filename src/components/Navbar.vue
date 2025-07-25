@@ -58,7 +58,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: #8e74e3;
+  color: var(--color-main-light-2);
   font-size: 12px;
   text-decoration: none; /* 디자인 유지 위해 직접 지정 */
   font-weight: 500;
