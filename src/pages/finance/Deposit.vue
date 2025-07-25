@@ -106,8 +106,8 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductInputForm from '@/components/finance/ProductInputForm.vue';
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
-import depositRecomendData from '@/pages/finance/deposit_recomend.json';
-import depositAllData from '@/pages/finance/deposit_all.json';
+import depositRecomendData from '@/components/finance/deposit/deposit_recommend.json';
+import depositAllData from '@/components/finance/deposit/deposit_all.json';
 
 const router = useRouter();
 const showProducts = ref(false);
