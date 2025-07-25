@@ -3,7 +3,11 @@
     <!-- dictionary, notification 경로에서는 헤더 숨김 -->
     <HeaderBar v-if="shouldHideHeader" />
     <main
-      :class="['main-content', { 'finance-bg': route.name === 'FinanceHome' }]"
+      :class="[
+        'main-content',
+        { 'finance-center': route.name === 'FinanceHome' },
+        { 'finance-bg': route.name === 'FinanceHome' },
+      ]"
     >
       <router-view />
     </main>
@@ -46,6 +50,11 @@ const shouldHideHeader = computed(() => {
 .main-content {
   flex: 1 0 auto;
   padding-bottom: 80px; /* 하단 네비게이션 영역 확보 */
+}
+.finance-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .finance-bg {
   background: var(--color-bg-light);
