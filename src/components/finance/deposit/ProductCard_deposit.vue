@@ -31,15 +31,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useFavoriteStore } from '@/stores/favorite.js';
 
 const props = defineProps({
   product: Object,
 });
 
-const isFavorite = ref(false);
+const favoriteStore = useFavoriteStore();
+const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
 function toggleFavorite() {
-  isFavorite.value = !isFavorite.value;
+  if (isFavorite.value) {
+    favoriteStore.removeFavorite(props.product);
+  } else {
+    favoriteStore.addFavorite(props.product);
+  }
 }
 
 const bankLogoMap = {
