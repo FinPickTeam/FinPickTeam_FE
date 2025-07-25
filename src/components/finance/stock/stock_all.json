@@ -1,0 +1,226 @@
+{
+  "status": 200,
+  "message": "사용자 맞춤 주식 추천 성공",
+  "data": [
+    {
+      "stockCode": "035420",
+      "stockName": "네이버",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"226500\"},{\"dt\":\"20250723\",\"cur_prc\":\"231500\"},{\"dt\":\"20250722\",\"cur_prc\":\"235000\"},{\"dt\":\"20250721\",\"cur_prc\":\"240000\"},{\"dt\":\"20250718\",\"cur_prc\":\"242000\"}]",
+      "stockPrice": "+234000",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+7000",
+      "stockChangeRate": "+3.08",
+      "stockSummary": "국내 포털  ",
+      "stockGptReason": "네이버는 인터넷 서비스에서 강자죠. 최근 플랫폼 확장으로 주목받고 있어요!"
+    },
+    {
+      "stockCode": "068270",
+      "stockName": "셀트리온",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"180400\"},{\"dt\":\"20250723\",\"cur_prc\":\"179800\"},{\"dt\":\"20250722\",\"cur_prc\":\"180900\"},{\"dt\":\"20250721\",\"cur_prc\":\"181200\"},{\"dt\":\"20250718\",\"cur_prc\":\"180300\"}]",
+      "stockPrice": "-177400",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "-3000",
+      "stockChangeRate": "-1.66",
+      "stockSummary": "바이오시밀러  ",
+      "stockGptReason": "셀트리온, 바이오 의약품 분야에서 글로벌 시장 진출로 성장 가능성이 커요!"
+    },
+    {
+      "stockCode": "000660",
+      "stockName": "SK하이닉스",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"269500\"},{\"dt\":\"20250723\",\"cur_prc\":\"269000\"},{\"dt\":\"20250722\",\"cur_prc\":\"268500\"},{\"dt\":\"20250721\",\"cur_prc\":\"272500\"},{\"dt\":\"20250718\",\"cur_prc\":\"269000\"}]",
+      "stockPrice": "-268750",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "-750",
+      "stockChangeRate": "-0.28",
+      "stockSummary": "메모리반도체  ",
+      "stockGptReason": "SK하이닉스, 반도체 업계에서 삼성전자 다음 가는 큰 회사죠. 요즘 기술 개발도 활발하대요!"
+    },
+    {
+      "stockCode": "005930",
+      "stockName": "삼성전자",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"66000\"},{\"dt\":\"20250723\",\"cur_prc\":\"66400\"},{\"dt\":\"20250722\",\"cur_prc\":\"66000\"},{\"dt\":\"20250721\",\"cur_prc\":\"67800\"},{\"dt\":\"20250718\",\"cur_prc\":\"67100\"}]",
+      "stockPrice": "+66100",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+100",
+      "stockChangeRate": "+0.15",
+      "stockSummary": "반도체 1위  ",
+      "stockGptReason": "삼성전자는 언제나 믿고 갈 수 있는 안정적인 선택이죠. 반도체 시장의 큰 손이에요!"
+    },
+    {
+      "stockCode": "051910",
+      "stockName": "LG화학",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"304500\"},{\"dt\":\"20250723\",\"cur_prc\":\"291000\"},{\"dt\":\"20250722\",\"cur_prc\":\"289000\"},{\"dt\":\"20250721\",\"cur_prc\":\"287000\"},{\"dt\":\"20250718\",\"cur_prc\":\"272500\"}]",
+      "stockPrice": "+307500",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+2500",
+      "stockChangeRate": "+0.82",
+      "stockSummary": "2차전지 화학  ",
+      "stockGptReason": "LG화학, 배터리 시장의 선두주자로 전기차 시대에 맞춰 주목받고 있어요!"
+    },
+    {
+      "stockCode": "035420",
+      "stockName": "네이버",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"226500\"},{\"dt\":\"20250723\",\"cur_prc\":\"231500\"},{\"dt\":\"20250722\",\"cur_prc\":\"235000\"},{\"dt\":\"20250721\",\"cur_prc\":\"240000\"},{\"dt\":\"20250718\",\"cur_prc\":\"242000\"}]",
+      "stockPrice": "+234000",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+7000",
+      "stockChangeRate": "+3.08",
+      "stockSummary": "국내 포털  ",
+      "stockGptReason": "네이버는 인터넷 서비스에서 강자죠. 최근 플랫폼 확장으로 주목받고 있어요!"
+    },
+    {
+      "stockCode": "068270",
+      "stockName": "셀트리온",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"180400\"},{\"dt\":\"20250723\",\"cur_prc\":\"179800\"},{\"dt\":\"20250722\",\"cur_prc\":\"180900\"},{\"dt\":\"20250721\",\"cur_prc\":\"181200\"},{\"dt\":\"20250718\",\"cur_prc\":\"180300\"}]",
+      "stockPrice": "-177400",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "-3000",
+      "stockChangeRate": "-1.66",
+      "stockSummary": "바이오시밀러  ",
+      "stockGptReason": "셀트리온, 바이오 의약품 분야에서 글로벌 시장 진출로 성장 가능성이 커요!"
+    },
+    {
+      "stockCode": "000660",
+      "stockName": "SK하이닉스",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"269500\"},{\"dt\":\"20250723\",\"cur_prc\":\"269000\"},{\"dt\":\"20250722\",\"cur_prc\":\"268500\"},{\"dt\":\"20250721\",\"cur_prc\":\"272500\"},{\"dt\":\"20250718\",\"cur_prc\":\"269000\"}]",
+      "stockPrice": "-268750",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "-750",
+      "stockChangeRate": "-0.28",
+      "stockSummary": "메모리반도체  ",
+      "stockGptReason": "SK하이닉스, 반도체 업계에서 삼성전자 다음 가는 큰 회사죠. 요즘 기술 개발도 활발하대요!"
+    },
+    {
+      "stockCode": "005930",
+      "stockName": "삼성전자",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"66000\"},{\"dt\":\"20250723\",\"cur_prc\":\"66400\"},{\"dt\":\"20250722\",\"cur_prc\":\"66000\"},{\"dt\":\"20250721\",\"cur_prc\":\"67800\"},{\"dt\":\"20250718\",\"cur_prc\":\"67100\"}]",
+      "stockPrice": "+66100",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+100",
+      "stockChangeRate": "+0.15",
+      "stockSummary": "반도체 1위  ",
+      "stockGptReason": "삼성전자는 언제나 믿고 갈 수 있는 안정적인 선택이죠. 반도체 시장의 큰 손이에요!"
+    },
+    {
+      "stockCode": "051910",
+      "stockName": "LG화학",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"304500\"},{\"dt\":\"20250723\",\"cur_prc\":\"291000\"},{\"dt\":\"20250722\",\"cur_prc\":\"289000\"},{\"dt\":\"20250721\",\"cur_prc\":\"287000\"},{\"dt\":\"20250718\",\"cur_prc\":\"272500\"}]",
+      "stockPrice": "+307500",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+2500",
+      "stockChangeRate": "+0.82",
+      "stockSummary": "2차전지 화학  ",
+      "stockGptReason": "LG화학, 배터리 시장의 선두주자로 전기차 시대에 맞춰 주목받고 있어요!"
+    },
+    {
+      "stockCode": "035420",
+      "stockName": "네이버",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"226500\"},{\"dt\":\"20250723\",\"cur_prc\":\"231500\"},{\"dt\":\"20250722\",\"cur_prc\":\"235000\"},{\"dt\":\"20250721\",\"cur_prc\":\"240000\"},{\"dt\":\"20250718\",\"cur_prc\":\"242000\"}]",
+      "stockPrice": "+234000",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+7000",
+      "stockChangeRate": "+3.08",
+      "stockSummary": "국내 포털  ",
+      "stockGptReason": "네이버는 인터넷 서비스에서 강자죠. 최근 플랫폼 확장으로 주목받고 있어요!"
+    },
+    {
+      "stockCode": "068270",
+      "stockName": "셀트리온",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"180400\"},{\"dt\":\"20250723\",\"cur_prc\":\"179800\"},{\"dt\":\"20250722\",\"cur_prc\":\"180900\"},{\"dt\":\"20250721\",\"cur_prc\":\"181200\"},{\"dt\":\"20250718\",\"cur_prc\":\"180300\"}]",
+      "stockPrice": "-177400",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "-3000",
+      "stockChangeRate": "-1.66",
+      "stockSummary": "바이오시밀러  ",
+      "stockGptReason": "셀트리온, 바이오 의약품 분야에서 글로벌 시장 진출로 성장 가능성이 커요!"
+    },
+    {
+      "stockCode": "000660",
+      "stockName": "SK하이닉스",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"269500\"},{\"dt\":\"20250723\",\"cur_prc\":\"269000\"},{\"dt\":\"20250722\",\"cur_prc\":\"268500\"},{\"dt\":\"20250721\",\"cur_prc\":\"272500\"},{\"dt\":\"20250718\",\"cur_prc\":\"269000\"}]",
+      "stockPrice": "-268750",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "-750",
+      "stockChangeRate": "-0.28",
+      "stockSummary": "메모리반도체  ",
+      "stockGptReason": "SK하이닉스, 반도체 업계에서 삼성전자 다음 가는 큰 회사죠. 요즘 기술 개발도 활발하대요!"
+    },
+    {
+      "stockCode": "005930",
+      "stockName": "삼성전자",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"66000\"},{\"dt\":\"20250723\",\"cur_prc\":\"66400\"},{\"dt\":\"20250722\",\"cur_prc\":\"66000\"},{\"dt\":\"20250721\",\"cur_prc\":\"67800\"},{\"dt\":\"20250718\",\"cur_prc\":\"67100\"}]",
+      "stockPrice": "+66100",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+100",
+      "stockChangeRate": "+0.15",
+      "stockSummary": "반도체 1위  ",
+      "stockGptReason": "삼성전자는 언제나 믿고 갈 수 있는 안정적인 선택이죠. 반도체 시장의 큰 손이에요!"
+    },
+    {
+      "stockCode": "051910",
+      "stockName": "LG화학",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"304500\"},{\"dt\":\"20250723\",\"cur_prc\":\"291000\"},{\"dt\":\"20250722\",\"cur_prc\":\"289000\"},{\"dt\":\"20250721\",\"cur_prc\":\"287000\"},{\"dt\":\"20250718\",\"cur_prc\":\"272500\"}]",
+      "stockPrice": "+307500",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+2500",
+      "stockChangeRate": "+0.82",
+      "stockSummary": "2차전지 화학  ",
+      "stockGptReason": "LG화학, 배터리 시장의 선두주자로 전기차 시대에 맞춰 주목받고 있어요!"
+    },
+    {
+      "stockCode": "035420",
+      "stockName": "네이버",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"226500\"},{\"dt\":\"20250723\",\"cur_prc\":\"231500\"},{\"dt\":\"20250722\",\"cur_prc\":\"235000\"},{\"dt\":\"20250721\",\"cur_prc\":\"240000\"},{\"dt\":\"20250718\",\"cur_prc\":\"242000\"}]",
+      "stockPrice": "+234000",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+7000",
+      "stockChangeRate": "+3.08",
+      "stockSummary": "국내 포털  ",
+      "stockGptReason": "네이버는 인터넷 서비스에서 강자죠. 최근 플랫폼 확장으로 주목받고 있어요!"
+    },
+    {
+      "stockCode": "068270",
+      "stockName": "셀트리온",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"180400\"},{\"dt\":\"20250723\",\"cur_prc\":\"179800\"},{\"dt\":\"20250722\",\"cur_prc\":\"180900\"},{\"dt\":\"20250721\",\"cur_prc\":\"181200\"},{\"dt\":\"20250718\",\"cur_prc\":\"180300\"}]",
+      "stockPrice": "-177400",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "-3000",
+      "stockChangeRate": "-1.66",
+      "stockSummary": "바이오시밀러  ",
+      "stockGptReason": "셀트리온, 바이오 의약품 분야에서 글로벌 시장 진출로 성장 가능성이 커요!"
+    },
+    {
+      "stockCode": "000660",
+      "stockName": "SK하이닉스",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"269500\"},{\"dt\":\"20250723\",\"cur_prc\":\"269000\"},{\"dt\":\"20250722\",\"cur_prc\":\"268500\"},{\"dt\":\"20250721\",\"cur_prc\":\"272500\"},{\"dt\":\"20250718\",\"cur_prc\":\"269000\"}]",
+      "stockPrice": "-268750",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "-750",
+      "stockChangeRate": "-0.28",
+      "stockSummary": "메모리반도체  ",
+      "stockGptReason": "SK하이닉스, 반도체 업계에서 삼성전자 다음 가는 큰 회사죠. 요즘 기술 개발도 활발하대요!"
+    },
+    {
+      "stockCode": "005930",
+      "stockName": "삼성전자",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"66000\"},{\"dt\":\"20250723\",\"cur_prc\":\"66400\"},{\"dt\":\"20250722\",\"cur_prc\":\"66000\"},{\"dt\":\"20250721\",\"cur_prc\":\"67800\"},{\"dt\":\"20250718\",\"cur_prc\":\"67100\"}]",
+      "stockPrice": "+66100",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+100",
+      "stockChangeRate": "+0.15",
+      "stockSummary": "반도체 1위  ",
+      "stockGptReason": "삼성전자는 언제나 믿고 갈 수 있는 안정적인 선택이죠. 반도체 시장의 큰 손이에요!"
+    },
+    {
+      "stockCode": "051910",
+      "stockName": "LG화학",
+      "stockChartData": "[{\"dt\":\"20250724\",\"cur_prc\":\"304500\"},{\"dt\":\"20250723\",\"cur_prc\":\"291000\"},{\"dt\":\"20250722\",\"cur_prc\":\"289000\"},{\"dt\":\"20250721\",\"cur_prc\":\"287000\"},{\"dt\":\"20250718\",\"cur_prc\":\"272500\"}]",
+      "stockPrice": "+307500",
+      "stockMarketType": "KOSPI",
+      "stockPredictedPrice": "+2500",
+      "stockChangeRate": "+0.82",
+      "stockSummary": "2차전지 화학  ",
+      "stockGptReason": "LG화학, 배터리 시장의 선두주자로 전기차 시대에 맞춰 주목받고 있어요!"
+    }
+  ]
+}
