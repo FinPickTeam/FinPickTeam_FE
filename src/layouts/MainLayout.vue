@@ -21,7 +21,8 @@ const route = useRoute();
 const hideHeaderNames = [
   "dictionary",
   "Notification",
-
+  "DiaryHome",
+  "Diary",
   "profile",
   "quiz-history",
   "withdraw",
