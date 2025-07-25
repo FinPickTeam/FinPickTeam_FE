@@ -1,22 +1,18 @@
 <template>
   <div class="product-card-list">
-    <ProductCardDeposit
+    <ProductCard_stock
       v-for="(product, index) in products"
-      :key="index"
+      :key="product.stockCode || index"
       :product="product"
     />
   </div>
 </template>
 
 <script setup>
-import ProductCardDeposit from '@/components/finance/deposit/ProductCard_deposit.vue';
+import ProductCard_stock from './ProductCard_stock.vue';
+import stockRecommendData from '@/components/finance/stock/stock_recommend.json';
 
-const props = defineProps({
-  products: {
-    type: Array,
-    required: true,
-  },
-});
+const products = stockRecommendData.data;
 </script>
 
 <style scoped>

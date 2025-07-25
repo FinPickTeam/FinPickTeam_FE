@@ -82,7 +82,7 @@ const getLogoUrl = (bankName) => {
 <style scoped>
 .product-card {
   position: relative;
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 16px;
   box-shadow: 0 2px 8px 0 #0002;
   padding: 8px 20px 10px 54px;
@@ -138,7 +138,7 @@ const getLogoUrl = (bankName) => {
 }
 .product-summary {
   font-size: var(--font-size-body);
-  color: #888;
+  color: var(--color-text-light);
   margin-bottom: 2px;
   white-space: nowrap;
   overflow: hidden;
