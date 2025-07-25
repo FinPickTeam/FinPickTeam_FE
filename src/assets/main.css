@@ -8,6 +8,7 @@
   /* Primary Colors */
   --color-main: #4318d1;
   --color-main-light: #8e74e3;
+  --color-main-light-2: #a99afe; /* 네비바 아이콘 색상 */
   --color-main-dark: #6c4cf1;
 
   /* Background Colors */
@@ -27,6 +28,7 @@
   --color-accent: #e11d48;
   --color-warning: #ffe082;
   --color-success: #22c55e;
+  --color-accent-2: #0890fe;
   --color-accent-light: #fff6f6;
   --color-success-light: #f0fdf4;
 
@@ -70,12 +72,13 @@ h3 {
 }
 
 .logo {
+  font-family: 'Black Han Sans', var(--font-main);
   font-size: 40px;
   font-weight: 900;
   letter-spacing: 1px;
   background: linear-gradient(
     90deg,
-    var(--color-main) 0%,
+    var(--color-main) 100%,
     var(--color-main-light) 100%
   );
   -webkit-background-clip: text;

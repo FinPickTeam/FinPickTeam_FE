@@ -1,18 +1,13 @@
-<!-- 상품 카드 컴포넌트 -->
 <template>
-  <div class="product-card">
-    <!-- 은행 로고 -->
-    <div class="bank-logo">
-      <img
-        :src="getLogoUrl(product.depositBankName)"
-        :alt="`${product.depositBankName} 로고`"
-        class="logo-img"
-      />
+  <div class="stock-card">
+    <div class="stock-chart">
+      <!-- 차트 이미지 또는 캔버스/차트 컴포넌트 삽입 -->
+      <img :src="chartImgUrl" alt="차트" />
     </div>
-    <!-- 텍스트 정보 -->
-    <div class="card-main">
-      <div class="card-title-row">
-        <span class="product-title">{{ product.depositProductName }}</span>
+    <div class="stock-info">
+      <div class="stock-header">
+        <span class="stock-name">{{ product.stockName }}</span>
+        <span class="stock-code">{{ product.stockCode }}</span>
         <span
           class="heart"
           :class="{ active: isFavorite }"
@@ -20,151 +15,147 @@
           >♥</span
         >
       </div>
-      <div class="product-summary">{{ product.depositSummary }}</div>
-      <div class="product-info-row">12개월 기준</div>
-      <div class="rate-row">
-        <span class="max-rate">최고 연 {{ product.depositMaxRate }}%</span>
-        <span class="basic-rate">기본 연 {{ product.depositBasicRate }}%</span>
+      <div class="stock-main">
+        <span class="stock-price">{{ displayPrice }}</span>
+        <span class="stock-summary">{{ product.stockSummary }}</span>
+      </div>
+      <div class="stock-footer">
+        <span class="stock-change" :class="{ up: isUp, down: isDown }">
+          <span class="stock-change-label">전일대비</span>
+          <span class="stock-change-gap">{{ displayChange }}</span>
+          <span class="stock-rate">{{ displayRate }}</span>
+        </span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useFavoriteStore } from '@/stores/favorite.js';
 
-const props = defineProps({
-  product: Object,
-});
-
+const props = defineProps({ product: Object });
 const favoriteStore = useFavoriteStore();
 const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
 function toggleFavorite() {
-  if (isFavorite.value) {
-    favoriteStore.removeFavorite(props.product);
-  } else {
-    favoriteStore.addFavorite(props.product);
-  }
+  if (isFavorite.value) favoriteStore.removeFavorite(props.product);
+  else favoriteStore.addFavorite(props.product);
 }
 
-const bankLogoMap = {
-  국민은행: 'KB국민은행.png',
-  농협은행: 'NH농협은행.png',
-  IBK기업은행: 'IBK기업은행.png',
-  한국산업은행: 'KDB산업은행.png',
-  SC제일은행: 'SC제일은행.png',
-  수협은행: '수협은행.png',
-  우리은행: '우리은행.png',
-  하나은행: '하나은행.png',
-  카카오뱅크: '카카오뱅크.png',
-  케이뱅크: '케이뱅크.png',
-  토스뱅크: '토스뱅크.png',
-  IM뱅크: 'iM뱅크.png',
-  광주은행: '광주은행, 전북은행.png',
-  전북은행: '광주은행, 전북은행.png',
-  신한은행: '신한은행, 제주은행.png',
-  제주은행: '신한은행, 제주은행.png',
-  경남은행: '경남은행, 부산은행.png',
-  부산은행: '경남은행, 부산은행.png',
-};
+// 예시: 차트 이미지 URL (실제 차트라면 차트 컴포넌트로 대체)
+const chartImgUrl = '/path/to/chart.png';
 
-const getLogoUrl = (bankName) => {
-  const fileName = bankLogoMap[bankName];
-  if (!fileName) {
-    return new URL('../../../assets/bank_logo/KB국민은행.png', import.meta.url)
-      .href;
+// 가격, 등락률 등 표시 포맷
+const displayPrice = computed(() =>
+  Number(props.product.stockPrice.replace(/[+-]/, '')).toLocaleString()
+);
+const isUp = computed(() => props.product.stockPrice.startsWith('+'));
+const isDown = computed(() => props.product.stockPrice.startsWith('-'));
+const displayChange = computed(
+  () =>
+    (props.product.stockPredictedPrice.startsWith('+') ? '▲' : '▼') +
+    ' ' +
+    props.product.stockPredictedPrice.replace(/[+-]/, '')
+);
+const displayRate = computed(() => {
+  const rate = String(props.product.stockChangeRate);
+  if (rate.startsWith('+') || rate.startsWith('-')) {
+    return rate + '%';
+  } else {
+    return '+' + rate + '%';
   }
-  return new URL(`../../../assets/bank_logo/${fileName}`, import.meta.url).href;
-};
+});
 </script>
 
 <style scoped>
-.product-card {
-  position: relative;
-  background: #fff;
+.stock-card {
+  display: flex;
+  align-items: center;
+  background: var(--color-bg);
   border-radius: 16px;
   box-shadow: 0 2px 8px 0 #0002;
-  padding: 8px 20px 10px 54px;
+  padding: 10px 18px;
   width: 350px;
   font-family: var(--font-main);
   margin-bottom: 10px;
+  position: relative;
 }
-.bank-logo {
-  position: absolute;
-  left: 10px;
-  top: 14px;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+.stock-chart {
+  width: 80px;
+  height: 60px;
+  margin-right: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
-.logo-img {
-  width: 36px;
-  height: 36px;
-  object-fit: cover;
-  border-radius: 50%;
+.stock-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
-.card-main {
-  min-width: 0;
-}
-.card-title-row {
+.stock-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: -4px;
+  gap: 6px;
 }
-.product-title {
-  font-size: var(--font-size-title-sub);
+.stock-name {
   font-weight: var(--font-weight-bold);
+  font-size: var(--font-size-title-sub);
   color: var(--color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 220px;
+}
+.stock-code,
+.stock-market {
+  color: #aaa;
+  font-size: var(--font-size-body);
 }
 .heart {
+  margin-left: auto;
   color: var(--color-bg-accent);
-  font-size: 26px;
+  font-size: 22px;
   cursor: pointer;
-  margin-left: 8px;
   user-select: none;
   transition: color 0.2s;
 }
 .heart.active {
   color: #e11d48;
 }
-.product-summary {
-  font-size: var(--font-size-body);
-  color: #888;
-  margin-bottom: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
-}
-.product-info-row {
-  font-size: var(--font-size-body);
-  color: #8e74e3;
-  margin-bottom: 2px;
-  margin-top: 2px;
-}
-.rate-row {
+.stock-main {
   display: flex;
-  gap: 16px;
   align-items: baseline;
+  gap: 10px;
+}
+.stock-price {
+  font-size: 28px;
+  font-weight: bold;
+  color: #e11d48;
+}
+.stock-summary {
+  margin-left: auto;
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+}
+.stock-footer {
+  font-size: var(--font-size-body-large);
+  color: var(--color-text-light);
   margin-top: 2px;
 }
-.max-rate {
-  color: var(--color-main-light);
-  font-size: var(--font-size-body-large);
+.stock-change.up {
+  color: var(--color-accent);
   font-weight: var(--font-weight-bold);
 }
-.basic-rate {
-  color: var(--color-main-light);
-  font-size: var(--font-size-body-large);
+.stock-change.down {
+  color: var(--color-accent-2);
+  font-weight: var(--font-weight-bold);
+}
+.stock-change-label {
+  color: var(--color-text);
   font-weight: var(--font-weight-medium);
+}
+.stock-rate {
+  margin-left: 6px;
+}
+.stock-change-gap {
+  margin-left: 6px;
 }
 </style>
