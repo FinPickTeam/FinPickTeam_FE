@@ -10,29 +10,22 @@
         <font-awesome-icon :icon="['fas', 'trash']" class="header-icon" />
       </div>
     </div>
-    <div class="challenge-box">
+    <div class="top-box">
       <div class="greeting">
         안녕하세요, <span class="username">사용자님!</span>
       </div>
       <div class="stats-card">
         <div class="stat-item">
-          <div class="stat-value">10</div>
-          <div class="stat-label">회</div>
+          <div class="stat-value">10 회</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value">8</div>
-          <div class="stat-label">회</div>
+          <div class="stat-value">8 회</div>
         </div>
         <div class="stat-item">
-          <div class="stat-value">80</div>
-          <div class="stat-label">%</div>
+          <div class="stat-value">80 %</div>
         </div>
       </div>
-      <div class="carousel-dots">
-        <span class="dot active"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-      </div>
+      <!-- carousel-dots 삭제 -->
     </div>
     <div class="section">
       <div class="section-title">
@@ -88,6 +81,7 @@ library.add(faAngleLeft, faPen, faTrash, faCalendarAlt, faSearch, faFire);
 .challenge-container {
   width: 390px;
   min-height: 844px;
+  max-width: 390px;
   background: #f7f8fa;
   margin: 0 auto;
   font-family: var(--font-main);
@@ -183,31 +177,12 @@ library.add(faAngleLeft, faPen, faTrash, faCalendarAlt, faSearch, faFire);
   color: #222;
   margin-bottom: 2px;
 }
-.stat-label {
-  color: #888;
-  font-size: var(--font-size-body);
-}
-.carousel-dots {
-  display: flex;
-  gap: 6px;
-  margin-top: 4px;
-  justify-content: center;
-}
-.dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #fff;
-  opacity: 0.4;
-}
-.dot.active {
-  opacity: 1;
-  background: #fff;
-  border: 2px solid var(--color-main);
-}
+/* carousel-dots 관련 CSS 전체 삭제 */
 .section {
   margin: 18px 0 0 0;
-  padding: 0 18px;
+  padding: 0;
+  max-width: 390px;
+  box-sizing: border-box;
 }
 .section-title {
   font-size: 1.1rem;
@@ -229,6 +204,8 @@ library.add(faAngleLeft, faPen, faTrash, faCalendarAlt, faSearch, faFire);
   display: flex;
   gap: 12px;
   margin-bottom: 8px;
+  max-width: 390px;
+  box-sizing: border-box;
 }
 .group-card {
   background: #fff;
@@ -262,9 +239,11 @@ library.add(faAngleLeft, faPen, faTrash, faCalendarAlt, faSearch, faFire);
   display: flex;
   gap: 12px;
   margin-bottom: 8px;
+  max-width: 390px;
+  box-sizing: border-box;
 }
 .hot-card {
-  background: #e7e0fa;
+  background: var(--color-main-light);
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(67, 24, 209, 0.08);
   padding: 18px 14px 14px 14px;
@@ -286,18 +265,18 @@ library.add(faAngleLeft, faPen, faTrash, faCalendarAlt, faSearch, faFire);
 }
 .hot-title {
   font-weight: bold;
-  color: #222;
+  color: #fff;
   margin-top: 18px;
   margin-bottom: 6px;
   text-align: center;
 }
 .hot-date {
-  color: #888;
+  color: #fff;
   font-size: 0.92rem;
   margin-bottom: 4px;
 }
 .hot-progress {
-  color: #4318d1;
+  color: #fff;
   font-size: 0.95rem;
   font-weight: 600;
   margin-bottom: 8px;
@@ -316,5 +295,16 @@ library.add(faAngleLeft, faPen, faTrash, faCalendarAlt, faSearch, faFire);
 }
 .hot-btn:hover {
   background: #6c4cf1;
+}
+.top-box {
+  background: linear-gradient(
+    135deg,
+    var(--color-main-light) 0%,
+    var(--color-main) 100%
+  );
+  padding: 0 0 32px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 </style>
