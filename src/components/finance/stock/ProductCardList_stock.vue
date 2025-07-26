@@ -10,9 +10,13 @@
 
 <script setup>
 import ProductCard_stock from './ProductCard_stock.vue';
-import stockRecommendData from '@/components/finance/stock/stock_recommend.json';
 
-const products = stockRecommendData.data;
+const props = defineProps({
+  products: {
+    type: Array,
+    default: () => [],
+  },
+});
 </script>
 
 <style scoped>

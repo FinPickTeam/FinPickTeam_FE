@@ -35,7 +35,7 @@
 
       <!-- 주식 상품 리스트 -->
       <div v-if="showProducts" class="products-container">
-        <ProductCardList_stock />
+        <ProductCardList_stock :products="stockRecommendData.data" />
       </div>
     </div>
 
@@ -95,6 +95,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductCardList_stock from '@/components/finance/stock/ProductCardList_stock.vue';
 import stockAllData from '@/components/finance/stock/stock_all.json';
+import stockRecommendData from '@/components/finance/stock/stock_recommend.json';
 
 const router = useRouter();
 const showProducts = ref(false);
@@ -123,6 +124,19 @@ const sortOption = ref('name');
 // 전체보기 필터링된 데이터
 const filteredAllProducts = computed(() => {
   let result = stockAllData.data;
+
+  // 중복 제거 (stockCode 기준)
+  const uniqueStocks = [];
+  const seenCodes = new Set();
+
+  for (const stock of result) {
+    if (!seenCodes.has(stock.stockCode)) {
+      seenCodes.add(stock.stockCode);
+      uniqueStocks.push(stock);
+    }
+  }
+
+  result = uniqueStocks;
 
   // 🔍 키워드 검색
   if (searchKeyword.value) {

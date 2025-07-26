@@ -37,9 +37,13 @@ import { useFavoriteStore } from '@/stores/favorite.js';
 const props = defineProps({ product: Object });
 const favoriteStore = useFavoriteStore();
 const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
+
 function toggleFavorite() {
-  if (isFavorite.value) favoriteStore.removeFavorite(props.product);
-  else favoriteStore.addFavorite(props.product);
+  if (isFavorite.value) {
+    favoriteStore.removeFavorite(props.product);
+  } else {
+    favoriteStore.addFavorite(props.product);
+  }
 }
 
 // 예시: 차트 이미지 URL (실제 차트라면 차트 컴포넌트로 대체)
