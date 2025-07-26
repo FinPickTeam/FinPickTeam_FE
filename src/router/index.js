@@ -140,14 +140,6 @@ const router = createRouter({
         { path: 'quiz', name: 'Quiz', component: Quiz },
         // 재테크
         { path: 'finance', name: 'FinanceHome', component: FinanceHome },
-        { path: 'finance/deposit', name: 'Deposit', component: Deposit },
-        {
-          path: 'finance/installment',
-          name: 'Installment',
-          component: Installment,
-        },
-        { path: 'finance/fund', name: 'Fund', component: Fund },
-        { path: 'finance/stock', name: 'Stock', component: Stock },
         // 내 자산
         {
           path: 'openbanking',
@@ -177,7 +169,6 @@ const router = createRouter({
         {
           path: 'openbanking/ars-agreement',
           name: 'ObArsAgreement',
-          component: () => import('../pages/openbanking/ObArsAgreement.vue'),
         },
         // 챌린지
         { path: 'challenge', name: 'ChallengeHome', component: ChallengeHome },

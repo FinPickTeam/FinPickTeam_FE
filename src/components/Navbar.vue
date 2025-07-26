@@ -1,22 +1,43 @@
 <template>
   <nav class="bottom-nav">
-    <RouterLink to="/challenge" class="nav-item">
+    <RouterLink
+      to="/challenge"
+      class="nav-item"
+      :class="{ 'router-link-active': isActive('/challenge') }"
+    >
       <i class="fa-solid fa-trophy"></i>
       <span>챌린지</span>
     </RouterLink>
-    <RouterLink to="/openbanking" class="nav-item">
+    <RouterLink
+      to="/openbanking"
+      class="nav-item"
+      :class="{ 'router-link-active': isActive('/openbanking') }"
+    >
       <i class="fas fa-wallet"></i>
       <span>내 자산</span>
     </RouterLink>
-    <RouterLink to="/" class="nav-item">
+    <RouterLink
+      to="/"
+      class="nav-item"
+      active-class=""
+      :class="{ 'home-active': isHomeActive }"
+    >
       <i class="fas fa-home"></i>
       <span>홈</span>
     </RouterLink>
-    <RouterLink to="/finance" class="nav-item">
+    <RouterLink
+      to="/finance"
+      class="nav-item"
+      :class="{ 'router-link-active': isActive('/finance') }"
+    >
       <i class="fas fa-chart-line"></i>
       <span>재테크</span>
     </RouterLink>
-    <RouterLink to="/mypage" class="nav-item">
+    <RouterLink
+      to="/mypage"
+      class="nav-item"
+      :class="{ 'router-link-active': isActive('/mypage') }"
+    >
       <i class="fas fa-user"></i>
       <span>내 페이지</span>
     </RouterLink>
@@ -24,7 +45,19 @@
 </template>
 
 <script setup>
-// 특별한 로직 없음
+import { useRoute } from 'vue-router';
+import { computed } from 'vue';
+
+const route = useRoute();
+
+const isActive = (path) => {
+  return route.path.startsWith(path);
+};
+
+const isHomeActive = computed(() => {
+  // 정확히 홈 경로일 때만 true 반환
+  return route.path === '/' || route.path === '';
+});
 </script>
 
 <style scoped>
@@ -69,7 +102,8 @@
   margin-bottom: 2px;
 }
 .nav-item.router-link-exact-active,
-.nav-item.router-link-active {
+.nav-item.router-link-active,
+.nav-item.home-active {
   color: #4318d1;
 }
 </style>
