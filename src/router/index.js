@@ -42,6 +42,7 @@ import ProductCard_stock from '../components/finance/stock/ProductCard_stock.vue
 import ProductCardList_stock from '../components/finance/stock/ProductCardList_stock.vue';
 import ProductCard_fund from '../components/finance/fund/ProductCard_fund.vue';
 import ProductCardList_fund from '../components/finance/fund/ProductCardList_fund.vue';
+import ProductInputForm_installment from '../components/finance/installment/ProductInputForm_installment.vue';
 
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
@@ -87,6 +88,11 @@ const router = createRouter({
       path: '/finance/product-card-fund',
       name: 'ProductCardFund',
       component: ProductCard_fund,
+    },
+    {
+      path: '/finance/product-input-form-installment',
+      name: 'ProductInputFormInstallment',
+      component: ProductInputForm_installment,
     },
 
     // 로그인, 회원가입, ARS 등은 레이아웃 없이 단독 페이지로 유지
