@@ -8,7 +8,13 @@
         </div>
         <div class="product-title">{{ fund.name }}</div>
       </div>
-      <div class="heart-icon">♥</div>
+      <div
+        class="heart-icon"
+        :class="{ active: isFavorite }"
+        @click="toggleFavorite"
+      >
+        ♥
+      </div>
     </div>
 
     <!-- 제품 카테고리 -->
@@ -30,11 +36,28 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useFavoriteStore } from '@/stores/favorite.js';
 import kbLogo from '../../../assets/fund_logo/KB 자산운용.png';
 
 const props = defineProps({
   fund: Object,
 });
+
+const favoriteStore = useFavoriteStore();
+const isFavorite = computed(() => favoriteStore.isFavorite(props.fund));
+
+function toggleFavorite() {
+  console.log('Toggle favorite clicked for fund:', props.fund);
+  console.log('Current isFavorite state:', isFavorite.value);
+
+  if (isFavorite.value) {
+    console.log('Removing fund from favorites');
+    favoriteStore.removeFavorite(props.fund);
+  } else {
+    console.log('Adding fund to favorites');
+    favoriteStore.addFavorite(props.fund);
+  }
+}
 
 const typeClassMap = {
   주식형: 'type-stock',
@@ -112,6 +135,10 @@ const riskClass = computed(() => riskClassMap[props.fund?.risk] || '');
   margin-left: 8px;
   user-select: none;
   transition: color 0.2s;
+}
+
+.heart-icon.active {
+  color: #e11d48;
 }
 
 .product-category {

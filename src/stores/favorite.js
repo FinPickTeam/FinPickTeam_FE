@@ -27,6 +27,23 @@ export const useFavoriteStore = defineStore('favorite', () => {
         favorites.value.push(product);
       }
     }
+    // 펀드 상품인 경우
+    else if (product.name && product.type) {
+      console.log('Adding fund to favorites:', product.name, product.type);
+      if (
+        !favorites.value.find(
+          (p) => p.name === product.name && p.type === product.type
+        )
+      ) {
+        favorites.value.push(product);
+        console.log(
+          'Fund added to favorites. Current favorites:',
+          favorites.value
+        );
+      } else {
+        console.log('Fund already in favorites');
+      }
+    }
   }
 
   function removeFavorite(product) {
@@ -44,6 +61,12 @@ export const useFavoriteStore = defineStore('favorite', () => {
             p.stockName === product.stockName &&
             p.stockCode === product.stockCode
           )
+      );
+    }
+    // 펀드 상품인 경우
+    else if (product.name && product.type) {
+      favorites.value = favorites.value.filter(
+        (p) => !(p.name === product.name && p.type === product.type)
       );
     }
   }
@@ -66,6 +89,16 @@ export const useFavoriteStore = defineStore('favorite', () => {
       const result = favorites.value.some(
         (p) =>
           p.stockName === product.stockName && p.stockCode === product.stockCode
+      );
+      console.log('Is favorite:', result);
+      return result;
+    }
+    // 펀드 상품인 경우
+    else if (product.name && product.type) {
+      console.log('Checking favorite for fund:', product.name, product.type);
+      console.log('Current favorites:', favorites.value);
+      const result = favorites.value.some(
+        (p) => p.name === product.name && p.type === product.type
       );
       console.log('Is favorite:', result);
       return result;

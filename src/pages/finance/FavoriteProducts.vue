@@ -15,9 +15,19 @@
         <ProductCardList_stock :products="stockFavorites" />
       </div>
 
+      <!-- 펀드 상품 -->
+      <div v-if="fundFavorites.length > 0">
+        <h2>펀드 상품</h2>
+        <ProductCardList_fund :funds="fundFavorites" />
+      </div>
+
       <!-- 찜한 상품이 없을 때 -->
       <div
-        v-if="depositFavorites.length === 0 && stockFavorites.length === 0"
+        v-if="
+          depositFavorites.length === 0 &&
+          stockFavorites.length === 0 &&
+          fundFavorites.length === 0
+        "
         class="no-favorites"
       >
         <p>찜한 상품이 없습니다.</p>
@@ -31,6 +41,7 @@ import { computed } from 'vue';
 import { useFavoriteStore } from '@/stores/favorite.js';
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
 import ProductCardList_stock from '@/components/finance/stock/ProductCardList_stock.vue';
+import ProductCardList_fund from '@/components/finance/fund/ProductCardList_fund.vue';
 
 const favoriteStore = useFavoriteStore();
 
@@ -41,6 +52,10 @@ const depositFavorites = computed(() => {
 
 const stockFavorites = computed(() => {
   return favoriteStore.favorites.filter((item) => item.stockName);
+});
+
+const fundFavorites = computed(() => {
+  return favoriteStore.favorites.filter((item) => item.name && item.type);
 });
 </script>
 
