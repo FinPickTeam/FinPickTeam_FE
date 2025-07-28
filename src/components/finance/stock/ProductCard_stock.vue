@@ -128,7 +128,7 @@ const displayRate = computed(() => {
   gap: 10px;
 }
 .stock-price {
-  font-size: 28px;
+  font-size: var(--font-size-title-main);
   font-weight: bold;
   color: #e11d48;
 }

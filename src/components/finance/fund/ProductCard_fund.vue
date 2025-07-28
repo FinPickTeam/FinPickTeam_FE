@@ -1,0 +1,185 @@
+<template>
+  <div class="product-card">
+    <!-- 상단 헤더 -->
+    <div class="card-header">
+      <div class="company-info">
+        <div class="logo-container">
+          <img :src="kbLogo" alt="KB 자산운용" class="kb-logo-img" />
+        </div>
+        <div class="product-title">{{ fund.name }}</div>
+      </div>
+      <div class="heart-icon">♥</div>
+    </div>
+
+    <!-- 제품 카테고리 -->
+    <div class="product-category">{{ fund.category }}</div>
+
+    <!-- 수익률 정보 (오른쪽 정렬) -->
+    <div class="return-section">
+      <div class="return-label">수익률 (기준:3개월)</div>
+      <div class="return-value">+{{ fund.returnRate }}</div>
+    </div>
+
+    <!-- 하단 태그들 -->
+    <div class="product-tags">
+      <span :class="['tag', typeClass]">{{ fund.type }}</span>
+      <span :class="['tag', riskClass]">{{ fund.risk }}</span>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+import kbLogo from '../../../assets/fund_logo/KB 자산운용.png';
+
+const props = defineProps({
+  fund: Object,
+});
+
+const typeClassMap = {
+  주식형: 'type-stock',
+  채권형: 'type-bond',
+  혼합형: 'type-mix',
+};
+
+const riskClassMap = {
+  '높은 위험': 'risk-high',
+  '보통 위험': 'risk-medium',
+  '낮은 위험': 'risk-low',
+};
+
+const typeClass = computed(() => typeClassMap[props.fund?.type] || '');
+const riskClass = computed(() => riskClassMap[props.fund?.risk] || '');
+</script>
+
+<style scoped>
+.product-card {
+  padding: 8px 20px 10px 54px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  margin-bottom: 10px;
+  background: white;
+  box-shadow: 0 2px 8px 0 #0002;
+  position: relative;
+  width: 350px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: -10px;
+}
+
+.company-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-container {
+  position: absolute;
+  left: 10px;
+  top: 14px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.kb-logo-img {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.product-title {
+  font-size: var(--font-size-title-sub);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.heart-icon {
+  color: var(--color-bg-accent);
+  font-size: 26px;
+  cursor: pointer;
+  margin-left: 8px;
+  user-select: none;
+  transition: color 0.2s;
+}
+
+.product-category {
+  font-size: var(--font-size-body);
+  color: var(--color-text-light);
+  margin-bottom: -10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.return-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.return-label {
+  font-size: var(--font-size-body);
+  color: #8e74e3;
+  font-weight: var(--font-weight-medium);
+}
+
+.return-value {
+  font-size: var(--font-size-title-main);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-main-light);
+  text-align: right;
+  margin-bottom: 2px;
+}
+
+.product-tags {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 2px;
+}
+
+.tag {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+}
+
+.type-stock {
+  background-color: #7c3aed;
+}
+
+.type-bond {
+  background-color: #059669;
+}
+
+.type-mix {
+  background-color: #dc2626;
+}
+
+.risk-high {
+  background-color: #ef4444;
+}
+
+.risk-medium {
+  background-color: #10b981;
+}
+
+.risk-low {
+  background-color: #3b82f6;
+}
+</style>
