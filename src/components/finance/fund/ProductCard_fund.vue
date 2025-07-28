@@ -91,7 +91,7 @@ const riskClass = computed(() => riskClassMap[props.fund?.risk] || '');
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: -10px;
+  margin-bottom: -6px;
 }
 
 .company-info {
@@ -144,7 +144,7 @@ const riskClass = computed(() => riskClassMap[props.fund?.risk] || '');
 .product-category {
   font-size: var(--font-size-body);
   color: var(--color-text-light);
-  margin-bottom: -10px;
+  margin-bottom: -8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
