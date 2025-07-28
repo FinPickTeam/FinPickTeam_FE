@@ -114,7 +114,7 @@ const displayRate = computed(() => {
 .heart {
   margin-left: auto;
   color: var(--color-bg-accent);
-  font-size: 22px;
+  font-size: 26px;
   cursor: pointer;
   user-select: none;
   transition: color 0.2s;
@@ -128,7 +128,7 @@ const displayRate = computed(() => {
   gap: 10px;
 }
 .stock-price {
-  font-size: 28px;
+  font-size: var(--font-size-title-main);
   font-weight: bold;
   color: #e11d48;
 }
