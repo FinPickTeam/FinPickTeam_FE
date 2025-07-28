@@ -6,7 +6,7 @@
     <!-- 중앙 카드 -->
     <div class="main-card">
       <div class="avatar-img-wrap">
-        <img :src="baseAvatar" class="avatar-img" alt="아바타" />
+        <img :src="avatarfix" class="avatar-img" alt="아바타" />
         <img v-if="wearingShirt" :src="shirtImg" class="shirt-img" alt="상의" />
         <img v-if="wearingPants" :src="pantsImg" class="pants-img" alt="바지" />
         <img
@@ -50,7 +50,7 @@ import { useAvatarStore } from '../../stores/avatar.js';
 import baseAvatar from '../mypage/avatar/avatar-base.png';
 import shirtImg from '../mypage/avatar/shirt-yellow.png';
 import pantsImg from '../mypage/avatar/pants.png';
-import sunglassImg from '../mypage/avatar/sunglass.png';
+import avatarfix from '../../assets/avartarfix.png';
 import { storeToRefs } from 'pinia';
 
 const showQuiz = ref(false);
@@ -84,13 +84,14 @@ const { wearingShirt, wearingPants, wearingAcc } = storeToRefs(avatarStore);
 .main-content {
   width: 100%;
   max-width: 390px;
+  height: calc(100vh - 80px - 80px); /* 상단바(80px)와 네비바(80px) 높이 제외 */
   margin: 0 auto;
-  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: center; /* 화면 중앙 정렬 */
   position: relative;
+  overflow: hidden;
 }
 .quiz-bubble {
   display: inline-block;
@@ -118,28 +119,25 @@ const { wearingShirt, wearingPants, wearingAcc } = storeToRefs(avatarStore);
   transform: rotate(45deg);
 }
 .main-card {
-  width: 260px;
-  height: 260px;
-  background: #d1d5db;
-  border-radius: 12px;
-  margin: 0 auto;
-  margin-bottom: 16px;
   position: relative;
+  width: 300px;
+  height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* margin 제거 */
 }
 .avatar-img-wrap {
   position: relative;
-  width: 120px;
-  height: 120px;
+  width: 300px;
+  height: 300px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .avatar-img {
-  width: 100px;
-  height: 100px;
+  width: 250px;
+  height: 300px;
   z-index: 1;
 }
 .shirt-img,

@@ -7,7 +7,7 @@
     <div class="stock-info">
       <div class="stock-header">
         <span class="stock-name">{{ product.stockName }}</span>
-        <span class="stock-code">{{ product.stockCode }}</span>
+        <span class="stock-summary">{{ product.stockSummary }}</span>
         <span
           class="heart"
           :class="{ active: isFavorite }"
@@ -17,7 +17,6 @@
       </div>
       <div class="stock-main">
         <span class="stock-price">{{ displayPrice }}</span>
-        <span class="stock-summary">{{ product.stockSummary }}</span>
       </div>
       <div class="stock-footer">
         <span class="stock-change" :class="{ up: isUp, down: isDown }">
@@ -108,8 +107,7 @@ const displayRate = computed(() => {
   font-size: var(--font-size-title-sub);
   color: var(--color-text);
 }
-.stock-code,
-.stock-market {
+.stock-summary {
   color: #aaa;
   font-size: var(--font-size-body);
 }
@@ -133,11 +131,6 @@ const displayRate = computed(() => {
   font-size: 28px;
   font-weight: bold;
   color: #e11d48;
-}
-.stock-summary {
-  margin-left: auto;
-  color: var(--color-text-light);
-  font-size: var(--font-size-body);
 }
 .stock-footer {
   font-size: var(--font-size-body-large);
