@@ -1,17 +1,29 @@
 <template>
   <!-- Profile Section -->
   <div class="profile-section">
-    <div class="profile-circle avatar-profile">
-      <div class="avatar-img-wrap">
-        <img :src="baseAvatar" class="avatar-img" alt="아바타" />
-        <img v-if="wearingShirt" :src="shirtImg" class="shirt-img" alt="상의" />
-        <img v-if="wearingPants" :src="pantsImg" class="pants-img" alt="바지" />
-        <img
-          v-if="wearingAcc"
-          :src="sunglassImg"
-          class="acc-img"
-          alt="액세서리"
-        />
+    <div class="profile-card">
+      <div class="avatar-container">
+        <div class="avatar-pixel">
+          <img :src="baseAvatar" class="avatar-img" alt="아바타" />
+          <img
+            v-if="wearingShirt"
+            :src="getShirtImage"
+            class="shirt-img"
+            alt="상의"
+          />
+          <img
+            v-if="wearingShoes"
+            :src="getShoesImage"
+            class="shoes-img"
+            alt="신발"
+          />
+          <img
+            v-if="wearingGlasses"
+            :src="getGlassesImage"
+            class="glasses-img"
+            alt="안경"
+          />
+        </div>
       </div>
       <button class="profile-edit-btn" @click="goToAvatarShop">
         <span class="hanger-icon">🧥</span>
@@ -100,14 +112,17 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAvatarStore } from "../../stores/avatar.js";
-import baseAvatar from "../mypage/avatar/avatar-base.png";
-import shirtImg from "../mypage/avatar/shirt-yellow.png";
-import pantsImg from "../mypage/avatar/pants.png";
-import sunglassImg from "../mypage/avatar/sunglass.png";
+import baseAvatar from "./avatar/avatarimg/avatar-base.png";
+import shirtBlue from "./avatar/avatarimg/shirts-blue.png";
+import shirtRed from "./avatar/avatarimg/shirt-red.png";
+import shoesBrown from "./avatar/avatarimg/shoese-brown.png";
+import shoes from "./avatar/avatarimg/shoese.png";
+import sportGlasses from "./avatar/avatarimg/sporglasses.png";
+import sunGlasses from "./avatar/avatarimg/sunglasses.png";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
@@ -115,27 +130,57 @@ import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 library.add(faAngleRight);
 
 const router = useRouter();
+const avatarStore = useAvatarStore();
+const { coin } = storeToRefs(avatarStore);
 const pushEnabled = ref(true);
 
-const avatarStore = useAvatarStore();
-const { wearingShirt, wearingPants, wearingAcc } = storeToRefs(avatarStore);
-const coin = avatarStore.coin; // 수정됨
+// 착용 중인 아이템 확인
+const wearingShirt = computed(() => {
+  const wearingItem = avatarStore.getWearingItem("shirts");
+  return wearingItem ? wearingItem.id : null;
+});
 
-const handleLogout = () => {
-  // 로그아웃 로직 (필요시 추가)
-  // 예: 로컬 스토리지 클리어, 세션 삭제 등
+const wearingShoes = computed(() => {
+  const wearingItem = avatarStore.getWearingItem("shoes");
+  return wearingItem ? wearingItem.id : null;
+});
 
-  // 로그인 페이지로 이동
-  router.push("/login");
-};
+const wearingGlasses = computed(() => {
+  const wearingItem = avatarStore.getWearingItem("glasses");
+  return wearingItem ? wearingItem.id : null;
+});
 
-const goToQuizHistory = () => {
-  router.push("/quiz-history");
-};
+// 착용 중인 아이템 이미지 가져오기
+const getShirtImage = computed(() => {
+  if (wearingShirt.value === "shirt-blue") return shirtBlue;
+  if (wearingShirt.value === "shirt-red") return shirtRed;
+  return null;
+});
 
-const goToAvatarShop = () => {
+const getShoesImage = computed(() => {
+  if (wearingShoes.value === "shoes-brown") return shoesBrown;
+  if (wearingShoes.value === "shoes") return shoes;
+  return null;
+});
+
+const getGlassesImage = computed(() => {
+  if (wearingGlasses.value === "sport-glasses") return sportGlasses;
+  if (wearingGlasses.value === "sun-glasses") return sunGlasses;
+  return null;
+});
+
+function goToAvatarShop() {
   router.push("/avatar-shop");
-};
+}
+
+function goToQuizHistory() {
+  router.push("/quiz-history");
+}
+
+function handleLogout() {
+  // 로그아웃 로직
+  console.log("로그아웃");
+}
 </script>
 
 <style scoped>
@@ -167,6 +212,59 @@ const goToAvatarShop = () => {
   justify-content: center;
   align-items: center;
   max-width: 390px;
+}
+
+.profile-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 30px;
+  padding: 20px;
+  border: 2px solid #4318d1;
+  border-radius: 12px;
+  background: var(--color-bg);
+  box-sizing: border-box;
+  width: calc(100% - 60px);
+  max-width: 330px;
+  min-width: 0;
+}
+
+.avatar-container {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-pixel {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shoes-img,
+.glasses-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 100px;
+  height: 100px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.shoes-img {
+  z-index: 2;
+}
+
+.glasses-img {
+  z-index: 3;
 }
 .profile-circle.avatar-profile {
   margin: 0 auto;
