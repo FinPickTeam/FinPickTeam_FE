@@ -25,9 +25,6 @@
           />
         </div>
       </div>
-      <button class="profile-edit-btn" @click="goToAvatarShop">
-        <span class="hanger-icon">🧥</span>
-      </button>
     </div>
   </div>
 
@@ -169,10 +166,6 @@ const getGlassesImage = computed(() => {
   return null;
 });
 
-function goToAvatarShop() {
-  router.push("/avatar-shop");
-}
-
 function goToQuizHistory() {
   router.push("/quiz-history");
 }
@@ -221,7 +214,7 @@ function handleLogout() {
   justify-content: center;
   margin: 0 30px;
   padding: 20px;
-  border: 2px solid #4318d1;
+  border: 2px solid #ffffff;
   border-radius: 12px;
   background: var(--color-bg);
   box-sizing: border-box;
