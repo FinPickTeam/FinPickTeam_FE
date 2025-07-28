@@ -16,14 +16,6 @@
       </div>
     </div>
 
-    <!-- 진행 단계 표시 -->
-    <div class="agreement-progress">
-      <div class="progress-step active">1</div>
-      <div class="progress-step">2</div>
-      <div class="progress-step">3</div>
-      <div class="progress-step">4</div>
-    </div>
-
     <!-- 섹션 제목 -->
     <div class="agreement-section-title">오픈뱅킹 이용약관</div>
 

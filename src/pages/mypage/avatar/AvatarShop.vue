@@ -156,11 +156,19 @@ function handleBuyOrToggleAcc() {
   margin: 0 auto;
   background: #fff;
   position: relative;
-  padding-bottom: 80px;
+  padding-bottom: 100px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow-y: auto;
+  max-height: 100vh;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+}
+
+.shop-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 .avatar-section {
   display: flex;

@@ -132,7 +132,7 @@ const goBack = () => {
 const goToNext = () => {
   if (canProceed.value) {
     // 다음 단계로 이동 (원하는 라우트로 수정)
-    router.push("/openbanking/ars-verification");
+    router.push("/ars-auth");
   }
 };
 </script>
