@@ -3,12 +3,23 @@ import { defineStore } from "pinia";
 
 export const useAvatarStore = defineStore("avatar", () => {
   const coin = ref(1000);
-  const hasShirt = ref(false);
-  const wearingShirt = ref(false);
-  const hasPants = ref(false);
-  const wearingPants = ref(false);
-  const hasAcc = ref(false);
-  const wearingAcc = ref(false);
+
+  // 아바타 아이템 상태 관리
+  const avatarItems = ref({
+    shirts: {
+      "shirt-blue": { purchased: false, wearing: false },
+      "shirt-red": { purchased: false, wearing: false },
+    },
+    shoes: {
+      "shoes-brown": { purchased: false, wearing: false },
+      shoes: { purchased: false, wearing: false },
+    },
+    glasses: {
+      "sport-glasses": { purchased: false, wearing: false },
+      "sun-glasses": { purchased: false, wearing: false },
+    },
+  });
+
   // 포인트 내역
   const coinHistory = ref([
     {
@@ -28,59 +39,78 @@ export const useAvatarStore = defineStore("avatar", () => {
     });
   }
 
-  function buyOrToggleShirt(price = 50) {
-    if (!hasShirt.value) {
+  // 아이템 구매 및 착용 토글
+  function buyOrToggleItem(category, itemId, price) {
+    const item = avatarItems.value[category][itemId];
+
+    if (!item.purchased) {
       if (coin.value >= price) {
         coin.value -= price;
-        hasShirt.value = true;
-        wearingShirt.value = true;
-        addCoinHistory("사용", -price, "상의 구매");
+        item.purchased = true;
+        item.wearing = true;
+        addCoinHistory("사용", -price, `${category} 구매`);
       } else {
         alert("코인이 부족합니다!");
+        return false;
       }
     } else {
-      wearingShirt.value = !wearingShirt.value;
+      // 같은 카테고리의 다른 아이템 착용 해제
+      Object.keys(avatarItems.value[category]).forEach((id) => {
+        if (id !== itemId) {
+          avatarItems.value[category][id].wearing = false;
+        }
+      });
+      // 현재 아이템 착용/해제 토글
+      item.wearing = !item.wearing;
     }
+    return true;
   }
 
-  function buyOrTogglePants(price = 50) {
-    if (!hasPants.value) {
-      if (coin.value >= price) {
-        coin.value -= price;
-        hasPants.value = true;
-        wearingPants.value = true;
-        addCoinHistory("사용", -price, "바지 구매");
-      } else {
-        alert("코인이 부족합니다!");
+  // 현재 착용 중인 아이템 가져오기
+  function getWearingItem(category) {
+    const items = avatarItems.value[category];
+    for (const [id, item] of Object.entries(items)) {
+      if (item.wearing) {
+        return { id, ...item };
       }
-    } else {
-      wearingPants.value = !wearingPants.value;
     }
+    return null;
   }
 
-  function buyOrToggleAcc(price = 20000) {
-    if (!hasAcc.value) {
-      if (coin.value >= price) {
-        coin.value -= price;
-        hasAcc.value = true;
-        wearingAcc.value = true;
-        addCoinHistory("사용", -price, "액세서리 구매");
-      } else {
-        alert("코인이 부족합니다!");
-      }
-    } else {
-      wearingAcc.value = !wearingAcc.value;
+  // 아이템 구매 상태 확인
+  function isItemPurchased(category, itemId) {
+    return avatarItems.value[category][itemId]?.purchased || false;
+  }
+
+  // 아이템 착용 상태 확인
+  function isItemWearing(category, itemId) {
+    return avatarItems.value[category][itemId]?.wearing || false;
+  }
+
+  // 아이템 상태 설정 (AvatarShop에서 사용)
+  function setItemState(category, itemId, purchased, wearing) {
+    if (avatarItems.value[category][itemId]) {
+      avatarItems.value[category][itemId].purchased = purchased;
+      avatarItems.value[category][itemId].wearing = wearing;
     }
   }
 
   function resetAvatar() {
     coin.value = 900;
-    hasShirt.value = false;
-    wearingShirt.value = false;
-    hasPants.value = false;
-    wearingPants.value = false;
-    hasAcc.value = false;
-    wearingAcc.value = false;
+    avatarItems.value = {
+      shirts: {
+        "shirt-blue": { purchased: false, wearing: false },
+        "shirt-red": { purchased: false, wearing: false },
+      },
+      shoes: {
+        "shoes-brown": { purchased: false, wearing: false },
+        shoes: { purchased: false, wearing: false },
+      },
+      glasses: {
+        "sport-glasses": { purchased: false, wearing: false },
+        "sun-glasses": { purchased: false, wearing: false },
+      },
+    };
     addCoinHistory("초기화", 900, "아바타 리셋");
   }
 
@@ -90,15 +120,12 @@ export const useAvatarStore = defineStore("avatar", () => {
 
   return {
     coin,
-    hasShirt,
-    wearingShirt,
-    buyOrToggleShirt,
-    hasPants,
-    wearingPants,
-    buyOrTogglePants,
-    hasAcc,
-    wearingAcc,
-    buyOrToggleAcc,
+    avatarItems,
+    buyOrToggleItem,
+    getWearingItem,
+    isItemPurchased,
+    isItemWearing,
+    setItemState,
     resetAvatar,
     coinHistory,
     addCoinHistory,
