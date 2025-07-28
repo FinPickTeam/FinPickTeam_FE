@@ -114,7 +114,7 @@ const displayRate = computed(() => {
 .heart {
   margin-left: auto;
   color: var(--color-bg-accent);
-  font-size: 22px;
+  font-size: 26px;
   cursor: pointer;
   user-select: none;
   transition: color 0.2s;
