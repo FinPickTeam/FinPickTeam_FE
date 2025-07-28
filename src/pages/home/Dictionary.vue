@@ -138,12 +138,6 @@
           >
             ㅎ
           </button>
-          <button
-            @click="setFilter('A-Z')"
-            :class="['filter-btn', { active: currentFilter === 'A-Z' }]"
-          >
-            A-Z
-          </button>
         </div>
       </div>
 
@@ -298,45 +292,37 @@ const filterTerms = () => {
     );
   }
   if (currentFilter.value !== "all") {
-    if (currentFilter.value === "A-Z") {
-      filtered = filtered.filter((term) => /^[A-Za-z]/.test(term.term));
-    } else {
-      filtered = filtered.filter((term) => {
-        const firstChar = term.term.charAt(0);
-        return isChoseongMatch(firstChar, currentFilter.value);
-      });
-    }
+    filtered = filtered.filter((term) => {
+      const firstChar = term.term.charAt(0);
+      return getChoseong(firstChar) === currentFilter.value;
+    });
   }
   filteredTerms.value = filtered;
   currentPage.value = 1;
 };
 
-// 초성별 유니코드 범위 매핑
-const choseongRanges = {
-  ㄱ: [0xac00, 0xb098 - 1], // 가 ~ 깋
-  ㄴ: [0xb098, 0xb2e4 - 1], // 나 ~ 닣
-  ㄷ: [0xb2e4, 0xb77c - 1], // 다 ~ 딯
-  ㄹ: [0xb77c, 0xb9c8 - 1], // 라 ~ 릯
-  ㅁ: [0xb9c8, 0xbc14 - 1], // 마 ~ 밓
-  ㅂ: [0xbc14, 0xc0ac - 1], // 바 ~ 삫 (ㅃ포함)
-  ㅅ: [0xc0ac, 0xc544 - 1], // 사 ~ 앟 (ㅆ포함)
-  ㅇ: [0xc544, 0xc790 - 1], // 아 ~ 잏
-  ㅈ: [0xc790, 0xcc28 - 1], // 자 ~ 찧 (ㅉ포함)
-  ㅊ: [0xcc28, 0xce74 - 1], // 차 ~ 칳
-  ㅋ: [0xce74, 0xd0c0 - 1], // 카 ~ 킿
-  ㅌ: [0xd0c0, 0xd30c - 1], // 타 ~ 팋
-  ㅍ: [0xd30c, 0xd558 - 1], // 파 ~ 핧
-  ㅎ: [0xd558, 0xd7a4 - 1], // 하 ~ 힣
+const getChoseong = (char) => {
+  const choseong = {
+    가: "ㄱ",
+    나: "ㄴ",
+    다: "ㄷ",
+    라: "ㄹ",
+    마: "ㅁ",
+    바: "ㅂ",
+    사: "ㅅ",
+    아: "ㅇ",
+    자: "ㅈ",
+    차: "ㅊ",
+    카: "ㅋ",
+    타: "ㅌ",
+    파: "ㅍ",
+    하: "ㅎ",
+  };
+  const code = char.charCodeAt(0) - 44032;
+  if (code < 0 || code > 11171) return char;
+  const idx = Math.floor(code / 588);
+  return Object.values(choseong)[idx] || char;
 };
-
-function isChoseongMatch(char, choseong) {
-  const code = char.charCodeAt(0);
-  if (choseongRanges[choseong]) {
-    const [start, end] = choseongRanges[choseong];
-    return code >= start && code <= end;
-  }
-  return false;
-}
 
 const setFilter = (filter) => {
   currentFilter.value = filter;

@@ -1,11 +1,10 @@
 <template>
   <div class="shop-container">
-    <!-- 헤더 영역 -->
-    <div class="dictionary-header-bar">
+    <div class="shop-header-bar">
       <button class="back-btn" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="dictionary-header-title">상점</span>
+      <span class="shop-header-title">상점</span>
     </div>
 
     <!-- 아바타 및 코인 (항상 표시) -->
@@ -31,11 +30,7 @@
           alt="안경"
         />
       </div>
-      <div class="coin-error-space">
-        <span v-if="showCoinError" class="coin-error"
-          >포인트가 부족합니다!</span
-        >
-      </div>
+      <div v-if="showCoinError" class="coin-error">포인트가 부족합니다!</div>
       <div class="coin-balance">
         <span class="coin-icon">🪙</span> {{ avatarStore.coin }}
       </div>
@@ -276,19 +271,6 @@
     </div>
 
     <Navbar />
-    <div v-if="showPurchaseModal" class="purchase-modal-overlay">
-      <div class="purchase-modal">
-        <div class="purchase-modal-message">정말 구매하시겠습니까?</div>
-        <div class="purchase-modal-actions">
-          <button class="modal-cancel-btn" @click="closePurchaseModal">
-            취소
-          </button>
-          <button class="modal-confirm-btn" @click="confirmPurchase">
-            구매
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -336,7 +318,7 @@ const shirtItems = ref([
   {
     id: "shirt-blue",
     name: "파란 상의",
-    price: 50000,
+    price: 50,
     image: shirtBlue,
     purchased: false,
     wearing: false,
@@ -484,101 +466,11 @@ const lotteItems = ref([
   },
 ]);
 
-const showPurchaseModal = ref(false);
-const pendingPurchase = ref(null);
-const pendingPurchaseType = ref(""); // 'shirt' | 'shoes' | 'glasses' | 'gifticon'
-
-function openPurchaseModal(item, type) {
-  pendingPurchase.value = item;
-  pendingPurchaseType.value = type;
-  showPurchaseModal.value = true;
-}
-function closePurchaseModal() {
-  showPurchaseModal.value = false;
-  pendingPurchase.value = null;
-  pendingPurchaseType.value = "";
-}
-function confirmPurchase() {
-  if (!pendingPurchase.value) return;
-  if (pendingPurchaseType.value === "shirt") {
-    actuallyBuyShirt(pendingPurchase.value);
-  } else if (pendingPurchaseType.value === "shoes") {
-    actuallyBuyShoes(pendingPurchase.value);
-  } else if (pendingPurchaseType.value === "glasses") {
-    actuallyBuyGlasses(pendingPurchase.value);
-  } else if (pendingPurchaseType.value === "gifticon") {
-    actuallyBuyGifticon(pendingPurchase.value);
-  }
-  closePurchaseModal();
-}
-
-function actuallyBuyShirt(item) {
-  if (!item.purchased && avatarStore.coin < item.price) {
-    showCoinError.value = true;
-    setTimeout(() => {
-      showCoinError.value = false;
-    }, 2000);
-    return;
-  }
-  if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-  } else {
-    // 착용/해제 토글 기존 로직
-    handleBuyOrToggleShirt(item, true);
-  }
-}
-function actuallyBuyShoes(item) {
-  if (!item.purchased && avatarStore.coin < item.price) {
-    showCoinError.value = true;
-    setTimeout(() => {
-      showCoinError.value = false;
-    }, 2000);
-    return;
-  }
-  if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-  } else {
-    handleBuyOrToggleShoes(item, true);
-  }
-}
-function actuallyBuyGlasses(item) {
-  if (!item.purchased && avatarStore.coin < item.price) {
-    showCoinError.value = true;
-    setTimeout(() => {
-      showCoinError.value = false;
-    }, 2000);
-    return;
-  }
-  if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-  } else {
-    handleBuyOrToggleGlasses(item, true);
-  }
-}
-function actuallyBuyGifticon(item) {
-  if (avatarStore.coin < item.price) {
-    showCoinError.value = true;
-    setTimeout(() => {
-      showCoinError.value = false;
-    }, 2000);
-    return;
-  }
-  avatarStore.coin -= item.price;
-  item.purchased = true;
-}
-
 function goBack() {
   router.back();
 }
 
-function handleBuyOrToggleShirt(item, skipModal = false) {
-  if (!item.purchased && !skipModal) {
-    openPurchaseModal(item, "shirt");
-    return;
-  }
+function handleBuyOrToggleShirt(item) {
   if (!item.purchased && avatarStore.coin < item.price) {
     showCoinError.value = true;
     setTimeout(() => {
@@ -586,7 +478,9 @@ function handleBuyOrToggleShirt(item, skipModal = false) {
     }, 2000);
     return;
   }
+
   if (!item.purchased) {
+    // 구매
     avatarStore.coin -= item.price;
     item.purchased = true;
 
@@ -634,11 +528,7 @@ function handleBuyOrToggleShirt(item, skipModal = false) {
   syncStoreState();
 }
 
-function handleBuyOrToggleShoes(item, skipModal = false) {
-  if (!item.purchased && !skipModal) {
-    openPurchaseModal(item, "shoes");
-    return;
-  }
+function handleBuyOrToggleShoes(item) {
   if (!item.purchased && avatarStore.coin < item.price) {
     showCoinError.value = true;
     setTimeout(() => {
@@ -646,7 +536,9 @@ function handleBuyOrToggleShoes(item, skipModal = false) {
     }, 2000);
     return;
   }
+
   if (!item.purchased) {
+    // 구매
     avatarStore.coin -= item.price;
     item.purchased = true;
 
@@ -694,11 +586,7 @@ function handleBuyOrToggleShoes(item, skipModal = false) {
   syncStoreState();
 }
 
-function handleBuyOrToggleGlasses(item, skipModal = false) {
-  if (!item.purchased && !skipModal) {
-    openPurchaseModal(item, "glasses");
-    return;
-  }
+function handleBuyOrToggleGlasses(item) {
   if (!item.purchased && avatarStore.coin < item.price) {
     showCoinError.value = true;
     setTimeout(() => {
@@ -706,7 +594,9 @@ function handleBuyOrToggleGlasses(item, skipModal = false) {
     }, 2000);
     return;
   }
+
   if (!item.purchased) {
+    // 구매
     avatarStore.coin -= item.price;
     item.purchased = true;
 
@@ -754,11 +644,7 @@ function handleBuyOrToggleGlasses(item, skipModal = false) {
   syncStoreState();
 }
 
-function handleBuyGifticon(item, skipModal = false) {
-  if (!item.purchased && !skipModal) {
-    openPurchaseModal(item, "gifticon");
-    return;
-  }
+function handleBuyGifticon(item) {
   if (avatarStore.coin < item.price) {
     showCoinError.value = true;
     setTimeout(() => {
@@ -766,6 +652,8 @@ function handleBuyGifticon(item, skipModal = false) {
     }, 2000);
     return;
   }
+
+  // 구매 성공 시 코인 차감 및 구매 상태 업데이트
   avatarStore.coin -= item.price;
   item.purchased = true;
 }
@@ -830,7 +718,7 @@ function handleBuyGifticon(item, skipModal = false) {
   height: 120px;
   background: #fff;
   border-radius: 20px;
-  border: 2px solid #ffffff;
+  border: 2px solid #e0e0e0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -947,52 +835,37 @@ function handleBuyGifticon(item, skipModal = false) {
   }
 }
 
-/* === 헤더 스타일 Dictionary.vue와 동일하게 적용 === */
-.dictionary-header-bar {
-  margin-top: 32px;
-  position: relative;
+.shop-header-bar {
   display: flex;
   align-items: center;
-  width: 100%;
-  height: 48px;
-  padding: 0;
+  gap: 8px;
   margin-bottom: 18px;
-  z-index: 1100;
+  max-width: 540px;
+  padding: 20px 0 0 0;
 }
-.dictionary-header-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+.shop-header-title {
   font-size: 1.2rem;
   font-weight: bold;
   color: #333;
-  margin: 0;
 }
+
 .back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
   background: none;
   border: none;
   font-size: 22px;
-  color: #222;
+  color: #7c3aed;
   cursor: pointer;
   padding: 2px 8px 2px 2px;
   border-radius: 8px;
   transition: background 0.15s;
-  position: relative;
-  z-index: 1200;
 }
-.back-btn:hover {
-  background: #f3f3f3;
-}
-/* === 기존 shop-header-bar, shop-header-title 스타일 제거 또는 무시 === */
 
+.back-btn:hover {
+  background: #f3e8ff;
+}
+
+/* 기존 .shop-tabs, .shop-tab 스타일 제거 후 아래 스타일 추가 */
 .subtab-row {
   display: flex;
   width: 100%;
@@ -1249,64 +1122,5 @@ function handleBuyGifticon(item, skipModal = false) {
 .item-card.selected {
   border: 2px solid #a78bfa;
   background: #f3e8ff;
-}
-
-.coin-error-space {
-  min-height: 40px; /* Further increased to ensure no UI shift */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* 구매 확인 모달 스타일 */
-.purchase-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-.purchase-modal {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
-  padding: 32px 24px 24px 24px;
-  min-width: 260px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.purchase-modal-message {
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 24px;
-  color: #222;
-  text-align: center;
-}
-.purchase-modal-actions {
-  display: flex;
-  gap: 18px;
-}
-.modal-cancel-btn,
-.modal-confirm-btn {
-  padding: 8px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  border: none;
-  cursor: pointer;
-}
-.modal-cancel-btn {
-  background: #eee;
-  color: #333;
-}
-.modal-confirm-btn {
-  background: #4318d1;
-  color: #fff;
 }
 </style>

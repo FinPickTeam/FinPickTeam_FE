@@ -39,7 +39,7 @@
         <button class="floating-btn">
           <i class="fas fa-envelope" @click="openNewsletter"></i>
         </button>
-        <button class="floating-btn" @click="goToAvatarShop">
+        <button class="floating-btn">
           <i class="fa-solid fa-store"></i>
         </button>
       </div>
@@ -70,9 +70,6 @@ import shoes from "../mypage/avatar/avatarimg/shoese.png";
 import sportGlasses from "../mypage/avatar/avatarimg/sporglasses.png";
 import sunGlasses from "../mypage/avatar/avatarimg/sunglasses.png";
 import { storeToRefs } from "pinia";
-import { useRouter } from "vue-router";
-
-const router = useRouter();
 
 const showQuiz = ref(false);
 const showNewsletter = ref(false);
@@ -88,10 +85,6 @@ function openNewsletter() {
 }
 function closeNewsletter() {
   showNewsletter.value = false;
-}
-
-function goToAvatarShop() {
-  router.push("/avatar-shop");
 }
 
 const avatarStore = useAvatarStore();
