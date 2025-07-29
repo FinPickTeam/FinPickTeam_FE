@@ -2,7 +2,10 @@
   <div class="ars_bg">
     <div class="ars_outer_box">
       <div class="ars_header">
-        <div class="logo">FinPick</div>
+        <div class="login-logo">
+          <h1 class="logo">FinPick</h1>
+          <p>금융 생활의 새로운 시작</p>
+        </div>
         <div class="subtitle">ARS 인증 진행 중</div>
       </div>
       <div class="ars_verification_wrapper">
@@ -22,7 +25,7 @@
             <div class="ars_waiting">
               <span class="waiting_icon">📞</span>
               <span class="waiting_label">통화 대기 중</span>
-              <span class="waiting_timer">2:53</span>
+              <span class="waiting_timer">{{ timerDisplay }}</span>
             </div>
             <ul class="ars_guide_list">
               <li>전화를 받으신 후 안내에 따라 인증번호를 입력하세요</li>
@@ -31,7 +34,9 @@
             </ul>
           </div>
         </div>
-        <button class="ars_next_btn">다음 단계로 진행</button>
+        <button class="ars_next_btn" @click="goToComplete">
+          다음 단계로 진행
+        </button>
         <div class="ars_warning_box">
           <div class="warning_title">
             <span class="warning_icon">⚠️</span>
@@ -39,7 +44,7 @@
           </div>
           <ul class="warning_list">
             <li>전화번호가 정확한지 다시 한번 확인해주세요</li>
-            <li>인증번호가 맞지 않을 경우 접수 시 다시 시도해주세요</li>
+            <li>인증번호가 맞지 않을 경우 시 다시 시도해주세요</li>
             <li>인증번호는 정확히 입력해야 합니다</li>
           </ul>
         </div>
@@ -53,34 +58,68 @@
 </template>
 
 <script setup>
-// 추후 인증번호, 타이머 등은 props 또는 상태로 관리 가능
+import { useRouter } from "vue-router";
+import { ref, onMounted, onUnmounted } from "vue";
+
+const router = useRouter();
+const timerDisplay = ref("3:00");
+let timerInterval = null;
+let totalSeconds = 180; // 3분 = 180초
+
+function goToComplete() {
+  router.push("/ars/complete");
+}
+
+function updateTimer() {
+  if (totalSeconds <= 0) {
+    // 시간이 다 되면 ARS fail 페이지로 이동
+    clearInterval(timerInterval);
+    router.push("/ars/fail");
+    return;
+  }
+
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  timerDisplay.value = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  totalSeconds--;
+}
+
+onMounted(() => {
+  // 1초마다 타이머 업데이트
+  timerInterval = setInterval(updateTimer, 1000);
+});
+
+onUnmounted(() => {
+  // 컴포넌트가 언마운트될 때 타이머 정리
+  if (timerInterval) {
+    clearInterval(timerInterval);
+  }
+});
 </script>
 
 <style scoped>
-:global(html),
-:global(body),
 .ars_bg {
-  overflow-x: hidden !important;
-  overflow-y: hidden !important;
-}
-.ars_bg {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  min-height: 100vh;
   background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 .ars_outer_box {
-  width: 540px;
-  height: 960px;
+  width: 100%;
+  max-width: 540px;
+  min-height: 100vh;
   background: #fff;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  overflow: hidden;
+  padding: 20px;
+  box-sizing: border-box;
 }
 .ars_header {
   width: 100%;
@@ -91,7 +130,12 @@
   align-items: center;
   justify-content: center;
 }
-.logo {
+.login-logo {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.login-logo h1 {
+  margin-bottom: 8px;
   font-size: 36px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -100,7 +144,15 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-fill-color: transparent;
+}
+.login-logo p {
+  color: #888;
+  font-size: 15px;
+  text-align: center;
+  font-weight: 400;
+  margin-top: 4px;
   margin-bottom: 0;
+  letter-spacing: 0;
 }
 .subtitle {
   font-size: 16px;
@@ -120,13 +172,13 @@
   position: relative;
   padding-top: 0;
   padding-bottom: 24px;
-  overflow-y: auto;
+  overflow-y: visible;
   box-sizing: border-box;
 }
 .ars_card,
 .ars_next_btn,
 .ars_warning_box {
-  width: 485px;
+  width: 100%;
   max-width: 100%;
   margin: 0 auto 18px auto;
   box-sizing: border-box;
@@ -249,7 +301,7 @@
 }
 .warning_list {
   text-align: left;
-  padding-left: 96px;
+  padding-left: 12px;
   margin: 0 auto;
   display: block;
   font-size: 12px;
@@ -261,13 +313,13 @@
   list-style-position: outside;
 }
 .ars_help_group {
-  width: 485px;
+  width: 100%;
   max-width: 100%;
   margin: 12px auto 0 auto;
-  text-align: center;
+  text-align: left;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   gap: 4px;
 }
 .ars_help {

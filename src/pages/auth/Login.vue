@@ -31,7 +31,11 @@
         </span>
       </div>
       <div class="find-password">
-        <a href="#">비밀번호 찾기</a>
+        <div class="find-links">
+          <a href="#">아이디 찾기</a>
+          <span class="separator">|</span>
+          <a href="#">비밀번호 찾기</a>
+        </div>
       </div>
 
       <button class="login-btn">로그인</button>
@@ -45,11 +49,11 @@
 
 <script>
 export default {
-  name: 'Login',
+  name: "Login",
   data() {
     return {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
       showPassword: false,
     };
   },
@@ -125,6 +129,16 @@ input:focus {
 .find-password {
   text-align: right;
   margin-bottom: 24px;
+}
+.find-links {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+.separator {
+  color: #ccc;
+  font-size: 14px;
 }
 .find-password a {
   color: #4318d1;

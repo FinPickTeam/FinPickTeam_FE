@@ -47,7 +47,18 @@ function goDictionary() {
   z-index: 100;
   border-radius: 16px 16px 0 0;
 }
-.back-btn,
+.back-btn {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  font-size: 26px;
+  color: #222;
+  cursor: pointer;
+  outline: none;
+  display: flex;
+  align-items: center;
+}
+
 .dict-btn {
   background: none;
   border: none;

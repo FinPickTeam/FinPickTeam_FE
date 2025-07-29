@@ -1,80 +1,82 @@
 <template>
-  <div class="diaryhome-container">
-    <!-- 상단 헤더 -->
-    <div class="diaryhome-header">
-      <button class="diaryhome-back" @click="goBack">
-        <font-awesome-icon :icon="['fas', 'angle-left']" />
-      </button>
-      <div class="diaryhome-header-icons">
-        <button class="diaryhome-icon-btn">
-          <font-awesome-icon :icon="['fas', 'search']" />
+  <div class="diaryhome-scroll-container">
+    <div class="diaryhome-container">
+      <!-- 상단 헤더 -->
+      <div class="diaryhome-header">
+        <button class="diaryhome-back" @click="goBack">
+          <font-awesome-icon :icon="['fas', 'angle-left']" />
         </button>
-        <button class="diaryhome-icon-btn">
-          <font-awesome-icon :icon="['fas', 'plus']" />
-        </button>
+        <div class="diaryhome-header-icons">
+          <button class="diaryhome-icon-btn">
+            <font-awesome-icon :icon="['fas', 'search']" />
+          </button>
+          <button class="diaryhome-icon-btn">
+            <font-awesome-icon :icon="['fas', 'plus']" />
+          </button>
+        </div>
       </div>
-    </div>
 
-    <!-- 월간 소비/달력 영역 -->
-    <div class="diaryhome-month-card">
-      <div class="diaryhome-month-row">
-        <span class="diaryhome-month-arrow">&lt;</span>
-        <span class="diaryhome-month-title">7월</span>
-      </div>
-      <div class="diaryhome-month-amount">
-        800,000<span class="diaryhome-won">원</span>
-      </div>
-      <div class="diaryhome-month-desc">
-        지난 달보다 <span class="diaryhome-more">20만원 더</span> 쓰는 중
-      </div>
-      <!-- 달력 박스 -->
-      <div class="diaryhome-calendar-box">
-        <div class="diaryhome-calendar-row diaryhome-calendar-header">
-          <span v-for="d in days" :key="d">{{ d }}</span>
+      <!-- 월간 소비/달력 영역 -->
+      <div class="diaryhome-month-card">
+        <div class="diaryhome-month-row">
+          <span class="diaryhome-month-arrow">&lt;</span>
+          <span class="diaryhome-month-title">7월</span>
         </div>
-        <div class="diaryhome-calendar-row diaryhome-calendar-days">
-          <span v-for="n in 7" :key="n" :class="{ selected: n + 2 === 6 }">{{
-            n + 2
-          }}</span>
+        <div class="diaryhome-month-amount">
+          800,000<span class="diaryhome-won">원</span>
+        </div>
+        <div class="diaryhome-month-desc">
+          지난 달보다 <span class="diaryhome-more">20만원 더</span> 쓰는 중
+        </div>
+        <!-- 달력 박스 -->
+        <div class="diaryhome-calendar-box">
+          <div class="diaryhome-calendar-row diaryhome-calendar-header">
+            <span v-for="d in days" :key="d">{{ d }}</span>
+          </div>
+          <div class="diaryhome-calendar-row diaryhome-calendar-days">
+            <span v-for="n in 7" :key="n" :class="{ selected: n + 2 === 6 }">{{
+              n + 2
+            }}</span>
+          </div>
+        </div>
+        <div class="diaryhome-calendar-date-row">
+          <span class="diaryhome-calendar-date">7월 6일 수요일</span>
+          <span class="diaryhome-calendar-arrow" @click="goCalendarDetail">
+            <font-awesome-icon :icon="['fas', 'angle-right']" />
+          </span>
         </div>
       </div>
-      <div class="diaryhome-calendar-date-row">
-        <span class="diaryhome-calendar-date">7월 6일 수요일</span>
-        <span class="diaryhome-calendar-arrow" @click="goCalendarDetail">
-          <font-awesome-icon :icon="['fas', 'angle-right']" />
-        </span>
-      </div>
-    </div>
-    <hr class="diaryhome-divider" />
-    <!-- 카드 내역 리스트 -->
-    <div class="diaryhome-list-section">
-      <div class="diaryhome-list-item" v-for="i in 4" :key="i">
-        <img class="diaryhome-bank-logo" :src="kakaoLogo" alt="은행로고" />
-        <div class="diaryhome-list-info">
-          <div class="diaryhome-list-amount">+250,000원</div>
-          <div class="diaryhome-list-name">
-            KB IT’s Your Life 6개월 정기예금
+      <hr class="diaryhome-divider" />
+      <!-- 카드 내역 리스트 -->
+      <div class="diaryhome-list-section">
+        <div class="diaryhome-list-item" v-for="i in 4" :key="i">
+          <img class="diaryhome-bank-logo" :src="kakaoLogo" alt="은행로고" />
+          <div class="diaryhome-list-info">
+            <div class="diaryhome-list-amount">+250,000원</div>
+            <div class="diaryhome-list-name">
+              KB IT’s Your Life 6개월 정기예금
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- 이번 달 남은 돈 -->
-    <div class="diaryhome-summary-section">
-      <div class="diaryhome-summary-title">이번 달 남은 돈</div>
-      <div class="diaryhome-summary-date">7월 6일 기준</div>
-      <div class="diaryhome-summary-table">
-        <div class="diaryhome-summary-row">
-          <span>수입</span>
-          <span class="diaryhome-summary-income">+10,000,000</span>
-        </div>
-        <div class="diaryhome-summary-row">
-          <span>소비</span>
-          <span class="diaryhome-summary-spend">-800,000</span>
-        </div>
-        <div class="diaryhome-summary-row diaryhome-summary-left">
-          <span>남은 금액</span>
-          <span class="diaryhome-summary-left-amount">9,200,000</span>
+      <!-- 이번 달 남은 돈 -->
+      <div class="diaryhome-summary-section">
+        <div class="diaryhome-summary-title">이번 달 남은 돈</div>
+        <div class="diaryhome-summary-date">7월 6일 기준</div>
+        <div class="diaryhome-summary-table">
+          <div class="diaryhome-summary-row">
+            <span>수입</span>
+            <span class="diaryhome-summary-income">+10,000,000</span>
+          </div>
+          <div class="diaryhome-summary-row">
+            <span>소비</span>
+            <span class="diaryhome-summary-spend">-800,000</span>
+          </div>
+          <div class="diaryhome-summary-row diaryhome-summary-left">
+            <span>남은 금액</span>
+            <span class="diaryhome-summary-left-amount">9,200,000</span>
+          </div>
         </div>
       </div>
     </div>
@@ -114,6 +116,18 @@ const days = ["일", "월", "화", "수", "목", "금", "토"];
 </script>
 
 <style scoped>
+.diaryhome-scroll-container {
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  padding-bottom: 100px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.diaryhome-scroll-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 .diaryhome-container {
   width: 390px;
   min-height: 844px;
@@ -141,7 +155,7 @@ const days = ["일", "월", "화", "수", "목", "금", "토"];
   background: none;
   border: none;
   font-size: 24px;
-  color: #4318d1;
+  color: #222;
   cursor: pointer;
   padding: 4px 8px 4px 0;
   border-radius: 8px;

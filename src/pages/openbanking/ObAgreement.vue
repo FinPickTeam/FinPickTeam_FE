@@ -102,12 +102,12 @@ const agreements = ref([
   },
   {
     title: "오픈뱅킹용 개인(신용)정보수집·이용동의 (필수)",
-    required: false,
+    required: true,
     checked: false,
   },
   {
-    title: "개인(신용)정보수집·이용 및 제공동의(필수)",
-    required: false,
+    title: "개인(신용)정보수집·이용 및 제공동의 (필수)",
+    required: true,
     checked: false,
   },
 ]);

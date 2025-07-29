@@ -171,8 +171,8 @@ function goToQuizHistory() {
 }
 
 function handleLogout() {
-  // 로그아웃 로직
-  console.log("로그아웃");
+  // 로그아웃 후 로그인 페이지로 이동
+  router.push("/login");
 }
 </script>
 
