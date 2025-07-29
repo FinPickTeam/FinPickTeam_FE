@@ -107,11 +107,7 @@ import kakaoLogo from "@/assets/bank_logo/카카오뱅크.png";
 
 const router = useRouter();
 const goBack = () => {
-  if (window.history.length > 1) {
-    router.back();
-  } else {
-    router.push("/");
-  }
+  router.push("/");
 };
 
 const accounts = ref([
@@ -137,6 +133,12 @@ const goToDiary = () => {
   max-height: calc(100vh - 64px);
   overflow-y: auto;
   padding-bottom: 100px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.myhome-scroll-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 .obmyhome-container {
   width: 390px;
@@ -165,7 +167,7 @@ const goToDiary = () => {
   background: none;
   border: none;
   font-size: 24px;
-  color: #4318d1;
+  color: #222;
   cursor: pointer;
   padding: 4px 8px 4px 0;
   border-radius: 8px;
