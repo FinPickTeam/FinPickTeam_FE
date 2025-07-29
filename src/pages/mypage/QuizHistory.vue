@@ -95,7 +95,6 @@
         <button class="close-modal-btn" @click="closeModal">닫기</button>
       </div>
     </div>
-    <Navbar />
   </div>
 </template>
 
@@ -426,39 +425,7 @@ const goBack = () => {
   background: var(--color-main-light);
   color: #fff;
 }
-/* Bottom Navigation */
-.bottom-nav {
-  position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 540px;
-  bottom: 0;
-  background: var(--color-bg);
-  border-top: 1px solid var(--color-border);
-  display: flex;
-  justify-content: space-around;
-  padding: 8px 0;
-  z-index: 100;
-}
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  color: var(--color-main-light);
-  font-size: 12px;
-  cursor: pointer;
-}
-.nav-item.active {
-  color: var(--color-main);
-}
-.nav-icon {
-  font-size: 20px;
-}
-.nav-label {
-  font-size: 10px;
-}
+
 .quiz-header-bar {
   position: relative; /* 필요 */
   display: flex;

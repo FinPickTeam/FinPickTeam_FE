@@ -316,10 +316,10 @@ onUnmounted(() => {
   width: 100%;
   max-width: 100%;
   margin: 12px auto 0 auto;
-  text-align: left;
+  text-align: center;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 4px;
 }
 .ars_help {

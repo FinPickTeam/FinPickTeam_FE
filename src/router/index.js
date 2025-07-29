@@ -38,6 +38,7 @@ import FavoriteProducts from "../pages/finance/FavoriteProducts.vue";
 
 // 재테크 컴포넌트
 import ProductInputForm from "../components/finance/deposit/ProductInputForm_deposit.vue";
+import ProductInputForm_installment from "../components/finance/installment/ProductInputForm_installment.vue";
 import ProductCard from "../components/finance/deposit/ProductCard_deposit.vue";
 import ProductCardList_deposit from "../components/finance/deposit/ProductCardList_deposit.vue";
 import ProductCard_stock from "../components/finance/stock/ProductCard_stock.vue";
