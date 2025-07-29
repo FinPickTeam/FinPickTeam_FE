@@ -90,6 +90,11 @@ const router = createRouter({
       name: "ProductCardFund",
       component: ProductCard_fund,
     },
+    {
+      path: "/finance/product-input-form-installment",
+      name: "ProductInputFormInstallment",
+      component: ProductInputForm_installment,
+    },
 
     // 로그인, 회원가입, ARS 등은 레이아웃 없이 단독 페이지로 유지
     {
