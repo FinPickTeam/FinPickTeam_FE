@@ -71,9 +71,17 @@ h3 {
   font-size: 20px;
 }
 
+@font-face {
+  font-family: 'JalnanGothic';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_231029@1.1/JalnanGothic.woff')
+    format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
 .logo {
-  font-family: 'Black Han Sans', var(--font-main);
-  font-size: 40px;
+  font-family: 'JalnanGothic', var(--font-main);
+  font-size: 32px;
   font-weight: 900;
   letter-spacing: 1px;
   background: linear-gradient(
@@ -86,6 +94,7 @@ h3 {
   background-clip: text;
   color: transparent;
   margin-bottom: 0;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
 button,
