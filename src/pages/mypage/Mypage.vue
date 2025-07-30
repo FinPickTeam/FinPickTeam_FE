@@ -79,7 +79,7 @@
       </label>
     </div>
     <div class="menu-item">
-      <span>알림 상세설정</span>
+      <span>투자성향 재검사</span>
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
     <div class="menu-item" @click="handleLogout">

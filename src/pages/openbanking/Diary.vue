@@ -1,12 +1,46 @@
 <script setup>
-import { ref } from "vue";
+import { ref, watch, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { faAngleLeft, faSearch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { DatePicker } from "v-calendar"; // ✅ 전역 실패 시 로컬 등록
+import transactionData from "./Transaction_dummy.json"; // ✅ json 직접 import
 
 const router = useRouter();
 const selectedDate = ref(new Date());
+
+// json 불러오는 마법의 코드
+const transactions = ref([]);
+const filteredTransactions = ref([]);
+function formatDate(date) {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, "0");
+  const dd = String(date.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+// JSON 데이터 불러오기
+async function fetchTransactions() {
+  const res = await fetch("/src/pages/openbanking/Transaction_dummy.json");
+  const data = await res.json();
+  transactions.value = data;
+  filterTransactions();
+}
+// 선택된 날짜 기준으로 필터링
+function filterTransactions() {
+  const target = formatDate(selectedDate.value);
+  filteredTransactions.value = transactions.value.filter(
+    (item) => item.date === target
+  );
+}
+// 날짜 변경 감지 시 필터링 실행
+watch(selectedDate, () => {
+  filterTransactions();
+});
+
+onMounted(() => {
+  fetchTransactions();
+});
 
 function goBack() {
   router.back();
@@ -28,6 +62,31 @@ function goDictionary() {
   </div>
   <div class="calendar-center-wrap">
     <DatePicker v-model="selectedDate" is-expanded color="indigo" locale="ko" />
+  </div>
+
+  <div class="transaction-list">
+    <div v-if="filteredTransactions.length === 0" class="empty-msg">
+      선택한 날짜에 거래 내역이 없습니다.
+    </div>
+    <div
+      v-for="(item, idx) in filteredTransactions"
+      :key="idx"
+      class="transaction-item"
+    >
+      <img
+        class="bank-logo"
+        :src="`/src/assets/bank_logo/${item.logo}`"
+        alt="bank"
+      />
+      <div class="transaction-info">
+        <div class="amount" :class="item.type === '입금' ? 'in' : 'out'">
+          {{ item.type === "입금" ? "+" : "-"
+          }}{{ item.amount.toLocaleString() }}원
+        </div>
+        <div class="account">{{ item.account }}</div>
+        <div class="desc">{{ item.description }}</div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -140,5 +199,51 @@ function goDictionary() {
 ::v-deep(.vc-day.vc-selected .vc-day-content),
 ::v-deep(.vc-day.vc-highlight .vc-day-content) {
   color: #fff !important;
+}
+
+/* 캘린더 제외 하단 스타일코드 */
+.transaction-list {
+  max-width: 360px;
+  margin: 20px auto;
+  padding: 0 16px;
+}
+.transaction-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+.bank-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+.transaction-info {
+  display: flex;
+  flex-direction: column;
+}
+.amount {
+  font-size: 18px;
+  font-weight: bold;
+}
+.amount.in {
+  color: #2e7d32;
+}
+.amount.out {
+  color: #c62828;
+}
+.account {
+  font-size: 14px;
+  color: #444;
+}
+.desc {
+  font-size: 12px;
+  color: #777;
+}
+.empty-msg {
+  text-align: center;
+  color: #aaa;
+  padding: 30px 0;
 }
 </style>

@@ -6,7 +6,7 @@
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
       <div class="obmyhome-header-icons">
-        <button class="obmyhome-icon-btn">
+        <button class="obmyhome-icon-btn" @click="goToDictionary">
           <font-awesome-icon :icon="['fas', 'search']" />
         </button>
         <button class="obmyhome-icon-btn">
@@ -89,6 +89,9 @@
 </template>
 
 <script setup>
+const goToDictionary = () => {
+  router.push("/dictionary");
+};
 import { ref } from "vue";
 import Navbar from "../../components/Navbar.vue";
 import { useRouter } from "vue-router";

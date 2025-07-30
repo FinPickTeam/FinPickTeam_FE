@@ -1,3 +1,8 @@
+import ProfileStep5 from "../pages/mypage/financetest/ProfileStep5.vue";
+import ProfileStep6 from "../pages/mypage/financetest/ProfileStep6.vue";
+import ProfileStep7 from "../pages/mypage/financetest/ProfileStep7.vue";
+import ProfileStep8 from "../pages/mypage/financetest/ProfileStep8.vue";
+import ProfileStep9 from "../pages/mypage/financetest/ProfileStep9.vue";
 import { createRouter, createWebHistory } from "vue-router";
 import ArsAuth from "../pages/ars/ArsAuth.vue";
 import ArsVerification from "../pages/ars/ArsVerification.vue";
@@ -109,7 +114,7 @@ const router = createRouter({
       component: Signup,
     },
     {
-      path: "/signup-complete",
+      path: "/auth/signupcomplete",
       name: "SignupComplete",
       component: SignupComplete,
     },
@@ -132,6 +137,31 @@ const router = createRouter({
       path: "/profile-step-4",
       name: "ProfileStep4",
       component: ProfileStep4,
+    },
+    {
+      path: "/mypage/financetest/profile-step-5",
+      name: "ProfileStep5",
+      component: ProfileStep5,
+    },
+    {
+      path: "/mypage/financetest/profile-step-6",
+      name: "ProfileStep6",
+      component: ProfileStep6,
+    },
+    {
+      path: "/mypage/financetest/profile-step-7",
+      name: "ProfileStep7",
+      component: ProfileStep7,
+    },
+    {
+      path: "/mypage/financetest/profile-step-8",
+      name: "ProfileStep8",
+      component: ProfileStep8,
+    },
+    {
+      path: "/mypage/financetest/profile-step-9",
+      name: "ProfileStep9",
+      component: ProfileStep9,
     },
     {
       path: "/ars-auth",
@@ -190,6 +220,12 @@ const router = createRouter({
           path: "openbanking/diaryhome",
           name: "DiaryHome",
           component: () => import("../pages/openbanking/DiaryHome.vue"),
+        },
+        {
+          path: "openbanking/monthly-report",
+          name: "OpenbankingMonthlyReport",
+          component: () =>
+            import("../pages/openbanking/OpenbankingMonthlyReport.vue"),
         },
         {
           path: "openbanking/diary",
