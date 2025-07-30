@@ -1,0 +1,33 @@
+{
+  "status": 200,
+  "message": "",
+  "data": [
+    {
+      "installmentBankName": "부산은행",
+      "installmentProductName": "BNK내맘대로 적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.25,
+      "installmentMaxRate": 2.45,
+      "installmentSummary": "기간, 금액, 우대이율 모두 내맘대로! 적금"
+    },
+    {
+      "installmentBankName": "경남은행",
+      "installmentProductName": "BNK더조은자유적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 3.2,
+      "installmentMaxRate": 3.9,
+      "installmentSummary": "더 좋은 내일을 위한 더 좋은 습관"
+    },
+    {
+      "installmentBankName": "KB국민은행",
+      "installmentProductName": "KB맑은하늘적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.45,
+      "installmentMaxRate": 3.25,
+      "installmentSummary": "맑은하늘 만들고 금리도 Up"
+    }
+  ]
+}
