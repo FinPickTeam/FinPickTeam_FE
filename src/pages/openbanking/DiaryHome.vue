@@ -7,7 +7,7 @@
           <font-awesome-icon :icon="['fas', 'angle-left']" />
         </button>
         <div class="diaryhome-header-icons">
-          <button class="diaryhome-icon-btn">
+          <button class="diaryhome-icon-btn" @click="goToDictionary">
             <font-awesome-icon :icon="['fas', 'search']" />
           </button>
           <button class="diaryhome-icon-btn">
@@ -84,6 +84,9 @@
 </template>
 
 <script setup>
+const goToDictionary = () => {
+  router.push("/dictionary");
+};
 import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";

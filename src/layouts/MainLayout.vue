@@ -35,6 +35,7 @@ const hideHeaderNames = [
   "avatar-shop",
   "ChallengeHome",
   "OpenBankingMyHome",
+  "OpenbankingMonthlyReport",
 ];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);

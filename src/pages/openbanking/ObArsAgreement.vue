@@ -5,15 +5,7 @@
       <button class="ars-agreement-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="ars-agreement-title">휴대폰간편인증</span>
-      <div class="ars-agreement-header-icons">
-        <button class="ars-agreement-icon-btn">
-          <font-awesome-icon :icon="['fas', 'search']" />
-        </button>
-        <button class="ars-agreement-icon-btn">
-          <font-awesome-icon :icon="['fas', 'bars']" />
-        </button>
-      </div>
+      <span class="ars-agreement-title center-title">휴대폰간편인증</span>
     </div>
 
     <!-- 안내문구 -->
@@ -153,18 +145,23 @@ const goToNext = () => {
   height: 56px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   background: #fff;
   padding: 0 16px;
   box-sizing: border-box;
   border-bottom: 1px solid #ececec;
+  position: relative;
 }
 
 .ars-agreement-back {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
   font-size: 24px;
-  color: #4318d1;
+  color: #222;
   cursor: pointer;
   padding: 4px 8px 4px 0;
   border-radius: 8px;
@@ -179,6 +176,12 @@ const goToNext = () => {
   font-size: 1.1rem;
   font-weight: 600;
   color: #222;
+}
+.center-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
 .ars-agreement-header-icons {
@@ -206,7 +209,7 @@ const goToNext = () => {
   color: #6b7280;
   padding: 20px 16px 12px 16px;
   line-height: 1.5;
-  text-align: left;
+  text-align: center;
 }
 
 .ars-agreement-list {

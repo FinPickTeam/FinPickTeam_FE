@@ -9,14 +9,14 @@
     </div>
     <!-- 진행 바 -->
     <div class="progress-bar">
-      <div class="progress"></div>
-      <div class="progress"></div>
-      <div class="progress"></div>
       <div class="progress active"></div>
+      <div class="progress"></div>
+      <div class="progress"></div>
+      <div class="progress"></div>
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 4</div>
+      <div class="question-title">문항 1</div>
       <div class="question-desc">투자 경험이 어느 정도 되시나요?</div>
       <div class="options">
         <div
@@ -29,9 +29,9 @@
         </div>
       </div>
     </div>
-    <!-- 완료 버튼 -->
+    <!-- 다음 버튼 -->
     <button class="next-btn" :disabled="selected === null" @click="goNext">
-      완료
+      다음
     </button>
   </div>
 </template>
@@ -49,7 +49,7 @@ const goBack = () => {
 };
 const goNext = () => {
   if (selected.value !== null) {
-    router.push("/");
+    router.push("/profile-step-2");
   }
 };
 </script>

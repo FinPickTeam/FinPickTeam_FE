@@ -16,7 +16,7 @@
             type="tel"
             id="phone"
             v-model="phoneNumber"
-            @input="filterNumbers"
+            @input="formatPhoneNumber"
             :class="{ error: showErrors && !phoneNumber }"
             placeholder="휴대폰 번호를 입력하세요"
           />
@@ -61,6 +61,10 @@
             type="text"
             id="name"
             v-model="userName"
+            maxlength="10"
+            @input="filterName"
+            @compositionstart="handleComposition"
+            @compositionend="handleComposition"
             :class="{ error: showErrors && !userName }"
             placeholder="이름을 입력하세요"
           />
@@ -105,6 +109,34 @@
   </div>
 </template>
 <script setup>
+// 전화번호 자동 하이픈 포맷팅
+function formatPhoneNumber(event) {
+  let value = event.target.value.replace(/[^0-9]/g, "");
+  if (value.length > 11) value = value.slice(0, 11);
+  let formatted = value;
+  if (value.length >= 3 && value.length <= 7) {
+    formatted = value.slice(0, 3) + "-" + value.slice(3);
+  } else if (value.length > 7) {
+    formatted =
+      value.slice(0, 3) + "-" + value.slice(3, 7) + "-" + value.slice(7);
+  }
+  phoneNumber.value = formatted;
+}
+// 이름 입력 시 문자만 허용
+let isComposing = false;
+function filterName(event) {
+  if (isComposing) return;
+  // 한글, 영문만 허용 (공백, 숫자, 특수문자 불가)
+  const value = event.target.value;
+  userName.value = value.replace(/[^a-zA-Z가-힣]/g, "");
+}
+function handleComposition(e) {
+  if (e.type === "compositionstart") isComposing = true;
+  if (e.type === "compositionend") {
+    isComposing = false;
+    filterName(e);
+  }
+}
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 
@@ -117,11 +149,14 @@ const showErrors = ref(false);
 
 // 모든 필수 필드가 입력되었는지 확인
 const isFormValid = computed(() => {
+  // 휴대폰 번호: 11자리(하이픈 제외), 생년월일: 8자리(YYYYMMDD)
+  const phoneDigits = phoneNumber.value.replace(/[^0-9]/g, "");
+  const birthDigits = birthDate.value.replace(/[^0-9]/g, "");
   return (
-    phoneNumber.value &&
+    phoneDigits.length === 11 &&
     selectedCarrier.value &&
     userName.value &&
-    birthDate.value
+    birthDigits.length === 8
   );
 });
 
