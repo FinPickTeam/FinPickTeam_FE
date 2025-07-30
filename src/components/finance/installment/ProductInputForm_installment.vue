@@ -85,13 +85,14 @@ const selectedPrefer = ref([]);
   padding: 18px 0 0 0;
 }
 .section-label {
-  font-size: 15px;
+  /*우대항목*/
+  font-size: var(--font-size-body);
   font-weight: 600;
-  color: #222;
+  color: var(--color-text);
   margin-bottom: 8px;
 }
 .period-amount-card {
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 16px;
   box-shadow: 0 2px 8px #0001;
   padding: 20px 18px 18px 18px;
@@ -108,27 +109,29 @@ const selectedPrefer = ref([]);
 .period-select {
   border: none;
   background: none;
-  font-size: 17px;
-  color: #1e8876;
+  font-size: var(--font-size-title-sub);
+  color: var(--color-main);
   font-weight: 600;
   outline: none;
   cursor: pointer;
 }
 .period-label {
-  font-size: 15px;
-  color: #444;
+  font-size: var(--font-size-body-large);
+  color: var(--color-text);
+  font-weight: 500;
 }
 .amount-row {
-  font-size: 16px;
-  color: #222;
-  font-weight: 500;
+  font-size: var(--font-size-body-large);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
 }
 .amount-input {
   border: none;
-  border-bottom: 1.5px solid #1e8876;
-  width: 90px;
-  font-size: 16px;
-  color: #1e8876;
+  border-bottom: 1.5px solid var(--color-main);
+  border-radius: 0;
+  width: 100px;
+  font-size: var(--font-size-title-sub);
+  color: var(--color-main);
   font-weight: 600;
   text-align: right;
   margin: 0 4px;
@@ -141,19 +144,19 @@ const selectedPrefer = ref([]);
 }
 .saving-type-btn {
   flex: 1 1 0;
-  border: 1.5px solid #e0e0e0;
-  background: #fff;
-  color: #222;
-  font-size: 15px;
-  font-weight: 500;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
   border-radius: 12px;
   padding: 10px 0;
   cursor: pointer;
   transition: border 0.2s, color 0.2s;
 }
 .saving-type-btn.active {
-  border: 1.5px solid #1e8876;
-  color: #1e8876;
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
 }
 .prefer-row {
   display: flex;
@@ -164,27 +167,27 @@ const selectedPrefer = ref([]);
 .prefer-tag {
   display: flex;
   align-items: center;
-  border: 1.5px solid #e0e0e0;
-  background: #fff;
-  color: #444;
-  font-size: 14px;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
   border-radius: 12px;
   padding: 7px 14px;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   transition: border 0.2s, color 0.2s, background 0.2s;
 }
 .prefer-tag.checked {
-  border: 1.5px solid #1e8876;
-  color: #1e8876;
-  background: #f0fdfa;
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
+  background: #f3f0fa;
 }
 .prefer-desc {
   display: inline-block;
-  background: #222;
-  color: #fff;
-  font-size: 11px;
-  font-weight: 500;
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
   border-radius: 8px;
   padding: 2px 10px;
   margin-left: 8px;
@@ -192,18 +195,18 @@ const selectedPrefer = ref([]);
 }
 .search-btn {
   width: 100%;
-  background: #1e8876;
-  color: #fff;
+  background: var(--color-main);
+  color: var(--color-bg);
   border: none;
   border-radius: 10px;
   padding: 13px 0;
-  font-size: 17px;
-  font-weight: 600;
+  font-size: var(--font-size-title-sub);
+  font-weight: var(--font-weight-medium);
   margin-top: 10px;
   cursor: pointer;
   transition: background 0.2s;
 }
 .search-btn:hover {
-  background: #176e5e;
+  background: var(--color-main-dark);
 }
 </style>
