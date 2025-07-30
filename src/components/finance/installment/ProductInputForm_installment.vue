@@ -12,8 +12,13 @@
         <span class="period-label">만기로</span>
       </div>
       <div class="amount-row">
-        매월 <input v-model="amount" class="amount-input" type="text" />원
-        저축하기
+        매월
+        <input
+          v-model="formattedAmount"
+          class="amount-input"
+          type="text"
+          @input="handleAmountInput"
+        />원 저축하기
       </div>
     </div>
 
@@ -57,9 +62,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+
 const period = ref('1년');
-const amount = ref('100,000');
+const amount = ref(100000); // 숫자로 저장
 const savingType = ref('자유적립식');
 const preferList = [
   '자동이체 실적',
@@ -75,14 +81,52 @@ const preferList = [
   '소득이체 실적',
 ];
 const selectedPrefer = ref([]);
+
+// 콤마가 포함된 포맷된 금액
+const formattedAmount = computed({
+  get: () => {
+    return amount.value.toLocaleString();
+  },
+  set: (value) => {
+    // 콤마 제거 후 숫자만 추출
+    const numericValue = value.replace(/[^\d]/g, '');
+    if (numericValue) {
+      amount.value = parseInt(numericValue);
+    } else {
+      amount.value = 0;
+    }
+  },
+});
+
+// 입력 처리 함수
+function handleAmountInput(event) {
+  const input = event.target;
+  const value = input.value;
+
+  // 숫자와 콤마만 허용
+  const numericValue = value.replace(/[^\d,]/g, '');
+
+  // 콤마 제거 후 숫자만 추출
+  const cleanValue = numericValue.replace(/,/g, '');
+
+  if (cleanValue) {
+    // 숫자를 1000단위로 콤마 포맷팅
+    const formatted = parseInt(cleanValue).toLocaleString();
+    input.value = formatted;
+    amount.value = parseInt(cleanValue);
+  } else {
+    input.value = '';
+    amount.value = 0;
+  }
+}
 </script>
 
 <style scoped>
 .input-form {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  padding: 18px 0 0 0;
+  gap: 10px;
+  padding: 10px 0 0 0;
 }
 .section-label {
   /*우대항목*/
@@ -95,11 +139,11 @@ const selectedPrefer = ref([]);
   background: var(--color-bg);
   border-radius: 16px;
   box-shadow: 0 2px 8px #0001;
-  padding: 20px 18px 18px 18px;
+  padding: 10px 18px 14px 18px;
   margin-bottom: 8px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 2px;
 }
 .period-select-row {
   display: flex;
@@ -129,12 +173,12 @@ const selectedPrefer = ref([]);
   border: none;
   border-bottom: 1.5px solid var(--color-main);
   border-radius: 0;
-  width: 100px;
+  width: 120px;
   font-size: var(--font-size-title-sub);
   color: var(--color-main);
   font-weight: 600;
   text-align: right;
-  margin: 0 4px;
+  margin: 0 2px;
   outline: none;
   background: none;
 }
