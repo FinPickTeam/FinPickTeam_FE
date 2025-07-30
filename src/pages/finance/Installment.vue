@@ -28,8 +28,11 @@
 
     <!-- 추천 탭일 때 -->
     <div class="scroll-area" v-if="activeSubtab === '추천'">
-      <ProductInputForm />
-      <ProductCardList :products="recommendProducts" />
+      <ProductInputForm
+        @search-completed="showSearchResults"
+        @hide-results="hideSearchResults"
+      />
+      <ProductCardList v-if="showResults" :products="recommendProducts" />
     </div>
 
     <!-- 전체 보기 탭일 때 -->
@@ -54,6 +57,7 @@ const router = useRouter();
 const activeSubtab = ref('추천');
 const recommendProducts = ref([]);
 const allProducts = ref([]);
+const showResults = ref(false);
 
 onMounted(() => {
   // 추천 상품 데이터 로드
@@ -73,6 +77,14 @@ function goTo(path) {
 
 function changeSubtab(tabName) {
   activeSubtab.value = tabName;
+}
+
+function showSearchResults() {
+  showResults.value = true;
+}
+
+function hideSearchResults() {
+  showResults.value = false;
 }
 </script>
 
