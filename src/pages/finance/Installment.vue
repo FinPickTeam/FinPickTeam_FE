@@ -14,24 +14,35 @@
         class="subtab"
         :class="{ active: activeSubtab === '추천' }"
         @click="changeSubtab('추천')"
+        >추천</span
       >
-        추천
-      </span>
       <span
         class="subtab"
         :class="{ active: activeSubtab === '전체 보기' }"
         @click="changeSubtab('전체 보기')"
+        >전체 보기</span
       >
-        전체 보기
-      </span>
     </div>
 
     <!-- 추천 탭일 때 -->
     <div class="scroll-area" v-if="activeSubtab === '추천'">
       <ProductInputForm
+        v-if="!showResults"
         @search-completed="showSearchResults"
         @hide-results="hideSearchResults"
       />
+
+      <!-- 조건 요약 텍스트 -->
+      <div v-if="summaryText" class="summary-text-box">
+        <div class="summary-content">
+          <div class="summary-info">
+            <span class="summary-label">🔍 검색 조건:</span>
+            <span class="summary-text">{{ summaryText }}</span>
+          </div>
+          <button class="edit-btn" @click="hideSearchResults">수정</button>
+        </div>
+      </div>
+
       <ProductCardList v-if="showResults" :products="recommendProducts" />
     </div>
 
@@ -58,14 +69,12 @@ const activeSubtab = ref('추천');
 const recommendProducts = ref([]);
 const allProducts = ref([]);
 const showResults = ref(false);
+const summaryText = ref('');
 
 onMounted(() => {
-  // 추천 상품 데이터 로드
   if (recommendData.status === 200 && recommendData.data) {
     recommendProducts.value = recommendData.data;
   }
-
-  // 전체 상품 데이터 로드
   if (allData.status === 200 && allData.data) {
     allProducts.value = allData.data;
   }
@@ -79,12 +88,14 @@ function changeSubtab(tabName) {
   activeSubtab.value = tabName;
 }
 
-function showSearchResults() {
+function showSearchResults(summary) {
+  summaryText.value = summary;
   showResults.value = true;
 }
 
 function hideSearchResults() {
   showResults.value = false;
+  summaryText.value = '';
 }
 </script>
 
@@ -94,11 +105,10 @@ function hideSearchResults() {
   margin: 0 auto;
   padding: 0px 16px;
   font-family: var(--font-main);
-  height: calc(100vh - 56px); /* 전체 화면 높이 - 헤더/탭 높이 */
+  height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
 }
-
 .tab-row {
   display: flex;
   gap: 12px;
@@ -107,25 +117,21 @@ function hideSearchResults() {
   margin-bottom: 8px;
   align-items: baseline;
 }
-
 .tab {
   color: #888;
   cursor: pointer;
   padding-bottom: 4px;
 }
-
 .tab.active {
   color: var(--color-main);
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-title-sub);
 }
-
 .subtab-row {
   display: flex;
   width: 100%;
   margin-bottom: 10px;
 }
-
 .subtab {
   flex: 1 1 0;
   text-align: center;
@@ -134,27 +140,21 @@ function hideSearchResults() {
   padding-bottom: 2px;
   border-bottom: 2px solid transparent;
   font-size: 15px;
-  /* 필요하다면 높이, 라인하이트 등 추가 */
 }
-
 .subtab.active {
   color: var(--color-main-light);
   border-bottom: 2px solid var(--color-main-light);
 }
-
 .scroll-area {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 100px; /* 네비게이션바 가리는 문제 방지 */
-  /* 스크롤바 숨기기 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE, Edge */
+  padding-bottom: 100px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-
 .scroll-area::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
-
 .info-text {
   margin-top: 36px;
   font-size: 17px;
@@ -163,9 +163,46 @@ function hideSearchResults() {
   font-weight: 500;
   line-height: 1.6;
 }
-
 .emoji {
   font-size: 20px;
   vertical-align: middle;
+}
+.summary-text-box {
+  background: #f5f5f5;
+  padding: 10px 12px;
+  margin: 10px 0 16px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #333;
+}
+.summary-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.summary-info {
+  flex: 1;
+}
+.summary-label {
+  font-weight: 600;
+  margin-right: 4px;
+}
+.summary-text {
+  font-weight: 500;
+}
+.edit-btn {
+  background: var(--color-main);
+  color: var(--color-bg);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-left: 12px;
+}
+.edit-btn:hover {
+  background: var(--color-main-dark);
 }
 </style>

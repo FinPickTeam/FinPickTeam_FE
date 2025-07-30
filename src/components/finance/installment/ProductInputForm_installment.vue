@@ -1,6 +1,6 @@
 <template>
-  <!-- 입력 폼 모드 -->
-  <form v-if="!isSummaryMode" class="input-form" @submit.prevent="handleSubmit">
+  <!-- 입력 폼 -->
+  <form class="input-form" @submit.prevent="handleSubmit">
     <!-- 기간/금액 -->
     <div class="section-label">기간/금액</div>
     <div class="period-amount-card">
@@ -62,41 +62,13 @@
     <!-- 검색 버튼 -->
     <button class="search-btn" type="submit">검색</button>
   </form>
-
-  <!-- 요약 모드 -->
-  <div v-else class="summary-container">
-    <div class="summary-card">
-      <div class="summary-header">
-        <span class="summary-title">검색 조건</span>
-        <button class="edit-btn" @click="toggleSummaryMode">수정</button>
-      </div>
-      <div class="summary-content">
-        <div class="summary-item">
-          <span class="summary-label">기간:</span>
-          <span class="summary-value">{{ period }}</span>
-        </div>
-        <div class="summary-item">
-          <span class="summary-label">월 저축:</span>
-          <span class="summary-value">{{ formattedAmount }}원</span>
-        </div>
-        <div class="summary-item">
-          <span class="summary-label">적립방식:</span>
-          <span class="summary-value">{{ savingType }}</span>
-        </div>
-        <div class="summary-item" v-if="selectedPrefer.length > 0">
-          <span class="summary-label">우대항목:</span>
-          <span class="summary-value">{{ selectedPrefer.join(', ') }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
 
 const period = ref('1년');
-const amount = ref(100000); // 숫자로 저장
+const amount = ref(100000);
 const savingType = ref('자유적립식');
 const preferList = [
   '자동이체 실적',
@@ -111,25 +83,17 @@ const preferList = [
   '신규 고객 여부',
   '소득이체 실적',
 ];
-const selectedPrefer = ref([]);
-const isSummaryMode = ref(false);
 
-// 콤마가 포함된 포맷된 금액
+const selectedPrefer = ref([]);
+
 const formattedAmount = computed({
-  get: () => {
-    return amount.value.toLocaleString();
-  },
+  get: () => amount.value.toLocaleString(),
   set: (value) => {
     const numericValue = value.replace(/[^\d]/g, '');
-    if (numericValue) {
-      amount.value = parseInt(numericValue);
-    } else {
-      amount.value = 0;
-    }
+    amount.value = numericValue ? parseInt(numericValue) : 0;
   },
 });
 
-// 입력 처리 함수
 function handleAmountInput(event) {
   const input = event.target;
   const value = input.value;
@@ -145,32 +109,37 @@ function handleAmountInput(event) {
   }
 }
 
-// 요약 모드 토글
-function toggleSummaryMode() {
-  isSummaryMode.value = !isSummaryMode.value;
+// 요약 텍스트 생성
+const summaryText = computed(() => {
+  const preferText =
+    selectedPrefer.value.length > 0
+      ? selectedPrefer.value.length === 1
+        ? selectedPrefer.value[0]
+        : selectedPrefer.value.length === 2
+        ? selectedPrefer.value.join('+')
+        : selectedPrefer.value[0] +
+          '+' +
+          selectedPrefer.value[1] +
+          ' 외 ' +
+          (selectedPrefer.value.length - 2) +
+          '건'
+      : '';
+  return `${period.value} | 월 ${amount.value.toLocaleString()}원 | ${
+    savingType.value
+  }${preferText ? ' | ' + preferText : ''}`;
+});
 
-  // 수정 모드로 돌아갈 때 상품 리스트 숨기기
-  if (!isSummaryMode.value) {
-    emit('hide-results');
-  }
-}
+const emit = defineEmits(['search-completed']);
 
-// 폼 제출 시 입력값 콘솔 출력 및 요약 모드로 변경
 function handleSubmit() {
+  // 콘솔 출력
   console.log('기간:', period.value);
   console.log('월 저축 금액:', amount.value);
   console.log('적립방식:', savingType.value);
   console.log('우대항목:', selectedPrefer.value);
 
-  // 요약 모드로 변경
-  isSummaryMode.value = true;
-
-  // 부모 컴포넌트에 검색 완료 이벤트 발생
-  emit('search-completed');
+  emit('search-completed', summaryText.value);
 }
-
-// 이벤트 정의
-const emit = defineEmits(['search-completed', 'hide-results']);
 </script>
 
 <style scoped>
@@ -304,72 +273,5 @@ const emit = defineEmits(['search-completed', 'hide-results']);
 }
 .search-btn:hover {
   background: var(--color-main-dark);
-}
-
-/* 요약 모드 스타일 */
-.summary-container {
-  padding: 10px 0 0 0;
-}
-
-.summary-card {
-  background: var(--color-bg);
-  border-radius: 16px;
-  box-shadow: 0 2px 8px #0001;
-  padding: 16px;
-  margin-bottom: 8px;
-}
-
-.summary-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.summary-title {
-  font-size: var(--font-size-title-sub);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text);
-}
-
-.edit-btn {
-  background: var(--color-main);
-  color: var(--color-bg);
-  border: none;
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.edit-btn:hover {
-  background: var(--color-main-dark);
-}
-
-.summary-content {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.summary-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.summary-label {
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-light);
-  min-width: 60px;
-}
-
-.summary-value {
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text);
 }
 </style>
