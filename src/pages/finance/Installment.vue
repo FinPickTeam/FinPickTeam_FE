@@ -29,17 +29,50 @@
     <!-- 추천 탭일 때 -->
     <div class="scroll-area" v-if="activeSubtab === '추천'">
       <ProductInputForm
+        v-if="!showResults"
+        :is-summary-mode="isSummaryMode"
+        :form-data="formData"
         @search-completed="showSearchResults"
-        @hide-results="hideSearchResults"
+        @toggle-summary-mode="toggleSummaryMode"
       />
+
+      <!-- 조건 요약 텍스트 -->
+      <div v-if="summaryText" class="summary-text-box">
+        <div class="summary-content">
+          <div class="summary-info">
+            <div class="summary-text-container">
+              <div class="summary-item-box">
+                <span class="summary-item-value">{{ formData.period }}</span>
+              </div>
+              <div class="summary-item-box">
+                <span class="summary-item-value"
+                  >월 {{ formData.amount.toLocaleString() }}원</span
+                >
+              </div>
+              <div class="summary-item-box">
+                <span class="summary-item-value">{{
+                  formData.savingType
+                }}</span>
+              </div>
+              <div
+                v-if="formData.selectedPrefer.length > 0"
+                class="summary-item-box"
+              >
+                <span class="summary-item-value">{{
+                  formData.selectedPrefer.join(', ')
+                }}</span>
+              </div>
+            </div>
+          </div>
+          <button class="edit-btn" @click="hideSearchResults">수정</button>
+        </div>
+      </div>
+
       <ProductCardList v-if="showResults" :products="recommendProducts" />
     </div>
 
     <!-- 전체 보기 탭일 때 -->
     <div class="scroll-area" v-else>
-      <div class="info-text">
-        <span class="emoji">📊</span> 전체 적금 상품을 확인해보세요
-      </div>
       <ProductCardList :products="allProducts" />
     </div>
   </div>
@@ -58,6 +91,14 @@ const activeSubtab = ref('추천');
 const recommendProducts = ref([]);
 const allProducts = ref([]);
 const showResults = ref(false);
+const isSummaryMode = ref(false);
+const summaryText = ref('');
+const formData = ref({
+  period: '1년',
+  amount: 100000,
+  savingType: '자유적립식',
+  selectedPrefer: [],
+});
 
 onMounted(() => {
   // 추천 상품 데이터 로드
@@ -79,12 +120,44 @@ function changeSubtab(tabName) {
   activeSubtab.value = tabName;
 }
 
-function showSearchResults() {
+function showSearchResults(receivedFormData) {
   showResults.value = true;
+
+  // 폼 데이터 저장
+  formData.value = receivedFormData;
+
+  // 요약 텍스트 생성
+  const preferText =
+    receivedFormData.selectedPrefer.length > 0
+      ? receivedFormData.selectedPrefer.length === 1
+        ? receivedFormData.selectedPrefer[0]
+        : receivedFormData.selectedPrefer.length === 2
+        ? receivedFormData.selectedPrefer.join('+')
+        : receivedFormData.selectedPrefer[0] +
+          '+' +
+          receivedFormData.selectedPrefer[1] +
+          ' 외 ' +
+          (receivedFormData.selectedPrefer.length - 2) +
+          '건'
+      : '';
+
+  summaryText.value = `${
+    receivedFormData.period
+  } | 월 ${receivedFormData.amount.toLocaleString()}원 | ${
+    receivedFormData.savingType
+  }${preferText ? ' | ' + preferText : ''}`;
 }
 
 function hideSearchResults() {
   showResults.value = false;
+  summaryText.value = '';
+}
+
+function toggleSummaryMode() {
+  isSummaryMode.value = !isSummaryMode.value;
+  if (!isSummaryMode.value) {
+    hideSearchResults();
+  }
 }
 </script>
 
@@ -167,5 +240,92 @@ function hideSearchResults() {
 .emoji {
   font-size: 20px;
   vertical-align: middle;
+}
+
+.summary-text-box {
+  margin-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.summary-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+}
+
+.summary-text-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
+  /* 스크롤바 숨기기 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
+
+.summary-text-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.summary-item-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 8px 6px;
+  min-width: 30px;
+  flex-shrink: 0;
+}
+
+.summary-item-label {
+  font-size: 11px;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 2px;
+  text-align: center;
+}
+
+.summary-item-value {
+  font-size: 12px;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.edit-btn {
+  background-color: var(--color-main);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: var(--font-weight-medium);
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 48px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.edit-btn:hover {
+  background-color: var(--color-main-dark);
 }
 </style>
