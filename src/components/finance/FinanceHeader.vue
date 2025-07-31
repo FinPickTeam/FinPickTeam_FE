@@ -42,10 +42,15 @@ const toggleFavorite = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   background: var(--color-bg-light);
   padding: 5px 0;
   min-height: 80px;
+  z-index: 100;
 }
 .icon-btn {
   background: none;
