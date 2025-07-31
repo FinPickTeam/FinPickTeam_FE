@@ -1,6 +1,6 @@
 <!-- 적금 상품 카드 컴포넌트 -->
 <template>
-  <div v-if="product" class="product-card">
+  <div v-if="product" class="product-card" @click="goToDetail">
     <!-- 은행 로고 -->
     <div class="bank-logo">
       <img
@@ -16,7 +16,7 @@
         <span
           class="heart"
           :class="{ active: isFavorite }"
-          @click="toggleFavorite"
+          @click.stop="toggleFavorite"
           >♥</span
         >
       </div>
@@ -36,14 +36,25 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite.js';
 
 const props = defineProps({
   product: Object,
 });
 
+const router = useRouter();
 const favoriteStore = useFavoriteStore();
 const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
+
+function goToDetail() {
+  // 상품 ID를 기반으로 상세 페이지로 이동
+  // 실제로는 product.id 또는 다른 고유 식별자를 사용
+  const productId =
+    props.product.installmentProductName?.replace(/\s+/g, '-') || 'default';
+  router.push(`/finance/installment/${productId}`);
+}
+
 function toggleFavorite() {
   console.log('Toggle favorite clicked for:', props.product);
   console.log('Current isFavorite:', isFavorite.value);
@@ -104,6 +115,13 @@ const getLogoUrl = (bankName) => {
   width: 350px;
   font-family: var(--font-main);
   margin-bottom: 10px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px 0 #0003;
 }
 .bank-logo {
   position: absolute;

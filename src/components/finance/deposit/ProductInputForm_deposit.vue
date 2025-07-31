@@ -1,75 +1,283 @@
 <!-- 투자 금액/기간 입력 폼 -->
 <template>
-  <div class="product-input-form">
-    <div class="input-summary">
-      <div class="input-wrap">
-        <input
-          v-model="amountRaw"
-          type="text"
-          class="highlight input-amount"
-          min="0"
-          :placeholder="'금액'"
-          @input="onAmountInput"
-        />
-        <span class="input-overlay" v-if="amountRaw">
-          {{ formattedAmount }}
-        </span>
+  <!-- 입력 폼 모드 -->
+  <form v-if="!isSummaryMode" class="input-form" @submit.prevent="handleSubmit">
+    <!-- 투자 금액/기간 -->
+    <div class="section-label">투자 금액/기간</div>
+    <div class="amount-period-card">
+      <div class="period-select-row">
+        <select v-model="period" class="period-select">
+          <option value="1년">1년</option>
+          <option value="2년">2년</option>
+          <option value="3년">3년</option>
+          <option value="4년">4년</option>
+          <option value="5년">5년</option>
+        </select>
+        <span class="period-label">만기로</span>
       </div>
-      원을
-      <input
-        v-model="period"
-        type="number"
-        class="highlight input-period"
-        min="1"
-        :placeholder="'개월'"
-        :class="{ bold: period }"
-      />
-      개월 동안 투자하면<br />
-      어떤 예적금 상품이 좋을까요?
+      <div class="amount-row">
+        매월
+        <input
+          v-model="formattedAmount"
+          class="amount-input"
+          type="text"
+          @input="handleAmountInput"
+        />원 저축하기
+      </div>
     </div>
-    <button class="check-btn" @click="logValues">추천 상품 확인하기</button>
+
+    <!-- 예금 유형 -->
+    <div class="section-label">예금 유형</div>
+    <div class="deposit-type-row">
+      <button
+        type="button"
+        :class="['deposit-type-btn', { active: depositType === '정기예금' }]"
+        @click="depositType = '정기예금'"
+      >
+        정기예금
+      </button>
+      <button
+        type="button"
+        :class="['deposit-type-btn', { active: depositType === '정기적금' }]"
+        @click="depositType = '정기적금'"
+      >
+        정기적금
+      </button>
+    </div>
+
+    <!-- 우대항목 -->
+    <div class="section-label">
+      우대항목 <span class="prefer-desc">선택하지 않아도 검색 가능</span>
+    </div>
+    <div class="prefer-row">
+      <label
+        v-for="item in preferList"
+        :key="item"
+        :class="['prefer-tag', { checked: selectedPrefer.includes(item) }]"
+      >
+        <input type="checkbox" v-model="selectedPrefer" :value="item" hidden />
+        {{ item }}
+      </label>
+    </div>
+
+    <!-- 검색 버튼 -->
+    <button class="search-btn" type="submit">검색</button>
+  </form>
+
+  <!-- 요약 모드 -->
+  <div v-else class="summary-container">
+    <div class="summary-card">
+      <div class="summary-header">
+        <span class="summary-title">검색 조건</span>
+        <button class="edit-btn" @click="toggleSummaryMode">수정</button>
+      </div>
+      <div class="summary-content">
+        <div class="summary-item">
+          <span class="summary-label">투자 금액:</span>
+          <span class="summary-value">{{ formattedAmount }}원</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">투자 기간:</span>
+          <span class="summary-value">{{ period }}</span>
+        </div>
+        <div class="summary-item">
+          <span class="summary-label">예금 유형:</span>
+          <span class="summary-value">{{ depositType }}</span>
+        </div>
+        <div class="summary-item" v-if="selectedPrefer.length > 0">
+          <span class="summary-label">우대항목:</span>
+          <span class="summary-value">{{ selectedPrefer.join(', ') }}</span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
-const emit = defineEmits(['show-products']);
-
-const amountRaw = ref('500000000');
-const period = ref(12);
-
-const formattedAmount = computed(() => {
-  const num = Number(amountRaw.value.replace(/[^0-9]/g, ''));
-  return num ? num.toLocaleString() : '';
+// Props 정의
+const props = defineProps({
+  isSummaryMode: {
+    type: Boolean,
+    default: false,
+  },
+  formData: {
+    type: Object,
+    default: () => ({
+      amountRaw: 100000,
+      period: '1년',
+      depositType: '정기예금',
+      selectedPrefer: [],
+    }),
+  },
 });
 
-function onAmountInput(e) {
-  amountRaw.value = e.target.value.replace(/[^0-9]/g, '');
+const amountRaw = ref(props.formData.amountRaw);
+const period = ref(props.formData.period);
+const depositType = ref(props.formData.depositType);
+const preferList = [
+  '신규 고객',
+  '급여 이체 실적 있음',
+  '신용/체크카드 실적 있음',
+  '오픈뱅킹 가입 및 유지 중',
+  '마케팅 정보 수신에 동의',
+  '주택청약 보유',
+  '쿠폰 사용 경험 있음',
+];
+const selectedPrefer = ref([...props.formData.selectedPrefer]);
+
+// props가 변경될 때 로컬 상태 업데이트
+watch(
+  () => props.formData,
+  (newFormData) => {
+    amountRaw.value = newFormData.amountRaw;
+    period.value = newFormData.period;
+    depositType.value = newFormData.depositType;
+    selectedPrefer.value = [...newFormData.selectedPrefer];
+  },
+  { deep: true }
+);
+
+// 콤마가 포함된 포맷된 금액
+const formattedAmount = computed({
+  get: () => {
+    return amountRaw.value.toLocaleString();
+  },
+  set: (value) => {
+    const numericValue = value.replace(/[^\d]/g, '');
+    if (numericValue) {
+      amountRaw.value = parseInt(numericValue);
+    } else {
+      amountRaw.value = 0;
+    }
+  },
+});
+
+// 입력 처리 함수
+function handleAmountInput(event) {
+  const input = event.target;
+  const value = input.value;
+  const numericValue = value.replace(/[^\d,]/g, '');
+  const cleanValue = numericValue.replace(/,/g, '');
+  if (cleanValue) {
+    const formatted = parseInt(cleanValue).toLocaleString();
+    input.value = formatted;
+    amountRaw.value = parseInt(cleanValue);
+  } else {
+    input.value = '';
+    amountRaw.value = 0;
+  }
 }
 
-function logValues() {
-  // 기존 콘솔 출력
-  console.log('입력한 금액:', formattedAmount.value);
-  console.log('입력한 기간:', period.value);
-  // 부모에게 알림
-  emit('show-products');
+// 요약 모드 토글
+function toggleSummaryMode() {
+  emit('toggle-summary-mode');
 }
+
+// 폼 제출 시 입력값 콘솔 출력 및 부모에게 이벤트 전달
+function handleSubmit() {
+  console.log('투자 금액:', formattedAmount.value);
+  console.log('투자 기간:', period.value);
+  console.log('예금 유형:', depositType.value);
+  console.log('우대항목:', selectedPrefer.value);
+
+  // 필터링 객체 생성
+  const filterObject = {
+    newCustomer: selectedPrefer.value.includes('신규 고객'),
+    salaryTransfer: selectedPrefer.value.includes('급여 이체 실적 있음'),
+    cardUsage: selectedPrefer.value.includes('신용/체크카드 실적 있음'),
+    internetMobileBanking:
+      selectedPrefer.value.includes('오픈뱅킹 가입 및 유지 중'),
+    marketingConsent: selectedPrefer.value.includes('마케팅 정보 수신에 동의'),
+    housingSubscription: selectedPrefer.value.includes('주택청약 보유'),
+    couponUsed: selectedPrefer.value.includes('쿠폰 사용 경험 있음'),
+  };
+
+  console.log('필터링 객체:', filterObject);
+
+  // 부모 컴포넌트에 검색 완료 이벤트와 폼 데이터 전달
+  emit('search-completed', {
+    amountRaw: amountRaw.value,
+    period: period.value,
+    depositType: depositType.value,
+    selectedPrefer: selectedPrefer.value,
+    filterObject: filterObject,
+  });
+}
+
+// 이벤트 정의
+const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
 </script>
 
 <style scoped>
-.product-input-form {
-  background: var(--color-bg);
-  border-radius: 16px;
-  padding: 20px 5px 20px 5px;
+.input-form {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.04);
-  max-width: 350px;
-  margin: 0 auto;
-  margin-bottom: 14px;
+  gap: 10px;
+  padding: 10px 0 0 0;
 }
+
+.section-label {
+  font-size: var(--font-size-body);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 8px;
+}
+
+.amount-period-card {
+  background: var(--color-bg);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 10px 18px 14px 18px;
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.period-select-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.period-select {
+  border: none;
+  background: none;
+  font-size: var(--font-size-title-sub);
+  color: var(--color-main);
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.period-label {
+  font-size: var(--font-size-body-large);
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.amount-row {
+  font-size: var(--font-size-body-large);
+  color: var(--color-text);
+  font-weight: var(--font-weight-medium);
+}
+
+.amount-input {
+  border: none;
+  border-bottom: 1.5px solid var(--color-main);
+  border-radius: 0;
+  width: 120px;
+  font-size: var(--font-size-title-sub);
+  color: var(--color-main);
+  font-weight: 600;
+  text-align: right;
+  margin: 0 2px;
+  outline: none;
+  background: none;
+}
+
 .input-summary {
   color: var(--color-text);
   font-size: var(--font-size-body);
@@ -77,6 +285,7 @@ function logValues() {
   margin-bottom: 4px;
   line-height: 1.7;
 }
+
 .highlight {
   background: #edeaff;
   color: var(--color-main);
@@ -93,6 +302,7 @@ function logValues() {
   max-width: 12ch;
   width: auto;
 }
+
 .input-wrap {
   position: relative;
   display: inline-block;
@@ -101,6 +311,7 @@ function logValues() {
   width: 100%;
   vertical-align: middle;
 }
+
 .input-amount {
   background: transparent;
   color: transparent;
@@ -123,6 +334,7 @@ function logValues() {
   overflow: hidden;
   white-space: nowrap;
 }
+
 .input-overlay {
   position: absolute;
   right: 0;
@@ -146,27 +358,160 @@ function logValues() {
   max-width: 17ch;
   justify-content: flex-end;
 }
+
 .input-period {
   width: 6ch;
 }
+
 .input-period.bold {
   font-weight: var(--font-weight-bold);
 }
-.check-btn {
-  width: 220px;
-  margin-top: 4px;
+
+.deposit-type-row {
+  display: flex;
+  gap: 12px;
+}
+
+.deposit-type-btn {
+  flex: 1 1 0;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  border-radius: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: border 0.2s, color 0.2s;
+}
+
+.deposit-type-btn.active {
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
+}
+
+.prefer-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 8px;
+  margin-top: 6px;
+}
+
+.prefer-tag {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  border-radius: 12px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  transition: border 0.2s, color 0.2s, background 0.2s;
+}
+
+.prefer-tag.checked {
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
+  background: #f3f0fa;
+}
+
+.prefer-desc {
+  display: inline-block;
+  background: var(--color-text);
+  color: var(--color-bg);
+  font-size: var(--font-size-caption);
+  font-weight: var(--font-weight-medium);
+  border-radius: 8px;
+  padding: 2px 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.search-btn {
+  width: 100%;
   background: var(--color-main);
-  color: #fff;
+  color: var(--color-bg);
   border: none;
   border-radius: 10px;
-  padding: 4px 0;
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-regular);
+  padding: 13px 0;
+  font-size: var(--font-size-title-sub);
+  font-weight: var(--font-weight-medium);
+  margin-top: 10px;
   cursor: pointer;
   transition: background 0.2s;
 }
-.check-btn:hover {
+
+.search-btn:hover {
   background: var(--color-main-dark);
+}
+
+/* 요약 모드 스타일 */
+.summary-container {
+  padding: 10px 0 0 0;
+}
+
+.summary-card {
+  background: var(--color-bg);
+  border-radius: 16px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 16px;
+  margin-bottom: 8px;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.summary-title {
+  font-size: var(--font-size-title-sub);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text);
+}
+
+.edit-btn {
+  background: var(--color-main);
+  color: var(--color-bg);
+  border: none;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-btn:hover {
+  background: var(--color-main-dark);
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.summary-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summary-label {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-light);
+  min-width: 60px;
+}
+
+.summary-value {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
 }
 
 /* Chrome, Safari, Edge, Opera */

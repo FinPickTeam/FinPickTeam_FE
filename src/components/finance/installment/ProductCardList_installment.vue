@@ -24,7 +24,7 @@ const props = defineProps({
 .product-card-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 0px;
   align-items: center;
   justify-content: center;
   padding: 20px;

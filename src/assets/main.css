@@ -4,6 +4,36 @@
   padding: 0;
   box-sizing: border-box;
 }
+
+/* 스크롤바 숨김 처리 */
+html {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
+
+html::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+body {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
+
+body::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* 모든 스크롤 가능한 요소에 대해 스크롤바 숨김 */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 :root {
   /* Primary Colors */
   --color-main: #4318d1;
@@ -84,17 +114,11 @@ h3 {
   font-size: 32px;
   font-weight: 900;
   letter-spacing: 1px;
-  background: linear-gradient(
-    90deg,
-    var(--color-main) 100%,
-    var(--color-main-light) 100%
-  );
+  background: var(--color-main);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: transparent;
   margin-bottom: 0;
-  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
 button,

@@ -1,7 +1,7 @@
 [
   {
-    "depositBankName": "하나은행",
-    "depositProductName": "김민서",
+    "depositBankName": "KB국민은행",
+    "depositProductName": "일반정기예금",
     "depositContractPeriod": "1개월 이상 60개월 이하",
     "depositSubscriptionAmount": "10만원 이상",
     "depositBasicRate": 2.25,
@@ -13,71 +13,35 @@
     "depositProductName": "KB Star 정기예금",
     "depositContractPeriod": "1개월 이상 36개월 이하",
     "depositSubscriptionAmount": "100만원 이상",
-    "depositBasicRate": 100,
+    "depositBasicRate": 2.15,
     "depositMaxRate": 2.45,
-    "depositSummary": " Digital KB 대표 정기예금"
-  },
-  {
-    "depositBankName": "IBK기업은행",
-    "depositProductName": "안홍영최고",
-    "depositContractPeriod": "1개월 이상 36개월 이하",
-    "depositSubscriptionAmount": "100만원 이상",
-    "depositBasicRate": 1.95,
-    "depositMaxRate": 4.05,
-    "depositSummary": "박준영"
-  },
-  {
-    "depositBankName": "하나은행",
-    "depositProductName": "김유빈",
-    "depositContractPeriod": "1개월 이상 60개월 이하",
-    "depositSubscriptionAmount": "10만원 이상",
-    "depositBasicRate": 2.25,
-    "depositMaxRate": 2.25,
-    "depositSummary": "목돈넣고 안정수익 마음든든"
+    "depositSummary": "Digital KB 대표 정기예금"
   },
   {
     "depositBankName": "KB국민은행",
-    "depositProductName": "박성빈",
-    "depositContractPeriod": "1개월 이상 36개월 이하",
-    "depositSubscriptionAmount": "100만원 이상",
-    "depositBasicRate": 100,
-    "depositMaxRate": 2.45,
-    "depositSummary": " Digital KB 대표 정기예금"
-  },
-  {
-    "depositBankName": "IBK기업은행",
-    "depositProductName": "이다현",
+    "depositProductName": "국민수퍼정기예금",
     "depositContractPeriod": "1개월 이상 36개월 이하",
     "depositSubscriptionAmount": "100만원 이상",
     "depositBasicRate": 1.95,
     "depositMaxRate": 2.05,
-    "depositSummary": "박준영"
+    "depositSummary": "가입 조건을 직접 설계하는"
+  },
+  {
+    "depositBankName": "신한은행",
+    "depositProductName": "신한 정기예금",
+    "depositContractPeriod": "1개월 이상 60개월 이하",
+    "depositSubscriptionAmount": "10만원 이상",
+    "depositBasicRate": 2.3,
+    "depositMaxRate": 2.3,
+    "depositSummary": "안정적인 수익을 원하는 분들을 위한"
   },
   {
     "depositBankName": "하나은행",
-    "depositProductName": "김로아",
+    "depositProductName": "하나 정기예금",
     "depositContractPeriod": "1개월 이상 60개월 이하",
     "depositSubscriptionAmount": "10만원 이상",
-    "depositBasicRate": 2.25,
-    "depositMaxRate": 2.25,
-    "depositSummary": "목돈넣고 안정수익 마음든든"
-  },
-  {
-    "depositBankName": "KB국민은행",
-    "depositProductName": "손주성",
-    "depositContractPeriod": "1개월 이상 36개월 이하",
-    "depositSubscriptionAmount": "100만원 이상",
-    "depositBasicRate": 100,
-    "depositMaxRate": 2.45,
-    "depositSummary": " Digital KB 대표 정기예금"
-  },
-  {
-    "depositBankName": "IBK기업은행",
-    "depositProductName": "조예림",
-    "depositContractPeriod": "1개월 이상 36개월 이하",
-    "depositSubscriptionAmount": "100만원 이상",
-    "depositBasicRate": 1.95,
-    "depositMaxRate": 2.05,
-    "depositSummary": "박준영"
+    "depositBasicRate": 2.2,
+    "depositMaxRate": 2.2,
+    "depositSummary": "하나은행의 대표 정기예금 상품"
   }
 ]
