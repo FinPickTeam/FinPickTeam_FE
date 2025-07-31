@@ -114,17 +114,11 @@ h3 {
   font-size: 32px;
   font-weight: 900;
   letter-spacing: 1px;
-  background: linear-gradient(
-    90deg,
-    var(--color-main) 100%,
-    var(--color-main-light) 100%
-  );
+  background: var(--color-main);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  color: transparent;
   margin-bottom: 0;
-  text-shadow: 0 0 1px rgba(0, 0, 0, 0.1);
 }
 
 button,
