@@ -45,11 +45,18 @@ const props = defineProps({
 const favoriteStore = useFavoriteStore();
 const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
 function toggleFavorite() {
+  console.log('Toggle favorite clicked for:', props.product);
+  console.log('Current isFavorite:', isFavorite.value);
+
   if (isFavorite.value) {
+    console.log('Removing from favorites');
     favoriteStore.removeFavorite(props.product);
   } else {
+    console.log('Adding to favorites');
     favoriteStore.addFavorite(props.product);
   }
+
+  console.log('Updated favorites:', favoriteStore.favorites);
 }
 
 const bankLogoMap = {
@@ -140,6 +147,8 @@ const getLogoUrl = (bankName) => {
   margin-left: 8px;
   user-select: none;
   transition: color 0.2s;
+  z-index: 10;
+  position: relative;
 }
 .heart.active {
   color: #e11d48;

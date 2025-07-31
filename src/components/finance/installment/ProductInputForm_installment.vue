@@ -93,11 +93,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
-const period = ref('1년');
-const amount = ref(100000); // 숫자로 저장
-const savingType = ref('자유적립식');
+// Props 정의
+const props = defineProps({
+  isSummaryMode: {
+    type: Boolean,
+    default: false,
+  },
+  formData: {
+    type: Object,
+    default: () => ({
+      period: '1년',
+      amount: 100000,
+      savingType: '자유적립식',
+      selectedPrefer: [],
+    }),
+  },
+});
+
+const period = ref(props.formData.period);
+const amount = ref(props.formData.amount);
+const savingType = ref(props.formData.savingType);
 const preferList = [
   '자동이체 실적',
   '신용/체크카드 사용',
@@ -111,8 +128,19 @@ const preferList = [
   '신규 고객 여부',
   '소득이체 실적',
 ];
-const selectedPrefer = ref([]);
-const isSummaryMode = ref(false);
+const selectedPrefer = ref([...props.formData.selectedPrefer]);
+
+// props가 변경될 때 로컬 상태 업데이트
+watch(
+  () => props.formData,
+  (newFormData) => {
+    period.value = newFormData.period;
+    amount.value = newFormData.amount;
+    savingType.value = newFormData.savingType;
+    selectedPrefer.value = [...newFormData.selectedPrefer];
+  },
+  { deep: true }
+);
 
 // 콤마가 포함된 포맷된 금액
 const formattedAmount = computed({
@@ -147,30 +175,27 @@ function handleAmountInput(event) {
 
 // 요약 모드 토글
 function toggleSummaryMode() {
-  isSummaryMode.value = !isSummaryMode.value;
-
-  // 수정 모드로 돌아갈 때 상품 리스트 숨기기
-  if (!isSummaryMode.value) {
-    emit('hide-results');
-  }
+  emit('toggle-summary-mode');
 }
 
-// 폼 제출 시 입력값 콘솔 출력 및 요약 모드로 변경
+// 폼 제출 시 입력값 콘솔 출력 및 부모에게 이벤트 전달
 function handleSubmit() {
   console.log('기간:', period.value);
   console.log('월 저축 금액:', amount.value);
   console.log('적립방식:', savingType.value);
   console.log('우대항목:', selectedPrefer.value);
 
-  // 요약 모드로 변경
-  isSummaryMode.value = true;
-
-  // 부모 컴포넌트에 검색 완료 이벤트 발생
-  emit('search-completed');
+  // 부모 컴포넌트에 검색 완료 이벤트와 폼 데이터 전달
+  emit('search-completed', {
+    period: period.value,
+    amount: amount.value,
+    savingType: savingType.value,
+    selectedPrefer: selectedPrefer.value,
+  });
 }
 
 // 이벤트 정의
-const emit = defineEmits(['search-completed', 'hide-results']);
+const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
 </script>
 
 <style scoped>
