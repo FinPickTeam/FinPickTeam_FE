@@ -69,7 +69,7 @@ const isHomeActive = computed(() => {
   max-width: 390px;
   width: 100%;
   background: #fff; /* 디자인 유지 위해 직접 지정 */
-  box-shadow: 0 -2px 12px 0 #0001;
+  /* box-shadow 제거 */
   display: flex;
   justify-content: space-around;
   align-items: center;
