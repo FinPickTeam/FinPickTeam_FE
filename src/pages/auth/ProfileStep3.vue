@@ -37,11 +37,12 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
-const options = ['전혀 없음', '1년 미만', '1-3년', '3-5년', '5년 이상'];
+const route = useRoute();
+const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
 const selected = ref(null);
 
 const goBack = () => {
@@ -49,7 +50,8 @@ const goBack = () => {
 };
 const goNext = () => {
   if (selected.value !== null) {
-    router.push('/profile-step-4');
+    const from = route.query.from || "mypage";
+    router.push(`/profile-step-4?from=${from}`);
   }
 };
 </script>
@@ -59,7 +61,7 @@ const goNext = () => {
   min-height: 100vh;
   background: #fff;
   padding: 0 20px 32px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 .nav-bar {
   display: flex;

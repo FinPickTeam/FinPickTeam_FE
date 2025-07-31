@@ -1,1901 +1,2444 @@
-[
-  {
-    "date": "2025-07-15",
-    "bank": "신한은행",
-    "logo": "신한은행.png",
-    "amount": 325000,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "식비"
-  },
-  {
-    "date": "2025-03-24",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 133552,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "서점"
-  },
-  {
-    "date": "2025-05-13",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 834959,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "간식"
-  },
-  {
-    "date": "2025-02-27",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 751828,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-05-01",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 118097,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-05-09",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 559454,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "간식"
-  },
-  {
-    "date": "2025-02-13",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 741637,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "식비"
-  },
-  {
-    "date": "2025-05-21",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 140717,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "쇼핑"
-  },
-  {
-    "date": "2025-01-10",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 824079,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-05-06",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 648825,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-02-17",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 159158,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "월급"
-  },
-  {
-    "date": "2025-01-21",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 942338,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-02-19",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 696087,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-03-08",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 510436,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "쇼핑"
-  },
-  {
-    "date": "2025-04-28",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 769436,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "서점"
-  },
-  {
-    "date": "2025-05-20",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 346359,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "간식"
-  },
-  {
-    "date": "2025-01-25",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 399572,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "환급"
-  },
-  {
-    "date": "2025-03-07",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 725797,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-01-17",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 868989,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "서점"
-  },
-  {
-    "date": "2025-03-20",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 738062,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-02-15",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 529365,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-02-11",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 611474,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-05-27",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 468556,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-05-24",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 503972,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "환급"
-  },
-  {
-    "date": "2025-06-15",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 247336,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "월급"
-  },
-  {
-    "date": "2025-02-13",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 962364,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "이체 수신"
-  },
-  {
-    "date": "2025-02-02",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 528850,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-06-16",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 25989,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-05-09",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 159558,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "환급"
-  },
-  {
-    "date": "2025-04-22",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 587459,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "마트"
-  },
-  {
-    "date": "2025-03-20",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 799866,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "환급"
-  },
-  {
-    "date": "2025-04-09",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 899670,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "이체 수신"
-  },
-  {
-    "date": "2025-04-21",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 401267,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-03-23",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 534670,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "간식"
-  },
-  {
-    "date": "2025-06-20",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 333153,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "식비"
-  },
-  {
-    "date": "2025-04-02",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 20190,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "서점"
-  },
-  {
-    "date": "2025-05-20",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 807064,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-04-01",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 615716,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "식비"
-  },
-  {
-    "date": "2025-03-13",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 268503,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-04-20",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 25035,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "쇼핑"
-  },
-  {
-    "date": "2025-01-08",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 176745,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-02-13",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 223639,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-04-17",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 367752,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-05-01",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 923152,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "서점"
-  },
-  {
-    "date": "2025-02-27",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 753797,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "월급"
-  },
-  {
-    "date": "2025-06-15",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 175956,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "카페"
-  },
-  {
-    "date": "2025-02-01",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 447349,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-06-08",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 919648,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "식비"
-  },
-  {
-    "date": "2025-04-22",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 153619,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-05-10",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 705241,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-05-14",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 182504,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-05-28",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 758393,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-06-18",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 825933,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "카페"
-  },
-  {
-    "date": "2025-01-26",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 392575,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "월급"
-  },
-  {
-    "date": "2025-01-13",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 964692,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-04-21",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 807568,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "간식"
-  },
-  {
-    "date": "2025-02-02",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 242909,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-04-06",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 785063,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "쇼핑"
-  },
-  {
-    "date": "2025-06-09",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 377176,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-02-11",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 296749,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "이체 수신"
-  },
-  {
-    "date": "2025-01-17",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 850576,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "마트"
-  },
-  {
-    "date": "2025-01-09",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 591005,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-06-16",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 173479,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "환급"
-  },
-  {
-    "date": "2025-05-11",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 87056,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-01-22",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 990063,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "월급"
-  },
-  {
-    "date": "2025-03-09",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 926272,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-06-13",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 840528,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "환급"
-  },
-  {
-    "date": "2025-05-22",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 616819,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-01-04",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 965396,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-04-19",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 422807,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "마트"
-  },
-  {
-    "date": "2025-02-25",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 806655,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-04-27",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 107978,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "환급"
-  },
-  {
-    "date": "2025-01-06",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 448241,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-06-22",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 420724,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "환급"
-  },
-  {
-    "date": "2025-02-17",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 327056,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "서점"
-  },
-  {
-    "date": "2025-03-13",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 151772,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "월급"
-  },
-  {
-    "date": "2025-05-17",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 139853,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "마트"
-  },
-  {
-    "date": "2025-06-02",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 952166,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "환급"
-  },
-  {
-    "date": "2025-03-16",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 86455,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "쇼핑"
-  },
-  {
-    "date": "2025-02-23",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 92409,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "식비"
-  },
-  {
-    "date": "2025-03-19",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 848254,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "카페"
-  },
-  {
-    "date": "2025-06-14",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 558404,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-05-25",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 204661,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "서점"
-  },
-  {
-    "date": "2025-03-25",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 863439,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-04-16",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 331677,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "쇼핑"
-  },
-  {
-    "date": "2025-01-20",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 356337,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "이체 수신"
-  },
-  {
-    "date": "2025-02-15",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 681002,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "카페"
-  },
-  {
-    "date": "2025-06-17",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 402090,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-03-05",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 267425,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-04-18",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 303084,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "월급"
-  },
-  {
-    "date": "2025-04-06",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 775341,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-05-12",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 159720,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "환급"
-  },
-  {
-    "date": "2025-02-16",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 842110,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-05-17",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 323195,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "월급"
-  },
-  {
-    "date": "2025-01-13",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 666999,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-01-25",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 975400,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-04-22",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 857103,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "식비"
-  },
-  {
-    "date": "2025-04-09",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 174929,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "서점"
-  },
-  {
-    "date": "2025-03-07",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 429077,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "카페"
-  },
-  {
-    "date": "2025-06-02",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 346229,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-02-27",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 532937,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "카페"
-  },
-  {
-    "date": "2025-03-13",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 784146,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-02-15",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 502878,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "카페"
-  },
-  {
-    "date": "2025-05-24",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 116943,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "마트"
-  },
-  {
-    "date": "2025-05-14",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 988034,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "환급"
-  },
-  {
-    "date": "2025-05-01",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 807812,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "환급"
-  },
-  {
-    "date": "2025-06-15",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 455102,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "식비"
-  },
-  {
-    "date": "2025-04-22",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 644896,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "카페"
-  },
-  {
-    "date": "2025-06-20",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 519476,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "카페"
-  },
-  {
-    "date": "2025-06-27",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 426086,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "마트"
-  },
-  {
-    "date": "2025-05-12",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 263841,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-05-22",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 921611,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-05-01",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 416426,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "서점"
-  },
-  {
-    "date": "2025-06-22",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 494777,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "환급"
-  },
-  {
-    "date": "2025-02-26",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 320257,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "서점"
-  },
-  {
-    "date": "2025-06-12",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 959330,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "환급"
-  },
-  {
-    "date": "2025-04-22",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 340872,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "마트"
-  },
-  {
-    "date": "2025-05-08",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 465166,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "식비"
-  },
-  {
-    "date": "2025-03-25",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 974728,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "서점"
-  },
-  {
-    "date": "2025-05-06",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 374969,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "월급"
-  },
-  {
-    "date": "2025-05-28",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 339850,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-01-08",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 617472,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "카페"
-  },
-  {
-    "date": "2025-03-23",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 960999,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "쇼핑"
-  },
-  {
-    "date": "2025-02-02",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 351316,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "식비"
-  },
-  {
-    "date": "2025-05-11",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 476893,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "쇼핑"
-  },
-  {
-    "date": "2025-02-02",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 631219,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-05-07",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 17415,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "쇼핑"
-  },
-  {
-    "date": "2025-03-03",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 101781,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-01-15",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 685503,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "서점"
-  },
-  {
-    "date": "2025-06-19",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 936612,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "환급"
-  },
-  {
-    "date": "2025-01-07",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 626671,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "카페"
-  },
-  {
-    "date": "2025-06-21",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 71003,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-03-21",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 145011,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-05-21",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 965120,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-03-10",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 46373,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-06-09",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 144762,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-06-21",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 819687,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-03-12",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 524869,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "이체 수신"
-  },
-  {
-    "date": "2025-05-07",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 768610,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-04-17",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 710515,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "마트"
-  },
-  {
-    "date": "2025-04-04",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 879186,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-05-02",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 451981,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "서점"
-  },
-  {
-    "date": "2025-06-18",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 256467,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-03-04",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 134781,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-05-19",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 240456,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "서점"
-  },
-  {
-    "date": "2025-04-05",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 399347,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "마트"
-  },
-  {
-    "date": "2025-06-15",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 809856,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-01-10",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 268762,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "서점"
-  },
-  {
-    "date": "2025-05-18",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 571862,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "마트"
-  },
-  {
-    "date": "2025-03-03",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 57056,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "식비"
-  },
-  {
-    "date": "2025-04-15",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 982185,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "마트"
-  },
-  {
-    "date": "2025-01-01",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 970568,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-06-15",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 96169,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-04-15",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 138197,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "이체 수신"
-  },
-  {
-    "date": "2025-04-12",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 299275,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "간식"
-  },
-  {
-    "date": "2025-03-12",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 394223,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "서점"
-  },
-  {
-    "date": "2025-04-13",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 607488,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "카페"
-  },
-  {
-    "date": "2025-03-15",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 865517,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "서점"
-  },
-  {
-    "date": "2025-04-26",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 17112,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "마트"
-  },
-  {
-    "date": "2025-01-04",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 387891,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "월급"
-  },
-  {
-    "date": "2025-01-07",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 599093,
-    "type": "입금",
-    "account": "체크카드",
-    "description": "환급"
-  },
-  {
-    "date": "2025-06-08",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 303537,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-01-06",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 955995,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-04-27",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 753632,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "서점"
-  },
-  {
-    "date": "2025-05-01",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 52382,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "서점"
-  },
-  {
-    "date": "2025-07-01",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 493859,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-07-10",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 103200,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "식비"
-  },
-  {
-    "date": "2025-04-26",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 667909,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "간식"
-  },
-  {
-    "date": "2025-01-12",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 518269,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-03-27",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 341138,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "간식"
-  },
-  {
-    "date": "2025-06-11",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 324789,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-01-02",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 690585,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-01-27",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 117895,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "월급"
-  },
-  {
-    "date": "2025-03-17",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 59538,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-04-08",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 118557,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "마트"
-  },
-  {
-    "date": "2025-05-22",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 237228,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "카페"
-  },
-  {
-    "date": "2025-04-24",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 640562,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "카페"
-  },
-  {
-    "date": "2025-01-08",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 437401,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "서점"
-  },
-  {
-    "date": "2025-05-13",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 911844,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "간식"
-  },
-  {
-    "date": "2025-06-25",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 961321,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-01-15",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 951228,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "마트"
-  },
-  {
-    "date": "2025-03-17",
-    "bank": "KB국민은행",
-    "logo": "KB국민은행.png",
-    "amount": 830275,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "환급"
-  },
-  {
-    "date": "2025-04-07",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 196555,
-    "type": "입금",
-    "account": "신용카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-03-22",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 493684,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-02-23",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 554336,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-02-17",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 549896,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-02-14",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 291855,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-03-21",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 910618,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "월급"
-  },
-  {
-    "date": "2025-01-09",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 251744,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "월급"
-  },
-  {
-    "date": "2025-03-07",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 200773,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "환급"
-  },
-  {
-    "date": "2025-06-25",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 984305,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "서점"
-  },
-  {
-    "date": "2025-02-19",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 314620,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "카페"
-  },
-  {
-    "date": "2025-05-24",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 660009,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-05-01",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 65294,
-    "type": "출금",
-    "account": "월급통장",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-05-06",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 898542,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "월급"
-  },
-  {
-    "date": "2025-03-16",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 196130,
-    "type": "입금",
-    "account": "기타계좌",
-    "description": "서점"
-  },
-  {
-    "date": "2025-02-02",
-    "bank": "토스뱅크",
-    "logo": "토스뱅크.png",
-    "amount": 573338,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "영화관"
-  },
-  {
-    "date": "2025-04-27",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 899067,
-    "type": "출금",
-    "account": "생활비 통장",
-    "description": "카페"
-  },
-  {
-    "date": "2025-02-23",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 818963,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "카페"
-  },
-  {
-    "date": "2025-02-05",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 656564,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-06-14",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 158199,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "교통비"
-  },
-  {
-    "date": "2025-01-18",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 276233,
-    "type": "출금",
-    "account": "신용카드",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-04-04",
-    "bank": "신한은행",
-    "logo": "신한은행, 제주은행.png",
-    "amount": 550052,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "공과금"
-  },
-  {
-    "date": "2025-01-13",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 894540,
-    "type": "출금",
-    "account": "투자계좌",
-    "description": "카페"
-  },
-  {
-    "date": "2025-04-26",
-    "bank": "NH농협은행",
-    "logo": "NH농협은행.png",
-    "amount": 565437,
-    "type": "입금",
-    "account": "월급통장",
-    "description": "간식"
-  },
-  {
-    "date": "2025-03-18",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 145050,
-    "type": "입금",
-    "account": "투자계좌",
-    "description": "투자 수익"
-  },
-  {
-    "date": "2025-06-27",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 301003,
-    "type": "출금",
-    "account": "기타계좌",
-    "description": "보너스"
-  },
-  {
-    "date": "2025-02-13",
-    "bank": "SC제일은행",
-    "logo": "SC제일은행.png",
-    "amount": 626694,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "카페"
-  },
-  {
-    "date": "2025-04-27",
-    "bank": "우리은행",
-    "logo": "우리은행.png",
-    "amount": 447143,
-    "type": "입금",
-    "account": "생활비 통장",
-    "description": "간식"
-  },
-  {
-    "date": "2025-06-13",
-    "bank": "IBK기업은행",
-    "logo": "IBK기업은행.png",
-    "amount": 593298,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "마트"
-  },
-  {
-    "date": "2025-01-16",
-    "bank": "하나은행",
-    "logo": "하나은행.png",
-    "amount": 636639,
-    "type": "출금",
-    "account": "체크카드",
-    "description": "마트"
-  }
-]
+{
+  "initialAssets": 0,
+  "transactions": [
+    {
+      "date": "2025-07-30",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 325000,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-07-30",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 325000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-07-30",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 325000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-07-30",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 325000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-07-15",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 325000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-07-31",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 325000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-07-31",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 325000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-07-31",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 325000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-03-24",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 133552,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "서점"
+    },
+    {
+      "date": "2025-05-13",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 834959,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "간식"
+    },
+    {
+      "date": "2025-05-13",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 834959,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "간식"
+    },
+    {
+      "date": "2025-05-13",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 834959,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "간식"
+    },
+    {
+      "date": "2025-02-27",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 751828,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-05-01",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 118097,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-05-09",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 559454,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "간식"
+    },
+    {
+      "date": "2025-02-13",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 741637,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "식비"
+    },
+    {
+      "date": "2025-05-21",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 140717,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-01-10",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 824079,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-05-06",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 648825,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-02-17",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 159158,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "월급"
+    },
+    {
+      "date": "2025-01-21",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 942338,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-02-19",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 696087,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-03-08",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 510436,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-04-28",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 769436,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "서점"
+    },
+    {
+      "date": "2025-05-20",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 346359,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "간식"
+    },
+    {
+      "date": "2025-01-25",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 399572,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "환급"
+    },
+    {
+      "date": "2025-03-07",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 725797,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-01-17",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 868989,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "서점"
+    },
+    {
+      "date": "2025-03-20",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 738062,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-02-15",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 529365,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-02-11",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 611474,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-05-27",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 468556,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-05-24",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 503972,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "환급"
+    },
+    {
+      "date": "2025-06-15",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 247336,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "월급"
+    },
+    {
+      "date": "2025-02-13",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 962364,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "이체 수신"
+    },
+    {
+      "date": "2025-02-02",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 528850,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-06-16",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 25989,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-05-09",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 159558,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "환급"
+    },
+    {
+      "date": "2025-04-22",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 587459,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "마트"
+    },
+    {
+      "date": "2025-03-20",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 799866,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "환급"
+    },
+    {
+      "date": "2025-04-09",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 899670,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "이체 수신"
+    },
+    {
+      "date": "2025-04-21",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 401267,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-03-23",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 534670,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "간식"
+    },
+    {
+      "date": "2025-06-20",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 333153,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "식비"
+    },
+    {
+      "date": "2025-04-02",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 20190,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "서점"
+    },
+    {
+      "date": "2025-05-20",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 807064,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-04-01",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 615716,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-03-13",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 268503,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-04-20",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 25035,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-01-08",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 176745,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-02-13",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 223639,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-04-17",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 367752,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-05-01",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 923152,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "서점"
+    },
+    {
+      "date": "2025-02-27",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 753797,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-06-15",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 175956,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "카페"
+    },
+    {
+      "date": "2025-02-01",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 447349,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-06-08",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 919648,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "식비"
+    },
+    {
+      "date": "2025-04-22",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 153619,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-05-10",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 705241,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-05-14",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 182504,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-05-28",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 758393,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-06-18",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 825933,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "카페"
+    },
+    {
+      "date": "2025-01-26",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 392575,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "월급"
+    },
+    {
+      "date": "2025-01-13",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 964692,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-04-21",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 807568,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "간식"
+    },
+    {
+      "date": "2025-02-02",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 242909,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-04-06",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 785063,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-06-09",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 377176,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-02-11",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 296749,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "이체 수신"
+    },
+    {
+      "date": "2025-01-17",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 850576,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "마트"
+    },
+    {
+      "date": "2025-01-09",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 591005,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-06-16",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 173479,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "환급"
+    },
+    {
+      "date": "2025-05-11",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 87056,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-01-22",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 990063,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-03-09",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 926272,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-06-13",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 840528,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "환급"
+    },
+    {
+      "date": "2025-05-22",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 616819,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-01-04",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 965396,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-04-19",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 422807,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "마트"
+    },
+    {
+      "date": "2025-02-25",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 806655,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-04-27",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 107978,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "환급"
+    },
+    {
+      "date": "2025-01-06",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 448241,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-06-22",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 420724,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "환급"
+    },
+    {
+      "date": "2025-02-17",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 327056,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "서점"
+    },
+    {
+      "date": "2025-03-13",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 151772,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "월급"
+    },
+    {
+      "date": "2025-05-17",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 139853,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "마트"
+    },
+    {
+      "date": "2025-06-02",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 952166,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "환급"
+    },
+    {
+      "date": "2025-03-16",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 86455,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-02-23",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 92409,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "식비"
+    },
+    {
+      "date": "2025-03-19",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 848254,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "카페"
+    },
+    {
+      "date": "2025-06-14",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 558404,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-05-25",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 204661,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "서점"
+    },
+    {
+      "date": "2025-03-25",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 863439,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-04-16",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 331677,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-01-20",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 356337,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "이체 수신"
+    },
+    {
+      "date": "2025-02-15",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 681002,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "카페"
+    },
+    {
+      "date": "2025-06-17",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 402090,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-03-05",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 267425,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-04-18",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 303084,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "월급"
+    },
+    {
+      "date": "2025-04-06",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 775341,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-05-12",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 159720,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "환급"
+    },
+    {
+      "date": "2025-02-16",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 842110,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-05-17",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 323195,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-01-13",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 666999,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-01-25",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 975400,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-04-22",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 857103,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "식비"
+    },
+    {
+      "date": "2025-04-09",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 174929,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "서점"
+    },
+    {
+      "date": "2025-03-07",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 429077,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "카페"
+    },
+    {
+      "date": "2025-06-02",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 346229,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-02-27",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 532937,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "카페"
+    },
+    {
+      "date": "2025-03-13",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 784146,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-02-15",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 502878,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-05-24",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 116943,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "마트"
+    },
+    {
+      "date": "2025-05-14",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 988034,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "환급"
+    },
+    {
+      "date": "2025-05-01",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 807812,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "환급"
+    },
+    {
+      "date": "2025-06-15",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 455102,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "식비"
+    },
+    {
+      "date": "2025-04-22",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 644896,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "카페"
+    },
+    {
+      "date": "2025-06-20",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 519476,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "카페"
+    },
+    {
+      "date": "2025-06-27",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 426086,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "마트"
+    },
+    {
+      "date": "2025-05-12",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 263841,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-05-22",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 921611,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-05-01",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 416426,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "서점"
+    },
+    {
+      "date": "2025-06-22",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 494777,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "환급"
+    },
+    {
+      "date": "2025-02-26",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 320257,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "서점"
+    },
+    {
+      "date": "2025-06-12",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 959330,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "환급"
+    },
+    {
+      "date": "2025-04-22",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 340872,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "마트"
+    },
+    {
+      "date": "2025-05-08",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 465166,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-03-25",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 974728,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "서점"
+    },
+    {
+      "date": "2025-05-06",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 374969,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "월급"
+    },
+    {
+      "date": "2025-05-28",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 339850,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-01-08",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 617472,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "카페"
+    },
+    {
+      "date": "2025-03-23",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 960999,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-02-02",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 351316,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "식비"
+    },
+    {
+      "date": "2025-05-11",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 476893,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-02-02",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 631219,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-05-07",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 17415,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-03-03",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 101781,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-01-15",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 685503,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "서점"
+    },
+    {
+      "date": "2025-06-19",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 936612,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "환급"
+    },
+    {
+      "date": "2025-01-07",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 626671,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-06-21",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 71003,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-03-21",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 145011,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-05-21",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 965120,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-03-10",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 46373,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-06-09",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 144762,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-06-21",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 819687,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-03-12",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 524869,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "이체 수신"
+    },
+    {
+      "date": "2025-05-07",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 768610,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-04-17",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 710515,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "마트"
+    },
+    {
+      "date": "2025-04-04",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 879186,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-05-02",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 451981,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "서점"
+    },
+    {
+      "date": "2025-06-18",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 256467,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-03-04",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 134781,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-05-19",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 240456,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "서점"
+    },
+    {
+      "date": "2025-04-05",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 399347,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "마트"
+    },
+    {
+      "date": "2025-06-15",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 809856,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-01-10",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 268762,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "서점"
+    },
+    {
+      "date": "2025-05-18",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 571862,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "마트"
+    },
+    {
+      "date": "2025-03-03",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 57056,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "식비"
+    },
+    {
+      "date": "2025-04-15",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 982185,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "마트"
+    },
+    {
+      "date": "2025-01-01",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 970568,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-06-15",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 96169,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-04-15",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 138197,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "이체 수신"
+    },
+    {
+      "date": "2025-04-12",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 299275,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "간식"
+    },
+    {
+      "date": "2025-03-12",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 394223,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "서점"
+    },
+    {
+      "date": "2025-04-13",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 607488,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "카페"
+    },
+    {
+      "date": "2025-03-15",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 865517,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "서점"
+    },
+    {
+      "date": "2025-04-26",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 17112,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "마트"
+    },
+    {
+      "date": "2025-01-04",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 387891,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-01-07",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 599093,
+      "type": "입금",
+      "account": "체크카드",
+      "description": "환급"
+    },
+    {
+      "date": "2025-06-08",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 303537,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-01-06",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 955995,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-04-27",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 753632,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "서점"
+    },
+    {
+      "date": "2025-05-01",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 52382,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "서점"
+    },
+    {
+      "date": "2025-07-01",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 493859,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-07-10",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 103200,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "식비"
+    },
+    {
+      "date": "2025-08-01",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 450000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-08-05",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 120000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-08-10",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 300000,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-08-15",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 200000,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-08-20",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 150000,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "마트"
+    },
+    {
+      "date": "2025-08-25",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 80000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "간식"
+    },
+    {
+      "date": "2025-04-26",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 667909,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "간식"
+    },
+    {
+      "date": "2025-01-12",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 518269,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-03-27",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 341138,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "간식"
+    },
+    {
+      "date": "2025-06-11",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 324789,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-01-02",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 690585,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-01-27",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 117895,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-03-17",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 59538,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-04-08",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 118557,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "마트"
+    },
+    {
+      "date": "2025-05-22",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 237228,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "카페"
+    },
+    {
+      "date": "2025-04-24",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 640562,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-01-08",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 437401,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "서점"
+    },
+    {
+      "date": "2025-05-13",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 911844,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "간식"
+    },
+    {
+      "date": "2025-06-25",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 961321,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-01-15",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 951228,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "마트"
+    },
+    {
+      "date": "2025-03-17",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 830275,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "환급"
+    },
+    {
+      "date": "2025-04-07",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 196555,
+      "type": "입금",
+      "account": "신용카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-03-22",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 493684,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-02-23",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 554336,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-02-17",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 549896,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-02-14",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 291855,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-03-21",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 910618,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-01-09",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 251744,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "월급"
+    },
+    {
+      "date": "2025-03-07",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 200773,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "환급"
+    },
+    {
+      "date": "2025-06-25",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 984305,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "서점"
+    },
+    {
+      "date": "2025-02-19",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 314620,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "카페"
+    },
+    {
+      "date": "2025-05-24",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 660009,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-05-01",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 65294,
+      "type": "출금",
+      "account": "월급통장",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-05-06",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 898542,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "월급"
+    },
+    {
+      "date": "2025-03-16",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 196130,
+      "type": "입금",
+      "account": "기타계좌",
+      "description": "서점"
+    },
+    {
+      "date": "2025-02-02",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 573338,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "영화관"
+    },
+    {
+      "date": "2025-04-27",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 899067,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "카페"
+    },
+    {
+      "date": "2025-02-23",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 818963,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "카페"
+    },
+    {
+      "date": "2025-02-05",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 656564,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-06-14",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 158199,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-01-18",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 276233,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-04-04",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 550052,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-01-13",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 894540,
+      "type": "출금",
+      "account": "투자계좌",
+      "description": "카페"
+    },
+    {
+      "date": "2025-04-26",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 565437,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "간식"
+    },
+    {
+      "date": "2025-03-18",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 145050,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-06-27",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 301003,
+      "type": "출금",
+      "account": "기타계좌",
+      "description": "보너스"
+    },
+    {
+      "date": "2025-02-13",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 626694,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "카페"
+    },
+    {
+      "date": "2025-04-27",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 447143,
+      "type": "입금",
+      "account": "생활비 통장",
+      "description": "간식"
+    },
+    {
+      "date": "2025-06-13",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 593298,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-01-16",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 636639,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "마트"
+    },
+    {
+      "date": "2025-01-25",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 3500000,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-01-28",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 150000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-01-30",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 250000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "식비"
+    },
+    {
+      "date": "2025-02-01",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 500000,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-02-05",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 180000,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-02-10",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 120000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-02-15",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 300000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-02-25",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 3500000,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-03-01",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 400000,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-03-05",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 200000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-03-10",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 150000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-03-15",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 250000,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-03-20",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 180000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "공과금"
+    },
+    {
+      "date": "2025-03-25",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 3500000,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-04-01",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 450000,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-04-05",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 220000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "식비"
+    },
+    {
+      "date": "2025-04-10",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 160000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-04-15",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 300000,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-04-20",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 200000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-04-25",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 3500000,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-05-01",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 500000,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-05-05",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 240000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-05-10",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 170000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-05-15",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 350000,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-05-20",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 250000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-05-25",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 3500000,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-06-01",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 550000,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-06-05",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 260000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-06-10",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 180000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-06-15",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 400000,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-06-20",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 300000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-06-25",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 3500000,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-07-01",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 600000,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-07-05",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 280000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-07-10",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 190000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-07-15",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 450000,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-07-20",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 350000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-07-25",
+      "bank": "NH농협은행",
+      "logo": "NH농협은행.png",
+      "amount": 3500000,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-08-01",
+      "bank": "SC제일은행",
+      "logo": "SC제일은행.png",
+      "amount": 650000,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    },
+    {
+      "date": "2025-08-05",
+      "bank": "KB국민은행",
+      "logo": "KB국민은행.png",
+      "amount": 300000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-08-10",
+      "bank": "하나은행",
+      "logo": "하나은행.png",
+      "amount": 200000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "교통비"
+    },
+    {
+      "date": "2025-08-15",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 500000,
+      "type": "출금",
+      "account": "신용카드",
+      "description": "쇼핑"
+    },
+    {
+      "date": "2025-08-20",
+      "bank": "토스뱅크",
+      "logo": "토스뱅크.png",
+      "amount": 400000,
+      "type": "출금",
+      "account": "체크카드",
+      "description": "카페"
+    },
+    {
+      "date": "2025-08-25",
+      "bank": "우리은행",
+      "logo": "우리은행.png",
+      "amount": 3500000,
+      "type": "입금",
+      "account": "월급통장",
+      "description": "월급"
+    },
+    {
+      "date": "2025-08-30",
+      "bank": "IBK기업은행",
+      "logo": "IBK기업은행.png",
+      "amount": 700000,
+      "type": "입금",
+      "account": "투자계좌",
+      "description": "투자 수익"
+    }
+  ]
+}

@@ -1,6 +1,21 @@
 <template>
   <div class="monthly-report-container">
-    <!-- 상단 네비게이션 -->
+    <!-- 상단 헤더 -->
+    <div class="obmyhome-header">
+      <button class="obmyhome-back" @click="goBack">
+        <font-awesome-icon :icon="['fas', 'angle-left']" />
+      </button>
+      <div class="obmyhome-header-icons">
+        <button class="obmyhome-icon-btn" @click="goToDictionary">
+          <font-awesome-icon :icon="['fas', 'search']" />
+        </button>
+        <button class="obmyhome-icon-btn">
+          <font-awesome-icon :icon="['fas', 'plus']" />
+        </button>
+      </div>
+    </div>
+
+    <!-- 월 선택 네비게이션 -->
     <div class="report-header">
       <button class="nav-arrow" @click="goPrevMonth">
         <i class="fas fa-chevron-left"></i>
@@ -15,28 +30,38 @@
     <section class="report-section consumption-section">
       <div class="section-title">총 소비</div>
       <div class="consumption-amount">
-        {{ (totalConsumption.value ?? 0).toLocaleString() }}원
+        {{ totalConsumption.toLocaleString() }}원
       </div>
       <div class="consumption-diff">
-        지난달보다
-        <span class="accent"
-          >{{ Math.abs(lastMonthDiff.value ?? 0).toLocaleString() }}원</span
-        >
-        <template v-if="(lastMonthDiff.value ?? 0) > 0">더 썼어요!</template>
-        <template v-else-if="(lastMonthDiff.value ?? 0) < 0"
-          >덜 썼어요!</template
-        >
-        <template v-else>같이 썼어요!</template>
+        <template v-if="lastMonthDiff > 0">
+          <span class="accent-red"
+            >지난달보다 {{ Math.abs(lastMonthDiff).toLocaleString() }}원 더
+            썼어요!</span
+          >
+        </template>
+        <template v-else-if="lastMonthDiff < 0">
+          <span class="accent-blue"
+            >지난달보다 {{ Math.abs(lastMonthDiff).toLocaleString() }}원 덜
+            썼어요!</span
+          >
+        </template>
+        <template v-else>
+          <span class="accent-gray">지난달보다 같은 금액을 썼어요!</span>
+        </template>
       </div>
     </section>
 
-    <!-- 지난달보다 덜 썼어요 -->
+    <!-- 지난달 비교 -->
     <section class="report-section compare-section">
       <div class="compare-title">
         지난달보다
-        <span class="accent-blue"
-          >{{ Math.round((lastMonthLess.value ?? 0) / 10000) }}만원 덜</span
-        >
+        <span class="accent-blue" v-if="lastMonthDiff < 0">
+          {{ Math.round(Math.abs(lastMonthDiff) / 10000) }}만원 덜
+        </span>
+        <span class="accent-red" v-else-if="lastMonthDiff > 0">
+          {{ Math.round(lastMonthDiff / 10000) }}만원 더
+        </span>
+        <span class="accent-gray" v-else> 같은 금액을 </span>
         썼어요.
       </div>
       <div class="compare-bar-graph">
@@ -65,39 +90,39 @@
       <div class="category-bar">
         <div
           class="category-bar-item food"
-          :style="{ width: (categoryPercents.value?.['식비'] ?? 0) + '%' }"
+          :style="{ width: (categoryPercents?.['식비'] ?? 0) + '%' }"
         ></div>
         <div
           class="category-bar-item online"
           :style="{
-            width: (categoryPercents.value?.['온라인쇼핑'] ?? 0) + '%',
+            width: (categoryPercents?.['온라인쇼핑'] ?? 0) + '%',
           }"
         ></div>
         <div
           class="category-bar-item cafe"
-          :style="{ width: (categoryPercents.value?.['카페/간식'] ?? 0) + '%' }"
+          :style="{ width: (categoryPercents?.['카페/간식'] ?? 0) + '%' }"
         ></div>
         <div
           class="category-bar-item etc"
-          :style="{ width: (categoryPercents.value?.['그 외'] ?? 0) + '%' }"
+          :style="{ width: (categoryPercents?.['그 외'] ?? 0) + '%' }"
         ></div>
       </div>
       <div class="category-legend">
         <span
           ><span class="dot food"></span>식비
-          {{ (categoryPercents.value?.["식비"] ?? 0).toFixed(1) }}%</span
+          {{ (categoryPercents?.["식비"] ?? 0).toFixed(1) }}%</span
         >
         <span
           ><span class="dot cafe"></span>카페/간식
-          {{ (categoryPercents.value?.["카페/간식"] ?? 0).toFixed(1) }}%</span
+          {{ (categoryPercents?.["카페/간식"] ?? 0).toFixed(1) }}%</span
         >
         <span
           ><span class="dot online"></span>온라인쇼핑
-          {{ (categoryPercents.value?.["온라인쇼핑"] ?? 0).toFixed(1) }}%</span
+          {{ (categoryPercents?.["온라인쇼핑"] ?? 0).toFixed(1) }}%</span
         >
         <span
           ><span class="dot etc"></span>그 외
-          {{ (categoryPercents.value?.["그 외"] ?? 0).toFixed(1) }}%</span
+          {{ (categoryPercents?.["그 외"] ?? 0).toFixed(1) }}%</span
         >
       </div>
     </section>
@@ -108,11 +133,7 @@
         이번 달 지출 <span class="accent-blue">TOP 3</span>
       </div>
       <div class="top3-list">
-        <div
-          class="top3-item"
-          v-for="(item, idx) in top3.value"
-          :key="item.label"
-        >
+        <div class="top3-item" v-for="(item, idx) in top3" :key="item.label">
           <div class="top3-rank">{{ idx + 1 }}위</div>
           <div class="top3-icon" :class="iconClass(item.label)">
             <i :class="iconName(item.label)"></i>
@@ -145,54 +166,36 @@
         걸 추천드려요.
       </div>
     </section>
-
-    <!-- 다음 달 추천 챌린지 -->
-    <section class="report-section challenge-section">
-      <div class="section-title">다음 달 추천 챌린지</div>
-      <div class="challenge-list">
-        <div class="challenge-item">
-          <span class="challenge-label accent-blue">저축률 회복하기</span>
-          <span class="challenge-desc">최소 450,000원 저축해보아요.</span>
-          <label class="switch">
-            <input type="checkbox" checked disabled />
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="challenge-item">
-          <span class="challenge-label accent-blue"
-            >식비 + 카페 지출 줄이기</span
-          >
-          <span class="challenge-desc"
-            >총합 350,000원 이하로 유지해보세요.</span
-          >
-          <label class="switch">
-            <input type="checkbox" checked disabled />
-            <span class="slider"></span>
-          </label>
-        </div>
-        <div class="challenge-item">
-          <span class="challenge-label accent-blue">무지출 데이 도전!</span>
-          <span class="challenge-desc"
-            >‘무지출 데이’를 2회 이상 가져보세요.</span
-          >
-          <label class="switch">
-            <input type="checkbox" checked disabled />
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import {
+  faAngleLeft,
+  faSearch,
+  faPlus,
+} from "@fortawesome/free-solid-svg-icons";
+library.add(faAngleLeft, faSearch, faPlus);
+
 import transactionData from "./Transaction_dummy.json";
 
-// 월 상태
-const today = new Date();
-const currentYear = ref(today.getFullYear());
-const currentMonth = ref(today.getMonth() + 1);
+const router = useRouter();
+
+const goToDictionary = () => {
+  router.push("/dictionary");
+};
+
+const goBack = () => {
+  router.push("/openbanking/myhome");
+};
+
+// 월 상태 - 현재 날짜로 초기화
+const currentYear = ref(new Date().getFullYear());
+const currentMonth = ref(new Date().getMonth() + 1);
 
 // 월 이동 함수
 const goPrevMonth = () => {
@@ -217,8 +220,8 @@ const monthStr = computed(
   () => `${currentYear.value}-${String(currentMonth.value).padStart(2, "0")}`
 );
 const transactions = computed(() =>
-  Array.isArray(transactionData)
-    ? transactionData.filter((t) => {
+  Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions.filter((t) => {
         const d = new Date(t.date);
         return (
           d.getFullYear() === currentYear.value &&
@@ -227,11 +230,69 @@ const transactions = computed(() =>
       })
     : []
 );
-// 총 소비 (출금 합계)
+
+// 총 소비 (출금 합계) - computed로 변경하여 동적 계산
 const totalConsumption = computed(() => {
-  return transactions.value
-    .filter((t) => (t.type || "").trim() === "출금")
-    .reduce((sum, t) => sum + Number(t.amount ?? 0), 0);
+  return Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions
+        .filter((t) => {
+          const tDate = new Date(t.date);
+          return (
+            tDate.getFullYear() === currentYear.value &&
+            tDate.getMonth() + 1 === currentMonth.value &&
+            (t.type || "").trim() === "출금"
+          );
+        })
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    : 0;
+});
+
+// 이전달 데이터 가져오기 - 그래프 방식과 동일하게 직접 순회
+const getPrevMonthData = () => {
+  const prevYear =
+    currentMonth.value === 1 ? currentYear.value - 1 : currentYear.value;
+  const prevMonth = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
+
+  return Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions.filter((t) => {
+        const tDate = new Date(t.date);
+        return (
+          tDate.getFullYear() === prevYear &&
+          tDate.getMonth() + 1 === prevMonth &&
+          (t.type || "").trim() === "출금"
+        );
+      })
+    : [];
+};
+
+// 이전달 총 소비 - computed로 변경하여 동적 계산
+const prevMonthConsumption = computed(() => {
+  const prevYear =
+    currentMonth.value === 1 ? currentYear.value - 1 : currentYear.value;
+  const prevMonth = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
+
+  return Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions
+        .filter((t) => {
+          const tDate = new Date(t.date);
+          return (
+            tDate.getFullYear() === prevYear &&
+            tDate.getMonth() + 1 === prevMonth &&
+            (t.type || "").trim() === "출금"
+          );
+        })
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    : 0;
+});
+
+// 지난달 대비 증감 - computed로 변경하여 동적 계산
+const lastMonthDiff = computed(() => {
+  return totalConsumption.value - prevMonthConsumption.value;
+});
+
+// 지난달보다 덜 쓴 금액 (양수일 때만)
+const lastMonthLess = computed(() => {
+  return lastMonthDiff.value < 0 ? Math.abs(lastMonthDiff.value) : 0;
 });
 
 // 카테고리별 집계
@@ -242,19 +303,30 @@ const categoryMap = {
 };
 const categorySums = computed(() => {
   const sums = { 식비: 0, "카페/간식": 0, 온라인쇼핑: 0, "그 외": 0 };
-  transactions.value
-    .filter((t) => (t.type || "").trim() === "출금")
-    .forEach((t) => {
-      let found = false;
-      for (const [cat, keywords] of Object.entries(categoryMap)) {
-        if (keywords.some((k) => (t.description || "").includes(k))) {
-          sums[cat] += Number(t.amount ?? 0);
-          found = true;
-          break;
-        }
+
+  // 그래프 방식과 동일하게 직접 transactionData에서 필터링
+  const currentMonthTransactions = Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions.filter((t) => {
+        const tDate = new Date(t.date);
+        return (
+          tDate.getFullYear() === currentYear.value &&
+          tDate.getMonth() + 1 === currentMonth.value &&
+          (t.type || "").trim() === "출금"
+        );
+      })
+    : [];
+
+  currentMonthTransactions.forEach((t) => {
+    let found = false;
+    for (const [cat, keywords] of Object.entries(categoryMap)) {
+      if (keywords.some((k) => (t.description || "").includes(k))) {
+        sums[cat] += Number(t.amount ?? 0);
+        found = true;
+        break;
       }
-      if (!found) sums["그 외"] += Number(t.amount ?? 0);
-    });
+    }
+    if (!found) sums["그 외"] += Number(t.amount ?? 0);
+  });
   return sums;
 });
 const totalOut = computed(() =>
@@ -289,20 +361,28 @@ const monthBarHeights = computed(() => {
   const now = new Date(currentYear.value, currentMonth.value - 1, 1);
   for (let i = 11; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}`;
-    const sum = Array.isArray(transactionData)
-      ? transactionData
-          .filter(
-            (t) => t.date.startsWith(ym) && (t.type || "").trim() === "출금"
-          )
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1;
+
+    // 해당 월의 출금 데이터 합계 계산
+    const sum = Array.isArray(transactionData?.transactions)
+      ? transactionData.transactions
+          .filter((t) => {
+            const tDate = new Date(t.date);
+            return (
+              tDate.getFullYear() === year &&
+              tDate.getMonth() + 1 === month &&
+              (t.type || "").trim() === "출금"
+            );
+          })
           .reduce((a, b) => a + Number(b.amount ?? 0), 0)
       : 0;
-    bars.push({ ym, sum });
+
+    bars.push({ ym: `${year}-${String(month).padStart(2, "0")}`, sum });
   }
+
   const max = Math.max(...bars.map((b) => b.sum), 1);
+
   // 색상 클래스 지정
   return bars.map((b) => {
     let colorClass = "bar-purple";
@@ -314,33 +394,6 @@ const monthBarHeights = computed(() => {
     };
   });
 });
-
-// 6. 지난달 대비 증감 (이전 달과 비교)
-const lastMonthDiff = computed(() => {
-  const prev = getPrevMonthStr(monthStr.value);
-  const prevSum = transactionData
-    .filter((t) => t.date.startsWith(prev) && (t.type || "").trim() === "출금")
-    .reduce((a, b) => a + Number(b.amount ?? 0), 0);
-
-  return totalConsumption.value - prevSum;
-});
-
-const lastMonthLess = computed(() => {
-  const prev = getPrevMonthStr(monthStr.value);
-  const prevSum = transactionData
-    .filter((t) => t.date.startsWith(prev) && (t.type || "").trim() === "출금")
-    .reduce((a, b) => a + Number(b.amount ?? 0), 0);
-
-  return prevSum > totalConsumption.value
-    ? prevSum - totalConsumption.value
-    : 0;
-});
-
-function getPrevMonthStr(ym) {
-  const [y, m] = ym.split("-").map(Number);
-  if (m === 1) return `${y - 1}-12`;
-  return `${y}-${String(m - 1).padStart(2, "0")}`;
-}
 
 // 아이콘 클래스 및 이름 매핑
 const iconClass = (label) => {
@@ -362,6 +415,52 @@ const iconName = (label) => {
   background: var(--color-bg-light);
   min-height: 100vh;
   padding-bottom: 90px;
+}
+
+/* 상단 헤더 스타일 */
+.obmyhome-header {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #ececec;
+}
+.obmyhome-back {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #222;
+  cursor: pointer;
+  padding: 4px 8px 4px 0;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.obmyhome-back:hover {
+  background: #f3f3f3;
+}
+.obmyhome-header-icons {
+  display: flex;
+  gap: 12px;
+}
+.obmyhome-icon-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #4318d1;
+  cursor: pointer;
+  padding: 4px 4px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+.obmyhome-icon-btn:hover {
+  background: #f3f3f3;
 }
 .report-header {
   display: flex;
@@ -424,6 +523,14 @@ const iconName = (label) => {
 }
 .accent-blue {
   color: var(--color-main);
+  font-weight: var(--font-weight-bold);
+}
+.accent-red {
+  color: #e74c3c;
+  font-weight: var(--font-weight-bold);
+}
+.accent-gray {
+  color: var(--color-text-light);
   font-weight: var(--font-weight-bold);
 }
 .compare-bar-graph {
