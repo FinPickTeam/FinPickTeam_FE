@@ -5,6 +5,8 @@ export const useFavoriteStore = defineStore('favorite', () => {
   const favorites = ref([]);
 
   function addFavorite(product) {
+    console.log('Adding favorite:', product);
+
     // 예금 상품인 경우
     if (product.depositProductName) {
       if (
@@ -13,6 +15,24 @@ export const useFavoriteStore = defineStore('favorite', () => {
         )
       ) {
         favorites.value.push(product);
+        console.log('Deposit product added to favorites');
+      }
+    }
+    // 적금 상품인 경우
+    else if (product.installmentProductName) {
+      console.log(
+        'Processing installment product:',
+        product.installmentProductName
+      );
+      if (
+        !favorites.value.find(
+          (p) => p.installmentProductName === product.installmentProductName
+        )
+      ) {
+        favorites.value.push(product);
+        console.log('Installment product added to favorites');
+      } else {
+        console.log('Installment product already in favorites');
       }
     }
     // 주식 상품인 경우
@@ -44,6 +64,8 @@ export const useFavoriteStore = defineStore('favorite', () => {
         console.log('Fund already in favorites');
       }
     }
+
+    console.log('Current favorites after add:', favorites.value);
   }
 
   function removeFavorite(product) {
@@ -51,6 +73,12 @@ export const useFavoriteStore = defineStore('favorite', () => {
     if (product.depositProductName) {
       favorites.value = favorites.value.filter(
         (p) => p.depositProductName !== product.depositProductName
+      );
+    }
+    // 적금 상품인 경우
+    else if (product.installmentProductName) {
+      favorites.value = favorites.value.filter(
+        (p) => p.installmentProductName !== product.installmentProductName
       );
     }
     // 주식 상품인 경우
@@ -72,11 +100,26 @@ export const useFavoriteStore = defineStore('favorite', () => {
   }
 
   function isFavorite(product) {
+    console.log('Checking if favorite:', product);
+
     // 예금 상품인 경우
     if (product.depositProductName) {
       return favorites.value.some(
         (p) => p.depositProductName === product.depositProductName
       );
+    }
+    // 적금 상품인 경우
+    else if (product.installmentProductName) {
+      console.log(
+        'Checking installment product:',
+        product.installmentProductName
+      );
+      console.log('Current favorites:', favorites.value);
+      const result = favorites.value.some(
+        (p) => p.installmentProductName === product.installmentProductName
+      );
+      console.log('Is installment favorite:', result);
+      return result;
     }
     // 주식 상품인 경우
     else if (product.stockName) {

@@ -41,7 +41,7 @@
         <div class="summary-content">
           <div class="summary-info">
             <span class="summary-label"
-              >🔍 검색 조건: <span class="summary-text">{{ summaryText }}</span>
+              >🔍 <span class="summary-text">{{ summaryText }}</span>
             </span>
           </div>
           <button class="edit-btn" @click="hideSearchResults">수정</button>
@@ -53,9 +53,6 @@
 
     <!-- 전체 보기 탭일 때 -->
     <div class="scroll-area" v-else>
-      <div class="info-text">
-        <span class="emoji">📊</span> 전체 적금 상품을 확인해보세요
-      </div>
       <ProductCardList :products="allProducts" />
     </div>
   </div>
@@ -267,6 +264,9 @@ function toggleSummaryMode() {
   border: none;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  width: 50px;
+  height: 32px;
+  flex-shrink: 0;
 }
 
 .edit-btn:hover {

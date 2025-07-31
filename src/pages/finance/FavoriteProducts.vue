@@ -13,6 +13,12 @@
         <ProductCardList_deposit :products="depositFavorites" />
       </div>
 
+      <!-- 적금 상품 -->
+      <div v-if="installmentFavorites.length > 0">
+        <div class="group-title">적금 상품</div>
+        <ProductCardList_installment :products="installmentFavorites" />
+      </div>
+
       <!-- 주식 상품 -->
       <div v-if="stockFavorites.length > 0">
         <div class="group-title">주식 상품</div>
@@ -29,6 +35,7 @@
       <div
         v-if="
           depositFavorites.length === 0 &&
+          installmentFavorites.length === 0 &&
           stockFavorites.length === 0 &&
           fundFavorites.length === 0
         "
@@ -47,6 +54,7 @@ import { useFavoriteStore } from '@/stores/favorite.js';
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
 import ProductCardList_stock from '@/components/finance/stock/ProductCardList_stock.vue';
 import ProductCardList_fund from '@/components/finance/fund/ProductCardList_fund.vue';
+import ProductCardList_installment from '@/components/finance/installment/ProductCardList_installment.vue';
 
 const router = useRouter();
 const favoriteStore = useFavoriteStore();
@@ -66,6 +74,10 @@ const stockFavorites = computed(() => {
 
 const fundFavorites = computed(() => {
   return favoriteStore.favorites.filter((item) => item.name && item.type);
+});
+
+const installmentFavorites = computed(() => {
+  return favoriteStore.favorites.filter((item) => item.installmentProductName);
 });
 </script>
 
