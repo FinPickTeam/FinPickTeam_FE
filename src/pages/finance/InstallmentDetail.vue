@@ -1,18 +1,19 @@
 <template>
   <div class="detail-container">
-    <!-- 헤더 -->
-    <div class="header">
-      <button class="back-btn" @click="goBack">
-        <i class="fa-solid fa-arrow-left"></i>
-      </button>
-      <h1 class="product-title">{{ product.installmentProductName }}</h1>
-      <div class="favorite-section">
+    <!-- 제목과 찜하기 -->
+    <div class="title-section">
+      <div class="title-with-heart">
+        <img
+          :src="getLogoUrl(product.installmentBankName)"
+          :alt="`${product.installmentBankName} 로고`"
+          class="bank-logo"
+        />
+        <h1 class="product-title">{{ product.installmentProductName }}</h1>
         <i
           :class="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
           class="heart-icon"
           @click="toggleFavorite"
         ></i>
-        <span class="favorite-text">찜하기</span>
       </div>
     </div>
 
@@ -23,8 +24,8 @@
           <span class="highlight"
             >{{ investmentAmount.toLocaleString() }}원</span
           >을 <span class="highlight">{{ selectedPeriod }}개월</span> 동안
-          투자하면 총
-          <span class="total-amount">{{ totalAmount.toLocaleString() }}원</span
+          투자하면 총<span class="total-amount"
+            >{{ totalAmount.toLocaleString() }}원</span
           >을 수령하실 수 있습니다.
         </span>
       </div>
@@ -32,7 +33,6 @@
 
     <!-- 상세 정보 섹션 -->
     <div class="detail-section">
-      <h2 class="section-title">상세 정보</h2>
       <div class="detail-card">
         <div class="detail-item">
           <span class="detail-label">상품특징</span>
@@ -138,6 +138,38 @@ function goToProduct() {
   window.open(product.value.installmentLink, '_blank');
 }
 
+const bankLogoMap = {
+  KB국민은행: 'KB국민은행.png',
+  NH농협은행: 'NH농협은행.png',
+  IBK기업은행: 'IBK기업은행.png',
+  KDB산업은행: 'KDB산업은행.png',
+  SC제일은행: 'SC제일은행.png',
+  수협은행: '수협은행.png',
+  우리은행: '우리은행.png',
+  하나은행: '하나은행.png',
+  카카오뱅크: '카카오뱅크.png',
+  케이뱅크: '케이뱅크.png',
+  토스뱅크: '토스뱅크.png',
+  iM뱅크: 'iM뱅크.png',
+  광주은행: '광주은행, 전북은행.png',
+  전북은행: '광주은행, 전북은행.png',
+  신한은행: '신한은행, 제주은행.png',
+  제주은행: '신한은행, 제주은행.png',
+  경남은행: '경남은행, 부산은행.png',
+  부산은행: '경남은행, 부산은행.png',
+};
+
+const getLogoUrl = (bankName) => {
+  if (!bankName) {
+    return '/src/assets/bank_logo/KB국민은행.png';
+  }
+  const fileName = bankLogoMap[bankName];
+  if (!fileName) {
+    return '/src/assets/bank_logo/KB국민은행.png';
+  }
+  return `/src/assets/bank_logo/${fileName}`;
+};
+
 onMounted(() => {
   // 실제로는 route.params.id를 사용해서 API에서 상품 데이터를 가져옴
   console.log('상품 ID:', route.params.id);
@@ -150,25 +182,28 @@ onMounted(() => {
   margin: 0 auto;
   padding: 16px;
   font-family: var(--font-main);
-  background: #f8f9fa;
+  background: var(--color-bg-light);
   min-height: 100vh;
 }
 
-.header {
+.title-section {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding: 16px 0;
+  margin-bottom: 16px;
+  padding: 0px 0 8px 0;
 }
 
-.back-btn {
-  background: none;
-  border: none;
-  font-size: 18px;
-  color: #333;
-  cursor: pointer;
-  padding: 8px;
+.title-with-heart {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bank-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
 }
 
 .product-title {
@@ -177,24 +212,12 @@ onMounted(() => {
   color: #333;
   margin: 0;
   flex: 1;
-  text-align: center;
-}
-
-.favorite-section {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
 }
 
 .heart-icon {
   font-size: 16px;
   color: #ff4757;
-}
-
-.favorite-text {
-  font-size: 12px;
-  color: #666;
+  cursor: pointer;
 }
 
 .summary-section {
@@ -202,7 +225,7 @@ onMounted(() => {
 }
 
 .summary-box {
-  background: #e8f4fd;
+  background: var(--color-bg);
   border-radius: 12px;
   padding: 20px;
   text-align: center;
@@ -215,33 +238,27 @@ onMounted(() => {
 }
 
 .highlight {
-  background: #b8e6ff;
-  padding: 2px 6px;
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-main);
+  padding: 2px 0px;
   border-radius: 4px;
-  font-weight: 600;
 }
 
 .total-amount {
-  font-weight: bold;
-  color: #2c3e50;
+  font-size: var(--font-size-body-large);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-main);
 }
 
 .detail-section {
   margin-bottom: 20px;
 }
 
-.section-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 12px;
-}
-
 .detail-card {
   background: white;
   border-radius: 12px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .detail-item {
@@ -273,7 +290,6 @@ onMounted(() => {
 }
 
 .action-section {
-  background: #f1f3f4;
   border-radius: 12px;
   padding: 20px;
   text-align: center;
