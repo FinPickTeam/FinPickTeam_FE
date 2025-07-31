@@ -224,9 +224,10 @@ const router = createRouter({
           component: () => import("../pages/openbanking/OpenBankingMyHome.vue"),
         },
         {
-          path: "openbanking/diaryhome",
-          name: "DiaryHome",
-          component: () => import("../pages/openbanking/DiaryHome.vue"),
+          path: "openbanking/daily-report",
+          name: "OpenbankingDailyReport",
+          component: () =>
+            import("../pages/openbanking/OpenbankingDailyReport.vue"),
         },
         {
           path: "openbanking/monthly-report",

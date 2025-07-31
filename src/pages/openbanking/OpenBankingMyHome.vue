@@ -19,17 +19,18 @@
     <div class="obmyhome-asset-card">
       <div class="obmyhome-asset-row">
         <span class="obmyhome-asset-title">총 자산</span>
-        <span class="obmyhome-asset-time">07:28 갱신</span>
+        <span class="obmyhome-asset-time">{{ todayDateText }}</span>
       </div>
       <div class="obmyhome-asset-amount">
-        10,000,000<span class="obmyhome-asset-won">원</span>
+        {{ totalAssets.toLocaleString()
+        }}<span class="obmyhome-asset-won">원</span>
       </div>
       <div class="obmyhome-asset-diff">
         <font-awesome-icon
           :icon="['fas', 'triangle-exclamation']"
           class="obmyhome-asset-diff-icon"
         />
-        <span class="obmyhome-asset-diff-text">전월 대비 12.5%</span>
+        <span class="obmyhome-asset-diff-text">{{ monthlyChangeText }}</span>
       </div>
     </div>
 
@@ -78,9 +79,14 @@
           </tr>
         </tbody>
       </table>
-      <button class="obmyhome-report-btn" @click="goToDiary">
-        월간 리포트 보기
-      </button>
+      <div class="obmyhome-report-buttons">
+        <button class="obmyhome-report-btn daily" @click="goToDailyReport">
+          일간 리포트 보기
+        </button>
+        <button class="obmyhome-report-btn monthly" @click="goToMonthlyReport">
+          월간 리포트 보기
+        </button>
+      </div>
     </div>
 
     <!-- 하단 네비게이션 -->
@@ -92,7 +98,7 @@
 const goToDictionary = () => {
   router.push("/dictionary");
 };
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import Navbar from "../../components/Navbar.vue";
 import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -107,6 +113,9 @@ library.add(faAngleLeft, faSearch, faPlus, faTriangleExclamation);
 
 // 은행 로고 이미지 import
 import kakaoLogo from "@/assets/bank_logo/카카오뱅크.png";
+
+// Transaction 데이터 import
+import transactionData from "./Transaction_dummy.json";
 
 const router = useRouter();
 const goBack = () => {
@@ -126,9 +135,177 @@ const accounts = ref([
   },
 ]);
 
-const goToDiary = () => {
-  router.push("/openbanking/diaryhome");
+const goToDailyReport = () => {
+  router.push("/openbanking/daily-report");
 };
+
+const goToMonthlyReport = () => {
+  router.push("/openbanking/monthly-report");
+};
+
+// 초기 재산 - Transaction_dummy.json에서 불러오기
+const initialAssets = computed(() => {
+  return transactionData?.initialAssets || 0;
+});
+
+// 총 입금 계산 (당일까지)
+const totalIncome = computed(() => {
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // 오늘 마지막 시간으로 설정
+
+  return Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions
+        .filter((t) => {
+          const tDate = new Date(t.date);
+          return (t.type || "").trim() === "입금" && tDate <= today;
+        })
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    : 0;
+});
+
+// 총 출금 계산 (당일까지)
+const totalExpense = computed(() => {
+  const today = new Date();
+  today.setHours(23, 59, 59, 999); // 오늘 마지막 시간으로 설정
+
+  return Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions
+        .filter((t) => {
+          const tDate = new Date(t.date);
+          return (t.type || "").trim() === "출금" && tDate <= today;
+        })
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    : 0;
+});
+
+// 현재 총 재산 계산
+const totalAssets = computed(() => {
+  return initialAssets.value + totalIncome.value - totalExpense.value;
+});
+
+// 오늘 날짜 텍스트 (갱신 시간)
+const todayDateText = computed(() => {
+  const today = new Date();
+  const month = today.getMonth() + 1;
+  const day = today.getDate();
+  const hours = today.getHours().toString().padStart(2, "0");
+  const minutes = today.getMinutes().toString().padStart(2, "0");
+  return `${month}.${day} ${hours}:${minutes} 갱신`;
+});
+
+// 이번 달 입금 계산
+const currentMonthIncome = computed(() => {
+  const today = new Date();
+  return Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions
+        .filter((t) => {
+          const tDate = new Date(t.date);
+          return (
+            tDate.getFullYear() === today.getFullYear() &&
+            tDate.getMonth() === today.getMonth() &&
+            (t.type || "").trim() === "입금"
+          );
+        })
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    : 0;
+});
+
+// 이번 달 출금 계산
+const currentMonthExpense = computed(() => {
+  const today = new Date();
+  return Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions
+        .filter((t) => {
+          const tDate = new Date(t.date);
+          return (
+            tDate.getFullYear() === today.getFullYear() &&
+            tDate.getMonth() === today.getMonth() &&
+            (t.type || "").trim() === "출금"
+          );
+        })
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    : 0;
+});
+
+// 이번 달 순변동
+const currentMonthNetChange = computed(() => {
+  return currentMonthIncome.value - currentMonthExpense.value;
+});
+
+// 지난 달 입금 계산
+const prevMonthIncome = computed(() => {
+  const today = new Date();
+  const prevMonth = today.getMonth() === 0 ? 11 : today.getMonth() - 1;
+  const prevYear =
+    today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
+
+  return Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions
+        .filter((t) => {
+          const tDate = new Date(t.date);
+          return (
+            tDate.getFullYear() === prevYear &&
+            tDate.getMonth() === prevMonth &&
+            (t.type || "").trim() === "입금"
+          );
+        })
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    : 0;
+});
+
+// 지난 달 출금 계산
+const prevMonthExpense = computed(() => {
+  const today = new Date();
+  const prevMonth = today.getMonth() === 0 ? 11 : today.getMonth() - 1;
+  const prevYear =
+    today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
+
+  return Array.isArray(transactionData?.transactions)
+    ? transactionData.transactions
+        .filter((t) => {
+          const tDate = new Date(t.date);
+          return (
+            tDate.getFullYear() === prevYear &&
+            tDate.getMonth() === prevMonth &&
+            (t.type || "").trim() === "출금"
+          );
+        })
+        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
+    : 0;
+});
+
+// 지난 달 순변동
+const prevMonthNetChange = computed(() => {
+  return prevMonthIncome.value - prevMonthExpense.value;
+});
+
+// 전월 대비 증감률 계산
+const monthlyChangePercent = computed(() => {
+  if (prevMonthNetChange.value === 0) {
+    return currentMonthNetChange.value === 0
+      ? 0
+      : currentMonthNetChange.value > 0
+      ? 100
+      : -100;
+  }
+  return (
+    ((currentMonthNetChange.value - prevMonthNetChange.value) /
+      Math.abs(prevMonthNetChange.value)) *
+    100
+  );
+});
+
+// 전월 대비 증감 텍스트
+const monthlyChangeText = computed(() => {
+  const percent = monthlyChangePercent.value;
+  if (percent > 0) {
+    return `전월 대비 +${percent.toFixed(1)}% 증가`;
+  } else if (percent < 0) {
+    return `전월 대비 ${percent.toFixed(1)}% 감소`;
+  } else {
+    return "전월 대비 0% 변화없음";
+  }
+});
 </script>
 
 <style scoped>
@@ -338,20 +515,44 @@ const goToDiary = () => {
   color: #222;
   font-weight: 500;
 }
+.obmyhome-report-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
 .obmyhome-report-btn {
-  width: 100%;
+  flex: 1;
   background: #ece9fd;
   color: #4318d1;
   border: none;
   border-radius: 8px;
   padding: 10px 0;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 6px;
   transition: background 0.15s;
 }
+
 .obmyhome-report-btn:hover {
+  background: #e0d7fa;
+}
+
+.obmyhome-report-btn.daily {
+  background: #f0f9ff;
+  color: #0369a1;
+}
+
+.obmyhome-report-btn.daily:hover {
+  background: #e0f2fe;
+}
+
+.obmyhome-report-btn.monthly {
+  background: #ece9fd;
+  color: #4318d1;
+}
+
+.obmyhome-report-btn.monthly:hover {
   background: #e0d7fa;
 }
 

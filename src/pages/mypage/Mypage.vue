@@ -78,7 +78,7 @@
         <span class="slider" :class="{ active: pushEnabled }"></span>
       </label>
     </div>
-    <div class="menu-item">
+    <div class="menu-item" @click="goToInvestmentTest">
       <span>투자성향 재검사</span>
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
@@ -173,6 +173,10 @@ function goToQuizHistory() {
 function handleLogout() {
   // 로그아웃 후 로그인 페이지로 이동
   router.push("/login");
+}
+
+function goToInvestmentTest() {
+  router.push("/profile-step-1?from=mypage");
 }
 </script>
 

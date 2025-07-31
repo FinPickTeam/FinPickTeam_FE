@@ -38,9 +38,10 @@
 
 <script setup>
 import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
+const route = useRoute();
 const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
 const selected = ref(null);
 
@@ -49,7 +50,12 @@ const goBack = () => {
 };
 const goNext = () => {
   if (selected.value !== null) {
-    router.push("/");
+    // SignupComplete에서 온 경우 home으로, Mypage에서 온 경우 ProfileStep5로
+    if (route.query.from === "signup") {
+      router.push("/");
+    } else {
+      router.push("/mypage/financetest/profile-step-5");
+    }
   }
 };
 </script>

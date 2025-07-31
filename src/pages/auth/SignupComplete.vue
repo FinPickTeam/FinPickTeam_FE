@@ -8,9 +8,9 @@
 
     <!-- 중앙 섹션 -->
     <div class="center-section">
-      <!-- 프로필 이미지 플레이스홀더 -->
-      <div class="profile-placeholder">
-        <!-- 여기에 프로필 이미지나 일러스트레이션이 들어갈 예정 -->
+      <!-- 완료 이미지 -->
+      <div class="complete-image">
+        <img src="./authimg/CompleteCha.png" alt="가입 완료" />
       </div>
 
       <!-- 환영 메시지 -->
@@ -29,14 +29,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter, useRoute } from 'vue-router';
+import { ref, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
 
 // 사용자 이름 (실제로는 props나 store에서 가져올 수 있음)
-const userName = ref('금맹정');
+const userName = ref("금맹정");
 
 // 컴포넌트 마운트 시 사용자 이름 설정
 onMounted(() => {
@@ -48,7 +48,7 @@ onMounted(() => {
 
 // 투자 성향 분석 페이지로 이동
 const goToProfile = () => {
-  router.push('/profile-step-1');
+  router.push("/profile-step-1?from=signup");
 };
 </script>
 
@@ -57,7 +57,7 @@ const goToProfile = () => {
   min-height: 100vh;
   background-color: #fff;
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 .logo {
@@ -83,16 +83,17 @@ const goToProfile = () => {
   margin: 40px 0;
 }
 
-.profile-placeholder {
-  width: 120px;
-  height: 120px;
-  border-radius: 50%;
-  background-color: #e5e7eb;
+.complete-image {
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 32px auto;
-  /* 프로필 이미지가 들어갈 자리 */
+}
+
+.complete-image img {
+  width: 200px;
+  height: auto;
+  max-width: 100%;
 }
 
 .welcome-message {
@@ -141,9 +142,8 @@ const goToProfile = () => {
     font-size: 40px;
   }
 
-  .profile-placeholder {
-    width: 100px;
-    height: 100px;
+  .complete-image img {
+    width: 160px;
   }
 
   .welcome-message h2 {
