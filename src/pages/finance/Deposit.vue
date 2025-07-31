@@ -40,9 +40,29 @@
       <div v-if="summaryText" class="summary-text-box">
         <div class="summary-content">
           <div class="summary-info">
-            <span class="summary-label"
-              >🔍 <span class="summary-text">{{ summaryText }}</span>
-            </span>
+            <div class="summary-text-container">
+              <div class="summary-item-box">
+                <span class="summary-item-value">{{ formData.period }}</span>
+              </div>
+              <div class="summary-item-box">
+                <span class="summary-item-value"
+                  >월 {{ formData.amountRaw.toLocaleString() }}원</span
+                >
+              </div>
+              <div class="summary-item-box">
+                <span class="summary-item-value">{{
+                  formData.depositType
+                }}</span>
+              </div>
+              <div
+                v-if="formData.selectedPrefer.length > 0"
+                class="summary-item-box"
+              >
+                <span class="summary-item-value">{{
+                  formData.selectedPrefer.join(', ')
+                }}</span>
+              </div>
+            </div>
           </div>
           <button class="edit-btn" @click="hideSearchResults">수정</button>
         </div>
@@ -332,18 +352,68 @@ const filteredAllProducts = computed(() => {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex: 1;
+  min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+}
+
+.summary-text-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+  padding-right: 8px;
+  /* 스크롤바 숨기기 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE, Edge */
+}
+
+.summary-text-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.summary-item-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 8px 6px;
+  min-width: 30px;
+  flex-shrink: 0;
+}
+
+.summary-item-label {
+  font-size: 11px;
+  color: #6c757d;
+  font-weight: 500;
+  margin-bottom: 2px;
+  text-align: center;
+}
+
+.summary-item-value {
+  font-size: 12px;
+  color: #333;
+  font-weight: 600;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .summary-label {
   font-weight: var(--font-weight-medium);
   color: #555;
   font-size: 14px;
+  flex-shrink: 0;
 }
 
 .summary-text {
   font-size: 14px;
   color: #333;
   font-weight: 500;
+  white-space: nowrap;
 }
 
 .edit-btn {
@@ -351,12 +421,12 @@ const filteredAllProducts = computed(() => {
   color: white;
   padding: 6px 12px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: var(--font-weight-medium);
   border: none;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  width: 50px;
+  width: 48px;
   height: 32px;
   flex-shrink: 0;
 }
