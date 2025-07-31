@@ -28,6 +28,114 @@
       "installmentBasicRate": 2.45,
       "installmentMaxRate": 3.25,
       "installmentSummary": "맑은하늘 만들고 금리도 Up"
+    },
+    {
+      "installmentBankName": "신한은행",
+      "installmentProductName": "신한 자유적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "24개월",
+      "installmentBasicRate": 2.65,
+      "installmentMaxRate": 3.1,
+      "installmentSummary": "자유롭게 적립하고 이자도 챙기고"
+    },
+    {
+      "installmentBankName": "우리은행",
+      "installmentProductName": "우리 WON 적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.8,
+      "installmentMaxRate": 3.3,
+      "installmentSummary": "WON하는 습관으로 이자 받기"
+    },
+    {
+      "installmentBankName": "하나은행",
+      "installmentProductName": "하나의 자유적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "6개월",
+      "installmentBasicRate": 2.15,
+      "installmentMaxRate": 2.6,
+      "installmentSummary": "짧고 굵게 모으는 자유 적금"
+    },
+    {
+      "installmentBankName": "IBK기업은행",
+      "installmentProductName": "IBK꿈드림 적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.95,
+      "installmentMaxRate": 3.5,
+      "installmentSummary": "청년을 위한 꿈 응원 적금"
+    },
+    {
+      "installmentBankName": "NH농협은행",
+      "installmentProductName": "NH내편 적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.75,
+      "installmentMaxRate": 3.4,
+      "installmentSummary": "내 편이 되어주는 맞춤형 적금"
+    },
+    {
+      "installmentBankName": "카카오뱅크",
+      "installmentProductName": "카카오 자유적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "6개월",
+      "installmentBasicRate": 2.0,
+      "installmentMaxRate": 2.3,
+      "installmentSummary": "간편하게 모으는 스마트 적금"
+    },
+    {
+      "installmentBankName": "토스뱅크",
+      "installmentProductName": "토스 습관적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.9,
+      "installmentMaxRate": 3.5,
+      "installmentSummary": "매일매일 습관처럼 모으기"
+    },
+    {
+      "installmentBankName": "대구은행",
+      "installmentProductName": "IM적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "24개월",
+      "installmentBasicRate": 2.4,
+      "installmentMaxRate": 2.9,
+      "installmentSummary": "IM과 함께하는 미래 준비"
+    },
+    {
+      "installmentBankName": "전북은행",
+      "installmentProductName": "JB모아Dream 적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.6,
+      "installmentMaxRate": 3.2,
+      "installmentSummary": "매일모아 꿈을 이루는 적금"
+    },
+    {
+      "installmentBankName": "광주은행",
+      "installmentProductName": "KJ 행복적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.35,
+      "installmentMaxRate": 2.85,
+      "installmentSummary": "행복을 적립하는 금융 습관"
+    },
+    {
+      "installmentBankName": "수협은행",
+      "installmentProductName": "Sh해피적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.55,
+      "installmentMaxRate": 3.05,
+      "installmentSummary": "작은 적금으로 만드는 해피 라이프"
+    },
+    {
+      "installmentBankName": "케이뱅크",
+      "installmentProductName": "K적금",
+      "installmentType": "자유적립식",
+      "installmentPeriod": "12개월",
+      "installmentBasicRate": 2.7,
+      "installmentMaxRate": 3.1,
+      "installmentSummary": "간편하고 실속있는 K뱅크 적금"
     }
   ]
 }
