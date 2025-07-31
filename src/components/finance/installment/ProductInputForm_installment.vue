@@ -180,10 +180,31 @@ function toggleSummaryMode() {
 
 // 폼 제출 시 입력값 콘솔 출력 및 부모에게 이벤트 전달
 function handleSubmit() {
+  console.log('=== handleSubmit 함수 실행됨 ===');
   console.log('기간:', period.value);
   console.log('월 저축 금액:', amount.value);
   console.log('적립방식:', savingType.value);
   console.log('우대항목:', selectedPrefer.value);
+
+  // 필터링 객체 생성
+  const filterObject = {
+    autoTransfer: selectedPrefer.value.includes('자동이체 실적'),
+    cardUsage: selectedPrefer.value.includes('신용/체크카드 사용'),
+    openBanking: selectedPrefer.value.includes('오픈뱅킹 가입'),
+    salaryTransfer: selectedPrefer.value.includes('급여/연금 이체'),
+    utilityPayment: selectedPrefer.value.includes('공과금 자동이체'),
+    marketingConsent: selectedPrefer.value.includes('마케팅 수신 동의'),
+    housingSubscription: selectedPrefer.value.includes('주택청약통장 보유'),
+    internetMobileBanking:
+      selectedPrefer.value.includes('인터넷/모바일뱅킹 이용'),
+    greenMission: selectedPrefer.value.includes('친환경/교통 미션'),
+    incomeTransfer: selectedPrefer.value.includes('소득이체 실적'),
+    newCustomer: selectedPrefer.value.includes('신규 고객 여부'),
+  };
+
+  console.log('=== 필터링 객체 생성 완료 ===');
+  console.log('필터링 객체:', filterObject);
+  console.log('=== 부모 컴포넌트로 데이터 전달 ===');
 
   // 부모 컴포넌트에 검색 완료 이벤트와 폼 데이터 전달
   emit('search-completed', {
@@ -191,6 +212,7 @@ function handleSubmit() {
     amount: amount.value,
     savingType: savingType.value,
     selectedPrefer: selectedPrefer.value,
+    filterObject: filterObject,
   });
 }
 
