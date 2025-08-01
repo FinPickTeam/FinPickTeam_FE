@@ -100,8 +100,6 @@ export const useFavoriteStore = defineStore('favorite', () => {
   }
 
   function isFavorite(product) {
-    console.log('Checking if favorite:', product);
-
     // 예금 상품인 경우
     if (product.depositProductName) {
       return favorites.value.some(

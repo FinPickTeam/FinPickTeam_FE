@@ -1,5 +1,5 @@
 <template>
-  <div class="product-card">
+  <div class="product-card" @click="goToDetail">
     <!-- 상단 헤더 -->
     <div class="card-header">
       <div class="company-info">
@@ -11,7 +11,7 @@
       <div
         class="heart-icon"
         :class="{ active: isFavorite }"
-        @click="toggleFavorite"
+        @click.stop="toggleFavorite"
       >
         ♥
       </div>
@@ -36,6 +36,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite.js';
 import kbLogo from '../../../assets/fund_logo/KB 자산운용.png';
 
@@ -43,8 +44,17 @@ const props = defineProps({
   fund: Object,
 });
 
+const router = useRouter();
 const favoriteStore = useFavoriteStore();
 const isFavorite = computed(() => favoriteStore.isFavorite(props.fund));
+
+function goToDetail() {
+  // 상품명을 기반으로 상세 페이지로 이동
+  const productName = props.fund.fundProductName;
+  if (productName) {
+    router.push(`/finance/fund/${productName}`);
+  }
+}
 
 function toggleFavorite() {
   console.log('Toggle favorite clicked for fund:', props.fund);

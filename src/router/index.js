@@ -279,6 +279,11 @@ const router = createRouter({
           name: 'DepositDetail',
           component: () => import('../pages/finance/DepositDetail.vue'),
         },
+        {
+          path: 'fund/:id',
+          name: 'FundDetail',
+          component: () => import('../pages/finance/FundDetail.vue'),
+        },
         // ... 추가 재테크 탭들
       ],
     },
