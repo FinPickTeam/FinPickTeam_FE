@@ -1,6 +1,6 @@
 <!-- 상품 카드 컴포넌트 -->
 <template>
-  <div class="product-card">
+  <div class="product-card" @click="goToDetail">
     <!-- 은행 로고 -->
     <div class="bank-logo">
       <img
@@ -16,7 +16,7 @@
         <span
           class="heart"
           :class="{ active: isFavorite }"
-          @click="toggleFavorite"
+          @click.stop="toggleFavorite"
           >♥</span
         >
       </div>
@@ -32,20 +32,27 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite.js';
 
 const props = defineProps({
   product: Object,
 });
 
+const router = useRouter();
 const favoriteStore = useFavoriteStore();
 const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
+
 function toggleFavorite() {
   if (isFavorite.value) {
     favoriteStore.removeFavorite(props.product);
   } else {
     favoriteStore.addFavorite(props.product);
   }
+}
+
+function goToDetail() {
+  router.push(`/finance/deposit/${props.product.depositProductName}`);
 }
 
 const bankLogoMap = {
