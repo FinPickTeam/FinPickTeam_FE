@@ -71,12 +71,9 @@
       <span>금융 퀴즈 히스토리</span>
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
-    <div class="menu-item">
-      <span>푸시알림</span>
-      <label class="toggle-switch">
-        <input type="checkbox" v-model="pushEnabled" />
-        <span class="slider" :class="{ active: pushEnabled }"></span>
-      </label>
+    <div class="menu-item" @click="goToPinpickCertificate">
+      <span>핀픽 인증서 관리</span>
+      <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
     <div class="menu-item" @click="goToInvestmentTest">
       <span>투자성향 재검사</span>
@@ -130,7 +127,6 @@ library.add(faAngleRight);
 const router = useRouter();
 const avatarStore = useAvatarStore();
 const { coin } = storeToRefs(avatarStore);
-const pushEnabled = ref(true);
 
 // 착용 중인 아이템 확인
 const wearingShirt = computed(() => {
@@ -180,6 +176,10 @@ function goToInvestmentTest() {
   router.push("/profile-step-1?from=mypage");
 }
 
+function goToPinpickCertificate() {
+  router.push("/mycertificate");
+}
+
 // 컴포넌트 마운트 시 저장된 아바타 정보 불러오기
 onMounted(() => {
   avatarStore.loadAvatar();
@@ -194,7 +194,7 @@ onMounted(() => {
   margin: 0 auto;
   background: var(--color-bg);
   position: relative;
-  padding-top: 0;
+  padding-top: 80px;
   padding-bottom: 80px;
   box-sizing: border-box;
   font-family: var(--font-main);
@@ -223,6 +223,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   margin: 0 30px;
+  margin-top: 80px;
   padding: 20px;
   border: 2px solid #ffffff;
   border-radius: 12px;
