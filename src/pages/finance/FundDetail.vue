@@ -16,21 +16,13 @@
         ></i>
       </div>
     </div>
-
-    <!-- 요약 계산 섹션 -->
-    <div class="summary-section">
-      <div class="summary-box">
-        <span class="summary-text">
-          <span class="highlight"
-            >{{ investmentAmount.toLocaleString() }}원</span
-          >을 <span class="highlight">{{ selectedPeriod }}개월</span> 동안
-          투자하면
-          <span class="total-amount">{{ totalAmount.toLocaleString() }}원</span
-          >을 받을 수 있습니다.
-        </span>
+    <!-- 수익률 차트 섹션 -->
+    <div class="chart-section" v-if="product.fundReturnsData">
+      <div class="chart-card">
+        <h3 class="chart-title">펀드 수익률 추이</h3>
+        <FundChart :returnsData="product.fundReturnsData" />
       </div>
     </div>
-
     <!-- 상세 정보 섹션 -->
     <div class="detail-section">
       <div class="detail-card">
@@ -52,6 +44,18 @@
             getReturnValue(product.fund3MonthReturn)
           }}</span>
         </div>
+        <div class="detail-item">
+          <span class="detail-label">설정일</span>
+          <span class="detail-value">{{ product.fundStartDate }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">순자산</span>
+          <span class="detail-value">{{ product.fundNetAssetValue }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">총보수비율</span>
+          <span class="detail-value">{{ product.fundTotalExpenseRatio }}</span>
+        </div>
       </div>
     </div>
 
@@ -68,6 +72,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
+import FundChart from '../../components/finance/fund/FundChart.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -122,17 +127,6 @@ const loadProductData = async () => {
     return;
   }
 };
-
-// 투자 조건
-const investmentAmount = ref(100000000); // 1억원
-const selectedPeriod = ref(12); // 12개월
-
-// 계산된 값들
-const totalAmount = computed(() => {
-  const rate = product.value.fund3MonthReturn / 100;
-  const months = selectedPeriod.value;
-  return Math.floor(investmentAmount.value * (1 + (rate * months) / 12));
-});
 
 // 찜하기 상태
 const isFavorite = computed(() => {
@@ -236,37 +230,6 @@ onMounted(() => {
   cursor: pointer;
 }
 
-.summary-section {
-  margin-bottom: 20px;
-}
-
-.summary-box {
-  background: var(--color-bg);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-}
-
-.summary-text {
-  font-size: 14px;
-  color: #333;
-  line-height: 1.5;
-}
-
-.highlight {
-  font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-main);
-  padding: 2px 0px;
-  border-radius: 4px;
-}
-
-.total-amount {
-  font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-main);
-}
-
 .detail-section {
   margin-bottom: 20px;
 }
@@ -303,6 +266,24 @@ onMounted(() => {
   line-height: 1.4;
   flex: 1;
   margin-left: 16px;
+}
+
+.chart-section {
+  margin-bottom: 20px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+  text-align: center;
 }
 
 .action-section {
