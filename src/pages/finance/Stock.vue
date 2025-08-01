@@ -54,23 +54,74 @@
           </button>
         </div>
 
-        <!-- 드롭다운 필터 -->
+        <!-- 태그 필터 -->
         <div v-if="showFilter" class="filter-dropdown">
-          <div class="filter-group">
-            <label>시장</label>
-            <select v-model="selectedMarket">
-              <option value="">전체</option>
-              <option value="KOSPI">KOSPI</option>
-              <option value="KOSDAQ">KOSDAQ</option>
-            </select>
+          <!-- 시장 섹션 -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">시장</h4>
+            <div class="tag-container">
+              <button
+                v-for="tag in marketTags"
+                :key="tag.value"
+                class="filter-tag"
+                :class="{ active: selectedMarkets.includes(tag.value) }"
+                @click="toggleMarketTag(tag.value)"
+              >
+                {{ tag.label }}
+              </button>
+            </div>
           </div>
-          <div class="filter-group">
-            <label>정렬</label>
-            <select v-model="sortOption">
-              <option value="name">이름순</option>
-              <option value="price">가격순</option>
-              <option value="change">등락률순</option>
-            </select>
+
+          <!-- 등락률 구간 섹션 -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">등락률 구간</h4>
+            <div class="tag-container">
+              <button
+                v-for="tag in changeRateTags"
+                :key="tag.value"
+                class="filter-tag"
+                :class="{ active: selectedChangeRates.includes(tag.value) }"
+                @click="toggleChangeRateTag(tag.value)"
+              >
+                {{ tag.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 분류 섹션 -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">분류</h4>
+            <div class="tag-container">
+              <button
+                v-for="tag in sortTypeTags"
+                :key="tag.value"
+                class="filter-tag"
+                :class="{ active: selectedSortType === tag.value }"
+                @click="toggleSortTypeTag(tag.value)"
+              >
+                {{ tag.label }}
+              </button>
+            </div>
+          </div>
+          <!-- 정렬 섹션 -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">정렬</h4>
+            <div class="tag-container">
+              <button
+                v-for="tag in orderTypeTags"
+                :key="tag.value"
+                class="filter-tag"
+                :class="{ active: selectedOrderType === tag.value }"
+                @click="toggleOrderTypeTag(tag.value)"
+              >
+                {{ tag.label }}
+              </button>
+            </div>
+          </div>
+
+          <!-- 선택 완료 버튼 -->
+          <div class="filter-complete-section">
+            <button class="complete-btn" @click="closeFilter">선택 완료</button>
           </div>
         </div>
       </div>
@@ -115,11 +166,69 @@ function changeSubtab(tabName) {
   showProducts.value = false; // 추천 탭 누르면 초기화
 }
 
+// 태그 토글 함수들
+function toggleMarketTag(tagValue) {
+  const index = selectedMarkets.value.indexOf(tagValue);
+  if (index > -1) {
+    selectedMarkets.value.splice(index, 1);
+  } else {
+    selectedMarkets.value.push(tagValue);
+  }
+}
+
+function toggleChangeRateTag(tagValue) {
+  const index = selectedChangeRates.value.indexOf(tagValue);
+  if (index > -1) {
+    selectedChangeRates.value.splice(index, 1);
+  } else {
+    selectedChangeRates.value.push(tagValue);
+  }
+}
+
+// 단일 선택 토글 함수들
+function toggleSortTypeTag(tagValue) {
+  selectedSortType.value = selectedSortType.value === tagValue ? '' : tagValue;
+}
+
+function toggleOrderTypeTag(tagValue) {
+  selectedOrderType.value =
+    selectedOrderType.value === tagValue ? '' : tagValue;
+}
+
+function closeFilter() {
+  showFilter.value = false;
+}
+
 // 전체보기용 상태
 const searchKeyword = ref('');
 const showFilter = ref(false);
-const selectedMarket = ref('');
-const sortOption = ref('name');
+const selectedMarkets = ref([]);
+const selectedChangeRates = ref([]);
+const selectedSortType = ref('');
+const selectedOrderType = ref('');
+
+// 태그 데이터
+const marketTags = ref([
+  { value: 'KOSPI', label: 'KOSPI' },
+  { value: 'KOSDAQ', label: 'KOSDAQ' },
+]);
+
+const changeRateTags = ref([
+  { value: '상승', label: '상승' },
+  { value: '하락', label: '하락' },
+  { value: '보합', label: '보합' },
+]);
+
+const sortTypeTags = ref([
+  { value: 'name', label: '이름순' },
+  { value: 'price', label: '가격순' },
+  { value: 'volume', label: '거래량순' },
+]);
+
+const orderTypeTags = ref([
+  { value: 'asc', label: '오름차순' },
+  { value: 'desc', label: '내림차순' },
+]);
 
 // 전체보기 필터링된 데이터
 const filteredAllProducts = computed(() => {
@@ -149,24 +258,43 @@ const filteredAllProducts = computed(() => {
   }
 
   // 🏦 시장 필터
-  if (selectedMarket.value) {
-    result = result.filter((p) => p.stockMarketType === selectedMarket.value);
+  if (selectedMarkets.value.length > 0) {
+    result = result.filter((p) =>
+      selectedMarkets.value.includes(p.stockMarketType || '')
+    );
+  }
+
+  // 📈 등락률 구간 필터
+  if (selectedChangeRates.value.length > 0) {
+    result = result.filter((p) => {
+      const changeRate = Number((p.stockChangeRate || '0').replace(/[+-]/, ''));
+      return selectedChangeRates.value.some((range) => {
+        if (range === '상승') return changeRate > 0;
+        if (range === '하락') return changeRate < 0;
+        if (range === '보합') return changeRate === 0;
+        return false;
+      });
+    });
   }
 
   // 📊 정렬
-  if (sortOption.value === 'name') {
-    result = [...result].sort((a, b) => a.stockName.localeCompare(b.stockName));
-  } else if (sortOption.value === 'price') {
+  if (selectedSortType.value && selectedOrderType.value) {
     result = [...result].sort((a, b) => {
-      const priceA = Number(a.stockPrice.replace(/[+-]/, ''));
-      const priceB = Number(b.stockPrice.replace(/[+-]/, ''));
-      return priceB - priceA;
-    });
-  } else if (sortOption.value === 'change') {
-    result = [...result].sort((a, b) => {
-      const changeA = Number(a.stockChangeRate.replace(/[+-]/, ''));
-      const changeB = Number(b.stockChangeRate.replace(/[+-]/, ''));
-      return changeB - changeA;
+      let comparison = 0;
+
+      if (selectedSortType.value === 'name') {
+        comparison = (a.stockName || '').localeCompare(b.stockName || '');
+      } else if (selectedSortType.value === 'price') {
+        const priceA = Number((a.stockPrice || '0').replace(/[^\d.-]/g, ''));
+        const priceB = Number((b.stockPrice || '0').replace(/[^\d.-]/g, ''));
+        comparison = priceA - priceB;
+      } else if (selectedSortType.value === 'volume') {
+        const volumeA = Number(a.stockVolume || '0');
+        const volumeB = Number(b.stockVolume || '0');
+        comparison = volumeA - volumeB;
+      }
+
+      return selectedOrderType.value === 'desc' ? -comparison : comparison;
     });
   }
 
@@ -287,6 +415,7 @@ const filteredAllProducts = computed(() => {
 .search-filter-container {
   position: relative;
   margin-bottom: 16px;
+  z-index: 1000;
 }
 
 .search-filter-row {
@@ -324,9 +453,9 @@ const filteredAllProducts = computed(() => {
   border-radius: 8px;
   padding: 12px 16px;
   box-shadow: 0 2px 8px #0001;
-  min-width: 220px;
-  z-index: 10;
-  position: relative;
+  width: 360px;
+  z-index: 1000;
+  position: absolute;
 }
 
 .products-list-container {
@@ -365,5 +494,73 @@ const filteredAllProducts = computed(() => {
   font-size: 24px;
   margin-bottom: 8px;
   display: block;
+}
+
+/* 태그 필터 스타일 */
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-tag {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  border-radius: 12px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  transition: border 0.2s, color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+.filter-tag:hover {
+  border-color: var(--color-main);
+  color: var(--color-main);
+}
+
+.filter-tag.active {
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
+  background: #f3f0fa;
+}
+
+.filter-complete-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  text-align: center;
+}
+
+.complete-btn {
+  background: var(--color-main);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.complete-btn:hover {
+  background: var(--color-main-dark);
 }
 </style>
