@@ -24,9 +24,9 @@
           <span class="highlight"
             >{{ investmentAmount.toLocaleString() }}원</span
           >을 <span class="highlight">{{ selectedPeriod }}개월</span> 동안
-          투자하면 총<span class="total-amount"
+          투자하면 최대<span class="total-amount"
             >{{ totalAmount.toLocaleString() }}원</span
-          >을 수령하실 수 있습니다.
+          >수령하실 수 있습니다.
         </span>
       </div>
     </div>
