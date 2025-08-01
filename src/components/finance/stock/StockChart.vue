@@ -13,6 +13,14 @@ const props = defineProps({
     type: String,
     default: '[]',
   },
+  isUp: {
+    type: Boolean,
+    default: false,
+  },
+  isDown: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const chartCanvas = ref(null);
@@ -46,10 +54,17 @@ const createChart = () => {
   const labels = parsedData.map((item) => item.date);
   const prices = parsedData.map((item) => item.price);
 
-  // 가격 변화에 따른 색상 결정
-  const isUp = prices[prices.length - 1] > prices[0];
-  const lineColor = isUp ? '#e11d48' : '#dc2626';
-  const fillColor = isUp ? 'rgba(225, 29, 72, 0.1)' : 'rgba(220, 38, 38, 0.1)';
+  // 상승/하락에 따른 색상 결정 (주식 카드와 동일한 색상)
+  const lineColor = props.isUp
+    ? '#e12343' // 상승: 빨간색
+    : props.isDown
+    ? '#3b63c4' // 하락: 파란색
+    : '#e11d48'; // 기본: 기존 색상
+  const fillColor = props.isUp
+    ? 'rgba(225, 35, 67, 0.1)' // 상승: 빨간 투명 배경
+    : props.isDown
+    ? 'rgba(59, 99, 196, 0.1)' // 하락: 파란 투명 배경
+    : 'rgba(225, 29, 72, 0.1)'; // 기본: 기존 투명 배경
 
   chart = new Chart(ctx, {
     type: 'line',
@@ -85,7 +100,7 @@ const createChart = () => {
           backgroundColor: 'rgba(0, 0, 0, 0.8)',
           titleColor: '#fff',
           bodyColor: '#fff',
-          borderColor: lineColor,
+          borderColor: lineColor, // 차트 선과 동일한 색상
           borderWidth: 1,
           callbacks: {
             label: function (context) {
@@ -136,7 +151,7 @@ onMounted(() => {
 
 // props 변경 시 차트 업데이트
 watch(
-  () => props.chartData,
+  () => [props.chartData, props.isUp, props.isDown],
   () => {
     updateChart();
   },

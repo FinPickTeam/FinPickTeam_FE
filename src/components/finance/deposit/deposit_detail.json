@@ -1,0 +1,12 @@
+{
+  "depositBankName": "KB국민은행",
+  "depositProductName": "일반정기예금",
+  "depositContractPeriod": "1개월 이상 60개월 이하",
+  "depositSubscriptionAmount": "10만원 이상",
+  "depositBasicRate": 2.25,
+  "depositMaxRate": 2.25,
+  "depositPreferentialRate": "해당없음",
+  "depositProductFeatures": "목돈을 일정기간동안 예치하여 안정적인 수익을 목적으로 하는 일시예치식\n예금입니다.",
+  "depositSummary": "목돈넣고 안정수익 마음든든",
+  "depositLink": "https://obank.kbstar.com/quics?page=C016613&cc=b061496:b061645&isNew=N&prcode=DP01000014\r"
+}

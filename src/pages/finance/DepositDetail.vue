@@ -4,11 +4,11 @@
     <div class="title-section">
       <div class="title-with-heart">
         <img
-          :src="getLogoUrl(product.installmentBankName)"
-          :alt="`${product.installmentBankName} 로고`"
+          :src="getLogoUrl(product.depositBankName)"
+          :alt="`${product.depositBankName} 로고`"
           class="bank-logo"
         />
-        <h1 class="product-title">{{ product.installmentProductName }}</h1>
+        <h1 class="product-title">{{ product.depositProductName }}</h1>
         <i
           :class="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
           class="heart-icon"
@@ -36,34 +36,30 @@
       <div class="detail-card">
         <div class="detail-item">
           <span class="detail-label">상품특징</span>
-          <span class="detail-value">{{
-            product.installmentProductFeatures
-          }}</span>
+          <span class="detail-value">{{ product.depositProductFeatures }}</span>
         </div>
         <div class="detail-item">
           <span class="detail-label">계약기간</span>
-          <span class="detail-value">{{
-            product.installmentContractPeriod
-          }}</span>
+          <span class="detail-value">{{ product.depositContractPeriod }}</span>
         </div>
         <div class="detail-item">
           <span class="detail-label">가입금액</span>
           <span class="detail-value">{{
-            product.installmentSubscriptionAmount
+            product.depositSubscriptionAmount
           }}</span>
         </div>
         <div class="detail-item">
           <span class="detail-label">금리</span>
           <span class="detail-value"
             >({{ selectedPeriod }}개월 기준) 기본
-            {{ product.installmentBasicRate }}% 최고
-            {{ product.installmentMaxRate }}%</span
+            {{ product.depositBasicRate }}% 최고
+            {{ product.depositMaxRate }}%</span
           >
         </div>
         <div class="detail-item">
           <span class="detail-label">우대 이율</span>
           <span class="detail-value">{{
-            product.installmentPreferentialRate
+            product.depositPreferentialRate
           }}</span>
         </div>
       </div>
@@ -90,48 +86,53 @@ const favoriteStore = useFavoriteStore();
 // 상품 데이터
 const product = ref({});
 
-// 데이터 로드 함수
+// deposit_all.json에서 해당 상품 데이터 찾기
 const loadProductData = async () => {
   try {
-    // 먼저 전체 상품 목록에서 해당 상품을 찾습니다
-    const allResponse = await fetch(
-      '/src/components/finance/installment/installment_all.json'
+    const response = await fetch(
+      '/src/components/finance/deposit/deposit_all.json'
     );
-    const allProducts = await allResponse.json();
+    const allProducts = await response.json();
 
+    // URL 파라미터의 상품명과 일치하는 상품 찾기
     const requestedProductName = route.params.id;
-    const foundProduct = allProducts.data.find(
-      (p) => p.installmentProductName === requestedProductName
+    const foundProduct = allProducts.find(
+      (product) => product.depositProductName === requestedProductName
     );
 
     if (foundProduct) {
-      // 상품이 존재하면 상세 정보를 로드합니다
-      const detailResponse = await fetch(
-        '/src/components/finance/installment/installment_detail.json'
-      );
-      const detailData = await detailResponse.json();
+      // 상세 정보를 위해 deposit_detail.json도 로드
+      try {
+        const detailResponse = await fetch(
+          '/src/components/finance/deposit/deposit_detail.json'
+        );
+        const detailData = await detailResponse.json();
 
-      if (detailData.status === 200 && detailData.data) {
-        // 상세 정보의 상품명이 요청된 상품명과 일치하는지 확인
-        if (detailData.data.installmentProductName === requestedProductName) {
-          product.value = detailData.data;
+        // 상세 정보의 상품명과 요청된 상품명이 일치하는지 확인
+        if (detailData.depositProductName === requestedProductName) {
+          // 상세 정보와 기본 정보를 합침
+          product.value = {
+            ...foundProduct,
+            ...detailData,
+          };
         } else {
-          console.error('상세 정보의 상품명이 일치하지 않습니다');
+          // 상세 정보가 없거나 상품명이 일치하지 않으면 404 페이지로 리다이렉트
           router.push('/404');
           return;
         }
-      } else {
-        console.error('상세 정보 로드 실패:', detailData.message);
+      } catch (detailError) {
+        // 상세 정보 로드 실패 시에도 404 페이지로 리다이렉트
         router.push('/404');
         return;
       }
     } else {
-      console.error('상품을 찾을 수 없습니다:', requestedProductName);
+      // 상품을 찾지 못했으면 404 페이지로 리다이렉트
       router.push('/404');
       return;
     }
   } catch (error) {
     console.error('상품 데이터 로드 실패:', error);
+    // 에러 발생 시에도 404 페이지로 리다이렉트
     router.push('/404');
     return;
   }
@@ -143,7 +144,7 @@ const selectedPeriod = ref(12); // 12개월
 
 // 계산된 값들
 const totalAmount = computed(() => {
-  const rate = product.value.installmentMaxRate / 100;
+  const rate = product.value.depositMaxRate / 100;
   const months = selectedPeriod.value;
   return Math.floor(investmentAmount.value * (1 + (rate * months) / 12));
 });
@@ -167,7 +168,7 @@ function toggleFavorite() {
 }
 
 function goToProduct() {
-  window.open(product.value.installmentLink, '_blank');
+  window.open(product.value.depositLink, '_blank');
 }
 
 const bankLogoMap = {

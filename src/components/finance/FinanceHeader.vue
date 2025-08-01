@@ -25,7 +25,13 @@ const router = useRouter();
 const isFavorite = ref(true); // 하트 활성화 여부(임시)
 
 const goBack = () => {
-  router.back();
+  // 상세 페이지인 경우 이전 페이지로 이동
+  if (router.currentRoute.value.name?.includes('Detail')) {
+    router.back();
+  } else {
+    // 메인 금융 페이지인 경우 홈으로 이동
+    router.push('/');
+  }
 };
 const goToDictionary = () => {
   router.push('/dictionary');

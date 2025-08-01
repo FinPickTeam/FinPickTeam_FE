@@ -1,0 +1,17 @@
+{
+  "status": 200,
+  "message": "KB맑은하늘적금의 데이터를 불러오는데 성공했습니다.",
+  "data": {
+    "installmentBankName": "KB국민은행",
+    "installmentProductName": "KB맑은하늘적금",
+    "installmentContractPeriod": "1년제, 2년제, 3년제",
+    "installmentType": "자유적립식",
+    "installmentSubscriptionAmount": "1만원 이상",
+    "installmentBasicRate": 2.45,
+    "installmentMaxRate": 3.25,
+    "installmentPreferentialRate": "맑은하늘을 위한 미션별 제공조건을 달성하는 경우 각 미션별 우대이율 제공 - 1년제 최고 연 0.8%p, 2년제 최고 연 0.9%p, 3년제 최고 연 1.0%p ① 종이통장 줄이기 미션: 연 0.1%p ② 종이서식 줄이기 미션: 연 0.2%p ③ 대중교통 미션: 1년제 연 0.4%p, 2년제 연 0.5%p, 3년제 연 0.6%p ④ 퀴즈미션: 연 0.1%p",
+    "installmentProductFeatures": "맑은하늘을 위한 생활 속 작은 실천에 대해 우대금리를 제공하고, 대중교통/자전거상해 관련 무료 보험서비스(최대 2억원 보장)를 제공하는 친환경 특화 상품",
+    "installmentSummary": "맑은하늘 만들고 금리도 Up",
+    "installmentLink": "https://obank.kbstar.com/quics?page=C016613&cc=b061496:b061645&isNew=Y&prcode=DP01000942"
+  }
+}

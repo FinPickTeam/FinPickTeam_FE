@@ -4,11 +4,11 @@
     <div class="title-section">
       <div class="title-with-heart">
         <img
-          :src="getLogoUrl(product.installmentBankName)"
-          :alt="`${product.installmentBankName} 로고`"
+          :src="getLogoUrl(product.fundManager)"
+          :alt="`${product.fundManager} 로고`"
           class="bank-logo"
         />
-        <h1 class="product-title">{{ product.installmentProductName }}</h1>
+        <h1 class="product-title">{{ product.fundProductName }}</h1>
         <i
           :class="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
           class="heart-icon"
@@ -16,55 +16,45 @@
         ></i>
       </div>
     </div>
-
-    <!-- 요약 계산 섹션 -->
-    <div class="summary-section">
-      <div class="summary-box">
-        <span class="summary-text">
-          <span class="highlight"
-            >{{ investmentAmount.toLocaleString() }}원</span
-          >을 <span class="highlight">{{ selectedPeriod }}개월</span> 동안
-          투자하면 최대<span class="total-amount"
-            >{{ totalAmount.toLocaleString() }}원</span
-          >수령하실 수 있습니다.
-        </span>
+    <!-- 수익률 차트 섹션 -->
+    <div class="chart-section" v-if="product.fundReturnsData">
+      <div class="chart-card">
+        <h3 class="chart-title">펀드 수익률 추이</h3>
+        <FundChart :returnsData="product.fundReturnsData" />
       </div>
     </div>
-
     <!-- 상세 정보 섹션 -->
     <div class="detail-section">
       <div class="detail-card">
         <div class="detail-item">
-          <span class="detail-label">상품특징</span>
+          <span class="detail-label">펀드 특징</span>
+          <span class="detail-value">{{ product.fundProductFeatures }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">펀드 타입</span>
+          <span class="detail-value">{{ product.fundType }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">위험도</span>
+          <span class="detail-value">{{ product.fundRiskLevel }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">3개월 수익률</span>
           <span class="detail-value">{{
-            product.installmentProductFeatures
+            getReturnValue(product.fund3MonthReturn)
           }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">계약기간</span>
-          <span class="detail-value">{{
-            product.installmentContractPeriod
-          }}</span>
+          <span class="detail-label">설정일</span>
+          <span class="detail-value">{{ product.fundStartDate }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">가입금액</span>
-          <span class="detail-value">{{
-            product.installmentSubscriptionAmount
-          }}</span>
+          <span class="detail-label">순자산</span>
+          <span class="detail-value">{{ product.fundNetAssetValue }}</span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">금리</span>
-          <span class="detail-value"
-            >({{ selectedPeriod }}개월 기준) 기본
-            {{ product.installmentBasicRate }}% 최고
-            {{ product.installmentMaxRate }}%</span
-          >
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">우대 이율</span>
-          <span class="detail-value">{{
-            product.installmentPreferentialRate
-          }}</span>
+          <span class="detail-label">총보수비율</span>
+          <span class="detail-value">{{ product.fundTotalExpenseRatio }}</span>
         </div>
       </div>
     </div>
@@ -82,6 +72,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
+import FundChart from '../../components/finance/fund/FundChart.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -95,25 +86,25 @@ const loadProductData = async () => {
   try {
     // 먼저 전체 상품 목록에서 해당 상품을 찾습니다
     const allResponse = await fetch(
-      '/src/components/finance/installment/installment_all.json'
+      '/src/components/finance/fund/fund_all.json'
     );
     const allProducts = await allResponse.json();
 
     const requestedProductName = route.params.id;
     const foundProduct = allProducts.data.find(
-      (p) => p.installmentProductName === requestedProductName
+      (p) => p.fundProductName === requestedProductName
     );
 
     if (foundProduct) {
       // 상품이 존재하면 상세 정보를 로드합니다
       const detailResponse = await fetch(
-        '/src/components/finance/installment/installment_detail.json'
+        '/src/components/finance/fund/fund_detail.json'
       );
       const detailData = await detailResponse.json();
 
       if (detailData.status === 200 && detailData.data) {
         // 상세 정보의 상품명이 요청된 상품명과 일치하는지 확인
-        if (detailData.data.installmentProductName === requestedProductName) {
+        if (detailData.data.fundProductName === requestedProductName) {
           product.value = detailData.data;
         } else {
           console.error('상세 정보의 상품명이 일치하지 않습니다');
@@ -137,21 +128,25 @@ const loadProductData = async () => {
   }
 };
 
-// 투자 조건
-const investmentAmount = ref(100000000); // 1억원
-const selectedPeriod = ref(12); // 12개월
-
-// 계산된 값들
-const totalAmount = computed(() => {
-  const rate = product.value.installmentMaxRate / 100;
-  const months = selectedPeriod.value;
-  return Math.floor(investmentAmount.value * (1 + (rate * months) / 12));
-});
-
 // 찜하기 상태
 const isFavorite = computed(() => {
   return favoriteStore.isFavorite(product.value);
 });
+
+// 수익률 표시 함수
+function getReturnValue(returnValue) {
+  if (returnValue === null || returnValue === undefined || returnValue === '') {
+    return 'N/A';
+  }
+
+  // 숫자인 경우 퍼센트로 표시
+  if (typeof returnValue === 'number') {
+    return `${returnValue > 0 ? '+' : ''}${returnValue.toFixed(2)}%`;
+  }
+
+  // 문자열인 경우 그대로 표시
+  return returnValue;
+}
 
 // 메서드들
 function goBack() {
@@ -167,39 +162,22 @@ function toggleFavorite() {
 }
 
 function goToProduct() {
-  window.open(product.value.installmentLink, '_blank');
+  window.open(product.value.fundLink, '_blank');
 }
 
-const bankLogoMap = {
-  KB국민은행: 'KB국민은행.png',
-  NH농협은행: 'NH농협은행.png',
-  IBK기업은행: 'IBK기업은행.png',
-  KDB산업은행: 'KDB산업은행.png',
-  SC제일은행: 'SC제일은행.png',
-  수협은행: '수협은행.png',
-  우리은행: '우리은행.png',
-  하나은행: '하나은행.png',
-  카카오뱅크: '카카오뱅크.png',
-  케이뱅크: '케이뱅크.png',
-  토스뱅크: '토스뱅크.png',
-  iM뱅크: 'iM뱅크.png',
-  광주은행: '광주은행, 전북은행.png',
-  전북은행: '광주은행, 전북은행.png',
-  신한은행: '신한은행, 제주은행.png',
-  제주은행: '신한은행, 제주은행.png',
-  경남은행: '경남은행, 부산은행.png',
-  부산은행: '경남은행, 부산은행.png',
+const fundLogoMap = {
+  'KB 자산운용': 'KB 자산운용.png',
 };
 
-const getLogoUrl = (bankName) => {
-  if (!bankName) {
-    return '/src/assets/bank_logo/KB국민은행.png';
+const getLogoUrl = (fundManager) => {
+  if (!fundManager) {
+    return '/src/assets/fund_logo/KB 자산운용.png';
   }
-  const fileName = bankLogoMap[bankName];
+  const fileName = fundLogoMap[fundManager];
   if (!fileName) {
-    return '/src/assets/bank_logo/KB국민은행.png';
+    return '/src/assets/fund_logo/KB 자산운용.png';
   }
-  return `/src/assets/bank_logo/${fileName}`;
+  return `/src/assets/fund_logo/${fileName}`;
 };
 
 onMounted(() => {
@@ -252,37 +230,6 @@ onMounted(() => {
   cursor: pointer;
 }
 
-.summary-section {
-  margin-bottom: 20px;
-}
-
-.summary-box {
-  background: var(--color-bg);
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-}
-
-.summary-text {
-  font-size: 14px;
-  color: #333;
-  line-height: 1.5;
-}
-
-.highlight {
-  font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-main);
-  padding: 2px 0px;
-  border-radius: 4px;
-}
-
-.total-amount {
-  font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-main);
-}
-
 .detail-section {
   margin-bottom: 20px;
 }
@@ -319,6 +266,24 @@ onMounted(() => {
   line-height: 1.4;
   flex: 1;
   margin-left: 16px;
+}
+
+.chart-section {
+  margin-bottom: 20px;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.chart-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 16px 0;
+  text-align: center;
 }
 
 .action-section {

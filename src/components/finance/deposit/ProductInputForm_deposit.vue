@@ -16,7 +16,6 @@
         <span class="period-label">만기로</span>
       </div>
       <div class="amount-row">
-        매월
         <input
           v-model="formattedAmount"
           class="amount-input"

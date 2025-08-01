@@ -1,7 +1,11 @@
 <template>
   <div class="stock-card">
     <div class="stock-chart">
-      <StockChart :chartData="product.stockChartData" />
+      <StockChart
+        :chartData="product.stockChartData"
+        :isUp="isUp"
+        :isDown="isDown"
+      />
     </div>
     <div class="stock-info">
       <div class="stock-header">
@@ -15,7 +19,9 @@
         >
       </div>
       <div class="stock-main">
-        <span class="stock-price">{{ displayPrice }}</span>
+        <span class="stock-price" :class="{ up: isUp, down: isDown }">{{
+          displayPrice
+        }}</span>
       </div>
       <div class="stock-footer">
         <span class="stock-change" :class="{ up: isUp, down: isDown }">
@@ -49,8 +55,18 @@ function toggleFavorite() {
 const displayPrice = computed(() =>
   Number(props.product.stockPrice.replace(/[+-]/, '')).toLocaleString()
 );
-const isUp = computed(() => props.product.stockPrice.startsWith('+'));
-const isDown = computed(() => props.product.stockPrice.startsWith('-'));
+const isUp = computed(() => {
+  const rate = String(props.product.stockChangeRate);
+  return (
+    rate.startsWith('+') || (!rate.startsWith('-') && parseFloat(rate) > 0)
+  );
+});
+const isDown = computed(() => {
+  const rate = String(props.product.stockChangeRate);
+  return (
+    rate.startsWith('-') || (!rate.startsWith('+') && parseFloat(rate) < 0)
+  );
+});
 const displayChange = computed(
   () =>
     (props.product.stockPredictedPrice.startsWith('+') ? '▲' : '▼') +
@@ -128,6 +144,12 @@ const displayRate = computed(() => {
   font-size: var(--font-size-title-main);
   font-weight: bold;
   color: #e11d48;
+}
+.stock-price.up {
+  color: var(--color-accent);
+}
+.stock-price.down {
+  color: var(--color-accent-2);
 }
 .stock-footer {
   font-size: var(--font-size-body-large);
