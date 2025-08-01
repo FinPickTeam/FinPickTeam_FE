@@ -39,34 +39,68 @@
         </div>
         <!-- 달력 박스 -->
         <div class="diaryhome-calendar-box">
-          <div class="diaryhome-calendar-row diaryhome-calendar-header">
-            <button class="diaryhome-week-arrow" @click="goPrevWeek">
-              <font-awesome-icon :icon="['fas', 'angle-left']" />
-            </button>
-            <span v-for="day in weekDays" :key="day">{{ day }}</span>
-            <button class="diaryhome-week-arrow" @click="goNextWeek">
-              <font-awesome-icon :icon="['fas', 'angle-right']" />
-            </button>
+          <!-- 일주일 달력 -->
+          <div v-if="calendarMode === 'week'" class="diaryhome-calendar-week">
+            <div class="diaryhome-calendar-header">
+              <button class="diaryhome-week-arrow" @click="goPrevWeek">
+                <font-awesome-icon :icon="['fas', 'angle-left']" />
+              </button>
+              <div class="diaryhome-calendar-columns">
+                <div
+                  v-for="(day, index) in weekDays"
+                  :key="day"
+                  class="diaryhome-calendar-column"
+                >
+                  <div class="diaryhome-weekday">{{ day }}</div>
+                  <div
+                    class="diaryhome-date"
+                    :class="{
+                      selected: isSelectedDate(currentWeekDates[index].date),
+                      'other-month': !currentWeekDates[index].isCurrentMonth,
+                      today: isToday(currentWeekDates[index].date),
+                    }"
+                    @click="selectDate(currentWeekDates[index].date)"
+                  >
+                    {{ currentWeekDates[index].day }}
+                  </div>
+                </div>
+              </div>
+              <button class="diaryhome-week-arrow" @click="goNextWeek">
+                <font-awesome-icon :icon="['fas', 'angle-right']" />
+              </button>
+            </div>
           </div>
-          <div class="diaryhome-calendar-row diaryhome-calendar-days">
-            <span
-              v-for="date in currentWeekDates"
-              :key="date.date"
-              :class="{
-                selected: isSelectedDate(date.date),
-                'other-month': !date.isCurrentMonth,
-                today: isToday(date.date),
-              }"
-              @click="selectDate(date.date)"
-            >
-              {{ date.day }}
-            </span>
+
+          <!-- 한달 달력 -->
+          <div v-else class="diaryhome-calendar-month">
+            <div class="diaryhome-calendar-header">
+              <span v-for="day in weekDays" :key="day">{{ day }}</span>
+            </div>
+            <div class="diaryhome-calendar-grid">
+              <span
+                v-for="date in currentMonthDates"
+                :key="date.date"
+                :class="{
+                  selected: isSelectedDate(date.date),
+                  'other-month': !date.isCurrentMonth,
+                  today: isToday(date.date),
+                }"
+                @click="selectDate(date.date)"
+              >
+                {{ date.day }}
+              </span>
+            </div>
           </div>
         </div>
         <div class="diaryhome-calendar-date-row">
           <span class="diaryhome-calendar-date">{{ selectedDateText }}</span>
           <span class="diaryhome-calendar-arrow" @click="goCalendarDetail">
-            <font-awesome-icon :icon="['fas', 'angle-right']" />
+            <font-awesome-icon
+              :icon="[
+                'fas',
+                calendarMode === 'week' ? 'angle-down' : 'angle-up',
+              ]"
+            />
           </span>
         </div>
       </div>
@@ -106,55 +140,15 @@
             해당 날짜의 거래 내역이 없습니다.
           </div>
           <div
-            v-if="selectedDateTransactions.length > 2 && !showAllTransactions"
+            v-if="selectedDateTransactions.length > 2"
             class="diaryhome-more-btn"
-            @click="showAllTransactions = true"
+            @click="toggleTransactions"
           >
-            더보기 ({{ selectedDateTransactions.length - 2 }}개 더)
-          </div>
-        </div>
-      </div>
-
-      <!-- 계좌 총 재산 -->
-      <div class="diaryhome-summary-section">
-        <div class="diaryhome-summary-title">내 계좌 총 재산</div>
-        <div class="diaryhome-summary-date">{{ todayDateText }} 기준</div>
-        <div class="diaryhome-summary-table">
-          <div class="diaryhome-summary-row">
-            <span>총 입금</span>
-            <span class="diaryhome-summary-income"
-              >+{{ totalIncome.toLocaleString() }}원</span
-            >
-          </div>
-          <div class="diaryhome-summary-row">
-            <span>총 출금</span>
-            <span class="diaryhome-summary-spend"
-              >-{{ totalExpense.toLocaleString() }}원</span
-            >
-          </div>
-          <div class="diaryhome-summary-row diaryhome-summary-left">
-            <span>현재 총 재산</span>
-            <span class="diaryhome-summary-left-amount"
-              >{{ totalAssets.toLocaleString() }}원</span
-            >
-          </div>
-          <div class="diaryhome-summary-row diaryhome-summary-change">
-            <span>전일 대비</span>
-            <span
-              class="diaryhome-summary-change-amount"
-              :class="{
-                increase:
-                  dailyChangePercent > 0 && selectedDateTransactions.length > 0,
-                decrease:
-                  dailyChangePercent < 0 && selectedDateTransactions.length > 0,
-                same:
-                  dailyChangePercent === 0 &&
-                  selectedDateTransactions.length > 0,
-                'no-change': selectedDateTransactions.length === 0,
-              }"
-            >
-              {{ dailyChangeText }}
-            </span>
+            {{
+              showAllTransactions
+                ? "숨기기"
+                : `더보기 (${selectedDateTransactions.length - 2}개 더)`
+            }}
           </div>
         </div>
       </div>
@@ -172,8 +166,17 @@ import {
   faSearch,
   faPlus,
   faAngleRight,
+  faAngleUp,
+  faAngleDown,
 } from "@fortawesome/free-solid-svg-icons";
-library.add(faAngleLeft, faSearch, faPlus, faAngleRight);
+library.add(
+  faAngleLeft,
+  faSearch,
+  faPlus,
+  faAngleRight,
+  faAngleUp,
+  faAngleDown
+);
 
 // 은행 로고 이미지 import
 import kakaoLogo from "@/assets/bank_logo/카카오뱅크.png";
@@ -194,6 +197,9 @@ const weekOffset = ref(0);
 
 // 더보기 기능을 위한 상태
 const showAllTransactions = ref(false);
+
+// 달력 모드 상태 (week: 일주일, month: 한달)
+const calendarMode = ref("week");
 
 // 요일 배열
 const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
@@ -265,6 +271,52 @@ const currentWeekDates = computed(() => {
   return dates;
 });
 
+// 현재 월의 모든 날짜들 계산
+const currentMonthDates = computed(() => {
+  const dates = [];
+  const firstDayOfMonth = new Date(
+    currentYear.value,
+    currentMonth.value - 1,
+    1
+  );
+  const lastDayOfMonth = new Date(currentYear.value, currentMonth.value, 0);
+
+  // 이전 달의 날짜들 (달력 시작 부분)
+  const firstDayOfWeek = firstDayOfMonth.getDay();
+  for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+    const date = new Date(firstDayOfMonth);
+    date.setDate(date.getDate() - (i + 1));
+    dates.push({
+      date: date,
+      day: date.getDate(),
+      isCurrentMonth: false,
+    });
+  }
+
+  // 현재 달의 날짜들
+  for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
+    const date = new Date(currentYear.value, currentMonth.value - 1, i);
+    dates.push({
+      date: date,
+      day: i,
+      isCurrentMonth: true,
+    });
+  }
+
+  // 다음 달의 날짜들 (달력 끝 부분)
+  const remainingDays = 42 - dates.length; // 6주 * 7일 = 42
+  for (let i = 1; i <= remainingDays; i++) {
+    const date = new Date(currentYear.value, currentMonth.value, i);
+    dates.push({
+      date: date,
+      day: date.getDate(),
+      isCurrentMonth: false,
+    });
+  }
+
+  return dates;
+});
+
 // 선택된 날짜 텍스트
 const selectedDateText = computed(() => {
   const date = selectedDate.value;
@@ -274,10 +326,44 @@ const selectedDateText = computed(() => {
   return `${month}월 ${day}일 ${dayOfWeek}요일`;
 });
 
+// 더보기/숨기기 토글 함수
+const toggleTransactions = () => {
+  showAllTransactions.value = !showAllTransactions.value;
+};
+
+// 달력 모드 토글 함수
+const toggleCalendarMode = () => {
+  calendarMode.value = calendarMode.value === "week" ? "month" : "week";
+};
+
 // 날짜 선택 함수
 const selectDate = (date) => {
-  selectedDate.value = new Date(date);
+  // 날짜 객체를 새로 생성하여 참조 문제 방지
+  const newDate = new Date(date.getTime());
+  selectedDate.value = newDate;
   showAllTransactions.value = false; // 날짜 변경 시 더보기 상태 초기화
+
+  // 선택된 날짜의 년월이 현재 표시된 년월과 다르면 업데이트
+  const selectedYear = newDate.getFullYear();
+  const selectedMonth = newDate.getMonth() + 1;
+
+  if (
+    selectedYear !== currentYear.value ||
+    selectedMonth !== currentMonth.value
+  ) {
+    currentYear.value = selectedYear;
+    currentMonth.value = selectedMonth;
+
+    // 선택된 날짜가 속한 주의 시작일을 계산하여 해당 주가 표시되도록 설정
+    const selectedDayOfWeek = newDate.getDay();
+    const daysToSubtract = selectedDayOfWeek;
+    const weekStartDate = new Date(newDate);
+    weekStartDate.setDate(newDate.getDate() - daysToSubtract);
+
+    // 현재 주 시작일을 선택된 날짜가 속한 주의 시작일로 설정
+    currentWeekStart.value = weekStartDate;
+    weekOffset.value = 0; // 주차 오프셋 초기화
+  }
 };
 
 // 선택된 날짜인지 확인
@@ -364,227 +450,6 @@ const displayedTransactions = computed(() => {
   }
 });
 
-// 선택된 날짜 기준 갱신 텍스트
-const todayDateText = computed(() => {
-  const selectedDateValue = selectedDate.value;
-  const month = selectedDateValue.getMonth() + 1;
-  const day = selectedDateValue.getDate();
-  const hours = selectedDateValue.getHours().toString().padStart(2, "0");
-  const minutes = selectedDateValue.getMinutes().toString().padStart(2, "0");
-  return `${month}월 ${day}일 ${hours}:${minutes} 갱신`;
-});
-
-// 초기 재산 - Transaction_dummy.json에서 불러오기
-const initialAssets = computed(() => {
-  return transactionData?.initialAssets || 0;
-});
-
-// 총 입금 계산 (선택된 날짜까지)
-const totalIncome = computed(() => {
-  const selectedDateValue = selectedDate.value;
-  selectedDateValue.setHours(23, 59, 59, 999); // 선택된 날짜 마지막 시간으로 설정
-
-  return Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (t.type || "").trim() === "입금" && tDate <= selectedDateValue;
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-});
-
-// 총 출금 계산 (선택된 날짜까지)
-const totalExpense = computed(() => {
-  const selectedDateValue = selectedDate.value;
-  selectedDateValue.setHours(23, 59, 59, 999); // 선택된 날짜 마지막 시간으로 설정
-
-  return Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (t.type || "").trim() === "출금" && tDate <= selectedDateValue;
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-});
-
-// 현재 총 재산 계산
-const totalAssets = computed(() => {
-  return initialAssets.value + totalIncome.value - totalExpense.value;
-});
-
-// 이번 달 입금 계산
-const currentMonthIncome = computed(() => {
-  return Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (
-            tDate.getFullYear() === currentYear.value &&
-            tDate.getMonth() + 1 === currentMonth.value &&
-            (t.type || "").trim() === "입금"
-          );
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-});
-
-// 이번 달 출금 계산
-const currentMonthExpense = computed(() => {
-  return Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (
-            tDate.getFullYear() === currentYear.value &&
-            tDate.getMonth() + 1 === currentMonth.value &&
-            (t.type || "").trim() === "출금"
-          );
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-});
-
-// 이번 달 순변동
-const currentMonthNetChange = computed(() => {
-  return currentMonthIncome.value - currentMonthExpense.value;
-});
-
-// 지난 달 입금 계산
-const prevMonthIncome = computed(() => {
-  const prevYear =
-    currentMonth.value === 1 ? currentYear.value - 1 : currentYear.value;
-  const prevMonth = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
-
-  return Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (
-            tDate.getFullYear() === prevYear &&
-            tDate.getMonth() + 1 === prevMonth &&
-            (t.type || "").trim() === "입금"
-          );
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-});
-
-// 지난 달 출금 계산
-const prevMonthExpense = computed(() => {
-  const prevYear =
-    currentMonth.value === 1 ? currentYear.value - 1 : currentYear.value;
-  const prevMonth = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
-
-  return Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (
-            tDate.getFullYear() === prevYear &&
-            tDate.getMonth() + 1 === prevMonth &&
-            (t.type || "").trim() === "출금"
-          );
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-});
-
-// 지난 달 순변동
-const prevMonthNetChange = computed(() => {
-  return prevMonthIncome.value - prevMonthExpense.value;
-});
-
-// 선택된 날짜의 총재산 계산
-const selectedDateTotalAssets = computed(() => {
-  const selectedDateValue = selectedDate.value;
-  const endOfDay = new Date(selectedDateValue);
-  endOfDay.setHours(23, 59, 59, 999);
-
-  const totalIncome = Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (t.type || "").trim() === "입금" && tDate <= endOfDay;
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-
-  const totalExpense = Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (t.type || "").trim() === "출금" && tDate <= endOfDay;
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-
-  return initialAssets.value + totalIncome - totalExpense;
-});
-
-// 전일의 총재산 계산
-const prevDayTotalAssets = computed(() => {
-  const prevDay = new Date(selectedDate.value);
-  prevDay.setDate(prevDay.getDate() - 1);
-  const endOfPrevDay = new Date(prevDay);
-  endOfPrevDay.setHours(23, 59, 59, 999);
-
-  const totalIncome = Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (t.type || "").trim() === "입금" && tDate <= endOfPrevDay;
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-
-  const totalExpense = Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (t.type || "").trim() === "출금" && tDate <= endOfPrevDay;
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-
-  return initialAssets.value + totalIncome - totalExpense;
-});
-
-// 전일 대비 증감률 계산 (총재산 기준)
-const dailyChangePercent = computed(() => {
-  if (prevDayTotalAssets.value === 0) {
-    return selectedDateTotalAssets.value === 0
-      ? 0
-      : selectedDateTotalAssets.value > 0
-      ? 100
-      : -100;
-  }
-  return (
-    ((selectedDateTotalAssets.value - prevDayTotalAssets.value) /
-      Math.abs(prevDayTotalAssets.value)) *
-    100
-  );
-});
-
-// 전일 대비 증감 텍스트
-const dailyChangeText = computed(() => {
-  const percent = dailyChangePercent.value;
-
-  // 거래 내역이 없는 경우
-  if (selectedDateTransactions.value.length === 0) {
-    return "증감없음";
-  }
-
-  if (percent > 0) {
-    return `+${percent.toFixed(1)}% 증가`;
-  } else if (percent < 0) {
-    return `${percent.toFixed(1)}% 감소`;
-  } else {
-    return "0% 변화없음";
-  }
-});
-
 // 네비게이션 함수들
 const goToDictionary = () => {
   router.push("/dictionary");
@@ -603,7 +468,7 @@ const goToReport = () => {
 };
 
 const goCalendarDetail = () => {
-  router.push("/openbanking/diary");
+  toggleCalendarMode();
 };
 
 // 초기화
@@ -752,6 +617,52 @@ updateCurrentWeekStart();
   display: flex;
   align-items: center;
   justify-content: space-between;
+  text-align: center;
+  min-height: 70px; /* 버튼과 컬럼의 높이 증가 */
+  width: 100%;
+  gap: 2px; /* 버튼과 컬럼 사이 간격 줄임 */
+}
+
+.diaryhome-calendar-columns {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  min-height: 70px; /* 컬럼의 높이 증가 */
+  gap: 0px; /* 컬럼 사이 간격 제거 */
+  width: 100%; /* 전체 너비 사용 */
+}
+
+.diaryhome-calendar-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px; /* 요일과 날짜 사이 간격 줄임 */
+  flex: 1;
+  min-height: 70px; /* 각 컬럼의 높이 증가 */
+  width: calc(100% / 7); /* 7개 컬럼으로 균등 분할 */
+}
+
+.diaryhome-weekday {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 2px;
+}
+
+.diaryhome-date {
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background 0.15s;
+  min-width: 32px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: #888;
 }
 
 .diaryhome-week-arrow {
@@ -760,36 +671,27 @@ updateCurrentWeekStart();
   color: #4318d1;
   font-size: 1rem;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 2px 4px;
   border-radius: 4px;
   transition: background 0.15s;
+  width: 32px; /* 버튼 너비 조정 */
+  height: 32px; /* 버튼 높이 조정 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* 버튼 크기 고정 */
 }
 
-.diaryhome-week-arrow:hover {
-  background: #f3f3f3;
-}
-.diaryhome-calendar-days {
-  color: #888;
-}
-
-.diaryhome-calendar-days span {
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: background 0.15s;
-  min-width: 32px;
-  text-align: center;
-}
-
-.diaryhome-calendar-days span:hover {
+/* 호버 효과 제거 */
+.diaryhome-date:hover {
   background: #f3f3f3;
 }
 
-.diaryhome-calendar-days span.other-month {
+.diaryhome-date.other-month {
   color: #ccc;
 }
 
-.diaryhome-calendar-days span.today {
+.diaryhome-date.today {
   background: #e0f2fe;
   color: #0369a1;
   font-weight: bold;
@@ -899,83 +801,6 @@ updateCurrentWeekStart();
   background: #ece9fd;
 }
 
-.diaryhome-summary-section {
-  background: #fff;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
-  margin: 0 16px 16px 16px;
-  padding: 18px 20px 18px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.diaryhome-summary-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-}
-.diaryhome-summary-date {
-  font-size: 0.95rem;
-  color: #888;
-}
-.diaryhome-summary-table {
-  margin-top: 8px;
-}
-.diaryhome-summary-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 1rem;
-  color: #222;
-  margin-bottom: 2px;
-}
-.diaryhome-summary-income {
-  color: #4318d1;
-  font-weight: 700;
-}
-.diaryhome-summary-spend {
-  color: #e11d48;
-  font-weight: 700;
-}
-.diaryhome-summary-left {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #4318d1;
-  margin-top: 6px;
-}
-.diaryhome-summary-left-amount {
-  color: #4318d1;
-  font-size: 1.2rem;
-  font-weight: 800;
-}
-
-.diaryhome-summary-change {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid #ececec;
-}
-
-.diaryhome-summary-change-amount {
-  font-weight: 700;
-}
-
-.diaryhome-summary-change-amount.increase {
-  color: #4318d1;
-}
-
-.diaryhome-summary-change-amount.decrease {
-  color: #e11d48;
-}
-
-.diaryhome-summary-change-amount.same {
-  color: #888;
-}
-
-.diaryhome-summary-change-amount.no-change {
-  color: #888;
-}
-
 .diaryhome-report-btn {
   width: calc(100% - 32px);
   margin: 0 16px 16px 16px;
@@ -996,16 +821,50 @@ updateCurrentWeekStart();
 .diaryhome-calendar-box {
   /* border: 2px solid #764ba2; */
   border-radius: 16px;
-  padding: 12px 10px 8px 10px;
   margin-bottom: 8px;
   background: #fff;
 }
-.diaryhome-calendar-days span.selected {
+.diaryhome-date.selected,
+.diaryhome-calendar-grid span.selected {
   background: #4318d1;
   color: #fff;
   border-radius: 50%;
   padding: 8px;
   font-weight: 700;
+}
+
+.diaryhome-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-top: 8px;
+}
+
+.diaryhome-calendar-grid span {
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background 0.15s;
+  min-width: 28px;
+  text-align: center;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.diaryhome-calendar-grid span:hover {
+  background: #f3f3f3;
+}
+
+.diaryhome-calendar-grid span.other-month {
+  color: #ccc;
+}
+
+.diaryhome-calendar-grid span.today {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-weight: bold;
 }
 .diaryhome-calendar-date-row {
   display: flex;

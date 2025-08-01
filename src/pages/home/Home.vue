@@ -55,19 +55,20 @@
 </template>
 
 <script setup>
-import Quiz from './Quiz.vue';
-import Newsletter from './Newsletter.vue';
-import { ref, computed } from 'vue';
-import { useAvatarStore } from '../../stores/avatar.js';
-import baseAvatar from '../mypage/avatar/avatarimg/avatar-base.png';
-import shirtBlue from '../mypage/avatar/avatarimg/shirts-blue.png';
-import shirtRed from '../mypage/avatar/avatarimg/shirt-red.png';
-import shoesBrown from '../mypage/avatar/avatarimg/shoese-brown.png';
-import shoes from '../mypage/avatar/avatarimg/shoese.png';
-import sportGlasses from '../mypage/avatar/avatarimg/sporglasses.png';
-import sunGlasses from '../mypage/avatar/avatarimg/sunglasses.png';
-import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import Quiz from "./Quiz.vue";
+import Newsletter from "./Newsletter.vue";
+import { ref, computed } from "vue";
+import { useAvatarStore } from "../../stores/avatar.js";
+import baseAvatar from "../mypage/avatar/avatarimg/avatar-base.png";
+import shirtBlue from "../mypage/avatar/avatarimg/shirts-blue.png";
+import shirtRed from "../mypage/avatar/avatarimg/shirt-red.png";
+import shoesBrown from "../mypage/avatar/avatarimg/shoese-brown.png";
+import shoes from "../mypage/avatar/avatarimg/shoese.png";
+import sportGlasses from "../mypage/avatar/avatarimg/sporglasses.png";
+import sunGlasses from "../mypage/avatar/avatarimg/sunglasses.png";
+import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
+import { onMounted } from "vue";
 
 const router = useRouter();
 
@@ -88,44 +89,49 @@ function closeNewsletter() {
 }
 
 function goToAvatarShop() {
-  router.push('/avatar-shop');
+  router.push("/avatar-shop");
 }
 
 const avatarStore = useAvatarStore();
 
 // 착용 중인 아이템 확인
 const wearingShirt = computed(() => {
-  const wearingItem = avatarStore.getWearingItem('shirts');
+  const wearingItem = avatarStore.getWearingItem("shirts");
   return wearingItem ? wearingItem.id : null;
 });
 
 const wearingShoes = computed(() => {
-  const wearingItem = avatarStore.getWearingItem('shoes');
+  const wearingItem = avatarStore.getWearingItem("shoes");
   return wearingItem ? wearingItem.id : null;
 });
 
 const wearingGlasses = computed(() => {
-  const wearingItem = avatarStore.getWearingItem('glasses');
+  const wearingItem = avatarStore.getWearingItem("glasses");
   return wearingItem ? wearingItem.id : null;
 });
 
 // 착용 중인 아이템 이미지 가져오기
 const getShirtImage = computed(() => {
-  if (wearingShirt.value === 'shirt-blue') return shirtBlue;
-  if (wearingShirt.value === 'shirt-red') return shirtRed;
+  if (wearingShirt.value === "shirt-blue") return shirtBlue;
+  if (wearingShirt.value === "shirt-red") return shirtRed;
   return null;
 });
 
 const getShoesImage = computed(() => {
-  if (wearingShoes.value === 'shoes-brown') return shoesBrown;
-  if (wearingShoes.value === 'shoes') return shoes;
+  if (wearingShoes.value === "shoes-brown") return shoesBrown;
+  if (wearingShoes.value === "shoes") return shoes;
   return null;
 });
 
 const getGlassesImage = computed(() => {
-  if (wearingGlasses.value === 'sport-glasses') return sportGlasses;
-  if (wearingGlasses.value === 'sun-glasses') return sunGlasses;
+  if (wearingGlasses.value === "sport-glasses") return sportGlasses;
+  if (wearingGlasses.value === "sun-glasses") return sunGlasses;
   return null;
+});
+
+// 컴포넌트 마운트 시 저장된 아바타 정보 불러오기
+onMounted(() => {
+  avatarStore.loadAvatar();
 });
 </script>
 
@@ -163,7 +169,7 @@ const getGlassesImage = computed(() => {
   text-align: center;
 }
 .quiz-bubble::after {
-  content: '';
+  content: "";
   position: absolute;
   left: 32px;
   bottom: -14px;

@@ -275,6 +275,11 @@
       </div>
     </div>
 
+    <!-- 아바타 착용 버튼 -->
+    <div class="wear-avatar-section">
+      <button class="wear-avatar-btn" @click="wearAvatar">아바타 착용</button>
+    </div>
+
     <Navbar />
     <div v-if="showPurchaseModal" class="purchase-modal-overlay">
       <div class="purchase-modal">
@@ -393,25 +398,44 @@ const glassesItems = ref([
 function syncStoreState() {
   // 상의 아이템 동기화
   shirtItems.value.forEach((item) => {
-    item.purchased = avatarStore.isItemPurchased("shirts", item.id);
-    item.wearing = avatarStore.isItemWearing("shirts", item.id);
+    const purchased = avatarStore.isItemPurchased("shirts", item.id);
+    const wearing = avatarStore.isItemWearing("shirts", item.id);
+
+    // 구매 상태는 한번 true가 되면 영구적으로 유지
+    if (purchased) {
+      item.purchased = true;
+    }
+    item.wearing = wearing;
   });
 
   // 신발 아이템 동기화
   shoesItems.value.forEach((item) => {
-    item.purchased = avatarStore.isItemPurchased("shoes", item.id);
-    item.wearing = avatarStore.isItemWearing("shoes", item.id);
+    const purchased = avatarStore.isItemPurchased("shoes", item.id);
+    const wearing = avatarStore.isItemWearing("shoes", item.id);
+
+    // 구매 상태는 한번 true가 되면 영구적으로 유지
+    if (purchased) {
+      item.purchased = true;
+    }
+    item.wearing = wearing;
   });
 
   // 액세서리 아이템 동기화
   glassesItems.value.forEach((item) => {
-    item.purchased = avatarStore.isItemPurchased("glasses", item.id);
-    item.wearing = avatarStore.isItemWearing("glasses", item.id);
+    const purchased = avatarStore.isItemPurchased("glasses", item.id);
+    const wearing = avatarStore.isItemWearing("glasses", item.id);
+
+    // 구매 상태는 한번 true가 되면 영구적으로 유지
+    if (purchased) {
+      item.purchased = true;
+    }
+    item.wearing = wearing;
   });
 }
 
-// 컴포넌트 마운트 시 store 상태 동기화
+// 컴포넌트 마운트 시 store 상태 동기화 및 저장된 아바타 정보 불러오기
 onMounted(() => {
+  avatarStore.loadAvatar();
   syncStoreState();
 });
 
@@ -523,6 +547,10 @@ function actuallyBuyShirt(item) {
   if (!item.purchased) {
     avatarStore.coin -= item.price;
     item.purchased = true;
+    avatarStore.setItemState("shirts", item.id, true, false); // 구매만 하고 착용은 안함
+
+    // 구매 후 자동으로 착용
+    handleBuyOrToggleShirt(item, true);
   } else {
     // 착용/해제 토글 기존 로직
     handleBuyOrToggleShirt(item, true);
@@ -539,6 +567,10 @@ function actuallyBuyShoes(item) {
   if (!item.purchased) {
     avatarStore.coin -= item.price;
     item.purchased = true;
+    avatarStore.setItemState("shoes", item.id, true, false); // 구매만 하고 착용은 안함
+
+    // 구매 후 자동으로 착용
+    handleBuyOrToggleShoes(item, true);
   } else {
     handleBuyOrToggleShoes(item, true);
   }
@@ -554,6 +586,10 @@ function actuallyBuyGlasses(item) {
   if (!item.purchased) {
     avatarStore.coin -= item.price;
     item.purchased = true;
+    avatarStore.setItemState("glasses", item.id, true, false); // 구매만 하고 착용은 안함
+
+    // 구매 후 자동으로 착용
+    handleBuyOrToggleGlasses(item, true);
   } else {
     handleBuyOrToggleGlasses(item, true);
   }
@@ -589,6 +625,7 @@ function handleBuyOrToggleShirt(item, skipModal = false) {
   if (!item.purchased) {
     avatarStore.coin -= item.price;
     item.purchased = true;
+    avatarStore.setItemState("shirts", item.id, true, false); // 구매 상태만 설정
 
     // 같은 카테고리의 다른 아이템 착용 해제
     shirtItems.value.forEach((otherItem) => {
@@ -649,6 +686,7 @@ function handleBuyOrToggleShoes(item, skipModal = false) {
   if (!item.purchased) {
     avatarStore.coin -= item.price;
     item.purchased = true;
+    avatarStore.setItemState("shoes", item.id, true, false); // 구매 상태만 설정
 
     // 같은 카테고리의 다른 아이템 착용 해제
     shoesItems.value.forEach((otherItem) => {
@@ -709,6 +747,7 @@ function handleBuyOrToggleGlasses(item, skipModal = false) {
   if (!item.purchased) {
     avatarStore.coin -= item.price;
     item.purchased = true;
+    avatarStore.setItemState("glasses", item.id, true, false); // 구매 상태만 설정
 
     // 같은 카테고리의 다른 아이템 착용 해제
     glassesItems.value.forEach((otherItem) => {
@@ -768,6 +807,29 @@ function handleBuyGifticon(item, skipModal = false) {
   }
   avatarStore.coin -= item.price;
   item.purchased = true;
+}
+
+function wearAvatar() {
+  // 현재 착용 중인 아바타 정보를 가져옴
+  const currentShirt = shirtItems.value.find((item) => item.wearing);
+  const currentShoes = shoesItems.value.find((item) => item.wearing);
+  const currentGlasses = glassesItems.value.find((item) => item.wearing);
+
+  // 착용 중인 아이템이 없으면 종료
+  if (!currentShirt && !currentShoes && !currentGlasses) {
+    alert("착용할 아바타 아이템을 먼저 선택해주세요.");
+    return;
+  }
+
+  // 현재 착용 중인 아바타 정보를 스토어에 저장
+  avatarStore.setAvatar(
+    currentShirt?.id || null,
+    currentShoes?.id || null,
+    currentGlasses?.id || null
+  );
+
+  // 성공 메시지 표시
+  alert("아바타가 성공적으로 적용되었습니다!");
 }
 </script>
 
@@ -1308,5 +1370,32 @@ function handleBuyGifticon(item, skipModal = false) {
 .modal-confirm-btn {
   background: #4318d1;
   color: #fff;
+}
+
+/* 아바타 착용 버튼 스타일 */
+.wear-avatar-section {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.wear-avatar-btn {
+  width: 100%;
+  padding: 12px 16px;
+  background: #a78bfa;
+  color: #fff;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(167, 139, 250, 0.2);
+  transition: background 0.2s;
+}
+
+.wear-avatar-btn:hover {
+  background: #9370ea;
 }
 </style>
