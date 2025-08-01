@@ -139,8 +139,10 @@ function handleComposition(e) {
 }
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
+import { useUserStore } from "../../stores/user.js";
 
 const router = useRouter();
+const userStore = useUserStore();
 const phoneNumber = ref("");
 const birthDate = ref("");
 const selectedCarrier = ref("");
@@ -166,6 +168,8 @@ function selectCarrier(carrier) {
 
 function validateAndSubmit() {
   if (isFormValid.value) {
+    // 사용자 이름을 스토어에 저장
+    userStore.setUserName(userName.value);
     // ArsVerification.vue로 라우팅
     router.push("/ars/verification");
   }
