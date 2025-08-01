@@ -61,32 +61,43 @@
           </button>
         </div>
 
-        <!-- 드롭다운 필터 -->
+        <!-- 태그 필터 -->
         <div v-if="showFilter" class="filter-dropdown">
-          <div class="filter-group">
-            <label>펀드 타입</label>
-            <select v-model="selectedType">
-              <option value="">전체</option>
-              <option value="주식형">주식형</option>
-              <option value="채권형">채권형</option>
-              <option value="혼합형">혼합형</option>
-            </select>
+          <!-- 펀드 타입 섹션 -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">펀드 타입</h4>
+            <div class="tag-container">
+              <button
+                v-for="tag in fundTypeTags"
+                :key="tag.value"
+                class="filter-tag"
+                :class="{ active: selectedFundTypes.includes(tag.value) }"
+                @click="toggleFundTypeTag(tag.value)"
+              >
+                {{ tag.label }}
+              </button>
+            </div>
           </div>
-          <div class="filter-group">
-            <label>위험도</label>
-            <select v-model="selectedRisk">
-              <option value="">전체</option>
-              <option value="높은 위험">높은 위험</option>
-              <option value="보통 위험">보통 위험</option>
-              <option value="낮은 위험">낮은 위험</option>
-            </select>
+
+          <!-- 위험도 섹션 -->
+          <div class="filter-section">
+            <h4 class="filter-section-title">위험도</h4>
+            <div class="tag-container">
+              <button
+                v-for="tag in riskTags"
+                :key="tag.value"
+                class="filter-tag"
+                :class="{ active: selectedRisks.includes(tag.value) }"
+                @click="toggleRiskTag(tag.value)"
+              >
+                {{ tag.label }}
+              </button>
+            </div>
           </div>
-          <div class="filter-group">
-            <label>정렬</label>
-            <select v-model="sortOption">
-              <option value="name">이름순</option>
-              <option value="return">수익률순</option>
-            </select>
+
+          <!-- 선택 완료 버튼 -->
+          <div class="filter-complete-section">
+            <button class="complete-btn" @click="closeFilter">선택 완료</button>
           </div>
         </div>
       </div>
@@ -128,12 +139,47 @@ function changeSubtab(tabName) {
   showProducts.value = false; // 추천 탭 누르면 초기화
 }
 
+// 태그 토글 함수들
+function toggleFundTypeTag(tagValue) {
+  const index = selectedFundTypes.value.indexOf(tagValue);
+  if (index > -1) {
+    selectedFundTypes.value.splice(index, 1);
+  } else {
+    selectedFundTypes.value.push(tagValue);
+  }
+}
+
+function toggleRiskTag(tagValue) {
+  const index = selectedRisks.value.indexOf(tagValue);
+  if (index > -1) {
+    selectedRisks.value.splice(index, 1);
+  } else {
+    selectedRisks.value.push(tagValue);
+  }
+}
+
+function closeFilter() {
+  showFilter.value = false;
+}
+
 // 전체보기용 상태
 const searchKeyword = ref('');
 const showFilter = ref(false);
-const selectedType = ref('');
-const selectedRisk = ref('');
-const sortOption = ref('name');
+const selectedFundTypes = ref([]);
+const selectedRisks = ref([]);
+
+// 태그 데이터
+const fundTypeTags = ref([
+  { value: '주식형', label: '주식형' },
+  { value: '채권형', label: '채권형' },
+  { value: '혼합형', label: '혼합형' },
+]);
+
+const riskTags = ref([
+  { value: '높은 위험', label: '높은 위험' },
+  { value: '보통 위험', label: '보통 위험' },
+  { value: '낮은 위험', label: '낮은 위험' },
+]);
 
 // 전체보기 필터링된 데이터
 const filteredAllFunds = computed(() => {
@@ -150,24 +196,17 @@ const filteredAllFunds = computed(() => {
   }
 
   // 🏦 펀드 타입 필터
-  if (selectedType.value) {
-    result = result.filter((fund) => fund.type === selectedType.value);
+  if (selectedFundTypes.value.length > 0) {
+    result = result.filter((fund) =>
+      selectedFundTypes.value.includes(fund.type || '')
+    );
   }
 
   // ⚠️ 위험도 필터
-  if (selectedRisk.value) {
-    result = result.filter((fund) => fund.risk === selectedRisk.value);
-  }
-
-  // 📊 정렬
-  if (sortOption.value === 'name') {
-    result = [...result].sort((a, b) => a.name.localeCompare(b.name));
-  } else if (sortOption.value === 'return') {
-    result = [...result].sort((a, b) => {
-      const returnA = Number(a.returnRate.replace('%', ''));
-      const returnB = Number(b.returnRate.replace('%', ''));
-      return returnB - returnA;
-    });
+  if (selectedRisks.value.length > 0) {
+    result = result.filter((fund) =>
+      selectedRisks.value.includes(fund.risk || '')
+    );
   }
 
   return result;
@@ -272,6 +311,7 @@ const filteredAllFunds = computed(() => {
 .search-filter-container {
   position: relative;
   margin-bottom: 16px;
+  z-index: 1000;
 }
 
 .search-filter-row {
@@ -309,9 +349,9 @@ const filteredAllFunds = computed(() => {
   border-radius: 8px;
   padding: 12px 16px;
   box-shadow: 0 2px 8px #0001;
-  min-width: 220px;
-  z-index: 10;
-  position: relative;
+  width: 360px;
+  z-index: 1000;
+  position: absolute;
 }
 
 .products-list-container {
@@ -364,5 +404,73 @@ const filteredAllFunds = computed(() => {
 .emoji {
   font-size: 20px;
   vertical-align: middle;
+}
+
+/* 태그 필터 스타일 */
+.filter-section {
+  margin-bottom: 20px;
+}
+
+.filter-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  margin-top: 0;
+}
+
+.tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-tag {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text-light);
+  font-size: var(--font-size-body);
+  border-radius: 12px;
+  padding: 7px 14px;
+  cursor: pointer;
+  font-weight: var(--font-weight-medium);
+  transition: border 0.2s, color 0.2s, background 0.2s;
+  white-space: nowrap;
+}
+
+.filter-tag:hover {
+  border-color: var(--color-main);
+  color: var(--color-main);
+}
+
+.filter-tag.active {
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
+  background: #f3f0fa;
+}
+
+.filter-complete-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  text-align: center;
+}
+
+.complete-btn {
+  background: var(--color-main);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
+}
+
+.complete-btn:hover {
+  background: var(--color-main-dark);
 }
 </style>
