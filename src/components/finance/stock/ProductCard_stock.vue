@@ -1,7 +1,11 @@
 <template>
   <div class="stock-card">
     <div class="stock-chart">
-      <StockChart :chartData="product.stockChartData" />
+      <StockChart
+        :chartData="product.stockChartData"
+        :isUp="isUp"
+        :isDown="isDown"
+      />
     </div>
     <div class="stock-info">
       <div class="stock-header">
