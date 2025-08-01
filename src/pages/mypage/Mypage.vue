@@ -123,6 +123,7 @@ import sunGlasses from "./avatar/avatarimg/sunglasses.png";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
+import { onMounted } from "vue";
 
 library.add(faAngleRight);
 
@@ -178,6 +179,11 @@ function handleLogout() {
 function goToInvestmentTest() {
   router.push("/profile-step-1?from=mypage");
 }
+
+// 컴포넌트 마운트 시 저장된 아바타 정보 불러오기
+onMounted(() => {
+  avatarStore.loadAvatar();
+});
 </script>
 
 <style scoped>

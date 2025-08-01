@@ -1595,6 +1595,69 @@
       "description": "식비"
     },
     {
+      "date": "2025-08-01",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 450000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-08-01",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 450000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-08-01",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 450000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-08-01",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 450000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-08-01",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 450000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-08-01",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 450000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
+      "date": "2025-08-01",
+      "bank": "신한은행",
+      "logo": "신한은행, 제주은행.png",
+      "amount": 450000,
+      "type": "출금",
+      "account": "생활비 통장",
+      "description": "식비"
+    },
+    {
       "date": "2025-08-05",
       "bank": "토스뱅크",
       "logo": "토스뱅크.png",

@@ -68,17 +68,18 @@
         <div
           v-for="(bar, idx) in monthBarHeights"
           :key="idx"
-          :class="[
-            'bar',
-            idx === monthBarHeights.length - 1 ? 'bar-accent' : '',
-            bar.colorClass,
-          ]"
+          :class="['bar', bar.isCurrent ? 'bar-accent' : '', bar.colorClass]"
           :style="{ height: bar.height + 'px' }"
+        ></div>
+      </div>
+      <div class="month-labels">
+        <span
+          v-for="(bar, idx) in monthBarHeights"
+          :key="idx"
+          :class="['month-label', bar.isCurrent ? 'month-label-current' : '']"
         >
-          <span v-if="idx === monthBarHeights.length - 1" class="bar-label"
-            >{{ currentMonth }}월</span
-          >
-        </div>
+          {{ getMonthLabel(idx) }}
+        </span>
       </div>
     </section>
 
@@ -354,13 +355,15 @@ const top3 = computed(() => {
     }));
 });
 
-// 월별 소비 막대그래프 (12개월)
+// 월별 소비 막대그래프 (7개월 - 현재 월이 가운데)
 const monthBarHeights = computed(() => {
-  // 최근 12개월 구하기
+  // 현재 월을 가운데로 하여 앞뒤 3개월씩 포함 (총 7개월)
   const bars = [];
   const now = new Date(currentYear.value, currentMonth.value - 1, 1);
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+
+  // 앞 3개월 + 현재 월 + 뒤 3개월
+  for (let i = -3; i <= 3; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
     const year = d.getFullYear();
     const month = d.getMonth() + 1;
 
@@ -384,16 +387,24 @@ const monthBarHeights = computed(() => {
   const max = Math.max(...bars.map((b) => b.sum), 1);
 
   // 색상 클래스 지정
-  return bars.map((b) => {
+  return bars.map((b, idx) => {
     let colorClass = "bar-purple";
     if (b.sum > 1000000) colorClass = "bar-red";
     else if (b.sum < 500000) colorClass = "bar-green";
     return {
       height: Math.round((b.sum / max) * 100),
       colorClass,
+      isCurrent: idx === 3, // 가운데(인덱스 3)가 현재 월
     };
   });
 });
+
+// 월 라벨 생성 함수
+const getMonthLabel = (idx) => {
+  const now = new Date(currentYear.value, currentMonth.value - 1, 1);
+  const d = new Date(now.getFullYear(), now.getMonth() + (idx - 3), 1);
+  return `${d.getMonth() + 1}월`;
+};
 
 // 아이콘 클래스 및 이름 매핑
 const iconClass = (label) => {
@@ -536,12 +547,13 @@ const iconName = (label) => {
 .compare-bar-graph {
   display: flex;
   align-items: flex-end;
-  gap: 8px;
+  gap: 12px;
   height: 110px;
   margin-bottom: 2px;
+  justify-content: center;
 }
 .bar {
-  width: 22px;
+  width: 28px;
   background: var(--color-main-light-2);
   border-radius: 8px 8px 0 0;
   transition: height 0.3s, background 0.3s;
@@ -557,6 +569,33 @@ const iconName = (label) => {
 }
 .bar-purple {
   background: #8e44ad !important;
+}
+
+/* 월 라벨 스타일 */
+.month-labels {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+.month-label {
+  width: 28px;
+  height: 20px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-light);
+  font-weight: var(--font-weight-medium);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+.month-label-current {
+  background: var(--color-main);
+  color: white;
+  font-weight: var(--font-weight-bold);
 }
 
 /* 카테고리 바 */

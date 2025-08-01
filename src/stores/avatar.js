@@ -89,9 +89,57 @@ export const useAvatarStore = defineStore("avatar", () => {
 
   // 아이템 상태 설정 (AvatarShop에서 사용)
   function setItemState(category, itemId, purchased, wearing) {
-    if (avatarItems.value[category][itemId]) {
-      avatarItems.value[category][itemId].purchased = purchased;
+    if (avatarItems.value[category] && avatarItems.value[category][itemId]) {
+      // 구매 상태가 true로 설정되면 영구적으로 유지
+      if (purchased) {
+        avatarItems.value[category][itemId].purchased = true;
+      }
+      // 착용 상태만 변경
       avatarItems.value[category][itemId].wearing = wearing;
+    }
+  }
+
+  // 현재 착용 중인 아바타 정보를 저장 (MYPAGE, HOME에서 사용)
+  function setAvatar(shirtId, shoesId, glassesId) {
+    // 모든 아이템 착용 해제
+    Object.keys(avatarItems.value.shirts).forEach((id) => {
+      avatarItems.value.shirts[id].wearing = false;
+    });
+    Object.keys(avatarItems.value.shoes).forEach((id) => {
+      avatarItems.value.shoes[id].wearing = false;
+    });
+    Object.keys(avatarItems.value.glasses).forEach((id) => {
+      avatarItems.value.glasses[id].wearing = false;
+    });
+
+    // 지정된 아이템들 착용
+    if (shirtId && avatarItems.value.shirts[shirtId]) {
+      avatarItems.value.shirts[shirtId].wearing = true;
+    }
+    if (shoesId && avatarItems.value.shoes[shoesId]) {
+      avatarItems.value.shoes[shoesId].wearing = true;
+    }
+    if (glassesId && avatarItems.value.glasses[glassesId]) {
+      avatarItems.value.glasses[glassesId].wearing = true;
+    }
+
+    // 로컬 스토리지에 저장 (페이지 새로고침 시에도 유지)
+    localStorage.setItem(
+      "currentAvatar",
+      JSON.stringify({
+        shirtId,
+        shoesId,
+        glassesId,
+      })
+    );
+  }
+
+  // 저장된 아바타 정보 불러오기
+  function loadAvatar() {
+    const savedAvatar = localStorage.getItem("currentAvatar");
+    if (savedAvatar) {
+      const avatar = JSON.parse(savedAvatar);
+      setAvatar(avatar.shirtId, avatar.shoesId, avatar.glassesId);
     }
   }
 
@@ -130,5 +178,7 @@ export const useAvatarStore = defineStore("avatar", () => {
     coinHistory,
     addCoinHistory,
     getCoinHistory,
+    setAvatar,
+    loadAvatar,
   };
 });

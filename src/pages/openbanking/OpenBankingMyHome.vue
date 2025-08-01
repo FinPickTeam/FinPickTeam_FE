@@ -49,9 +49,10 @@
           <img class="obmyhome-bank-logo" :src="acc.logo" alt="은행로고" />
           <div class="obmyhome-account-info">
             <div class="obmyhome-account-name">{{ acc.name }}</div>
-            <div class="obmyhome-account-balance">
-              {{ acc.balance.toLocaleString() }}원
-            </div>
+            <div class="obmyhome-account-number">***-***-****</div>
+          </div>
+          <div class="obmyhome-account-balance">
+            {{ acc.balance.toLocaleString() }}원
           </div>
         </div>
       </div>
@@ -461,38 +462,63 @@ const monthlyChangeText = computed(() => {
 .obmyhome-account-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  border-bottom: 1px solid #ececec;
 }
+
 .obmyhome-account-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #f7f8fa;
-  border-radius: 12px;
-  padding: 10px 14px;
+  padding: 16px 18px;
+  border-bottom: 1px solid #ececec;
+  transition: background-color 0.15s;
 }
+
+.obmyhome-account-item:hover {
+  background: #f8f9fa;
+}
+
+.obmyhome-account-item:last-child {
+  border-bottom: none;
+}
+
 .obmyhome-bank-logo {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   background: #fff;
   object-fit: cover;
   border: 1px solid #ececec;
+  flex-shrink: 0;
 }
+
 .obmyhome-account-info {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
+
 .obmyhome-account-name {
-  font-size: 0.98rem;
+  font-size: 0.95rem;
   color: #222;
-  font-weight: 500;
+  font-weight: 600;
 }
+
+.obmyhome-account-number {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 400;
+}
+
 .obmyhome-account-balance {
   font-size: 1.05rem;
   color: #4318d1;
   font-weight: 700;
+  text-align: right;
 }
 
 .obmyhome-spend-table {
