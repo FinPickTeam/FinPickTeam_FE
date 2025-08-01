@@ -50,11 +50,10 @@ const createChart = (data) => {
     return acc;
   }, []);
 
-  // 색상 결정 (마지막 수익률 기준)
-  const lastReturn = cumulativeReturns[cumulativeReturns.length - 1];
-  const borderColor = lastReturn >= 0 ? '#10b981' : '#ef4444'; // 양수: 초록, 음수: 빨강
-  const backgroundColor =
-    lastReturn >= 0 ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)';
+  // 각 데이터 포인트별 색상 결정
+  const segmentColors = cumulativeReturns.map((value) =>
+    value >= 0 ? '#e12343' : '#3b63c4'
+  );
 
   chart = new Chart(chartCanvas.value, {
     type: 'line',
@@ -64,15 +63,36 @@ const createChart = (data) => {
         {
           label: '누적 수익률',
           data: cumulativeReturns,
-          borderColor: borderColor,
-          backgroundColor: backgroundColor,
-          fill: true,
+          borderColor: (ctx) => {
+            const i = ctx.p1DataIndex;
+            return cumulativeReturns[i] >= 0 ? '#e12343' : '#3b63c4';
+          },
+          backgroundColor: (ctx) => {
+            const i = ctx.p1DataIndex;
+            return cumulativeReturns[i] >= 0
+              ? 'rgba(225, 35, 67, 0.05)' // 빨간 투명 배경
+              : 'rgba(59, 99, 196, 0.05)'; // 파란 투명 배경
+          },
+          fill: 'origin',
           tension: 0.3,
           pointRadius: 0,
           borderWidth: 1.5,
+          segment: {
+            borderColor: (ctx) => {
+              const i = ctx.p1DataIndex;
+              return cumulativeReturns[i] >= 0 ? '#e12343' : '#3b63c4';
+            },
+            backgroundColor: (ctx) => {
+              const i = ctx.p1DataIndex;
+              return cumulativeReturns[i] >= 0
+                ? 'rgba(225, 35, 67, 0.05)'
+                : 'rgba(59, 99, 196, 0.05)';
+            },
+          },
         },
       ],
     },
+
     options: {
       responsive: true,
       maintainAspectRatio: false,
@@ -86,6 +106,16 @@ const createChart = (data) => {
           callbacks: {
             label: function (context) {
               return `누적 수익률: ${context.raw.toFixed(2)}%`;
+            },
+            labelColor: function (context) {
+              const value = context.raw;
+              return {
+                borderColor: value >= 0 ? '#e12343' : '#3b63c4',
+                backgroundColor:
+                  value >= 0
+                    ? 'rgba(225, 35, 67, 0.05)'
+                    : 'rgba(59, 99, 196, 0.05)',
+              };
             },
           },
         },
