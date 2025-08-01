@@ -72,14 +72,69 @@
     </div>
 
     <!-- 전체 보기 탭일 때 -->
-    <div class="scroll-area" v-else>
-      <ProductCardList :products="allProducts" />
+    <div class="scroll-area" v-else-if="activeSubtab === '전체 보기'">
+      <div class="search-filter-container">
+        <div class="search-filter-row">
+          <input
+            v-model="searchKeyword"
+            class="search-bar"
+            type="text"
+            placeholder="적금 상품명을 검색해보세요"
+          />
+          <button class="filter-btn" @click="showFilter = !showFilter">
+            <i class="fa-solid fa-filter"></i>
+          </button>
+        </div>
+
+        <!-- 드롭다운 필터 -->
+        <div v-if="showFilter" class="filter-dropdown">
+          <div class="filter-group">
+            <label>적금 타입</label>
+            <select v-model="selectedType">
+              <option value="">전체</option>
+              <option value="자유적립식">자유적립식</option>
+              <option value="정기적립식">정기적립식</option>
+              <option value="만기일시지급식">만기일시지급식</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>가입기간</label>
+            <select v-model="selectedPeriod">
+              <option value="">전체</option>
+              <option value="6개월">6개월</option>
+              <option value="1년">1년</option>
+              <option value="2년">2년</option>
+              <option value="3년">3년</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>정렬</label>
+            <select v-model="sortOption">
+              <option value="name">이름순</option>
+              <option value="rate">금리순</option>
+              <option value="amount">최소금액순</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- 전체 상품 리스트 -->
+      <div
+        v-if="filteredAllProducts.length > 0"
+        class="products-list-container"
+      >
+        <ProductCardList :products="filteredAllProducts" />
+      </div>
+      <div v-else class="no-results">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <p>검색 조건에 맞는 적금 상품이 없습니다.</p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductInputForm from '../../components/finance/installment/ProductInputForm_installment.vue';
 import ProductCardList from '../../components/finance/installment/ProductCardList_installment.vue';
@@ -99,6 +154,13 @@ const formData = ref({
   savingType: '자유적립식',
   selectedPrefer: [],
 });
+
+// 전체보기용 상태
+const searchKeyword = ref('');
+const showFilter = ref(false);
+const selectedType = ref('');
+const selectedPeriod = ref('');
+const sortOption = ref('name');
 
 onMounted(() => {
   // 추천 상품 데이터 로드
@@ -159,6 +221,59 @@ function toggleSummaryMode() {
     hideSearchResults();
   }
 }
+
+// 전체보기 필터링된 데이터
+const filteredAllProducts = computed(() => {
+  let result = allProducts.value;
+
+  // 🔍 키워드 검색
+  if (searchKeyword.value) {
+    result = result.filter((product) => {
+      const productName = product.productName || '';
+      return productName
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .includes(searchKeyword.value.toLowerCase().replace(/\s+/g, ''));
+    });
+  }
+
+  // 🏦 적금 타입 필터
+  if (selectedType.value) {
+    result = result.filter(
+      (product) => (product.savingType || '') === selectedType.value
+    );
+  }
+
+  // 📅 가입기간 필터
+  if (selectedPeriod.value) {
+    result = result.filter(
+      (product) => (product.period || '') === selectedPeriod.value
+    );
+  }
+
+  // 📊 정렬
+  if (sortOption.value === 'name') {
+    result = [...result].sort((a, b) => {
+      const nameA = a.productName || '';
+      const nameB = b.productName || '';
+      return nameA.localeCompare(nameB);
+    });
+  } else if (sortOption.value === 'rate') {
+    result = [...result].sort((a, b) => {
+      const rateA = Number((a.interestRate || '0').replace('%', ''));
+      const rateB = Number((b.interestRate || '0').replace('%', ''));
+      return rateB - rateA;
+    });
+  } else if (sortOption.value === 'amount') {
+    result = [...result].sort((a, b) => {
+      const amountA = Number((a.minAmount || '0').replace(/[^\d]/g, ''));
+      const amountB = Number((b.minAmount || '0').replace(/[^\d]/g, ''));
+      return amountA - amountB;
+    });
+  }
+
+  return result;
+});
 </script>
 
 <style scoped>
@@ -327,5 +442,89 @@ function toggleSummaryMode() {
 
 .edit-btn:hover {
   background-color: var(--color-main-dark);
+}
+
+/* 전체보기 탭 */
+.search-filter-container {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.search-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.search-bar {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--color-bg-border);
+  font-size: 15px;
+  background: var(--color-bg);
+}
+
+.filter-btn {
+  background: var(--color-bg-light);
+  border: none;
+  border-radius: 8px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--color-main);
+  display: flex;
+  align-items: center;
+}
+
+.filter-dropdown {
+  margin-top: 6px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px #0001;
+  min-width: 220px;
+  z-index: 10;
+  position: relative;
+}
+
+.products-list-container {
+  width: 100%;
+}
+
+.filter-group {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-group label {
+  min-width: 48px;
+  font-size: 14px;
+  color: #555;
+}
+
+.filter-group select {
+  flex: 1;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.no-results {
+  margin-top: 40px;
+  text-align: center;
+  color: #888;
+  font-size: 16px;
+}
+
+.no-results i {
+  font-size: 24px;
+  margin-bottom: 8px;
+  display: block;
 }
 </style>
