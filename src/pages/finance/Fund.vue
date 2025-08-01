@@ -188,7 +188,7 @@ const filteredAllFunds = computed(() => {
   // 🔍 키워드 검색
   if (searchKeyword.value) {
     result = result.filter((fund) =>
-      fund.name
+      fund.fundProductName
         ?.toLowerCase()
         .replace(/\s+/g, '')
         .includes(searchKeyword.value.toLowerCase().replace(/\s+/g, ''))
@@ -198,14 +198,14 @@ const filteredAllFunds = computed(() => {
   // 🏦 펀드 타입 필터
   if (selectedFundTypes.value.length > 0) {
     result = result.filter((fund) =>
-      selectedFundTypes.value.includes(fund.type || '')
+      selectedFundTypes.value.includes(fund.fundType || '')
     );
   }
 
   // ⚠️ 위험도 필터
   if (selectedRisks.value.length > 0) {
     result = result.filter((fund) =>
-      selectedRisks.value.includes(fund.risk || '')
+      selectedRisks.value.includes(fund.fundRiskLevel || '')
     );
   }
 

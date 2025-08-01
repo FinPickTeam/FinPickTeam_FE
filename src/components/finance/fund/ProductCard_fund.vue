@@ -6,7 +6,7 @@
         <div class="logo-container">
           <img :src="kbLogo" alt="KB 자산운용" class="kb-logo-img" />
         </div>
-        <div class="product-title">{{ fund.name }}</div>
+        <div class="product-title">{{ fund.fundProductName }}</div>
       </div>
       <div
         class="heart-icon"
@@ -18,18 +18,18 @@
     </div>
 
     <!-- 제품 카테고리 -->
-    <div class="product-category">{{ fund.category }}</div>
+    <div class="product-category">{{ fund.fundProductFeatures }}</div>
 
     <!-- 수익률 정보 (오른쪽 정렬) -->
     <div class="return-section">
       <div class="return-label">수익률 (기준:3개월)</div>
-      <div class="return-value">+{{ fund.returnRate }}</div>
+      <div class="return-value">{{ fund.fund3MonthReturn || 'N/A' }}</div>
     </div>
 
     <!-- 하단 태그들 -->
     <div class="product-tags">
-      <span :class="['tag', typeClass]">{{ fund.type }}</span>
-      <span :class="['tag', riskClass]">{{ fund.risk }}</span>
+      <span :class="['tag', typeClass]">{{ fund.fundType }}</span>
+      <span :class="['tag', riskClass]">{{ fund.fundRiskLevel }}</span>
     </div>
   </div>
 </template>
@@ -71,8 +71,8 @@ const riskClassMap = {
   '낮은 위험': 'risk-low',
 };
 
-const typeClass = computed(() => typeClassMap[props.fund?.type] || '');
-const riskClass = computed(() => riskClassMap[props.fund?.risk] || '');
+const typeClass = computed(() => typeClassMap[props.fund?.fundType] || '');
+const riskClass = computed(() => riskClassMap[props.fund?.fundRiskLevel] || '');
 </script>
 
 <style scoped>
