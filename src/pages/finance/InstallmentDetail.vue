@@ -87,23 +87,55 @@ const route = useRoute();
 const router = useRouter();
 const favoriteStore = useFavoriteStore();
 
-// 상품 데이터 (실제로는 API에서 가져올 데이터)
-const product = ref({
-  installmentBankName: 'KB국민은행',
-  installmentProductName: 'KB맑은하늘적금',
-  installmentContractPeriod: '1년제, 2년제, 3년제',
-  installmentType: '자유적립식',
-  installmentSubscriptionAmount: '1만원 이상',
-  installmentBasicRate: 2.45,
-  installmentMaxRate: 3.25,
-  installmentPreferentialRate:
-    '맑은하늘을 위한 미션별 제공조건을 달성하는 경우 각 미션별 우대이율 제공 - 1년제 최고 연 0.8%p, 2년제 최고 연 0.9%p, 3년제 최고 연 1.0%p ① 종이통장 줄이기 미션: 연 0.1%p ② 종이서식 줄이기 미션: 연 0.2%p ③ 대중교통 미션: 1년제 연 0.4%p, 2년제 연 0.5%p, 3년제 연 0.6%p ④ 퀴즈미션: 연 0.1%p',
-  installmentProductFeatures:
-    '맑은하늘을 위한 생활 속 작은 실천에 대해 우대금리를 제공하고, 대중교통/자전거상해 관련 무료 보험서비스(최대 2억원 보장)를 제공하는 친환경 특화 상품',
-  installmentSummary: '맑은하늘 만들고 금리도 Up',
-  installmentLink:
-    'https://obank.kbstar.com/quics?page=C016613&cc=b061496:b061645&isNew=Y&prcode=DP01000942',
-});
+// 상품 데이터
+const product = ref({});
+
+// 데이터 로드 함수
+const loadProductData = async () => {
+  try {
+    // 먼저 전체 상품 목록에서 해당 상품을 찾습니다
+    const allResponse = await fetch(
+      '/src/components/finance/installment/installment_all.json'
+    );
+    const allProducts = await allResponse.json();
+
+    const requestedProductName = route.params.id;
+    const foundProduct = allProducts.data.find(
+      (p) => p.installmentProductName === requestedProductName
+    );
+
+    if (foundProduct) {
+      // 상품이 존재하면 상세 정보를 로드합니다
+      const detailResponse = await fetch(
+        '/src/components/finance/installment/installment_detail.json'
+      );
+      const detailData = await detailResponse.json();
+
+      if (detailData.status === 200 && detailData.data) {
+        // 상세 정보의 상품명이 요청된 상품명과 일치하는지 확인
+        if (detailData.data.installmentProductName === requestedProductName) {
+          product.value = detailData.data;
+        } else {
+          console.error('상세 정보의 상품명이 일치하지 않습니다');
+          router.push('/404');
+          return;
+        }
+      } else {
+        console.error('상세 정보 로드 실패:', detailData.message);
+        router.push('/404');
+        return;
+      }
+    } else {
+      console.error('상품을 찾을 수 없습니다:', requestedProductName);
+      router.push('/404');
+      return;
+    }
+  } catch (error) {
+    console.error('상품 데이터 로드 실패:', error);
+    router.push('/404');
+    return;
+  }
+};
 
 // 투자 조건
 const investmentAmount = ref(100000000); // 1억원
@@ -171,8 +203,8 @@ const getLogoUrl = (bankName) => {
 };
 
 onMounted(() => {
-  // 실제로는 route.params.id를 사용해서 API에서 상품 데이터를 가져옴
   console.log('상품 ID:', route.params.id);
+  loadProductData();
 });
 </script>
 

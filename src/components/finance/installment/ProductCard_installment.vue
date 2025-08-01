@@ -48,11 +48,11 @@ const favoriteStore = useFavoriteStore();
 const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
 
 function goToDetail() {
-  // 상품 ID를 기반으로 상세 페이지로 이동
-  // 실제로는 product.id 또는 다른 고유 식별자를 사용
-  const productId =
-    props.product.installmentProductName?.replace(/\s+/g, '-') || 'default';
-  router.push(`/finance/installment/${productId}`);
+  // 상품명을 기반으로 상세 페이지로 이동
+  const productName = props.product.installmentProductName;
+  if (productName) {
+    router.push(`/finance/installment/${productName}`);
+  }
 }
 
 function toggleFavorite() {
