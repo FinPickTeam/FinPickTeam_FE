@@ -25,22 +25,9 @@ const route = useRoute();
 // HeaderBar를 숨길 라우트 이름 목록
 // (이 배열에 포함된 name의 페이지에서는 HeaderBar가 표시되지 않음)
 const hideHeaderNames = [
-<<<<<<< HEAD
-  "dictionary",
-  "Notification",
-  "OpenbankingDailyReport",
-  "Diary",
-  "profile",
-  "quiz-history",
-  "withdraw",
-  "avatar-shop",
-  "ChallengeHome",
-  "OpenBankingMyHome",
-  "OpenbankingMonthlyReport",
-=======
   'dictionary',
   'Notification',
-  'DiaryHome',
+  'OpenbankingDailyReport',
   'Diary',
   'profile',
   'quiz-history',
@@ -49,7 +36,6 @@ const hideHeaderNames = [
   'ChallengeHome',
   'OpenBankingMyHome',
   'OpenbankingMonthlyReport',
->>>>>>> 37ad0db6bfa4aa92db7ab3f2cdfe497ed116d09e
 ];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);
