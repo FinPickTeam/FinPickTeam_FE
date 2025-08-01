@@ -1,5 +1,5 @@
 <template>
-  <header class="header-bar">
+  <header class="header-bar" :class="$attrs.class">
     <h1 class="logo">FinPick</h1>
     <div class="header-icons">
       <button class="icon-btn" @click="goToDictionary">
@@ -76,5 +76,9 @@ const goToDictionary = () => {
   border-radius: 50%;
   border: 2px solid #fff;
   display: inline-block;
+}
+
+.finance-header {
+  background: var(--color-bg-light) !important;
 }
 </style>

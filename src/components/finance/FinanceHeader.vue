@@ -3,7 +3,6 @@
     <button class="icon-btn back-btn" @click="goBack">
       <i class="fas fa-chevron-left"></i>
     </button>
-    <span class="header-title">재테크</span>
     <div class="header-icons">
       <button class="icon-btn" @click="goToDictionary">
         <i class="fas fa-search"></i>

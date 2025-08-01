@@ -1,8 +1,7 @@
 <template>
   <div class="stock-card">
     <div class="stock-chart">
-      <!-- 차트 이미지 또는 캔버스/차트 컴포넌트 삽입 -->
-      <img :src="chartImgUrl" alt="차트" />
+      <StockChart :chartData="product.stockChartData" />
     </div>
     <div class="stock-info">
       <div class="stock-header">
@@ -32,6 +31,7 @@
 <script setup>
 import { computed } from 'vue';
 import { useFavoriteStore } from '@/stores/favorite.js';
+import StockChart from './StockChart.vue';
 
 const props = defineProps({ product: Object });
 const favoriteStore = useFavoriteStore();
@@ -44,9 +44,6 @@ function toggleFavorite() {
     favoriteStore.addFavorite(props.product);
   }
 }
-
-// 예시: 차트 이미지 URL (실제 차트라면 차트 컴포넌트로 대체)
-const chartImgUrl = '/path/to/chart.png';
 
 // 가격, 등락률 등 표시 포맷
 const displayPrice = computed(() =>

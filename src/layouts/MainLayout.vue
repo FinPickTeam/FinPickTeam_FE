@@ -1,7 +1,10 @@
 <template>
   <div class="main-layout">
     <!-- dictionary, notification 경로에서는 헤더 숨김 -->
-    <HeaderBar v-if="shouldHideHeader" />
+    <HeaderBar
+      v-if="shouldHideHeader"
+      :class="{ 'finance-header': route.name === 'FinanceHome' }"
+    />
     <main
       :class="[
         'main-content',
