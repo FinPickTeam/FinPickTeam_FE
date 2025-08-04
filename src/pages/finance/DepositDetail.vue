@@ -17,17 +17,23 @@
       </div>
     </div>
 
+    <!-- 용어 하이라이팅 토글 버튼 -->
+    <div class="toggle-section">
+      <label class="toggle-label">
+        <input
+          type="checkbox"
+          v-model="isHighlightEnabled"
+          class="toggle-input"
+        />
+        <span class="toggle-slider"></span>
+        <span class="toggle-text">금융 용어 하이라이팅</span>
+      </label>
+    </div>
+
     <!-- 요약 계산 섹션 -->
     <div class="summary-section">
       <div class="summary-box">
-        <span class="summary-text">
-          <span class="highlight"
-            >{{ investmentAmount.toLocaleString() }}원</span
-          >을 <span class="highlight">{{ selectedPeriod }}개월</span> 동안
-          투자하면 최대<span class="total-amount"
-            >{{ totalAmount.toLocaleString() }}원</span
-          >수령하실 수 있습니다.
-        </span>
+        <span class="summary-text" v-html="highlightTerms(summaryText)"></span>
       </div>
     </div>
 
@@ -35,32 +41,39 @@
     <div class="detail-section">
       <div class="detail-card">
         <div class="detail-item">
-          <span class="detail-label">상품특징</span>
-          <span class="detail-value">{{ product.depositProductFeatures }}</span>
+          <span class="detail-label" v-html="highlightTerms('상품특징')"></span>
+          <span
+            class="detail-value"
+            v-html="highlightTerms(product.depositProductFeatures)"
+          ></span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">계약기간</span>
-          <span class="detail-value">{{ product.depositContractPeriod }}</span>
+          <span class="detail-label" v-html="highlightTerms('계약기간')"></span>
+          <span
+            class="detail-value"
+            v-html="highlightTerms(product.depositContractPeriod)"
+          ></span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">가입금액</span>
-          <span class="detail-value">{{
-            product.depositSubscriptionAmount
-          }}</span>
+          <span class="detail-label" v-html="highlightTerms('가입금액')"></span>
+          <span
+            class="detail-value"
+            v-html="highlightTerms(product.depositSubscriptionAmount)"
+          ></span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">금리</span>
-          <span class="detail-value"
-            >({{ selectedPeriod }}개월 기준) 기본
-            {{ product.depositBasicRate }}% 최고
-            {{ product.depositMaxRate }}%</span
-          >
+          <span class="detail-label" v-html="highlightTerms('금리')"></span>
+          <span class="detail-value" v-html="highlightTerms(rateText)"></span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">우대 이율</span>
-          <span class="detail-value">{{
-            product.depositPreferentialRate
-          }}</span>
+          <span
+            class="detail-label"
+            v-html="highlightTerms('우대 이율')"
+          ></span>
+          <span
+            class="detail-value"
+            v-html="highlightTerms(product.depositPreferentialRate)"
+          ></span>
         </div>
       </div>
     </div>
@@ -71,11 +84,24 @@
       <p class="action-subtext">아래를 클릭하면 해당 페이지로 이동해요</p>
       <button class="action-btn" @click="goToProduct">이동하기</button>
     </div>
+
+    <!-- 용어 설명 모달 -->
+    <div v-if="showModal" class="modal-overlay" @click="closeModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3 class="modal-title">{{ selectedTerm }}</h3>
+          <button class="modal-close" @click="closeModal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-definition">{{ selectedDefinition }}</p>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
 
@@ -85,6 +111,96 @@ const favoriteStore = useFavoriteStore();
 
 // 상품 데이터
 const product = ref({});
+
+// 용어 하이라이팅 관련 상태
+const isHighlightEnabled = ref(false);
+const showModal = ref(false);
+const selectedTerm = ref('');
+const selectedDefinition = ref('');
+const financialTerms = ref([]);
+
+// 금융 용어 사전 로드
+const loadFinancialTerms = async () => {
+  try {
+    console.log('금융 용어 사전 로드 시작');
+    const response = await fetch(
+      '/src/pages/home/financial_dictionary_parsed.json'
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    financialTerms.value = await response.json();
+    console.log(
+      '금융 용어 사전 로드 완료:',
+      financialTerms.value.length,
+      '개 용어'
+    );
+  } catch (error) {
+    console.error('금융 용어 사전 로드 실패:', error);
+    financialTerms.value = [];
+  }
+};
+
+// 안전한 HTML 이스케이프 함수
+const escapeHtml = (text) => {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+};
+
+// 용어 하이라이팅 함수 (안전한 방식)
+const highlightTerms = (text) => {
+  if (!isHighlightEnabled.value || !text) return text;
+
+  // 이미 하이라이팅된 텍스트인지 확인
+  if (text.includes('highlighted-term')) {
+    return text; // 이미 처리된 텍스트는 그대로 반환
+  }
+
+  let highlightedText = escapeHtml(text);
+
+  // 용어를 길이 순으로 정렬 (긴 용어부터 매칭)
+  const sortedTerms = [...financialTerms.value].sort(
+    (a, b) => b.term.length - a.term.length
+  );
+
+  sortedTerms.forEach((term) => {
+    const escapedTerm = escapeHtml(term.term);
+    // HTML 태그 내부를 제외하고 매칭하는 정규식
+    const regex = new RegExp(`(?<!<[^>]*?)(${escapedTerm})(?![^<]*?>)`, 'g');
+
+    highlightedText = highlightedText.replace(regex, (match) => {
+      return `<span class="highlighted-term" data-term="${escapeHtml(
+        term.term
+      )}" data-definition="${escapeHtml(term.definition)}">${match}</span>`;
+    });
+  });
+
+  return highlightedText;
+};
+
+// 모달 표시 함수
+const showTermModal = (term, definition) => {
+  selectedTerm.value = term;
+  selectedDefinition.value = definition;
+  showModal.value = true;
+};
+
+// 모달 닫기 함수
+const closeModal = () => {
+  showModal.value = false;
+};
+
+// 클릭 이벤트 핸들러 (전역에서 호출)
+const handleTermClick = (event) => {
+  if (event.target.classList.contains('highlighted-term')) {
+    const term = event.target.dataset.term;
+    const definition = event.target.dataset.definition;
+    showTermModal(term, definition);
+  }
+};
 
 // deposit_all.json에서 해당 상품 데이터 찾기
 const loadProductData = async () => {
@@ -149,6 +265,18 @@ const totalAmount = computed(() => {
   return Math.floor(investmentAmount.value * (1 + (rate * months) / 12));
 });
 
+// 요약 텍스트
+const summaryText = computed(() => {
+  return `${investmentAmount.value.toLocaleString()}원을 ${
+    selectedPeriod.value
+  }개월 동안 투자하면 최대${totalAmount.value.toLocaleString()}원수령하실 수 있습니다.`;
+});
+
+// 금리 텍스트
+const rateText = computed(() => {
+  return `(${selectedPeriod.value}개월 기준) 기본 ${product.value.depositBasicRate}% 최고 ${product.value.depositMaxRate}%`;
+});
+
 // 찜하기 상태
 const isFavorite = computed(() => {
   return favoriteStore.isFavorite(product.value);
@@ -206,6 +334,15 @@ const getLogoUrl = (bankName) => {
 onMounted(() => {
   console.log('상품 ID:', route.params.id);
   loadProductData();
+  loadFinancialTerms();
+
+  // 클릭 이벤트 리스너 추가
+  document.addEventListener('click', handleTermClick);
+});
+
+// 컴포넌트 언마운트 시 이벤트 리스너 제거
+onUnmounted(() => {
+  document.removeEventListener('click', handleTermClick);
 });
 </script>
 
@@ -251,6 +388,73 @@ onMounted(() => {
   font-size: 16px;
   color: #ff4757;
   cursor: pointer;
+}
+
+/* 토글 버튼 스타일 */
+.toggle-section {
+  margin-bottom: 16px;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: #ccc;
+  border-radius: 12px;
+  transition: background-color 0.3s;
+  margin-right: 8px;
+}
+
+.toggle-slider:before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s;
+}
+
+.toggle-input:checked + .toggle-slider {
+  background-color: var(--color-main);
+}
+
+.toggle-input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-text {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 하이라이팅된 용어 스타일 */
+:deep(.highlighted-term) {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: background-color 0.2s;
+}
+
+:deep(.highlighted-term:hover) {
+  background-color: #ffeaa7;
 }
 
 .summary-section {
@@ -357,5 +561,72 @@ onMounted(() => {
 .action-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 90%;
+  width: 350px;
+  max-height: 80vh;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
+  background-color: var(--color-main);
+  color: white;
+}
+
+.modal-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: white;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-body {
+  padding: 20px;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.modal-definition {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333;
+  margin: 0;
 }
 </style>
