@@ -1,7 +1,13 @@
 <template>
   <div class="detail-container">
+    <!-- 로딩 상태 -->
+    <div v-if="isLoading" class="loading-section">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">상품 정보를 불러오는 중...</p>
+    </div>
+
     <!-- 제목과 찜하기 -->
-    <div class="title-section">
+    <div v-else class="title-section">
       <div class="title-with-heart">
         <img
           :src="getLogoUrl(product.fundManager)"
@@ -15,52 +21,148 @@
           @click="toggleFavorite"
         ></i>
       </div>
+      <!-- 용어 하이라이팅 토글 버튼 -->
+      <div v-if="!isLoading" class="toggle-section">
+        <label class="toggle-label">
+          <input
+            type="checkbox"
+            v-model="isHighlightEnabled"
+            class="toggle-input"
+          />
+          <span class="toggle-text">단어 마법사</span>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>
+
     <!-- 수익률 차트 섹션 -->
-    <div class="chart-section" v-if="product.fundReturnsData">
+    <div class="chart-section" v-if="product.fundReturnsData && !isLoading">
       <div class="chart-card">
         <h3 class="chart-title">펀드 수익률 추이</h3>
         <FundChart :returnsData="product.fundReturnsData" />
       </div>
     </div>
+
     <!-- 상세 정보 섹션 -->
-    <div class="detail-section">
+    <div class="detail-section" v-if="product.fundProductName">
       <div class="detail-card">
         <div class="detail-item">
-          <span class="detail-label">펀드 특징</span>
-          <span class="detail-value">{{ product.fundProductFeatures }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="펀드 특징"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.fundProductFeatures"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">펀드 타입</span>
-          <span class="detail-value">{{ product.fundType }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="펀드 타입"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.fundType"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">위험도</span>
-          <span class="detail-value">{{ product.fundRiskLevel }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="위험도"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.fundRiskLevel"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">3개월 수익률</span>
-          <span class="detail-value">{{
-            getReturnValue(product.fund3MonthReturn)
-          }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="3개월 수익률"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="getReturnValue(product.fund3MonthReturn)"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">설정일</span>
-          <span class="detail-value">{{ product.fundStartDate }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="설정일"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.fundStartDate"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">순자산</span>
-          <span class="detail-value">{{ product.fundNetAssetValue }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="순자산"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.fundNetAssetValue"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">총보수비율</span>
-          <span class="detail-value">{{ product.fundTotalExpenseRatio }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="총보수비율"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.fundTotalExpenseRatio"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
       </div>
     </div>
 
     <!-- 이동하기 버튼 -->
-    <div class="action-section">
+    <div class="action-section" v-if="product.fundProductName">
       <p class="action-text">해당 상품을 보러가고 싶다면?</p>
       <p class="action-subtext">아래를 클릭하면 해당 페이지로 이동해요</p>
       <button class="action-btn" @click="goToProduct">이동하기</button>
@@ -73,6 +175,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
 import FundChart from '../../components/finance/fund/FundChart.vue';
+import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -80,6 +183,35 @@ const favoriteStore = useFavoriteStore();
 
 // 상품 데이터
 const product = ref({});
+const isLoading = ref(true);
+
+// 용어 하이라이팅 관련 상태
+const isHighlightEnabled = ref(false);
+const financialTerms = ref([]);
+
+// 금융 용어 사전 로드
+const loadFinancialTerms = async () => {
+  try {
+    console.log('금융 용어 사전 로드 시작');
+    const response = await fetch(
+      '/src/pages/home/financial_dictionary_parsed.json'
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    financialTerms.value = await response.json();
+    console.log(
+      '금융 용어 사전 로드 완료:',
+      financialTerms.value.length,
+      '개 용어'
+    );
+  } catch (error) {
+    console.error('금융 용어 사전 로드 실패:', error);
+    financialTerms.value = [];
+  }
+};
 
 // 데이터 로드 함수
 const loadProductData = async () => {
@@ -106,6 +238,7 @@ const loadProductData = async () => {
         // 상세 정보의 상품명이 요청된 상품명과 일치하는지 확인
         if (detailData.data.fundProductName === requestedProductName) {
           product.value = detailData.data;
+          isLoading.value = false;
         } else {
           console.error('상세 정보의 상품명이 일치하지 않습니다');
           router.push('/404');
@@ -180,9 +313,10 @@ const getLogoUrl = (fundManager) => {
   return `/src/assets/fund_logo/${fileName}`;
 };
 
-onMounted(() => {
+onMounted(async () => {
   console.log('상품 ID:', route.params.id);
-  loadProductData();
+  await loadProductData();
+  await loadFinancialTerms();
 });
 </script>
 
@@ -228,6 +362,112 @@ onMounted(() => {
   font-size: 16px;
   color: #ff4757;
   cursor: pointer;
+}
+
+/* 로딩 스타일 */
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 40px 20px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 토글 버튼 스타일 */
+.toggle-section {
+  margin-bottom: 0;
+  margin-left: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+  margin-left: 8px;
+}
+
+.toggle-slider:before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-input:checked ~ .toggle-slider {
+  background-color: var(--color-main);
+}
+
+.toggle-input:checked ~ .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-text {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 하이라이팅된 용어 스타일 */
+:deep(.highlighted-term) {
+  background-color: #ffff00;
+  color: #856404;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: background-color 0.2s;
+}
+
+:deep(.highlighted-term:hover) {
+  background-color: #ffeaa7;
 }
 
 .detail-section {

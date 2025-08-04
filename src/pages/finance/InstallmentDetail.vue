@@ -1,7 +1,13 @@
 <template>
   <div class="detail-container">
+    <!-- 로딩 상태 -->
+    <div v-if="isLoading" class="loading-section">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">상품 정보를 불러오는 중...</p>
+    </div>
+
     <!-- 제목과 찜하기 -->
-    <div class="title-section">
+    <div v-else class="title-section">
       <div class="title-with-heart">
         <img
           :src="getLogoUrl(product.installmentBankName)"
@@ -15,62 +21,119 @@
           @click="toggleFavorite"
         ></i>
       </div>
+      <!-- 용어 하이라이팅 토글 버튼 -->
+      <div v-if="!isLoading" class="toggle-section">
+        <label class="toggle-label">
+          <input
+            type="checkbox"
+            v-model="isHighlightEnabled"
+            class="toggle-input"
+          />
+          <span class="toggle-text">단어 마법사</span>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>
 
     <!-- 요약 계산 섹션 -->
-    <div class="summary-section">
+    <div class="summary-section" v-if="product.installmentProductName">
       <div class="summary-box">
-        <span class="summary-text">
-          <span class="highlight"
-            >{{ investmentAmount.toLocaleString() }}원</span
-          >을 <span class="highlight">{{ selectedPeriod }}개월</span> 동안
-          투자하면 최대<span class="total-amount"
-            >{{ totalAmount.toLocaleString() }}원</span
-          >수령하실 수 있습니다.
-        </span>
+        <FinancialTermSystem
+          :text="summaryText"
+          :financial-terms="financialTerms"
+          :is-enabled="isHighlightEnabled"
+        />
       </div>
     </div>
 
     <!-- 상세 정보 섹션 -->
-    <div class="detail-section">
+    <div class="detail-section" v-if="product.installmentProductName">
       <div class="detail-card">
         <div class="detail-item">
-          <span class="detail-label">상품특징</span>
-          <span class="detail-value">{{
-            product.installmentProductFeatures
-          }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="상품특징"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.installmentProductFeatures"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">계약기간</span>
-          <span class="detail-value">{{
-            product.installmentContractPeriod
-          }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="계약기간"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.installmentContractPeriod"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">가입금액</span>
-          <span class="detail-value">{{
-            product.installmentSubscriptionAmount
-          }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="가입금액"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.installmentSubscriptionAmount"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">금리</span>
-          <span class="detail-value"
-            >({{ selectedPeriod }}개월 기준) 기본
-            {{ product.installmentBasicRate }}% 최고
-            {{ product.installmentMaxRate }}%</span
-          >
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="금리"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="rateText"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
         <div class="detail-item">
-          <span class="detail-label">우대 이율</span>
-          <span class="detail-value">{{
-            product.installmentPreferentialRate
-          }}</span>
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="우대 이율"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="product.installmentPreferentialRate"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
         </div>
       </div>
     </div>
 
     <!-- 이동하기 버튼 -->
-    <div class="action-section">
+    <div class="action-section" v-if="product.installmentProductName">
       <p class="action-text">해당 상품을 보러가고 싶다면?</p>
       <p class="action-subtext">아래를 클릭하면 해당 페이지로 이동해요</p>
       <button class="action-btn" @click="goToProduct">이동하기</button>
@@ -82,6 +145,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
+import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -89,49 +153,84 @@ const favoriteStore = useFavoriteStore();
 
 // 상품 데이터
 const product = ref({});
+const isLoading = ref(true);
+
+// 용어 하이라이팅 관련 상태
+const isHighlightEnabled = ref(false);
+const financialTerms = ref([]);
+
+// 금융 용어 사전 로드
+const loadFinancialTerms = async () => {
+  try {
+    console.log('금융 용어 사전 로드 시작');
+    const response = await fetch(
+      '/src/pages/home/financial_dictionary_parsed.json'
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    financialTerms.value = await response.json();
+    console.log(
+      '금융 용어 사전 로드 완료:',
+      financialTerms.value.length,
+      '개 용어'
+    );
+  } catch (error) {
+    console.error('금융 용어 사전 로드 실패:', error);
+    financialTerms.value = [];
+  }
+};
 
 // 데이터 로드 함수
 const loadProductData = async () => {
   try {
-    // 먼저 전체 상품 목록에서 해당 상품을 찾습니다
-    const allResponse = await fetch(
+    const response = await fetch(
       '/src/components/finance/installment/installment_all.json'
     );
-    const allProducts = await allResponse.json();
+    const allProducts = await response.json();
 
+    // URL 파라미터의 상품명과 일치하는 상품 찾기
     const requestedProductName = route.params.id;
     const foundProduct = allProducts.data.find(
-      (p) => p.installmentProductName === requestedProductName
+      (product) => product.installmentProductName === requestedProductName
     );
 
     if (foundProduct) {
-      // 상품이 존재하면 상세 정보를 로드합니다
-      const detailResponse = await fetch(
-        '/src/components/finance/installment/installment_detail.json'
-      );
-      const detailData = await detailResponse.json();
+      // 상세 정보를 위해 installment_detail.json도 로드
+      try {
+        const detailResponse = await fetch(
+          '/src/components/finance/installment/installment_detail.json'
+        );
+        const detailData = await detailResponse.json();
 
-      if (detailData.status === 200 && detailData.data) {
-        // 상세 정보의 상품명이 요청된 상품명과 일치하는지 확인
+        // 상세 정보의 상품명과 요청된 상품명이 일치하는지 확인
         if (detailData.data.installmentProductName === requestedProductName) {
-          product.value = detailData.data;
+          // 상세 정보와 기본 정보를 합침
+          product.value = {
+            ...foundProduct,
+            ...detailData.data,
+          };
+          isLoading.value = false;
         } else {
-          console.error('상세 정보의 상품명이 일치하지 않습니다');
+          // 상세 정보가 없거나 상품명이 일치하지 않으면 404 페이지로 리다이렉트
           router.push('/404');
           return;
         }
-      } else {
-        console.error('상세 정보 로드 실패:', detailData.message);
+      } catch (detailError) {
+        // 상세 정보 로드 실패 시에도 404 페이지로 리다이렉트
         router.push('/404');
         return;
       }
     } else {
-      console.error('상품을 찾을 수 없습니다:', requestedProductName);
+      // 상품을 찾지 못했으면 404 페이지로 리다이렉트
       router.push('/404');
       return;
     }
   } catch (error) {
     console.error('상품 데이터 로드 실패:', error);
+    // 에러 발생 시에도 404 페이지로 리다이렉트
     router.push('/404');
     return;
   }
@@ -143,9 +242,33 @@ const selectedPeriod = ref(12); // 12개월
 
 // 계산된 값들
 const totalAmount = computed(() => {
+  if (!product.value.installmentMaxRate) return 0;
   const rate = product.value.installmentMaxRate / 100;
   const months = selectedPeriod.value;
   return Math.floor(investmentAmount.value * (1 + (rate * months) / 12));
+});
+
+// 요약 텍스트
+const summaryText = computed(() => {
+  if (!product.value.installmentMaxRate) {
+    return `${investmentAmount.value.toLocaleString()}원을 ${
+      selectedPeriod.value
+    }개월 동안 투자하면 수익을 계산할 수 없습니다.`;
+  }
+  return `${investmentAmount.value.toLocaleString()}원을 ${
+    selectedPeriod.value
+  }개월 동안 투자하면 최대${totalAmount.value.toLocaleString()}원수령하실 수 있습니다.`;
+});
+
+// 금리 텍스트
+const rateText = computed(() => {
+  if (
+    !product.value.installmentBasicRate ||
+    !product.value.installmentMaxRate
+  ) {
+    return '금리 정보를 불러오는 중입니다.';
+  }
+  return `(${selectedPeriod.value}개월 기준) 기본 ${product.value.installmentBasicRate}% 최고 ${product.value.installmentMaxRate}%`;
 });
 
 // 찜하기 상태
@@ -202,9 +325,10 @@ const getLogoUrl = (bankName) => {
   return `/src/assets/bank_logo/${fileName}`;
 };
 
-onMounted(() => {
+onMounted(async () => {
   console.log('상품 ID:', route.params.id);
-  loadProductData();
+  await loadProductData();
+  await loadFinancialTerms();
 });
 </script>
 
@@ -250,6 +374,112 @@ onMounted(() => {
   font-size: 16px;
   color: #ff4757;
   cursor: pointer;
+}
+
+/* 로딩 스타일 */
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: 40px 20px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 토글 버튼 스타일 */
+.toggle-section {
+  margin-bottom: 0;
+  margin-left: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-slider {
+  position: relative;
+  width: 40px;
+  height: 20px;
+  background-color: #ccc;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+  margin-left: 8px;
+}
+
+.toggle-slider:before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background-color: white;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.toggle-input:checked ~ .toggle-slider {
+  background-color: var(--color-main);
+}
+
+.toggle-input:checked ~ .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.toggle-text {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* 하이라이팅된 용어 스타일 */
+:deep(.highlighted-term) {
+  background-color: #ffff00;
+  color: #856404;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: background-color 0.2s;
+}
+
+:deep(.highlighted-term:hover) {
+  background-color: #ffeaa7;
 }
 
 .summary-section {

@@ -66,10 +66,11 @@ import AccountAgreement from "../pages/openbanking/AccountAgreement.vue";
 import AccountList from "../pages/openbanking/myaccount/AccountList.vue";
 import AccountDetail from "../pages/openbanking/myaccount/AccountDetail.vue";
 import CardList from "../pages/openbanking/myaccount/CardList.vue";
-import ChallengeHome from "../pages/challenge/ChallengeHome.vue";
+import ChallengeHome2 from "../pages/challenge/ChallengeHome2.vue";
 
 // 공통 레이아웃
 import MainLayout from "../layouts/MainLayout.vue";
+import ChallengeLayout from "../layouts/ChallengeLayout.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -301,7 +302,7 @@ const router = createRouter({
           component: CardList,
         },
         // 챌린지
-        { path: "challenge", name: "ChallengeHome", component: ChallengeHome },
+        { path: "challenge", name: "ChallengeHome", component: ChallengeHome2 },
         // 마이페이지
         { path: "mypage", name: "mypage", component: Mypage },
         { path: "withdraw", name: "withdraw", component: Withdraw },
@@ -360,6 +361,34 @@ const router = createRouter({
           component: () => import("../pages/finance/FundDetail.vue"),
         },
         // ... 추가 재테크 탭들
+      ],
+    },
+    {
+      path: "/challenge2",
+      component: ChallengeLayout,
+      children: [
+        { path: "", name: "ChallengeHome2", component: ChallengeHome2 },
+        {
+          path: "joined-list",
+          name: "ChallengeJoinedList",
+          component: () => import("../pages/challenge/ChallengeJoinedList.vue"),
+        },
+        {
+          path: "recruiting-list",
+          name: "ChallengeRecruitingList",
+          component: () =>
+            import("../pages/challenge/ChallengeRecruitingList.vue"),
+        },
+        {
+          path: "create",
+          name: "ChallengeCreate",
+          component: () => import("../pages/challenge/ChallengeCreate.vue"),
+        },
+        {
+          path: "ranking",
+          name: "ChallengeRanking",
+          component: () => import("../pages/challenge/ChallengeRanking.vue"),
+        },
       ],
     },
     // 404 Not Found catch-all
