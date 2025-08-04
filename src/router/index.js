@@ -24,9 +24,13 @@ import Withdraw from "../pages/mypage/Withdraw.vue";
 import WithdrawSuccess from "../pages/mypage/WithdrawSuccess.vue";
 import Profile from "../pages/mypage/Profile.vue";
 import QuizHistory from "../pages/mypage/QuizHistory.vue";
-import MyCertificates from "../pages/mypage/MyCertificates.vue";
-import CertificateCreate from "../pages/mypage/CertificateCreate.vue";
-import CertificateCreateVerify from "../pages/mypage/CertificateCreateVerify.vue";
+import MyCertificates from "../pages/mypage/MyCertificate/MyCertificates.vue";
+import CertificateDetail from "../pages/mypage/MyCertificate/CertificateDetail.vue";
+import CertificateCreateVerify from "../pages/mypage/MyCertificate/CertificateCreateVerify.vue";
+import CertificatePasswordChange from "../pages/mypage/MyCertificate/CertificatePasswordChange.vue";
+import CertificatePasswordChangeNew from "../pages/mypage/MyCertificate/CertificatePassword-Change-New.vue";
+import CertificatePasswordChangeConfirm from "../pages/mypage/MyCertificate/CertificatePassword-Change-Confirm.vue";
+import CustomerSupport from "../pages/mypage/CustomerSupport.vue";
 import Dictionary from "../pages/home/Dictionary.vue";
 import AvatarShop from "../pages/mypage/avatar/AvatarShop.vue";
 
@@ -56,6 +60,12 @@ import ProductCardList_fund from "../components/finance/fund/ProductCardList_fun
 import ProductCard_installment from "../components/finance/installment/ProductCard_installment.vue";
 
 import OpenBankingHome from "../pages/openbanking/OpenBankingHome.vue";
+import AccountLinkSelect from "../pages/openbanking/AccountLinkSelect.vue";
+import AccountAgreement from "../pages/openbanking/AccountAgreement.vue";
+
+import AccountList from "../pages/openbanking/myaccount/AccountList.vue";
+import AccountDetail from "../pages/openbanking/myaccount/AccountDetail.vue";
+import CardList from "../pages/openbanking/myaccount/CardList.vue";
 import ChallengeHome from "../pages/challenge/ChallengeHome.vue";
 
 // 공통 레이아웃
@@ -174,6 +184,21 @@ const router = createRouter({
       component: ProfileStep9,
     },
     {
+      path: "/certificate-password-change",
+      name: "certificate-password-change",
+      component: CertificatePasswordChange,
+    },
+    {
+      path: "/certificate-password-change-new",
+      name: "certificate-password-change-new",
+      component: CertificatePasswordChangeNew,
+    },
+    {
+      path: "/certificate-password-change-confirm",
+      name: "certificate-password-change-confirm",
+      component: CertificatePasswordChangeConfirm,
+    },
+    {
       path: "/ars-auth",
       name: "ARSAuth",
       component: ArsAuth,
@@ -249,6 +274,32 @@ const router = createRouter({
           name: "ObArsAgreement",
           component: () => import("../pages/openbanking/ObArsAgreement.vue"),
         },
+        {
+          path: "openbanking/account-link-select",
+          name: "AccountLinkSelect",
+          component: AccountLinkSelect,
+        },
+        {
+          path: "openbanking/account-agreement",
+          name: "AccountAgreement",
+          component: AccountAgreement,
+        },
+
+        {
+          path: "openbanking/account-list",
+          name: "AccountList",
+          component: AccountList,
+        },
+        {
+          path: "openbanking/account-detail/:accountId",
+          name: "AccountDetail",
+          component: AccountDetail,
+        },
+        {
+          path: "openbanking/card-list",
+          name: "CardList",
+          component: CardList,
+        },
         // 챌린지
         { path: "challenge", name: "ChallengeHome", component: ChallengeHome },
         // 마이페이지
@@ -267,15 +318,21 @@ const router = createRouter({
           component: MyCertificates,
         },
         {
-          path: "certificate-create",
-          name: "certificate-create",
-          component: CertificateCreate,
+          path: "certificate-detail",
+          name: "certificate-detail",
+          component: CertificateDetail,
         },
         {
           path: "certificate-create-verify",
           name: "certificate-create-verify",
           component: CertificateCreateVerify,
         },
+        {
+          path: "customer-support",
+          name: "customer-support",
+          component: CustomerSupport,
+        },
+
         { path: "avatar-shop", name: "avatar-shop", component: AvatarShop },
       ],
     },

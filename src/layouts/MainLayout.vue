@@ -38,7 +38,10 @@ const hideHeaderNames = [
   "ChallengeHome",
   "OpenBankingMyHome",
   "OpenbankingMonthlyReport",
-  "MyCertificates",
+  "mycertificate",
+  "AccountAgreement",
+  "AccountLinkSelect",
+  "customer-support",
 ];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);

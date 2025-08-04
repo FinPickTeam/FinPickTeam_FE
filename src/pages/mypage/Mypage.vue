@@ -79,6 +79,10 @@
       <span>투자성향 재검사</span>
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
+    <div class="menu-item" @click="goToCustomerService">
+      <span>고객센터</span>
+      <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
+    </div>
     <div class="menu-item" @click="handleLogout">
       <span>로그아웃</span>
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
@@ -178,6 +182,10 @@ function goToInvestmentTest() {
 
 function goToPinpickCertificate() {
   router.push("/mycertificate");
+}
+
+function goToCustomerService() {
+  router.push("/customer-support");
 }
 
 // 컴포넌트 마운트 시 저장된 아바타 정보 불러오기

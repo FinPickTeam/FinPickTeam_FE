@@ -19,6 +19,9 @@
       연동만 하면 준비 완료!
     </div>
     <button class="ob-btn" @click="goToAgreement">자산 연동하기</button>
+    <button class="ob-btn my-assets-btn" @click="goToMyAssets">
+      내 자산 보기
+    </button>
   </div>
 </template>
 
@@ -43,7 +46,11 @@ function prevBanner() {
 }
 const router = useRouter();
 function goToAgreement() {
-  router.push("/openbanking/agreement");
+  router.push("/openbanking/account-link-select");
+}
+
+function goToMyAssets() {
+  router.push("/openbanking/myhome");
 }
 </script>
 
@@ -155,5 +162,17 @@ function goToAgreement() {
 }
 .ob-btn:hover {
   background: var(--color-main-dark);
+}
+
+.my-assets-btn {
+  background: #f8f9fa;
+  color: var(--color-main);
+  border: 2px solid var(--color-main);
+  margin-top: 12px;
+}
+
+.my-assets-btn:hover {
+  background: var(--color-main);
+  color: #fff;
 }
 </style>

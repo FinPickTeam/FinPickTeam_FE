@@ -9,7 +9,7 @@
         <button class="obmyhome-icon-btn" @click="goToDictionary">
           <font-awesome-icon :icon="['fas', 'search']" />
         </button>
-        <button class="obmyhome-icon-btn">
+        <button class="obmyhome-icon-btn" @click="goToAddAccount">
           <font-awesome-icon :icon="['fas', 'plus']" />
         </button>
       </div>
@@ -19,7 +19,12 @@
     <div class="obmyhome-asset-card">
       <div class="obmyhome-asset-row">
         <span class="obmyhome-asset-title">총 자산</span>
-        <span class="obmyhome-asset-time">{{ todayDateText }}</span>
+        <div class="obmyhome-asset-actions">
+          <button class="obmyhome-refresh-btn">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+          </button>
+          <span class="obmyhome-asset-time">{{ refreshTimeText }}</span>
+        </div>
       </div>
       <div class="obmyhome-asset-amount">
         {{ totalAssets.toLocaleString()
@@ -38,7 +43,9 @@
     <div class="obmyhome-section-card">
       <div class="obmyhome-section-title-row">
         <span class="obmyhome-section-title">계좌</span>
-        <button class="obmyhome-section-more">&gt;</button>
+        <button class="obmyhome-section-more" @click="goToAccountList">
+          <i class="fa-solid fa-angle-right"></i>
+        </button>
       </div>
       <div class="obmyhome-account-list">
         <div
@@ -61,8 +68,10 @@
     <!-- 소비 정보 -->
     <div class="obmyhome-section-card">
       <div class="obmyhome-section-title-row">
-        <span class="obmyhome-section-title">소비</span>
-        <button class="obmyhome-section-more">&gt;</button>
+        <span class="obmyhome-section-title">카드</span>
+        <button class="obmyhome-section-more" @click="goToCardList">
+          <i class="fa-solid fa-angle-right"></i>
+        </button>
       </div>
       <table class="obmyhome-spend-table">
         <thead>
@@ -109,8 +118,9 @@ import {
   faSearch,
   faPlus,
   faTriangleExclamation,
+  faAngleRight,
 } from "@fortawesome/free-solid-svg-icons";
-library.add(faAngleLeft, faSearch, faPlus, faTriangleExclamation);
+library.add(faAngleLeft, faSearch, faPlus, faTriangleExclamation, faAngleRight);
 
 // 은행 로고 이미지 import
 import kakaoLogo from "@/assets/bank_logo/카카오뱅크.png";
@@ -142,6 +152,18 @@ const goToDailyReport = () => {
 
 const goToMonthlyReport = () => {
   router.push("/openbanking/monthly-report");
+};
+
+const goToAddAccount = () => {
+  router.push("/openbanking/account-link-select");
+};
+
+const goToCardList = () => {
+  router.push("/openbanking/card-list");
+};
+
+const goToAccountList = () => {
+  router.push("/openbanking/account-list");
 };
 
 // 초기 재산 - Transaction_dummy.json에서 불러오기
@@ -184,14 +206,12 @@ const totalAssets = computed(() => {
   return initialAssets.value + totalIncome.value - totalExpense.value;
 });
 
-// 오늘 날짜 텍스트 (갱신 시간)
-const todayDateText = computed(() => {
+// 갱신 시간 텍스트 (시간만 표시)
+const refreshTimeText = computed(() => {
   const today = new Date();
-  const month = today.getMonth() + 1;
-  const day = today.getDate();
   const hours = today.getHours().toString().padStart(2, "0");
   const minutes = today.getMinutes().toString().padStart(2, "0");
-  return `${month}.${day} ${hours}:${minutes} 갱신`;
+  return `${hours}:${minutes} 갱신`;
 });
 
 // 이번 달 입금 계산
@@ -396,6 +416,25 @@ const monthlyChangeText = computed(() => {
   color: #888;
   font-weight: 500;
 }
+.obmyhome-asset-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.obmyhome-refresh-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: #bdbdbd;
+  cursor: default;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .obmyhome-asset-time {
   font-size: 0.85rem;
   color: #bdbdbd;

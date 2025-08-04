@@ -36,7 +36,7 @@
         <span>인증서 정보</span>
         <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </div>
-      <div class="menu-item">
+      <div class="menu-item" @click="goToPasswordChange">
         <span>비밀번호 변경</span>
         <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </div>
@@ -54,7 +54,7 @@ import {
   faAngleRight,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { useUserStore } from "../../stores/user.js";
+import { useUserStore } from "../../../stores/user.js";
 
 library.add(faAngleLeft, faAngleRight, faUser);
 
@@ -72,7 +72,11 @@ function goBack() {
 }
 
 function goToCertificateInfo() {
-  router.push("/certificate-create");
+  router.push("/certificate-detail");
+}
+
+function goToPasswordChange() {
+  router.push("/certificate-password-change");
 }
 </script>
 

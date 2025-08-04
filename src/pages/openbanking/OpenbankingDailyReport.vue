@@ -93,7 +93,6 @@
           </div>
         </div>
         <div class="diaryhome-calendar-date-row">
-          <span class="diaryhome-calendar-date">{{ selectedDateText }}</span>
           <span class="diaryhome-calendar-arrow" @click="goCalendarDetail">
             <font-awesome-icon
               :icon="[
@@ -315,15 +314,6 @@ const currentMonthDates = computed(() => {
   }
 
   return dates;
-});
-
-// 선택된 날짜 텍스트
-const selectedDateText = computed(() => {
-  const date = selectedDate.value;
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const dayOfWeek = weekDays[date.getDay()];
-  return `${month}월 ${day}일 ${dayOfWeek}요일`;
 });
 
 // 더보기/숨기기 토글 함수
@@ -696,11 +686,6 @@ updateCurrentWeekStart();
   color: #0369a1;
   font-weight: bold;
 }
-.diaryhome-calendar-date {
-  font-size: 0.95rem;
-  color: #888;
-  margin-top: 2px;
-}
 
 .diaryhome-list-section {
   margin: 0 16px 16px 16px;
@@ -869,7 +854,7 @@ updateCurrentWeekStart();
 .diaryhome-calendar-date-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin: 0 2px 8px 2px;
   font-size: 1rem;
   color: #222;
