@@ -40,7 +40,9 @@
     <div class="participating-section">
       <div class="section-header">
         <i class="fas fa-calendar section-icon"></i>
-        <h3 class="section-title">참여중인 소그룹</h3>
+        <RouterLink to="/challenge2/joined-list" class="section-title-link">
+          <h3 class="section-title">참여중인 챌린지</h3>
+        </RouterLink>
       </div>
       <div class="challenges-scroll">
         <div class="challenge-card">
@@ -65,7 +67,9 @@
     <div class="hot-challenges-section">
       <div class="section-header">
         <i class="fas fa-search section-icon"></i>
-        <h3 class="section-title">현재 HOT 한 챌린지</h3>
+        <RouterLink to="/challenge2/recruiting-list" class="section-title-link">
+          <h3 class="section-title">현재 HOT 한 챌린지</h3>
+        </RouterLink>
       </div>
       <div class="challenges-scroll">
         <div class="challenge-card hot">
@@ -254,6 +258,16 @@
   font-weight: bold;
   color: #333;
   margin: 0;
+}
+
+.section-title-link {
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.section-title-link:hover {
+  opacity: 0.8;
 }
 
 /* 참여중인 소그룹 */
