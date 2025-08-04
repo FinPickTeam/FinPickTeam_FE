@@ -1,9 +1,9 @@
 <template>
   <nav class="bottom-nav">
     <RouterLink
-      to="/challenge"
+      to="/challenge2"
       class="nav-item"
-      :class="{ 'router-link-active': isActive('/challenge') }"
+      :class="{ 'router-link-active': isActive('/challenge2') }"
     >
       <i class="fa-solid fa-trophy"></i>
       <span>챌린지</span>
