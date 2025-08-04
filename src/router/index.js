@@ -56,6 +56,8 @@ import ProductCardList_fund from '../components/finance/fund/ProductCardList_fun
 import ProductCard_installment from '../components/finance/installment/ProductCard_installment.vue';
 
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
+
+// 챌린지
 import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
 import ChallengeHome2 from '../pages/challenge/ChallengeHome2.vue';
 
@@ -312,6 +314,27 @@ const router = createRouter({
       component: ChallengeLayout,
       children: [
         { path: '', name: 'ChallengeHome2', component: ChallengeHome2 },
+        {
+          path: 'joined-list',
+          name: 'ChallengeJoinedList',
+          component: () => import('../pages/challenge/ChallengeJoinedList.vue'),
+        },
+        {
+          path: 'recruiting-list',
+          name: 'ChallengeRecruitingList',
+          component: () =>
+            import('../pages/challenge/ChallengeRecruitingList.vue'),
+        },
+        {
+          path: 'create',
+          name: 'ChallengeCreate',
+          component: () => import('../pages/challenge/ChallengeCreate.vue'),
+        },
+        {
+          path: 'ranking',
+          name: 'ChallengeRanking',
+          component: () => import('../pages/challenge/ChallengeRanking.vue'),
+        },
       ],
     },
     // 404 Not Found catch-all
