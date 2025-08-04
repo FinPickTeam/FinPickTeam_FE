@@ -5,10 +5,10 @@
     </button>
 
     <div class="header-icons">
-      <button class="icon-btn" @click="goToEdit">
+      <button class="icon-btn" @click="goToCreate">
         <i class="fas fa-pen-to-square"></i>
       </button>
-      <button class="icon-btn" @click="goToDelete">
+      <button class="icon-btn" @click="goToRanking">
         <i class="fas fa-landmark"></i>
       </button>
     </div>
@@ -20,8 +20,8 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const goBack = () => router.back();
-const goToEdit = () => router.push('/challenge/edit'); // 원하는 경로로 수정
-const goToDelete = () => router.push('/challenge/delete'); // 원하는 경로로 수정
+const goToCreate = () => router.push('/challenge2/create'); // 원하는 경로로 수정
+const goToRanking = () => router.push('/challenge2/ranking'); // 원하는 경로로 수정
 </script>
 
 <style scoped>
