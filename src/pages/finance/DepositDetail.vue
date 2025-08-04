@@ -21,19 +21,18 @@
           @click="toggleFavorite"
         ></i>
       </div>
-    </div>
-
-    <!-- 용어 하이라이팅 토글 버튼 -->
-    <div v-if="!isLoading" class="toggle-section">
-      <label class="toggle-label">
-        <input
-          type="checkbox"
-          v-model="isHighlightEnabled"
-          class="toggle-input"
-        />
-        <span class="toggle-slider"></span>
-        <span class="toggle-text">금융 용어 하이라이팅</span>
-      </label>
+      <!-- 용어 하이라이팅 토글 버튼 -->
+      <div v-if="!isLoading" class="toggle-section">
+        <label class="toggle-label">
+          <input
+            type="checkbox"
+            v-model="isHighlightEnabled"
+            class="toggle-input"
+          />
+          <span class="toggle-text">단어 마법사</span>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
     </div>
 
     <!-- 요약 계산 섹션 -->
@@ -331,6 +330,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .bank-logo {
@@ -390,7 +390,10 @@ onMounted(async () => {
 
 /* 토글 버튼 스타일 */
 .toggle-section {
-  margin-bottom: 16px;
+  margin-bottom: 0;
+  margin-left: auto;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .toggle-label {
@@ -406,12 +409,12 @@ onMounted(async () => {
 
 .toggle-slider {
   position: relative;
-  width: 50px;
-  height: 24px;
+  width: 40px;
+  height: 20px;
   background-color: #ccc;
-  border-radius: 12px;
+  border-radius: 10px;
   transition: background-color 0.3s ease;
-  margin-right: 12px;
+  margin-left: 8px;
 }
 
 .toggle-slider:before {
@@ -419,20 +422,20 @@ onMounted(async () => {
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   background-color: white;
   border-radius: 50%;
   transition: transform 0.3s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.toggle-input:checked + .toggle-slider {
-  background-color: #4caf50;
+.toggle-input:checked ~ .toggle-slider {
+  background-color: var(--color-main);
 }
 
-.toggle-input:checked + .toggle-slider:before {
-  transform: translateX(26px);
+.toggle-input:checked ~ .toggle-slider:before {
+  transform: translateX(20px);
 }
 
 .toggle-text {
