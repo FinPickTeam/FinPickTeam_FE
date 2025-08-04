@@ -45,21 +45,11 @@
         </RouterLink>
       </div>
       <div class="challenges-scroll">
-        <div class="challenge-card">
-          <h4 class="challenge-title">이번 달 외식 10번 이하로 하기</h4>
-          <div class="challenge-date">2025.07.01 ~ 07.31</div>
-          <div class="challenge-progress">진행률 70%</div>
-        </div>
-        <div class="challenge-card">
-          <h4 class="challenge-title">일주일에 3번 이상 운동하기</h4>
-          <div class="challenge-date">2025.07.01 ~ 07.31</div>
-          <div class="challenge-progress">진행률 85%</div>
-        </div>
-        <div class="challenge-card">
-          <h4 class="challenge-title">하루 8시간 이상 수면하기</h4>
-          <div class="challenge-date">2025.07.01 ~ 07.31</div>
-          <div class="challenge-progress">진행률 60%</div>
-        </div>
+        <ParticipatingChallengeCard
+          v-for="challenge in participatingChallenges"
+          :key="challenge.id"
+          :challenge="challenge"
+        />
       </div>
     </div>
 
@@ -72,43 +62,73 @@
         </RouterLink>
       </div>
       <div class="challenges-scroll">
-        <div class="challenge-card hot">
-          <div class="hot-banner">
-            <i class="fas fa-fire"></i>
-            <span>HOT</span>
-          </div>
-          <h4 class="challenge-title">커피 5회 이하 마시기</h4>
-          <div class="challenge-date">2020.00.00 - 11.31</div>
-          <div class="challenge-participants">(4명 / 5명)</div>
-          <button class="participate-btn">참여하러 가기</button>
-        </div>
-        <div class="challenge-card hot">
-          <div class="hot-banner">
-            <i class="fas fa-fire"></i>
-            <span>HOT</span>
-          </div>
-          <h4 class="challenge-title">커피 5회 이하 마시기</h4>
-          <div class="challenge-date">2020.00.00 - 11.31</div>
-          <div class="challenge-participants">(4명 / 5명)</div>
-          <button class="participate-btn">참여하러 가기</button>
-        </div>
-        <div class="challenge-card hot">
-          <div class="hot-banner">
-            <i class="fas fa-fire"></i>
-            <span>HOT</span>
-          </div>
-          <h4 class="challenge-title">커피 5회 이하 마시기</h4>
-          <div class="challenge-date">2020.00.00 - 11.31</div>
-          <div class="challenge-participants">(4명 / 5명)</div>
-          <button class="participate-btn">참여하러 가기</button>
-        </div>
+        <HotChallengeCard
+          v-for="challenge in hotChallenges"
+          :key="challenge.id"
+          :challenge="challenge"
+          @participate="handleParticipate"
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-// 필요한 로직이 있다면 여기에 추가
+import { ref } from 'vue';
+import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
+import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
+
+// 참여중인 챌린지 데이터
+const participatingChallenges = ref([
+  {
+    id: 1,
+    title: '이번 달 외식 10번 이하로 하기',
+    date: '2025.07.01 ~ 07.31',
+    progress: 70,
+  },
+  {
+    id: 2,
+    title: '일주일에 3번 이상 운동하기',
+    date: '2025.07.01 ~ 07.31',
+    progress: 85,
+  },
+  {
+    id: 3,
+    title: '하루 8시간 이상 수면하기',
+    date: '2025.07.01 ~ 07.31',
+    progress: 60,
+  },
+]);
+
+// HOT 챌린지 데이터
+const hotChallenges = ref([
+  {
+    id: 1,
+    title: '커피 5회 이하 마시기',
+    date: '2020.00.00 - 11.31',
+    currentParticipants: 4,
+    maxParticipants: 5,
+  },
+  {
+    id: 2,
+    title: '커피 5회 이하 마시기',
+    date: '2020.00.00 - 11.31',
+    currentParticipants: 4,
+    maxParticipants: 5,
+  },
+  {
+    id: 3,
+    title: '커피 5회 이하 마시기',
+    date: '2020.00.00 - 11.31',
+    currentParticipants: 4,
+    maxParticipants: 5,
+  },
+]);
+
+const handleParticipate = (challenge) => {
+  console.log('참여하기 클릭:', challenge);
+  // 여기에 참여 로직 추가
+};
 </script>
 
 <style scoped>
@@ -276,44 +296,6 @@
   padding: 0 16px;
 }
 
-.challenge-card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  position: relative;
-  min-width: 280px;
-}
-
-.challenge-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 8px 0;
-  line-height: 1.4;
-}
-
-.challenge-date {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
-}
-
-.challenge-progress {
-  font-size: 14px;
-  font-weight: 600;
-  background: linear-gradient(
-    135deg,
-    var(--color-main-dark) 0%,
-    var(--color-main-light) 100%
-  );
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  display: inline-block;
-  font-size: 12px;
-}
-
 /* HOT 챌린지 */
 .hot-challenges-section {
   margin-bottom: 24px;
@@ -325,67 +307,6 @@
   gap: 16px;
   overflow-x: auto;
   padding-bottom: 8px;
-}
-
-.challenge-card.hot {
-  min-width: 280px;
-  position: relative;
-}
-
-.hot-banner {
-  background: linear-gradient(
-    135deg,
-    var(--color-main-dark) 0%,
-    var(--color-main-light) 100%
-  );
-  color: white;
-  padding: 8px 12px;
-  border-radius: 8px 8px 0 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: bold;
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-}
-
-.hot-banner i {
-  font-size: 14px;
-  color: #ff9800;
-}
-
-.challenge-card.hot .challenge-title {
-  margin-top: 40px;
-}
-
-.challenge-participants {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 16px;
-}
-
-.participate-btn {
-  background: linear-gradient(
-    135deg,
-    var(--color-main-dark) 0%,
-    var(--color-main-light) 100%
-  );
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  width: 100%;
-  transition: transform 0.2s ease;
-}
-
-.participate-btn:hover {
-  transform: translateY(-1px);
 }
 
 /* 스크롤바 스타일링 */
