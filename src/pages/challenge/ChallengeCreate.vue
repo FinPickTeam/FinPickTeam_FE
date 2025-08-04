@@ -1,10 +1,5 @@
 <template>
   <div class="challenge-create">
-    <div class="create-header">
-      <h1>챌린지 생성</h1>
-      <p>새로운 챌린지를 만들어보세요!</p>
-    </div>
-
     <div class="create-form">
       <div class="form-group">
         <label for="challenge-title">챌린지 제목</label>
@@ -36,14 +31,32 @@
       </div>
 
       <div class="form-group">
-        <label for="max-participants">최대 참가자 수</label>
-        <input
-          type="number"
-          id="max-participants"
-          v-model="maxParticipants"
-          min="1"
-          max="100"
-        />
+        <label for="target-amount">목표 금액</label>
+        <div class="amount-input-wrapper">
+          <input
+            type="number"
+            id="target-amount"
+            v-model="targetAmount"
+            min="1000"
+            step="1000"
+            placeholder="목표 금액을 입력하세요"
+          />
+          <span class="amount-unit">원</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>챌린지 유형</label>
+        <div class="challenge-type-options">
+          <label class="challenge-type-option">
+            <input type="radio" v-model="challengeType" value="individual" />
+            <span>개인 챌린지</span>
+          </label>
+          <label class="challenge-type-option">
+            <input type="radio" v-model="challengeType" value="group" />
+            <span>소그룹 챌린지</span>
+          </label>
+        </div>
       </div>
 
       <div class="form-group">
@@ -68,6 +81,30 @@
         </div>
       </div>
 
+      <div class="form-group">
+        <label>방 설정</label>
+        <div class="room-setting">
+          <div class="room-type-options">
+            <label class="room-type-option">
+              <input type="radio" v-model="roomType" value="public" />
+              <span>공개방</span>
+            </label>
+            <label class="room-type-option">
+              <input type="radio" v-model="roomType" value="private" />
+              <span>비공개방</span>
+            </label>
+          </div>
+          <div v-if="roomType === 'private'" class="password-input">
+            <input
+              type="password"
+              v-model="roomPassword"
+              placeholder="비밀번호를 입력하세요"
+              maxlength="20"
+            />
+          </div>
+        </div>
+      </div>
+
       <div class="form-actions">
         <button class="btn-cancel" @click="goBack">취소</button>
         <button class="btn-create" @click="createChallenge">챌린지 생성</button>
@@ -87,8 +124,11 @@ const challengeTitle = ref('');
 const challengeDescription = ref('');
 const startDate = ref('');
 const endDate = ref('');
-const maxParticipants = ref(5);
+const targetAmount = ref(100000);
+const challengeType = ref('individual');
 const category = ref('health');
+const roomType = ref('public');
+const roomPassword = ref('');
 
 const goBack = () => {
   router.back();
@@ -101,8 +141,11 @@ const createChallenge = () => {
     description: challengeDescription.value,
     startDate: startDate.value,
     endDate: endDate.value,
-    maxParticipants: maxParticipants.value,
+    targetAmount: targetAmount.value,
+    challengeType: challengeType.value,
     category: category.value,
+    roomType: roomType.value,
+    roomPassword: roomType.value === 'private' ? roomPassword.value : '',
   });
 
   // 성공 메시지 후 이전 페이지로 이동
@@ -113,26 +156,9 @@ const createChallenge = () => {
 
 <style scoped>
 .challenge-create {
-  padding: 80px 16px 20px 16px;
+  padding: 0px 16px 20px 16px;
   background: var(--color-bg-light);
   min-height: 100vh;
-}
-
-.create-header {
-  text-align: center;
-  margin-bottom: 32px;
-}
-
-.create-header h1 {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 8px;
-}
-
-.create-header p {
-  color: #666;
-  font-size: 14px;
 }
 
 .create-form {
@@ -140,6 +166,7 @@ const createChallenge = () => {
   border-radius: 16px;
   padding: 24px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .form-group {
@@ -152,6 +179,7 @@ const createChallenge = () => {
   color: #333;
   margin-bottom: 8px;
   font-size: 14px;
+  font-family: var(--font-main);
 }
 
 .form-group input,
@@ -161,6 +189,7 @@ const createChallenge = () => {
   border: 1px solid #ddd;
   border-radius: 8px;
   font-size: 14px;
+  font-family: var(--font-main);
   background: #f8f9fa;
 }
 
@@ -175,15 +204,70 @@ const createChallenge = () => {
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
 }
 
 .date-inputs input {
   flex: 1;
+  min-width: 0;
 }
 
 .date-inputs span {
   color: #666;
   font-weight: 500;
+  font-family: var(--font-main);
+}
+
+.amount-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.amount-input-wrapper input {
+  flex: 1;
+  padding-right: 40px;
+}
+
+.amount-unit {
+  position: absolute;
+  right: 16px;
+  color: #666;
+  font-weight: 500;
+  font-family: var(--font-main);
+  pointer-events: none;
+}
+
+.challenge-type-options {
+  display: flex;
+  gap: 12px;
+}
+
+.challenge-type-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-main);
+  flex: 1;
+}
+
+.challenge-type-option:hover {
+  border-color: var(--color-main);
+  background: #f8f9fa;
+}
+
+.challenge-type-option input[type='radio'] {
+  display: none;
+}
+
+.challenge-type-option input[type='radio']:checked + span {
+  color: var(--color-main);
+  font-weight: 600;
 }
 
 .category-options {
@@ -201,6 +285,7 @@ const createChallenge = () => {
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  font-family: var(--font-main);
 }
 
 .category-option:hover {
@@ -209,13 +294,69 @@ const createChallenge = () => {
 }
 
 .category-option input[type='radio'] {
-  width: auto;
-  margin: 0;
+  display: none;
 }
 
 .category-option input[type='radio']:checked + span {
   color: var(--color-main);
   font-weight: 600;
+}
+
+.room-setting {
+  display: flex;
+  flex-direction: column;
+}
+
+.room-type-options {
+  display: flex;
+  gap: 12px;
+}
+
+.room-type-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-main);
+  flex: 1;
+}
+
+.room-type-option:hover {
+  border-color: var(--color-main);
+  background: #f8f9fa;
+}
+
+.room-type-option input[type='radio'] {
+  display: none;
+}
+
+.room-type-option input[type='radio']:checked + span {
+  color: var(--color-main);
+  font-weight: 600;
+}
+
+.password-input {
+  margin-top: 8px;
+}
+
+.password-input input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-main);
+  background: #f8f9fa;
+}
+
+.password-input input:focus {
+  outline: none;
+  border-color: var(--color-main);
+  background: white;
 }
 
 .form-actions {
@@ -232,6 +373,7 @@ const createChallenge = () => {
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
+  font-family: var(--font-main);
   cursor: pointer;
   transition: transform 0.2s;
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="main-layout">
-    <ChallengeHeader />
+    <ChallengeHeader :title="headerTitle" />
     <main class="main-content">
       <router-view />
     </main>
@@ -9,8 +9,19 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
 import ChallengeHeader from '@/components/challenge/ChallengeHeader.vue';
 import Navbar from '@/components/Navbar.vue';
+
+const route = useRoute();
+
+const headerTitle = computed(() => {
+  if (route.name === 'ChallengeCreate') {
+    return '챌린지 생성';
+  }
+  return '';
+});
 </script>
 
 <style scoped>

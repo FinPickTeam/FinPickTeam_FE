@@ -1,8 +1,11 @@
 <template>
   <header class="challenge-header">
-    <button class="icon-btn" @click="goBack">
-      <i class="fas fa-chevron-left"></i>
-    </button>
+    <div class="header-left">
+      <button class="icon-btn" @click="goBack">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+      <h1 v-if="title" class="header-title">{{ title }}</h1>
+    </div>
 
     <div class="header-icons">
       <button class="icon-btn" @click="goToCreate">
@@ -17,6 +20,14 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+
+const props = defineProps({
+  title: {
+    type: String,
+    default: '',
+  },
+});
+
 const router = useRouter();
 
 const goBack = () => router.back();
@@ -41,6 +52,12 @@ const goToRanking = () => router.push('/challenge2/ranking'); // 원하는 경�
   z-index: 100;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .icon-btn {
   background: none;
   border: none;
@@ -48,6 +65,14 @@ const goToRanking = () => router.push('/challenge2/ranking'); // 원하는 경�
   color: white;
   cursor: pointer;
   padding: 6px;
+}
+
+.header-title {
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  font-family: var(--font-main);
+  margin: 0;
 }
 
 .header-icons {
