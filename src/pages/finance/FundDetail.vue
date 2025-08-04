@@ -457,7 +457,7 @@ onMounted(async () => {
 
 /* 하이라이팅된 용어 스타일 */
 :deep(.highlighted-term) {
-  background-color: #fff3cd;
+  background-color: #ffff00;
   color: #856404;
   padding: 2px 4px;
   border-radius: 4px;
