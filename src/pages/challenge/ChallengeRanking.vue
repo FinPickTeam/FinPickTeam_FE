@@ -1,69 +1,98 @@
 <template>
   <div class="challenge-ranking">
-    <div class="ranking-header">
-      <h1>챌린지 랭킹</h1>
-      <p>이번 주 가장 활발한 챌린지들을 확인해보세요!</p>
-    </div>
-
     <div class="ranking-tabs">
       <button
         class="tab-btn"
-        :class="{ active: activeTab === 'weekly' }"
-        @click="activeTab = 'weekly'"
+        :class="{ active: activeTab === 'common' }"
+        @click="activeTab = 'common'"
       >
-        주간 랭킹
+        공통 랭킹
       </button>
       <button
         class="tab-btn"
-        :class="{ active: activeTab === 'monthly' }"
-        @click="activeTab = 'monthly'"
+        :class="{ active: activeTab === 'personal' }"
+        @click="activeTab = 'personal'"
       >
-        월간 랭킹
+        개인 랭킹
       </button>
     </div>
 
-    <div class="ranking-list">
-      <div
-        v-for="(challenge, index) in rankingData"
-        :key="challenge.id"
-        class="ranking-item"
-        :class="{ 'top-three': index < 3 }"
-      >
-        <div class="rank-number" :class="{ 'top-rank': index < 3 }">
-          {{ index + 1 }}
-        </div>
-        <div class="challenge-info">
-          <h3 class="challenge-title">{{ challenge.title }}</h3>
-          <div class="challenge-stats">
-            <span class="participants"
-              >{{ challenge.participants }}명 참여</span
-            >
-            <span class="progress">진행률 {{ challenge.progress }}%</span>
-          </div>
-          <div class="challenge-category">
-            <span class="category-tag">{{ challenge.category }}</span>
+    <!-- 공통 랭킹 화면 -->
+    <div v-if="activeTab === 'common'" class="common-ranking">
+      <div class="ranking-card">
+        <div class="target-section">
+          <div class="target-icon">
+            <div class="target">
+              <div class="target-rings">
+                <div class="ring outer"></div>
+                <div class="ring middle"></div>
+                <div class="ring inner"></div>
+                <div class="bullseye"></div>
+              </div>
+              <div class="arrow"></div>
+            </div>
           </div>
         </div>
-        <div class="challenge-score">
-          <div class="score">{{ challenge.score.toLocaleString() }}</div>
-          <div class="score-label">점수</div>
+
+        <div class="ranking-info">
+          <div class="user-name">김철수님은 현재</div>
+          <div class="total-participants"><strong>1,000,000</strong> 명 중</div>
+          <div class="rank-position">1등</div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 75%"></div>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="my-ranking">
-      <h2>내 랭킹</h2>
-      <div class="my-rank-card">
-        <div class="my-rank-info">
-          <div class="my-rank-number">15</div>
-          <div class="my-rank-details">
-            <h3>내가 참여한 챌린지</h3>
-            <p>총 3개 챌린지 참여 중</p>
+    <!-- 개인 랭킹 화면 -->
+    <div v-if="activeTab === 'personal'">
+      <div class="ranking-list">
+        <div
+          v-for="(challenge, index) in rankingData"
+          :key="challenge.id"
+          class="ranking-item"
+          :class="{ 'top-three': index < 3 }"
+        >
+          <div class="rank-number" :class="{ 'top-rank': index < 3 }">
+            {{ index + 1 }}
+          </div>
+          <div class="challenge-info">
+            <h3 class="challenge-title">{{ challenge.title }}</h3>
+            <div class="challenge-stats">
+              <span class="participants"
+                >{{ challenge.participants }}명 참여</span
+              >
+              <span class="progress">진행률 {{ challenge.progress }}%</span>
+            </div>
+            <div class="challenge-category">
+              <span class="category-tag">{{ challenge.category }}</span>
+            </div>
+          </div>
+          <div class="challenge-score">
+            <div class="score">{{ challenge.score.toLocaleString() }}</div>
+            <div class="score-label">점수</div>
           </div>
         </div>
-        <div class="my-rank-score">
-          <div class="score">2,450</div>
-          <div class="score-label">점수</div>
+      </div>
+
+      <div class="my-ranking">
+        <h2>내 랭킹</h2>
+        <div class="my-rank-card">
+          <div class="my-rank-info">
+            <div class="my-rank-number">15</div>
+            <div class="my-rank-details">
+              <h3>내가 참여한 챌린지</h3>
+              <p>총 3개 챌린지 참여 중</p>
+            </div>
+          </div>
+          <div class="my-rank-score">
+            <div class="score">2,450</div>
+            <div class="score-label">점수</div>
+          </div>
         </div>
       </div>
     </div>
@@ -73,7 +102,7 @@
 <script setup>
 import { ref } from 'vue';
 
-const activeTab = ref('weekly');
+const activeTab = ref('common');
 
 const rankingData = ref([
   {
@@ -145,26 +174,160 @@ const rankingData = ref([
 
 <style scoped>
 .challenge-ranking {
-  padding: 80px 16px 20px 16px;
+  padding: 16px 16px 20px 16px;
   background: var(--color-bg-light);
   min-height: 100vh;
 }
 
-.ranking-header {
+/* 공통 랭킹 스타일 */
+.common-ranking {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+}
+
+.ranking-card {
+  background: var(--color-bg);
+  border-radius: 16px;
+  padding: 32px 24px;
   text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 320px;
+  width: 100%;
+}
+
+.target-section {
   margin-bottom: 24px;
 }
 
-.ranking-header h1 {
-  font-size: 24px;
-  font-weight: bold;
+.target-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.target {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.target-rings {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 3px solid #fff;
+}
+
+.ring.outer {
+  width: 100%;
+  height: 100%;
+  background: #ff6b6b;
+  border-color: #ff5252;
+}
+
+.ring.middle {
+  width: 70%;
+  height: 70%;
+  top: 15%;
+  left: 15%;
+  background: #fff;
+  border-color: #ff6b6b;
+}
+
+.ring.inner {
+  width: 40%;
+  height: 40%;
+  top: 30%;
+  left: 30%;
+  background: #ff6b6b;
+  border-color: #ff5252;
+}
+
+.bullseye {
+  position: absolute;
+  width: 20%;
+  height: 20%;
+  top: 40%;
+  left: 40%;
+  background: #ff5252;
+  border-radius: 50%;
+}
+
+.arrow {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 40px;
+  background: linear-gradient(to bottom, #ffd700, #ffed4e);
+  border-radius: 2px;
+}
+
+.arrow::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: -4px;
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid #ffd700;
+}
+
+.ranking-info {
+  margin-bottom: 24px;
+}
+
+.user-name {
+  font-size: 16px;
   color: #333;
   margin-bottom: 8px;
 }
 
-.ranking-header p {
-  color: #666;
-  font-size: 14px;
+.total-participants {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.total-participants strong {
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.rank-position {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.progress-section {
+  margin-top: 16px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: #fff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #b0a8f8, #8b7cf6);
+  border-radius: 4px;
+  transition: width 0.3s ease;
 }
 
 .ranking-tabs {
