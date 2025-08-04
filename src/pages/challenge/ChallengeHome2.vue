@@ -301,9 +301,12 @@
 
 .challenge-progress {
   font-size: 14px;
-  color: #6b46c1;
   font-weight: 600;
-  background: linear-gradient(135deg, #6b46c1 0%, #8b5cf6 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-main-dark) 0%,
+    var(--color-main-light) 100%
+  );
   color: white;
   padding: 6px 12px;
   border-radius: 20px;
@@ -330,7 +333,11 @@
 }
 
 .hot-banner {
-  background: linear-gradient(135deg, #6b46c1 0%, #8b5cf6 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-main-dark) 0%,
+    var(--color-main-light) 100%
+  );
   color: white;
   padding: 8px 12px;
   border-radius: 8px 8px 0 0;
@@ -347,6 +354,7 @@
 
 .hot-banner i {
   font-size: 14px;
+  color: #ff9800;
 }
 
 .challenge-card.hot .challenge-title {
@@ -360,7 +368,11 @@
 }
 
 .participate-btn {
-  background: linear-gradient(135deg, #6b46c1 0%, #8b5cf6 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-main-dark) 0%,
+    var(--color-main-light) 100%
+  );
   color: white;
   border: none;
   border-radius: 8px;
