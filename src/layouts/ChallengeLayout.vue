@@ -20,6 +20,9 @@ const headerTitle = computed(() => {
   if (route.name === 'ChallengeCreate') {
     return '챌린지 생성';
   }
+  if (route.name === 'ChallengeRanking') {
+    return '챌린지 랭킹';
+  }
   return '';
 });
 </script>
@@ -31,7 +34,7 @@ const headerTitle = computed(() => {
   flex-direction: column;
   align-items: stretch;
   background: var(--color-bg-light);
-  padding-top: 80px; /* 헤더 높이만큼 상단 패딩 */
+  padding-top: 60px; /* 헤더 높이만큼 상단 패딩 */
   padding-bottom: 80px; /* 네비바 높이만큼 하단 패딩 */
 }
 
