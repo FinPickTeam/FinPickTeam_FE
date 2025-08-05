@@ -139,23 +139,26 @@ const handleCardClick = (data) => {
   if (type === 'personal') {
     // 개인 챌린지 상세 페이지로 이동
     router.push({
-      name: 'ChallengePersonalDetail',
-      params: { id: challenge.id },
-      state: { challenge },
+      path: `/challenge/personal-detail/${challenge.id}`,
+      state: {
+        previousPage: '/challenge/joined-list',
+      },
     });
   } else if (type === 'group') {
     // 그룹 챌린지 상세 페이지로 이동
     router.push({
-      name: 'ChallengeGroupDetail',
-      params: { id: challenge.id },
-      state: { challenge },
+      path: `/challenge/group-detail/${challenge.id}`,
+      state: {
+        previousPage: '/challenge/joined-list',
+      },
     });
   } else if (type === 'common') {
     // 공통 챌린지 상세 페이지로 이동
     router.push({
-      name: 'ChallengeCommonDetail',
-      params: { id: challenge.id },
-      state: { challenge },
+      path: `/challenge/common-detail/${challenge.id}`,
+      state: {
+        previousPage: '/challenge/joined-list',
+      },
     });
   }
 };

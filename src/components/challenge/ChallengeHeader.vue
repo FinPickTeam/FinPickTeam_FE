@@ -48,8 +48,17 @@ const goBack = () => {
     currentRoute === 'ChallengeGroupDetail' ||
     currentRoute === 'ChallengeCommonDetail'
   ) {
-    // 챌린지 상세 페이지에서는 joined-list로 이동
-    router.push('/challenge/joined-list');
+    // 챌린지 상세 페이지에서는 이전 페이지로 이동
+    // 라우터 state에서 이전 페이지 정보를 확인
+    const previousPage = router.currentRoute.value.state?.previousPage;
+
+    if (previousPage) {
+      // 이전 페이지 정보가 있으면 해당 페이지로 이동
+      router.push(previousPage);
+    } else {
+      // 이전 페이지 정보가 없으면 브라우저 히스토리 사용
+      router.back();
+    }
   } else {
     // 다른 페이지에서는 이전 페이지로 이동
     router.back();
