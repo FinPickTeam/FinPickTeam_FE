@@ -40,7 +40,7 @@
     <div class="participating-section">
       <div class="section-header">
         <i class="fas fa-calendar section-icon"></i>
-        <RouterLink to="/challenge2/joined-list" class="section-title-link">
+        <RouterLink to="/challenge/joined-list" class="section-title-link">
           <h3 class="section-title">참여중인 챌린지</h3>
         </RouterLink>
       </div>
@@ -57,7 +57,7 @@
     <div class="hot-challenges-section">
       <div class="section-header">
         <i class="fas fa-search section-icon"></i>
-        <RouterLink to="/challenge2/recruiting-list" class="section-title-link">
+        <RouterLink to="/challenge/recruiting-list" class="section-title-link">
           <h3 class="section-title">현재 HOT 한 챌린지</h3>
         </RouterLink>
       </div>

@@ -105,15 +105,13 @@ const handleCardClick = (data) => {
   if (type === 'common') {
     // 공통 챌린지 상세 페이지로 이동
     router.push({
-      name: 'ChallengeCommonDetail',
-      params: { id: challenge.id },
+      path: `/challenge/common-detail/${challenge.id}`,
       state: { challenge },
     });
   } else if (type === 'group') {
     // 소그룹 챌린지 상세 페이지로 이동
     router.push({
-      name: 'ChallengeGroupDetail',
-      params: { id: challenge.id },
+      path: `/challenge/group-detail/${challenge.id}`,
       state: { challenge },
     });
   }
