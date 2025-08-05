@@ -100,7 +100,7 @@ const handleCardClick = (data) => {
   if (type === 'personal') {
     // 개인 챌린지 상세 페이지로 이동
     router.push({
-      path: `/challenge2/personal-detail/${challenge.id}`,
+      path: `/challenge/personal-detail/${challenge.id}`,
       state: { challenge },
     });
   }

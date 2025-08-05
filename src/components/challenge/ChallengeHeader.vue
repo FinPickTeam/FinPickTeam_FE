@@ -39,8 +39,8 @@ const goBack = () => {
     currentRoute === 'ChallengeRanking'
   ) {
     // 챌린지 생성 페이지나 랭킹 페이지에서는 ChallengeHome2로 이동
-    router.push('/challenge2');
-  } else if (currentRoute === 'ChallengeHome2') {
+    router.push('/challenge');
+  } else if (currentRoute === 'ChallengeHome') {
     // 챌린지 홈 페이지에서는 메인 홈페이지로 이동
     router.push('/');
   } else {
@@ -48,8 +48,8 @@ const goBack = () => {
     router.back();
   }
 };
-const goToCreate = () => router.push('/challenge2/create'); // 원하는 경로로 수정
-const goToRanking = () => router.push('/challenge2/ranking'); // 원하는 경로로 수정
+const goToCreate = () => router.push('/challenge/create'); // 원하는 경로로 수정
+const goToRanking = () => router.push('/challenge/ranking'); // 원하는 경로로 수정
 </script>
 
 <style scoped>
