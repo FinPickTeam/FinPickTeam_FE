@@ -1,7 +1,5 @@
 <template>
   <div class="challenge-recruiting-list">
-    <ChallengeHeader title="모집 중인 챌린지" />
-
     <div class="content">
       <!-- 공통 챌린지 섹션 -->
       <ChallengeSection
@@ -27,7 +25,6 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import ChallengeHeader from '@/components/challenge/ChallengeHeader.vue';
 import ChallengeSection from '@/components/challenge/ChallengeSection.vue';
 
 // 공통 챌린지 데이터 (모집 중)
@@ -106,13 +103,17 @@ const handleCardClick = (data) => {
     // 공통 챌린지 상세 페이지로 이동
     router.push({
       path: `/challenge/common-detail/${challenge.id}`,
-      state: { challenge },
+      state: {
+        previousPage: '/challenge/recruiting-list',
+      },
     });
   } else if (type === 'group') {
     // 소그룹 챌린지 상세 페이지로 이동
     router.push({
       path: `/challenge/group-detail/${challenge.id}`,
-      state: { challenge },
+      state: {
+        previousPage: '/challenge/recruiting-list',
+      },
     });
   }
 };

@@ -1,5 +1,5 @@
 <template>
-  <div class="challenge-card hot">
+  <div class="challenge-card hot" @click="handleCardClick">
     <div class="hot-banner">
       <i class="fas fa-fire"></i>
       <span>HOT</span>
@@ -10,7 +10,7 @@
       ({{ challenge.currentParticipants }}명 /
       {{ challenge.maxParticipants }}명)
     </div>
-    <button class="participate-btn" @click="handleParticipate">
+    <button class="participate-btn" @click.stop="handleParticipate">
       참여하러 가기
     </button>
   </div>
@@ -22,18 +22,22 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({
-      title: "",
-      date: "",
+      title: '',
+      date: '',
       currentParticipants: 0,
       maxParticipants: 0,
     }),
   },
 });
 
-const emit = defineEmits(["participate"]);
+const emit = defineEmits(['participate', 'click']);
 
 const handleParticipate = () => {
-  emit("participate", props.challenge);
+  emit('participate', props.challenge);
+};
+
+const handleCardClick = () => {
+  emit('click', props.challenge);
 };
 </script>
 
@@ -45,6 +49,13 @@ const handleParticipate = () => {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.challenge-card.hot:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .hot-banner {

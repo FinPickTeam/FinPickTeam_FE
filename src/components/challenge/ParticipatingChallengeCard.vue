@@ -1,5 +1,5 @@
 <template>
-  <div class="challenge-card">
+  <div class="challenge-card" @click="$emit('click')">
     <h4 class="challenge-title">{{ challenge.title }}</h4>
     <div class="challenge-date">{{ challenge.date }}</div>
     <div class="challenge-progress">진행률 {{ challenge.progress }}%</div>
@@ -12,12 +12,14 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({
-      title: "",
-      date: "",
+      title: '',
+      date: '',
       progress: 0,
     }),
   },
 });
+
+defineEmits(['click']);
 </script>
 
 <style scoped>
@@ -28,6 +30,13 @@ const props = defineProps({
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   position: relative;
   min-width: 280px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.challenge-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .challenge-title {

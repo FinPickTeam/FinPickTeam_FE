@@ -49,6 +49,7 @@
           v-for="challenge in participatingChallenges"
           :key="challenge.id"
           :challenge="challenge"
+          @click="handleCardClick(challenge)"
         />
       </div>
     </div>
@@ -67,6 +68,7 @@
           :key="challenge.id"
           :challenge="challenge"
           @participate="handleParticipate"
+          @click="handleCardClick"
         />
       </div>
     </div>
@@ -75,6 +77,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
 import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
 
@@ -125,9 +128,27 @@ const hotChallenges = ref([
   },
 ]);
 
+const router = useRouter();
+
 const handleParticipate = (challenge) => {
   console.log('참여하기 클릭:', challenge);
-  // 여기에 참여 로직 추가
+  // 챌린지 상세 페이지로 이동
+  router.push({
+    path: `/challenge/common-detail/${challenge.id}`,
+    state: {
+      previousPage: '/challenge',
+    },
+  });
+};
+
+const handleCardClick = (challenge) => {
+  // 참여중인 챌린지 상세 페이지로 이동
+  router.push({
+    path: `/challenge/personal-detail/${challenge.id}`,
+    state: {
+      previousPage: '/challenge',
+    },
+  });
 };
 </script>
 
