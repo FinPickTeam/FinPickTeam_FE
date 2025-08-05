@@ -17,6 +17,7 @@
         icon-class="fas fa-user"
         :max-count="3"
         :show-count="true"
+        @cardClick="handleCardClick"
       />
 
       <!-- 소그룹 챌린지 섹션 -->
@@ -34,6 +35,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import ChallengeSection from '@/components/challenge/ChallengeSection.vue';
 
 // 공통 챌린지 데이터
@@ -89,6 +91,21 @@ const groupChallenges = ref([
     maxParticipants: 5,
   },
 ]);
+
+const router = useRouter();
+
+const handleCardClick = (data) => {
+  const { challenge, type } = data;
+
+  if (type === 'personal') {
+    // 개인 챌린지 상세 페이지로 이동
+    router.push({
+      name: 'ChallengePersonalDetail',
+      params: { id: challenge.id },
+      state: { challenge },
+    });
+  }
+};
 </script>
 
 <style scoped>

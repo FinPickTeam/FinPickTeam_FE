@@ -401,6 +401,12 @@ const router = createRouter({
           component: () =>
             import('../pages/challenge/ChallengeGroupDetail.vue'),
         },
+        {
+          path: 'personal-detail/:id',
+          name: 'ChallengePersonalDetail',
+          component: () =>
+            import('../pages/challenge/ChallengePersonalDetail.vue'),
+        },
       ],
     },
     // 404 Not Found catch-all
