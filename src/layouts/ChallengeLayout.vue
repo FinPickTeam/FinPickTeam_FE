@@ -23,6 +23,12 @@ const headerTitle = computed(() => {
   if (route.name === 'ChallengeRanking') {
     return '챌린지 랭킹';
   }
+  if (route.name === 'ChallengeJoinedList') {
+    return '참여 중인 챌린지';
+  }
+  if (route.name === 'ChallengeRecruitingList') {
+    return '모집 중인 챌린지';
+  }
   return '';
 });
 </script>
