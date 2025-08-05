@@ -1,7 +1,5 @@
 <template>
   <div class="challenge-common-detail">
-    <ChallengeHeader title="공통 챌린지" />
-
     <div class="content">
       <!-- 챌린지 기본 정보 -->
       <div class="challenge-info">
@@ -65,7 +63,6 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import ChallengeHeader from '@/components/challenge/ChallengeHeader.vue';
 
 const route = useRoute();
 const router = useRouter();

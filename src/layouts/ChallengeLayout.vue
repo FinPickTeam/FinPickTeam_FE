@@ -29,6 +29,15 @@ const headerTitle = computed(() => {
   if (route.name === 'ChallengeRecruitingList') {
     return '모집 중인 챌린지';
   }
+  if (route.name === 'ChallengePersonalDetail') {
+    return '개인 챌린지 상세';
+  }
+  if (route.name === 'ChallengeGroupDetail') {
+    return '그룹 챌린지 상세';
+  }
+  if (route.name === 'ChallengeCommonDetail') {
+    return '공통 챌린지 상세';
+  }
   return '';
 });
 </script>
