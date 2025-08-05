@@ -6,7 +6,11 @@
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
       <span class="account-title">내 계좌</span>
-      <div class="account-header-right"></div>
+      <div class="account-header-right">
+        <button class="account-trash-btn" @click="toggleDeleteMode">
+          <font-awesome-icon :icon="['fas', 'trash']" />
+        </button>
+      </div>
     </div>
 
     <!-- 총 자산 카드 -->
@@ -29,9 +33,12 @@
         <div class="account-list">
           <div
             class="account-item"
+            :class="{
+              'account-item-selected': selectedAccounts.includes(account),
+            }"
             v-for="(account, index) in depositAccounts"
             :key="`deposit-${index}`"
-            @click="selectAccount(account)"
+            @click="handleAccountClick(account)"
           >
             <div class="account-item-header">
               <div class="account-bank-info">
@@ -61,9 +68,12 @@
         <div class="account-list">
           <div
             class="account-item"
+            :class="{
+              'account-item-selected': selectedAccounts.includes(account),
+            }"
             v-for="(account, index) in savingsAccounts"
             :key="`savings-${index}`"
-            @click="selectAccount(account)"
+            @click="handleAccountClick(account)"
           >
             <div class="account-item-header">
               <div class="account-bank-info">
@@ -96,9 +106,12 @@
         <div class="account-list">
           <div
             class="account-item"
+            :class="{
+              'account-item-selected': selectedAccounts.includes(account),
+            }"
             v-for="(account, index) in investmentAccounts"
             :key="`investment-${index}`"
-            @click="selectAccount(account)"
+            @click="handleAccountClick(account)"
           >
             <div class="account-item-header">
               <div class="account-bank-info">
@@ -123,6 +136,37 @@
       </div>
     </div>
 
+    <!-- 삭제 버튼 (삭제 모드일 때만 표시) -->
+    <div v-if="isDeleteMode" class="delete-section">
+      <button
+        class="delete-accounts-btn"
+        @click="showDeleteConfirm"
+        :disabled="selectedAccounts.length === 0"
+      >
+        선택된 계좌 삭제 ({{ selectedAccounts.length }}개)
+      </button>
+    </div>
+
+    <!-- 삭제 확인 모달 -->
+    <div v-if="showDeleteModal" class="modal-overlay" @click="closeDeleteModal">
+      <div class="modal-content" @click.stop>
+        <div class="modal-header">
+          <h3>계좌 삭제</h3>
+        </div>
+        <div class="modal-body">
+          <p>{{ selectedAccounts.length }}개의 계좌를 삭제하시겠습니까?</p>
+        </div>
+        <div class="modal-footer">
+          <button class="modal-btn modal-btn-cancel" @click="closeDeleteModal">
+            취소
+          </button>
+          <button class="modal-btn modal-btn-confirm" @click="confirmDelete">
+            삭제
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- 하단 네비게이션 -->
     <Navbar />
   </div>
@@ -133,11 +177,11 @@ import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { faAngleLeft, faTrash } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "../../../components/Navbar.vue";
 
 // FontAwesome 아이콘 등록
-library.add(faAngleLeft);
+library.add(faAngleLeft, faTrash);
 
 // Transaction 데이터 import
 import transactionData from "../Transaction_dummy.json";
@@ -250,6 +294,69 @@ const selectAccount = (account) => {
   router.push(`/openbanking/account-detail/${encodeURIComponent(accountId)}`);
 };
 
+// 삭제 모드 상태
+const isDeleteMode = ref(false);
+// 선택된 계좌 목록
+const selectedAccounts = ref([]);
+// 삭제 확인 모달 상태
+const showDeleteModal = ref(false);
+
+// 삭제 모드 토글
+const toggleDeleteMode = () => {
+  isDeleteMode.value = !isDeleteMode.value;
+  selectedAccounts.value = []; // 모드 토글 시 선택 해제
+};
+
+// 계좌 클릭 핸들러 (삭제 모드일 때는 선택/해제, 일반 모드일 때는 계좌 상세로 이동)
+const handleAccountClick = (account) => {
+  if (isDeleteMode.value) {
+    toggleAccountSelection(account);
+  } else {
+    selectAccount(account);
+  }
+};
+
+// 계좌 선택 토글
+const toggleAccountSelection = (account) => {
+  const index = selectedAccounts.value.indexOf(account);
+  if (index > -1) {
+    selectedAccounts.value.splice(index, 1);
+  } else {
+    selectedAccounts.value.push(account);
+  }
+};
+
+// 선택된 계좌 삭제 함수
+const deleteSelectedAccounts = () => {
+  if (selectedAccounts.value.length === 0) return;
+
+  const selectedCount = selectedAccounts.value.length;
+
+  // 실제 데이터베이스 또는 상태 관리 로직에 따라 계좌 삭제
+  // 여기서는 더미 데이터를 사용하므로 배열에서 제거
+  accounts.value = accounts.value.filter(
+    (account) => !selectedAccounts.value.includes(account)
+  );
+  selectedAccounts.value = []; // 삭제 후 선택 해제
+  isDeleteMode.value = false; // 삭제 모드 해제
+};
+
+// 삭제 확인 모달 열기
+const showDeleteConfirm = () => {
+  showDeleteModal.value = true;
+};
+
+// 삭제 확인 모달 닫기
+const closeDeleteModal = () => {
+  showDeleteModal.value = false;
+};
+
+// 삭제 확인 확인
+const confirmDelete = () => {
+  deleteSelectedAccounts();
+  closeDeleteModal();
+};
+
 // 계좌 데이터 초기화
 onMounted(() => {
   accounts.value = extractAccountsFromTransactions();
@@ -264,24 +371,27 @@ onMounted(() => {
 }
 
 .account-header {
+  width: 100%;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
   background: #fff;
-  border-bottom: 1px solid #ececec;
   position: sticky;
   top: 0;
   z-index: 100;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #ececec;
 }
 
 .account-back {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 24px;
   color: #222;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px 8px 4px 0;
   border-radius: 8px;
   transition: background 0.15s;
 }
@@ -298,6 +408,25 @@ onMounted(() => {
 
 .account-header-right {
   width: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.account-trash-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #4318d1;
+  cursor: pointer;
+  padding: 4px 4px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.account-trash-btn:hover {
+  background: #f3f3f3;
+  color: #dc2626;
 }
 
 .account-total-card {
@@ -369,11 +498,34 @@ onMounted(() => {
   box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
   cursor: pointer;
   transition: transform 0.15s, box-shadow 0.15s;
+  position: relative; /* 체크박스를 위한 상대 위치 */
 }
 
 .account-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(67, 24, 209, 0.12);
+}
+
+.account-item-selected {
+  background: #22c55e !important;
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+}
+
+.account-item-selected .account-bank-name,
+.account-item-selected .account-name,
+.account-item-selected .account-number {
+  color: #fff;
+}
+
+.account-item-selected .account-balance {
+  color: #fff;
+}
+
+.account-item-selected .account-type-badge {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: #fff;
 }
 
 .account-item-header {
@@ -435,6 +587,123 @@ onMounted(() => {
 .account-number {
   font-size: 0.85rem;
   color: #888;
+}
+
+.delete-section {
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #fff;
+  padding: 16px 20px;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 99;
+}
+
+.delete-accounts-btn {
+  width: 100%;
+  padding: 14px 20px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.delete-accounts-btn:hover:not(:disabled) {
+  background: #c02626;
+}
+
+.delete-accounts-btn:disabled {
+  background: #e0e0e0;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 16px;
+  padding: 24px;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  margin-bottom: 16px;
+}
+
+.modal-header h3 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0;
+}
+
+.modal-body {
+  margin-bottom: 24px;
+}
+
+.modal-body p {
+  font-size: 1rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.modal-footer {
+  display: flex;
+  gap: 12px;
+}
+
+.modal-btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.modal-btn-cancel {
+  background: #f3f4f6;
+  color: #666;
+}
+
+.modal-btn-cancel:hover {
+  background: #e5e7eb;
+}
+
+.modal-btn-confirm {
+  background: #dc2626;
+  color: #fff;
+}
+
+.modal-btn-confirm:hover {
+  background: #c02626;
 }
 
 @media (max-width: 430px) {

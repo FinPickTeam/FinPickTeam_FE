@@ -65,7 +65,7 @@
       </div>
     </div>
 
-    <!-- 소비 정보 -->
+    <!-- 카드 정보 -->
     <div class="obmyhome-section-card">
       <div class="obmyhome-section-title-row">
         <span class="obmyhome-section-title">카드</span>
@@ -73,22 +73,23 @@
           <i class="fa-solid fa-angle-right"></i>
         </button>
       </div>
-      <table class="obmyhome-spend-table">
-        <thead>
-          <tr>
-            <th>최대 소비</th>
-            <th>카테고리</th>
-            <th>금액</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>7일 소비</td>
-            <td>식비</td>
-            <td>120,000</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="obmyhome-section-subtitle-row">
+        <span class="obmyhome-section-subtitle">이번달 소비금액</span>
+      </div>
+      <div class="obmyhome-card-list">
+        <div class="obmyhome-card-item" v-for="(card, idx) in cards" :key="idx">
+          <div class="obmyhome-card-content">
+            <img class="obmyhome-bank-logo" :src="card.logo" alt="은행로고" />
+            <div class="obmyhome-card-info">
+              <div class="obmyhome-card-name">{{ card.name }}</div>
+              <div class="obmyhome-card-number">***-***-****</div>
+            </div>
+            <div class="obmyhome-card-amount">
+              {{ card.amount.toLocaleString() }}원
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="obmyhome-report-buttons">
         <button class="obmyhome-report-btn daily" @click="goToDailyReport">
           일간 리포트 보기
@@ -108,7 +109,7 @@
 const goToDictionary = () => {
   router.push("/dictionary");
 };
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import Navbar from "../../components/Navbar.vue";
 import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -133,18 +134,105 @@ const goBack = () => {
   router.push("/");
 };
 
-const accounts = ref([
-  {
-    logo: kakaoLogo,
-    name: "KB IT’s Your Life 6개월 정기예금",
-    balance: 250000,
-  },
-  {
-    logo: kakaoLogo,
-    name: "KB IT’s Your Life 6개월 정기예금",
-    balance: 250000,
-  },
-]);
+// Transaction_dummy.json에서 계좌 정보 추출
+const extractAccountsFromTransactions = () => {
+  if (!transactionData?.transactions) return [];
+
+  const accountMap = new Map();
+
+  // 초기 자산 설정
+  const initialBalance = transactionData.initialAssets || 0;
+
+  transactionData.transactions.forEach((transaction) => {
+    const accountKey = `${transaction.bank}-${transaction.account}`;
+
+    if (!accountMap.has(accountKey)) {
+      // 초기 잔액 설정 (첫 번째 계좌에만)
+      const isFirstAccount = accountMap.size === 0;
+      const initialAccountBalance = isFirstAccount ? initialBalance : 0;
+
+      accountMap.set(accountKey, {
+        name: `${transaction.bank} ${transaction.account}`,
+        balance: initialAccountBalance,
+        bank: transaction.bank,
+        logo: getBankLogo(transaction.logo),
+      });
+    }
+
+    // 잔액 계산 (입금은 +, 출금은 -)
+    const currentAccount = accountMap.get(accountKey);
+    if (transaction.type === "입금") {
+      currentAccount.balance += transaction.amount;
+    } else {
+      currentAccount.balance -= transaction.amount;
+    }
+  });
+
+  return Array.from(accountMap.values()).slice(0, 2);
+};
+
+// Transaction_dummy.json에서 카드 정보 추출 (이번달 소비내역)
+const extractCardsFromTransactions = () => {
+  if (!transactionData?.transactions) return [];
+
+  const cardMap = new Map();
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth();
+
+  transactionData.transactions.forEach((transaction) => {
+    // 카드 거래만 필터링 (체크카드, 신용카드)
+    if (
+      transaction.account.includes("체크카드") ||
+      transaction.account.includes("신용카드")
+    ) {
+      // 이번달 거래만 필터링
+      const transactionDate = new Date(transaction.date);
+      if (
+        transactionDate.getFullYear() === currentYear &&
+        transactionDate.getMonth() === currentMonth
+      ) {
+        const cardKey = `${transaction.bank}-${transaction.account}`;
+
+        if (!cardMap.has(cardKey)) {
+          cardMap.set(cardKey, {
+            name: `${transaction.bank} ${transaction.account}`,
+            amount: 0,
+            bank: transaction.bank,
+            logo: getBankLogo(transaction.logo),
+          });
+        }
+
+        // 카드 사용 금액 계산 (출금만)
+        const currentCard = cardMap.get(cardKey);
+        if (transaction.type === "출금") {
+          currentCard.amount += transaction.amount;
+        }
+      }
+    }
+  });
+
+  return Array.from(cardMap.values()).slice(0, 2);
+};
+
+// 은행 로고 동적 로딩
+const getBankLogo = (logoName) => {
+  try {
+    return new URL(`../../assets/bank_logo/${logoName}`, import.meta.url).href;
+  } catch (error) {
+    // 로고를 찾을 수 없는 경우 기본 로고 반환
+    return kakaoLogo;
+  }
+};
+
+const accounts = ref([]);
+const cards = ref([]);
+
+// 계좌 및 카드 데이터 초기화
+onMounted(() => {
+  accounts.value = extractAccountsFromTransactions();
+  cards.value = extractCardsFromTransactions();
+});
 
 const goToDailyReport = () => {
   router.push("/openbanking/daily-report");
@@ -480,10 +568,23 @@ const monthlyChangeText = computed(() => {
   justify-content: space-between;
   margin-bottom: 10px;
 }
+
 .obmyhome-section-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #222;
+}
+
+.obmyhome-section-subtitle-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+
+.obmyhome-section-subtitle {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 400;
 }
 .obmyhome-section-more {
   background: none;
@@ -560,6 +661,73 @@ const monthlyChangeText = computed(() => {
   text-align: right;
 }
 
+.obmyhome-card-list {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  border-bottom: 1px solid #ececec;
+}
+
+.obmyhome-card-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  border-bottom: 1px solid #ececec;
+  transition: background-color 0.15s;
+}
+
+.obmyhome-card-item:hover {
+  background: #f8f9fa;
+}
+
+.obmyhome-card-item:last-child {
+  border-bottom: none;
+}
+
+.obmyhome-card-name {
+  font-size: 0.95rem;
+  color: #222;
+  font-weight: 600;
+}
+
+.obmyhome-card-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.obmyhome-card-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.obmyhome-card-type {
+  font-size: 0.95rem;
+  color: #222;
+  font-weight: 600;
+}
+
+.obmyhome-card-number {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 400;
+}
+
+.obmyhome-card-amount {
+  font-size: 1.05rem;
+  color: #e11d48;
+  font-weight: 700;
+  text-align: right;
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
 .obmyhome-spend-table {
   width: 100%;
   border-collapse: collapse;
@@ -583,7 +751,7 @@ const monthlyChangeText = computed(() => {
 .obmyhome-report-buttons {
   display: flex;
   gap: 8px;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .obmyhome-report-btn {

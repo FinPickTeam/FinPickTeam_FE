@@ -13,6 +13,12 @@
       <div class="avatar-pixel">
         <img :src="avatarBase" class="avatar-img" alt="아바타" />
         <img
+          v-if="titleItems.find((item) => item.wearing)"
+          :src="titleItems.find((item) => item.wearing)?.image"
+          class="title-img"
+          alt="칭호"
+        />
+        <img
           v-if="shirtItems.find((item) => item.wearing)"
           :src="shirtItems.find((item) => item.wearing)?.image"
           class="shirt-img"
@@ -61,6 +67,36 @@
 
     <!-- 아바타 탭 내용 -->
     <div v-if="activeTab === 'avatar'" class="tab-content">
+      <!-- 칭호 아이템 -->
+      <div class="item-category">
+        <span class="category-icon">👑</span> 칭호
+      </div>
+      <div class="item-list">
+        <div
+          class="item-card"
+          :class="{ selected: item.wearing, purchased: item.purchased }"
+          v-for="item in titleItems"
+          :key="item.id"
+          @click="handleBuyOrToggleTitle(item)"
+        >
+          <img :src="item.image" class="item-img" :alt="item.name" />
+          <span class="item-price">🪙 {{ item.price }}</span>
+          <span v-if="item.purchased" class="own-label">보유중</span>
+          <span v-if="item.wearing" class="wearing-label">착용중</span>
+          <font-awesome-icon
+            v-if="item.purchased"
+            class="check-icon"
+            :icon="['fas', 'check-circle']"
+          />
+          <div v-if="item.wearing" class="wearing-overlay">
+            <font-awesome-icon
+              class="wearing-icon"
+              :icon="['fas', 'check-circle']"
+            />
+          </div>
+        </div>
+      </div>
+
       <!-- 상의 아이템 -->
       <div class="item-category"><span class="category-icon">👕</span> 옷</div>
       <div class="item-list">
@@ -312,6 +348,8 @@ import { ref, onMounted } from "vue";
 
 // 아바타 이미지 import
 import avatarBase from "./avatarimg/avatar-base.png";
+import titleWizardhat from "./avatarimg/title-wizardhat.png";
+import titleSprout from "./avatarimg/title-sprout.png";
 import shirtBlue from "./avatarimg/shirts-blue.png";
 import shirtRed from "./avatarimg/shirt-red.png";
 import shoesBrown from "./avatarimg/shoese-brown.png";
@@ -337,6 +375,25 @@ const activeTab = ref("avatar");
 const selectedCategory = ref("coffee");
 
 // 아바타 아이템 데이터
+const titleItems = ref([
+  {
+    id: "title-wizardhat",
+    name: "마법사 모자",
+    price: 100000,
+    image: titleWizardhat,
+    purchased: false,
+    wearing: false,
+  },
+  {
+    id: "title-sprout",
+    name: "씨앗",
+    price: 50000,
+    image: titleSprout,
+    purchased: false,
+    wearing: false,
+  },
+]);
+
 const shirtItems = ref([
   {
     id: "shirt-blue",
@@ -396,6 +453,18 @@ const glassesItems = ref([
 
 // store 상태를 로컬 상태에 동기화하는 함수
 function syncStoreState() {
+  // 칭호 아이템 동기화
+  titleItems.value.forEach((item) => {
+    const purchased = avatarStore.isItemPurchased("titles", item.id);
+    const wearing = avatarStore.isItemWearing("titles", item.id);
+
+    // 구매 상태는 한번 true가 되면 영구적으로 유지
+    if (purchased) {
+      item.purchased = true;
+    }
+    item.wearing = wearing;
+  });
+
   // 상의 아이템 동기화
   shirtItems.value.forEach((item) => {
     const purchased = avatarStore.isItemPurchased("shirts", item.id);
@@ -524,7 +593,9 @@ function closePurchaseModal() {
 }
 function confirmPurchase() {
   if (!pendingPurchase.value) return;
-  if (pendingPurchaseType.value === "shirt") {
+  if (pendingPurchaseType.value === "title") {
+    actuallyBuyTitle(pendingPurchase.value);
+  } else if (pendingPurchaseType.value === "shirt") {
     actuallyBuyShirt(pendingPurchase.value);
   } else if (pendingPurchaseType.value === "shoes") {
     actuallyBuyShoes(pendingPurchase.value);
@@ -536,6 +607,26 @@ function confirmPurchase() {
   closePurchaseModal();
 }
 
+function actuallyBuyTitle(item) {
+  if (!item.purchased && avatarStore.coin < item.price) {
+    showCoinError.value = true;
+    setTimeout(() => {
+      showCoinError.value = false;
+    }, 2000);
+    return;
+  }
+  if (!item.purchased) {
+    avatarStore.coin -= item.price;
+    item.purchased = true;
+    avatarStore.setItemState("titles", item.id, true, false); // 구매만 하고 착용은 안함
+
+    // 구매 후 자동으로 착용
+    handleBuyOrToggleTitle(item, true);
+  } else {
+    // 착용/해제 토글 기존 로직
+    handleBuyOrToggleTitle(item, true);
+  }
+}
 function actuallyBuyShirt(item) {
   if (!item.purchased && avatarStore.coin < item.price) {
     showCoinError.value = true;
@@ -608,6 +699,67 @@ function actuallyBuyGifticon(item) {
 
 function goBack() {
   router.back();
+}
+
+function handleBuyOrToggleTitle(item, skipModal = false) {
+  if (!item.purchased && !skipModal) {
+    openPurchaseModal(item, "title");
+    return;
+  }
+  if (!item.purchased && avatarStore.coin < item.price) {
+    showCoinError.value = true;
+    setTimeout(() => {
+      showCoinError.value = false;
+    }, 2000);
+    return;
+  }
+  if (!item.purchased) {
+    avatarStore.coin -= item.price;
+    item.purchased = true;
+    avatarStore.setItemState("titles", item.id, true, false); // 구매 상태만 설정
+
+    // 같은 카테고리의 다른 아이템 착용 해제
+    titleItems.value.forEach((otherItem) => {
+      if (otherItem.id !== item.id) {
+        otherItem.wearing = false;
+        avatarStore.setItemState(
+          "titles",
+          otherItem.id,
+          otherItem.purchased,
+          false
+        );
+      }
+    });
+
+    // 현재 아이템 착용
+    item.wearing = true;
+    avatarStore.setItemState("titles", item.id, true, true);
+  } else {
+    // 착용/해제 토글
+    if (item.wearing) {
+      // 착용 해제
+      item.wearing = false;
+      avatarStore.setItemState("titles", item.id, true, false);
+    } else {
+      // 착용 - 다른 아이템 착용 해제 후 착용
+      titleItems.value.forEach((otherItem) => {
+        if (otherItem.id !== item.id) {
+          otherItem.wearing = false;
+          avatarStore.setItemState(
+            "titles",
+            otherItem.id,
+            otherItem.purchased,
+            false
+          );
+        }
+      });
+      item.wearing = true;
+      avatarStore.setItemState("titles", item.id, true, true);
+    }
+  }
+
+  // 상태 변경 후 동기화
+  syncStoreState();
 }
 
 function handleBuyOrToggleShirt(item, skipModal = false) {
@@ -904,6 +1056,17 @@ function wearAvatar() {
   width: 100px;
   height: 100px;
   z-index: 1;
+}
+
+.title-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 120px;
+  height: 120px;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
 }
 
 .shirt-img {

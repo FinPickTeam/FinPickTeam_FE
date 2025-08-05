@@ -67,8 +67,8 @@
         <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </router-link>
     </div>
-    <div class="menu-item" @click="goToQuizHistory">
-      <span>금융 퀴즈 히스토리</span>
+    <div class="menu-item" @click="goToMyHistory">
+      <span>마이 히스토리</span>
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
     <div class="menu-item" @click="goToPinpickCertificate">
@@ -167,8 +167,8 @@ const getGlassesImage = computed(() => {
   return null;
 });
 
-function goToQuizHistory() {
-  router.push("/quiz-history");
+function goToMyHistory() {
+  router.push("/my-history");
 }
 
 function handleLogout() {

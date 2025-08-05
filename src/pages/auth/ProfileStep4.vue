@@ -9,10 +9,11 @@
     </div>
     <!-- 진행 바 -->
     <div class="progress-bar">
-      <div class="progress"></div>
-      <div class="progress"></div>
-      <div class="progress"></div>
-      <div class="progress active"></div>
+      <div
+        v-for="step in totalSteps"
+        :key="step"
+        :class="['progress', { active: step === 4 }]"
+      ></div>
     </div>
     <!-- 질문 -->
     <div class="question-section">
@@ -44,6 +45,16 @@ const router = useRouter();
 const route = useRoute();
 const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
 const selected = ref(null);
+
+// 동적 progress-bar 설정
+const totalSteps = ref(4); // 기본값
+
+// 라우터 쿼리에서 from 파라미터 확인하여 단계 수 결정
+if (route.query.from === "mypage") {
+  totalSteps.value = 9; // 투자성향 재검사는 9단계
+} else {
+  totalSteps.value = 4; // 회원가입은 4단계
+}
 
 const goBack = () => {
   router.back();

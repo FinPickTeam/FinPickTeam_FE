@@ -182,7 +182,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 library.add(faAngleLeft, faSearch, faPlus);
 
-import transactionData from "./Transaction_dummy.json";
+import transactionData from "../Transaction_dummy.json";
 
 const router = useRouter();
 

@@ -9,10 +9,11 @@
     </div>
     <!-- 진행 바 -->
     <div class="progress-bar">
-      <div class="progress active"></div>
-      <div class="progress"></div>
-      <div class="progress"></div>
-      <div class="progress"></div>
+      <div
+        v-for="step in totalSteps"
+        :key="step"
+        :class="['progress', { active: step === 5 }]"
+      ></div>
     </div>
     <!-- 질문 -->
     <div class="question-section">
@@ -43,6 +44,9 @@ import { useRouter } from "vue-router";
 const router = useRouter();
 const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
 const selected = ref(null);
+
+// 동적 progress-bar 설정 (투자성향 재검사는 항상 9단계)
+const totalSteps = ref(9);
 
 const goBack = () => {
   router.back();

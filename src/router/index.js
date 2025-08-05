@@ -23,10 +23,10 @@ import Mypage from "../pages/mypage/Mypage.vue";
 import Withdraw from "../pages/mypage/Withdraw.vue";
 import WithdrawSuccess from "../pages/mypage/WithdrawSuccess.vue";
 import Profile from "../pages/mypage/Profile.vue";
-import QuizHistory from "../pages/mypage/QuizHistory.vue";
+import MyHistory from "../pages/mypage/MyHistory.vue";
 import MyCertificates from "../pages/mypage/MyCertificate/MyCertificates.vue";
 import CertificateDetail from "../pages/mypage/MyCertificate/CertificateDetail.vue";
-import CertificateCreateVerify from "../pages/mypage/MyCertificate/CertificateCreateVerify.vue";
+
 import CertificatePasswordChange from "../pages/mypage/MyCertificate/CertificatePasswordChange.vue";
 import CertificatePasswordChangeNew from "../pages/mypage/MyCertificate/CertificatePassword-Change-New.vue";
 import CertificatePasswordChangeConfirm from "../pages/mypage/MyCertificate/CertificatePassword-Change-Confirm.vue";
@@ -67,6 +67,10 @@ import AccountList from "../pages/openbanking/myaccount/AccountList.vue";
 import AccountDetail from "../pages/openbanking/myaccount/AccountDetail.vue";
 import CardList from "../pages/openbanking/myaccount/CardList.vue";
 import ChallengeHome2 from "../pages/challenge/ChallengeHome2.vue";
+import OpenbankingDailyReport from "../pages/openbanking/Report/OpenbankingDailyReport.vue";
+import OpenbankingMonthlyReport from "../pages/openbanking/Report/OpenbankingMonthlyReport.vue";
+import DailyReportSelect from "../pages/openbanking/Report/DailyReportSelect.vue";
+import DailyReportDetail from "../pages/openbanking/Report/DailyReportDetail.vue";
 
 // 공통 레이아웃
 import MainLayout from "../layouts/MainLayout.vue";
@@ -256,14 +260,22 @@ const router = createRouter({
         {
           path: "openbanking/daily-report",
           name: "OpenbankingDailyReport",
-          component: () =>
-            import("../pages/openbanking/OpenbankingDailyReport.vue"),
+          component: OpenbankingDailyReport,
         },
         {
           path: "openbanking/monthly-report",
           name: "OpenbankingMonthlyReport",
-          component: () =>
-            import("../pages/openbanking/OpenbankingMonthlyReport.vue"),
+          component: OpenbankingMonthlyReport,
+        },
+        {
+          path: "openbanking/daily-report-select",
+          name: "DailyReportSelect",
+          component: DailyReportSelect,
+        },
+        {
+          path: "openbanking/daily-report-detail/:id",
+          name: "DailyReportDetail",
+          component: DailyReportDetail,
         },
         {
           path: "openbanking/agreement",
@@ -312,7 +324,7 @@ const router = createRouter({
           component: WithdrawSuccess,
         },
         { path: "profile", name: "profile", component: Profile },
-        { path: "quiz-history", name: "quiz-history", component: QuizHistory },
+        { path: "my-history", name: "my-history", component: MyHistory },
         {
           path: "mycertificate",
           name: "mycertificate",
@@ -323,11 +335,7 @@ const router = createRouter({
           name: "certificate-detail",
           component: CertificateDetail,
         },
-        {
-          path: "certificate-create-verify",
-          name: "certificate-create-verify",
-          component: CertificateCreateVerify,
-        },
+
         {
           path: "customer-support",
           name: "customer-support",

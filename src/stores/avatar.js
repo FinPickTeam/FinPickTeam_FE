@@ -6,6 +6,10 @@ export const useAvatarStore = defineStore("avatar", () => {
 
   // 아바타 아이템 상태 관리
   const avatarItems = ref({
+    titles: {
+      "title-wizardhat": { purchased: false, wearing: false },
+      "title-sprout": { purchased: false, wearing: false },
+    },
     shirts: {
       "shirt-blue": { purchased: false, wearing: false },
       "shirt-red": { purchased: false, wearing: false },
@@ -100,8 +104,11 @@ export const useAvatarStore = defineStore("avatar", () => {
   }
 
   // 현재 착용 중인 아바타 정보를 저장 (MYPAGE, HOME에서 사용)
-  function setAvatar(shirtId, shoesId, glassesId) {
+  function setAvatar(shirtId, shoesId, glassesId, titleId) {
     // 모든 아이템 착용 해제
+    Object.keys(avatarItems.value.titles).forEach((id) => {
+      avatarItems.value.titles[id].wearing = false;
+    });
     Object.keys(avatarItems.value.shirts).forEach((id) => {
       avatarItems.value.shirts[id].wearing = false;
     });
@@ -113,6 +120,9 @@ export const useAvatarStore = defineStore("avatar", () => {
     });
 
     // 지정된 아이템들 착용
+    if (titleId && avatarItems.value.titles[titleId]) {
+      avatarItems.value.titles[titleId].wearing = true;
+    }
     if (shirtId && avatarItems.value.shirts[shirtId]) {
       avatarItems.value.shirts[shirtId].wearing = true;
     }
@@ -127,6 +137,7 @@ export const useAvatarStore = defineStore("avatar", () => {
     localStorage.setItem(
       "currentAvatar",
       JSON.stringify({
+        titleId,
         shirtId,
         shoesId,
         glassesId,
@@ -139,13 +150,22 @@ export const useAvatarStore = defineStore("avatar", () => {
     const savedAvatar = localStorage.getItem("currentAvatar");
     if (savedAvatar) {
       const avatar = JSON.parse(savedAvatar);
-      setAvatar(avatar.shirtId, avatar.shoesId, avatar.glassesId);
+      setAvatar(
+        avatar.shirtId,
+        avatar.shoesId,
+        avatar.glassesId,
+        avatar.titleId
+      );
     }
   }
 
   function resetAvatar() {
     coin.value = 900;
     avatarItems.value = {
+      titles: {
+        "title-wizardhat": { purchased: false, wearing: false },
+        "title-sprout": { purchased: false, wearing: false },
+      },
       shirts: {
         "shirt-blue": { purchased: false, wearing: false },
         "shirt-red": { purchased: false, wearing: false },

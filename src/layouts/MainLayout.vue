@@ -32,7 +32,7 @@ const hideHeaderNames = [
   "Notification",
   "OpenbankingDailyReport",
   "profile",
-  "quiz-history",
+  "my-history",
   "withdraw",
   "avatar-shop",
   "ChallengeHome",
@@ -42,6 +42,9 @@ const hideHeaderNames = [
   "AccountAgreement",
   "AccountLinkSelect",
   "customer-support",
+  "DailyReportSelect",
+  "DailyReportDetail",
+  "CardList",
 ];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);

@@ -27,6 +27,35 @@
       <div class="account-number">{{ account?.accountNumber }}</div>
     </div>
 
+    <!-- Transaction_dummy.json 요약 정보 -->
+    <div class="transaction-summary-card">
+      <div class="summary-header">
+        <h3>거래 요약</h3>
+      </div>
+      <div class="summary-stats">
+        <div class="summary-stat">
+          <div class="stat-label">총 거래 건수</div>
+          <div class="stat-value">{{ totalTransactionCount }}건</div>
+        </div>
+        <div class="summary-stat">
+          <div class="stat-label">총 입금액</div>
+          <div class="stat-value income">
+            {{ totalIncome.toLocaleString() }}원
+          </div>
+        </div>
+        <div class="summary-stat">
+          <div class="stat-label">총 출금액</div>
+          <div class="stat-value expense">
+            {{ totalExpense.toLocaleString() }}원
+          </div>
+        </div>
+        <div class="summary-stat">
+          <div class="stat-label">최근 거래일</div>
+          <div class="stat-value">{{ latestTransactionDate }}</div>
+        </div>
+      </div>
+    </div>
+
     <!-- 계좌 상세 정보 -->
     <div class="account-detail-info">
       <div class="detail-row">
@@ -196,6 +225,40 @@ const accountTransactions = computed(() => {
     .slice(0, 10);
 });
 
+// Transaction_dummy.json 요약 정보 계산
+const totalTransactionCount = computed(() => {
+  if (!transactionData?.transactions) return 0;
+  return transactionData.transactions.length;
+});
+
+const totalIncome = computed(() => {
+  if (!transactionData?.transactions) return 0;
+  return transactionData.transactions
+    .filter((transaction) => transaction.type === "입금")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+});
+
+const totalExpense = computed(() => {
+  if (!transactionData?.transactions) return 0;
+  return transactionData.transactions
+    .filter((transaction) => transaction.type === "출금")
+    .reduce((sum, transaction) => sum + transaction.amount, 0);
+});
+
+const latestTransactionDate = computed(() => {
+  if (
+    !transactionData?.transactions ||
+    transactionData.transactions.length === 0
+  )
+    return "-";
+  const latestDate = new Date(
+    Math.max(...transactionData.transactions.map((t) => new Date(t.date)))
+  );
+  return `${latestDate.getFullYear()}.${String(
+    latestDate.getMonth() + 1
+  ).padStart(2, "0")}.${String(latestDate.getDate()).padStart(2, "0")}`;
+});
+
 // 날짜 포맷팅
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -296,6 +359,54 @@ onMounted(() => {
 
 .account-type-badge.type-investment {
   background: #dc2626;
+}
+
+.transaction-summary-card {
+  background: #fff;
+  margin: 16px;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
+}
+
+.summary-header h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.summary-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.summary-stat {
+  text-align: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.stat-value.income {
+  color: #059669;
+}
+
+.stat-value.expense {
+  color: #dc2626;
 }
 
 .account-balance {

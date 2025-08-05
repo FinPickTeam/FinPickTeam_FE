@@ -110,11 +110,15 @@
         <div class="diaryhome-list-container">
           <div
             class="diaryhome-list-item"
-            v-for="transaction in displayedTransactions"
-            :key="transaction.id"
+            v-for="(transaction, index) in displayedTransactions"
+            :key="index"
+            @click="goToTransactionDetail(getTransactionIndex(transaction))"
           >
             <div class="diaryhome-bank-logo">
-              <img :src="kakaoLogo" alt="은행로고" />
+              <img
+                :src="getTransactionLogo(transaction)"
+                :alt="transaction.bank + ' 로고'"
+              />
             </div>
             <div class="diaryhome-list-info">
               <div
@@ -139,14 +143,14 @@
             해당 날짜의 거래 내역이 없습니다.
           </div>
           <div
-            v-if="selectedDateTransactions.length > 2"
+            v-if="selectedDateTransactions.length > 3"
             class="diaryhome-more-btn"
             @click="toggleTransactions"
           >
             {{
               showAllTransactions
                 ? "숨기기"
-                : `더보기 (${selectedDateTransactions.length - 2}개 더)`
+                : `더보기 (${selectedDateTransactions.length - 3}개 더)`
             }}
           </div>
         </div>
@@ -156,7 +160,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -177,11 +181,35 @@ library.add(
   faAngleDown
 );
 
-// 은행 로고 이미지 import
-import kakaoLogo from "@/assets/bank_logo/카카오뱅크.png";
+// 은행 로고 이미지들을 동적으로 import하기 위한 함수
+const getBankLogo = (logoFileName) => {
+  try {
+    return new URL(`/src/assets/bank_logo/${logoFileName}`, import.meta.url)
+      .href;
+  } catch (error) {
+    // 로고 파일을 찾을 수 없는 경우 기본 로고 반환
+    return new URL("/src/assets/bank_logo/카카오뱅크.png", import.meta.url)
+      .href;
+  }
+};
+
+// 거래 로고 결정 함수 (카테고리 변경 여부에 따라 다른 로고 사용)
+const getTransactionLogo = (transaction) => {
+  console.log("=== getTransactionLogo 호출 ===");
+  console.log("전체 거래 객체:", transaction);
+  console.log("updatedCategory:", transaction.updatedCategory);
+  console.log("description:", transaction.description);
+  console.log("logo:", transaction.logo);
+
+  // daily-report에서는 항상 은행 로고만 사용
+  console.log("🏦 은행 로고 사용:", transaction.logo);
+  const bankLogoUrl = getBankLogo(transaction.logo);
+  console.log("은행 로고 URL:", bankLogoUrl);
+  return bankLogoUrl;
+};
 
 // Transaction 데이터 import
-import transactionData from "./Transaction_dummy.json";
+import transactionData from "../Transaction_dummy.json";
 
 const router = useRouter();
 
@@ -431,12 +459,93 @@ const selectedDateTransactions = computed(() => {
     : [];
 });
 
-// 화면에 표시할 거래 내역 계산 (최대 2개 또는 전체)
+// 화면에 표시할 거래 내역 계산 (최대 3개 또는 전체)
 const displayedTransactions = computed(() => {
+  let transactions = selectedDateTransactions.value;
+  console.log("원본 거래 내역:", transactions);
+
+  // localStorage와 sessionStorage에서 업데이트된 거래 데이터 확인
+  let updatedData = localStorage.getItem("transaction_data_updated");
+  if (!updatedData) {
+    updatedData = sessionStorage.getItem("transaction_data_updated");
+  }
+
+  let updatedTransactions = transactionData.transactions;
+
+  if (updatedData) {
+    try {
+      const parsedData = JSON.parse(updatedData);
+      updatedTransactions = parsedData.transactions;
+      console.log("업데이트된 거래 데이터 로드됨:", updatedTransactions);
+    } catch (error) {
+      console.error("업데이트된 거래 데이터 파싱 실패:", error);
+    }
+  }
+
+  // sessionStorage에서 카테고리 변경 정보 확인
+  transactions = transactions.map((transaction) => {
+    // 먼저 원본 인덱스를 찾기
+    const originalIndex = transactionData.transactions.findIndex(
+      (t) =>
+        t.date === transaction.date &&
+        t.bank === transaction.bank &&
+        t.amount === transaction.amount &&
+        t.type === transaction.type &&
+        t.account === transaction.account &&
+        t.description === transaction.description
+    );
+
+    // 업데이트된 거래 데이터에서 해당 거래 찾기
+    const updatedTransaction = updatedTransactions[originalIndex];
+
+    if (
+      updatedTransaction &&
+      updatedTransaction.description !== transaction.description
+    ) {
+      console.log(
+        `거래 ${originalIndex}의 카테고리가 "${transaction.description}"에서 "${updatedTransaction.description}"로 변경됨`
+      );
+      return {
+        ...transaction,
+        description: updatedTransaction.description,
+        updatedCategory: updatedTransaction.description, // 카테고리 변경 정보 추가
+        originalIndex: originalIndex, // 원본 인덱스 저장
+      };
+    }
+
+    // localStorage와 sessionStorage에서 개별 카테고리 변경 정보 확인
+    let updatedCategory = localStorage.getItem(
+      `selectedCategory_${originalIndex}`
+    );
+    if (!updatedCategory) {
+      updatedCategory = sessionStorage.getItem(
+        `selectedCategory_${originalIndex}`
+      );
+    }
+    console.log(`거래 ${originalIndex}의 updatedCategory:`, updatedCategory);
+
+    if (updatedCategory) {
+      const updatedTransaction = {
+        ...transaction,
+        description: updatedCategory,
+        updatedCategory: updatedCategory, // 카테고리 변경 정보 추가
+        originalIndex: originalIndex, // 원본 인덱스 저장
+      };
+      console.log("업데이트된 거래:", updatedTransaction);
+      return updatedTransaction;
+    }
+    return {
+      ...transaction,
+      originalIndex: originalIndex, // 원본 인덱스 저장
+    };
+  });
+
+  console.log("최종 거래 내역:", transactions);
+
   if (showAllTransactions.value) {
-    return selectedDateTransactions.value;
+    return transactions;
   } else {
-    return selectedDateTransactions.value.slice(0, 2);
+    return transactions.slice(0, 3); // 최대 3개까지만 표시
   }
 });
 
@@ -461,6 +570,43 @@ const goCalendarDetail = () => {
   toggleCalendarMode();
 };
 
+// 거래 객체로부터 전체 배열에서의 인덱스를 찾는 함수
+const getTransactionIndex = (transaction) => {
+  // originalIndex가 있으면 사용, 없으면 기존 방식으로 찾기
+  if (transaction.originalIndex !== undefined) {
+    return transaction.originalIndex;
+  }
+
+  return transactionData.transactions.findIndex(
+    (t) =>
+      t.date === transaction.date &&
+      t.bank === transaction.bank &&
+      t.amount === transaction.amount &&
+      t.type === transaction.type &&
+      t.account === transaction.account &&
+      t.description === transaction.description
+  );
+};
+
+const goToTransactionDetail = (transactionId) => {
+  router.push(`/openbanking/daily-report-detail/${transactionId}`);
+};
+
+// 페이지를 벗어날 때 sessionStorage 정리
+const cleanupSessionStorage = () => {
+  // 모든 selectedCategory_ 키를 찾아서 삭제
+  Object.keys(sessionStorage).forEach((key) => {
+    if (key.startsWith("selectedCategory_")) {
+      sessionStorage.removeItem(key);
+    }
+  });
+};
+
+// 페이지 언마운트 시 정리
+onUnmounted(() => {
+  cleanupSessionStorage();
+});
+
 // 초기화
 updateCurrentWeekStart();
 </script>
@@ -469,7 +615,6 @@ updateCurrentWeekStart();
 .diaryhome-scroll-container {
   max-height: calc(100vh - 64px);
   overflow-y: auto;
-  padding-bottom: 100px;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
@@ -485,7 +630,6 @@ updateCurrentWeekStart();
   background: #f7f8fa;
   font-family: "Noto Sans KR", sans-serif;
   box-sizing: border-box;
-  padding-bottom: 80px;
 }
 .diaryhome-header {
   width: 100%;
@@ -714,16 +858,22 @@ updateCurrentWeekStart();
   gap: 12px;
   padding: 8px 0;
   border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.diaryhome-list-item:hover {
+  background: #f8f9fa;
 }
 
 .diaryhome-list-item:last-child {
   border-bottom: none;
 }
 .diaryhome-bank-logo {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: #fff;
+  background: transparent;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -735,7 +885,7 @@ updateCurrentWeekStart();
 .diaryhome-bank-logo img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 50%;
 }
 .diaryhome-list-info {
