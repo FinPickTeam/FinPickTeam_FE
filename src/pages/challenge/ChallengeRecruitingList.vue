@@ -9,6 +9,7 @@
         :challenges="commonChallenges"
         type="common"
         icon-class="fas fa-users"
+        @cardClick="handleCardClick"
       />
 
       <!-- 소그룹 챌린지 섹션 -->
@@ -17,6 +18,7 @@
         :challenges="groupChallenges"
         type="group"
         icon-class="fas fa-user-friends"
+        @cardClick="handleCardClick"
       />
     </div>
   </div>
@@ -24,6 +26,7 @@
 
 <script setup>
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 import ChallengeHeader from '@/components/challenge/ChallengeHeader.vue';
 import ChallengeSection from '@/components/challenge/ChallengeSection.vue';
 
@@ -93,6 +96,28 @@ const groupChallenges = ref([
     creator: '최지영',
   },
 ]);
+
+const router = useRouter();
+
+const handleCardClick = (data) => {
+  const { challenge, type } = data;
+
+  if (type === 'common') {
+    // 공통 챌린지 상세 페이지로 이동
+    router.push({
+      name: 'ChallengeCommonDetail',
+      params: { id: challenge.id },
+      state: { challenge },
+    });
+  } else if (type === 'group') {
+    // 소그룹 챌린지 상세 페이지로 이동
+    router.push({
+      name: 'ChallengeGroupDetail',
+      params: { id: challenge.id },
+      state: { challenge },
+    });
+  }
+};
 </script>
 
 <style scoped>

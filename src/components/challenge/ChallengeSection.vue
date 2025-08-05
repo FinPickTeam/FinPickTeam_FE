@@ -13,6 +13,7 @@
         :key="challenge.id"
         :challenge="challenge"
         :type="type"
+        @cardClick="handleCardClick"
       />
     </div>
   </section>
@@ -48,6 +49,12 @@ const props = defineProps({
     default: false,
   },
 });
+
+const emit = defineEmits(['cardClick']);
+
+const handleCardClick = (data) => {
+  emit('cardClick', data);
+};
 </script>
 
 <style scoped>

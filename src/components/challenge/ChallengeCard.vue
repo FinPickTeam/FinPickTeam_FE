@@ -1,5 +1,5 @@
 <template>
-  <div class="challenge-card">
+  <div class="challenge-card" @click="handleCardClick">
     <div class="card-header">
       <h3 class="challenge-title">{{ challenge.title }}</h3>
     </div>
@@ -47,6 +47,15 @@ const getStatText = () => {
       return '';
   }
 };
+
+const emit = defineEmits(['cardClick']);
+
+const handleCardClick = () => {
+  emit('cardClick', {
+    challenge: props.challenge,
+    type: props.type,
+  });
+};
 </script>
 
 <style scoped>
@@ -56,6 +65,13 @@ const getStatText = () => {
   padding: 16px;
   margin-bottom: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.challenge-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .card-header {
