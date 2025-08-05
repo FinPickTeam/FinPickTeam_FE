@@ -47,14 +47,6 @@
             ></div>
           </div>
         </div>
-
-        <!-- 소그룹 챌린지 특별 정보 -->
-        <div class="group-info">
-          <div class="creator-info">
-            <span class="creator-label">생성자</span>
-            <span class="creator-name">{{ challenge.creator }}</span>
-          </div>
-        </div>
       </div>
 
       <!-- 참여 버튼 -->

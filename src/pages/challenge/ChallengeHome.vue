@@ -140,6 +140,8 @@ const handleParticipate = (challenge) => {
 
 /* 헤더 섹션 */
 .header-section {
+  width: 100%;
+  max-width: 390px;
   display: flex;
   flex-direction: column;
   background: linear-gradient(to right, #c8c4f8, var(--color-main-dark));
@@ -147,8 +149,8 @@ const handleParticipate = (challenge) => {
   padding: 16px 16px 0px 16px;
   margin-bottom: 12px;
   margin-top: -22px;
-  margin-left: -16px;
-  margin-right: -16px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .header-left {
