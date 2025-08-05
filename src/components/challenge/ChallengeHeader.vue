@@ -38,11 +38,18 @@ const goBack = () => {
     currentRoute === 'ChallengeCreate' ||
     currentRoute === 'ChallengeRanking'
   ) {
-    // 챌린지 생성 페이지나 랭킹 페이지에서는 ChallengeHome2로 이동
+    // 챌린지 생성 페이지나 랭킹 페이지에서는 ChallengeHome으로 이동
     router.push('/challenge');
   } else if (currentRoute === 'ChallengeHome') {
     // 챌린지 홈 페이지에서는 메인 홈페이지로 이동
     router.push('/');
+  } else if (
+    currentRoute === 'ChallengePersonalDetail' ||
+    currentRoute === 'ChallengeGroupDetail' ||
+    currentRoute === 'ChallengeCommonDetail'
+  ) {
+    // 챌린지 상세 페이지에서는 joined-list로 이동
+    router.push('/challenge/joined-list');
   } else {
     // 다른 페이지에서는 이전 페이지로 이동
     router.back();

@@ -390,25 +390,23 @@ const router = createRouter({
           name: 'ChallengeRanking',
           component: () => import('../pages/challenge/ChallengeRanking.vue'),
         },
-        {
-          path: 'common-detail/:id',
-          name: 'ChallengeCommonDetail',
-          component: () =>
-            import('../pages/challenge/ChallengeCommonDetail.vue'),
-        },
-        {
-          path: 'group-detail/:id',
-          name: 'ChallengeGroupDetail',
-          component: () =>
-            import('../pages/challenge/ChallengeGroupDetail.vue'),
-        },
-        {
-          path: 'personal-detail/:id',
-          name: 'ChallengePersonalDetail',
-          component: () =>
-            import('../pages/challenge/ChallengePersonalDetail.vue'),
-        },
       ],
+    },
+    // 챌린지 상세 페이지들은 별도 레이아웃으로 분리
+    {
+      path: '/challenge/common-detail/:id',
+      name: 'ChallengeCommonDetail',
+      component: () => import('../pages/challenge/ChallengeCommonDetail.vue'),
+    },
+    {
+      path: '/challenge/group-detail/:id',
+      name: 'ChallengeGroupDetail',
+      component: () => import('../pages/challenge/ChallengeGroupDetail.vue'),
+    },
+    {
+      path: '/challenge/personal-detail/:id',
+      name: 'ChallengePersonalDetail',
+      component: () => import('../pages/challenge/ChallengePersonalDetail.vue'),
     },
     // 404 Not Found catch-all
     {

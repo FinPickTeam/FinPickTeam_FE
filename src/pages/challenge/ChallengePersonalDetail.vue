@@ -1,66 +1,78 @@
 <template>
-  <div class="challenge-personal-detail">
-    <div class="content">
-      <!-- 챌린지 기본 정보 -->
-      <div class="challenge-info">
-        <div class="title-section">
-          <h1 class="challenge-title">{{ challenge.title }}</h1>
-          <div class="challenge-date">
-            {{ formatDate(challenge.startDate) }} ~
-            {{ formatDate(challenge.endDate) }}
-          </div>
-        </div>
-        <p class="challenge-description">{{ challenge.description }}</p>
+  <div class="main-layout">
+    <ChallengeHeader title="개인 챌린지 상세" />
+    <main class="main-content">
+      <div class="challenge-personal-detail">
+        <div class="content">
+          <!-- 챌린지 기본 정보 -->
+          <div class="challenge-info">
+            <div class="title-section">
+              <h1 class="challenge-title">{{ challenge.title }}</h1>
+              <div class="challenge-date">
+                {{ formatDate(challenge.startDate) }} ~
+                {{ formatDate(challenge.endDate) }}
+              </div>
+            </div>
+            <p class="challenge-description">{{ challenge.description }}</p>
 
-        <div class="challenge-stats">
-          <div class="stat-item">
-            <span class="stat-label">진행률</span>
-            <span class="stat-value">{{ challenge.progress }}%</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">목표 금액</span>
-            <span class="stat-value">{{ challenge.targetAmount }}원</span>
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">남은 기간</span>
-            <span class="stat-value">D-{{ challenge.remainingDays }}</span>
-          </div>
-        </div>
+            <div class="challenge-stats">
+              <div class="stat-item">
+                <span class="stat-label">진행률</span>
+                <span class="stat-value">{{ challenge.progress }}%</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">목표 금액</span>
+                <span class="stat-value">{{ challenge.targetAmount }}원</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">남은 기간</span>
+                <span class="stat-value">D-{{ challenge.remainingDays }}</span>
+              </div>
+            </div>
 
-        <div class="progress-section">
-          <div class="progress-header">
-            <span class="progress-label">저축 진행률</span>
-            <span class="progress-percentage">{{ challenge.progress }}%</span>
-          </div>
-          <div class="progress-bar">
-            <div
-              class="progress-fill"
-              :style="{
-                width: challenge.progress + '%',
-              }"
-            ></div>
-          </div>
-        </div>
+            <div class="progress-section">
+              <div class="progress-header">
+                <span class="progress-label">저축 진행률</span>
+                <span class="progress-percentage"
+                  >{{ challenge.progress }}%</span
+                >
+              </div>
+              <div class="progress-bar">
+                <div
+                  class="progress-fill"
+                  :style="{
+                    width: challenge.progress + '%',
+                  }"
+                ></div>
+              </div>
+            </div>
 
-        <!-- 개인 챌린지 특별 정보 -->
-        <div class="personal-info">
-          <div class="savings-info">
-            <span class="savings-label">현재 저축액</span>
-            <span class="savings-amount">{{ challenge.currentAmount }}원</span>
-          </div>
-          <div class="daily-goal">
-            <span class="goal-label">일일 목표</span>
-            <span class="goal-amount">{{ challenge.dailyGoal }}원</span>
+            <!-- 개인 챌린지 특별 정보 -->
+            <div class="personal-info">
+              <div class="savings-info">
+                <span class="savings-label">현재 저축액</span>
+                <span class="savings-amount"
+                  >{{ challenge.currentAmount }}원</span
+                >
+              </div>
+              <div class="daily-goal">
+                <span class="goal-label">일일 목표</span>
+                <span class="goal-amount">{{ challenge.dailyGoal }}원</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
+    <Navbar />
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import ChallengeHeader from '@/components/challenge/ChallengeHeader.vue';
+import Navbar from '@/components/Navbar.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -85,7 +97,7 @@ onMounted(() => {
 
   // 라우터 state에서 전달받은 챌린지 데이터 확인
   if (route.state && route.state.challenge) {
-    challenge.value = route.state.challenge;
+    challenge.value = { ...route.state.challenge };
   }
 
   // 실제로는 API 호출로 챌린지 데이터 가져오기
@@ -104,6 +116,20 @@ const formatDate = (dateString) => {
 </script>
 
 <style scoped>
+.main-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  background: var(--color-bg-light);
+  padding-top: 60px; /* 헤더 높이만큼 상단 패딩 */
+  padding-bottom: 80px; /* 네비바 높이만큼 하단 패딩 */
+}
+
+.main-content {
+  flex: 1 0 auto;
+}
+
 .challenge-personal-detail {
   min-height: 100vh;
   background-color: #f8f9fa;
@@ -115,7 +141,7 @@ const formatDate = (dateString) => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px); /* 헤더 높이를 제외한 전체 높이 */
+  min-height: calc(100vh - 140px); /* 헤더와 네비바 높이를 제외한 전체 높이 */
 }
 
 .challenge-info {
