@@ -66,7 +66,7 @@ import AccountAgreement from "../pages/openbanking/AccountAgreement.vue";
 import AccountList from "../pages/openbanking/myaccount/AccountList.vue";
 import AccountDetail from "../pages/openbanking/myaccount/AccountDetail.vue";
 import CardList from "../pages/openbanking/myaccount/CardList.vue";
-import ChallengeHome2 from "../pages/challenge/ChallengeHome2.vue";
+import ChallengeHome from "../pages/challenge/ChallengeHome.vue";
 import OpenbankingDailyReport from "../pages/openbanking/Report/OpenbankingDailyReport.vue";
 import OpenbankingMonthlyReport from "../pages/openbanking/Report/OpenbankingMonthlyReport.vue";
 import DailyReportSelect from "../pages/openbanking/Report/DailyReportSelect.vue";
@@ -313,8 +313,7 @@ const router = createRouter({
           name: "CardList",
           component: CardList,
         },
-        // 챌린지
-        { path: "challenge", name: "ChallengeHome", component: ChallengeHome2 },
+
         // 마이페이지
         { path: "mypage", name: "mypage", component: Mypage },
         { path: "withdraw", name: "withdraw", component: Withdraw },
@@ -335,7 +334,6 @@ const router = createRouter({
           name: "certificate-detail",
           component: CertificateDetail,
         },
-
         {
           path: "customer-support",
           name: "customer-support",
@@ -372,10 +370,10 @@ const router = createRouter({
       ],
     },
     {
-      path: "/challenge2",
+      path: "/challenge",
       component: ChallengeLayout,
       children: [
-        { path: "", name: "ChallengeHome2", component: ChallengeHome2 },
+        { path: "", name: "ChallengeHome", component: ChallengeHome },
         {
           path: "joined-list",
           name: "ChallengeJoinedList",
@@ -398,6 +396,22 @@ const router = createRouter({
           component: () => import("../pages/challenge/ChallengeRanking.vue"),
         },
       ],
+    },
+    // 챌린지 상세 페이지들은 별도 레이아웃으로 분리
+    {
+      path: "/challenge/common-detail/:id",
+      name: "ChallengeCommonDetail",
+      component: () => import("../pages/challenge/ChallengeCommonDetail.vue"),
+    },
+    {
+      path: "/challenge/group-detail/:id",
+      name: "ChallengeGroupDetail",
+      component: () => import("../pages/challenge/ChallengeGroupDetail.vue"),
+    },
+    {
+      path: "/challenge/personal-detail/:id",
+      name: "ChallengePersonalDetail",
+      component: () => import("../pages/challenge/ChallengePersonalDetail.vue"),
     },
     // 404 Not Found catch-all
     {

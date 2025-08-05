@@ -34,25 +34,41 @@
         <label for="target-amount">목표 금액</label>
         <div class="amount-input-wrapper">
           <input
-            type="number"
+            type="text"
             id="target-amount"
-            v-model="targetAmount"
-            min="1000"
-            step="1000"
+            :value="formatAmount(targetAmount)"
+            @input="handleAmountInput"
             placeholder="목표 금액을 입력하세요"
           />
           <span class="amount-unit">원</span>
+        </div>
+        <div class="amount-buttons">
+          <button
+            v-for="unit in [1000, 10000, 50000, 100000, 1000000]"
+            :key="unit"
+            type="button"
+            class="btn custom-amount-btn"
+            @click="addAmount(unit)"
+          >
+            +{{ unit.toLocaleString() }}
+          </button>
         </div>
       </div>
 
       <div class="form-group">
         <label>챌린지 유형</label>
         <div class="challenge-type-options">
-          <label class="challenge-type-option">
+          <label
+            class="challenge-type-option"
+            :class="{ active: challengeType === 'individual' }"
+          >
             <input type="radio" v-model="challengeType" value="individual" />
             <span>개인 챌린지</span>
           </label>
-          <label class="challenge-type-option">
+          <label
+            class="challenge-type-option"
+            :class="{ active: challengeType === 'group' }"
+          >
             <input type="radio" v-model="challengeType" value="group" />
             <span>소그룹 챌린지</span>
           </label>
@@ -60,36 +76,34 @@
       </div>
 
       <div class="form-group">
-        <label>챌린지 카테고리</label>
-        <div class="category-options">
-          <label class="category-option">
-            <input type="radio" v-model="category" value="health" />
-            <span>건강</span>
-          </label>
-          <label class="category-option">
-            <input type="radio" v-model="category" value="finance" />
-            <span>재테크</span>
-          </label>
-          <label class="category-option">
-            <input type="radio" v-model="category" value="study" />
-            <span>학습</span>
-          </label>
-          <label class="category-option">
-            <input type="radio" v-model="category" value="lifestyle" />
-            <span>라이프스타일</span>
-          </label>
-        </div>
+        <label for="challenge-category">챌린지 카테고리</label>
+        <select
+          id="challenge-category"
+          v-model="category"
+          class="category-select"
+        >
+          <option value="health">건강</option>
+          <option value="finance">재테크</option>
+          <option value="study">학습</option>
+          <option value="lifestyle">라이프스타일</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label>방 설정</label>
         <div class="room-setting">
           <div class="room-type-options">
-            <label class="room-type-option">
+            <label
+              class="room-type-option"
+              :class="{ active: roomType === 'public' }"
+            >
               <input type="radio" v-model="roomType" value="public" />
               <span>공개방</span>
             </label>
-            <label class="room-type-option">
+            <label
+              class="room-type-option"
+              :class="{ active: roomType === 'private' }"
+            >
               <input type="radio" v-model="roomType" value="private" />
               <span>비공개방</span>
             </label>
@@ -134,6 +148,20 @@ const goBack = () => {
   router.back();
 };
 
+const addAmount = (amount) => {
+  targetAmount.value += amount;
+};
+
+const formatAmount = (value) => {
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+const handleAmountInput = (event) => {
+  // 콤마 제거 후 숫자만 추출
+  const numericValue = event.target.value.replace(/,/g, '');
+  targetAmount.value = parseInt(numericValue) || 0;
+};
+
 const createChallenge = () => {
   // 챌린지 생성 로직
   console.log('챌린지 생성:', {
@@ -156,7 +184,7 @@ const createChallenge = () => {
 
 <style scoped>
 .challenge-create {
-  padding: 0px 16px 20px 16px;
+  padding: 10px 16px 20px 16px;
   background: var(--color-bg-light);
   min-height: 100vh;
 }
@@ -227,6 +255,8 @@ const createChallenge = () => {
 .amount-input-wrapper input {
   flex: 1;
   padding-right: 40px;
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .amount-unit {
@@ -238,27 +268,60 @@ const createChallenge = () => {
   pointer-events: none;
 }
 
+.amount-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.custom-amount-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f8f9fa;
+  color: #333;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-amount-btn:active {
+  border-color: var(--color-main);
+  background: var(--color-main);
+  color: white;
+}
+
 .challenge-type-options {
   display: flex;
   gap: 12px;
 }
 
 .challenge-type-option {
+  flex: 1 1 0;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  border-radius: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: border 0.2s, color 0.2s;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+  justify-content: center;
   font-family: var(--font-main);
-  flex: 1;
+  text-align: center;
 }
 
-.challenge-type-option:hover {
-  border-color: var(--color-main);
-  background: #f8f9fa;
+.challenge-type-option.active {
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
 }
 
 .challenge-type-option input[type='radio'] {
@@ -270,36 +333,21 @@ const createChallenge = () => {
   font-weight: 600;
 }
 
-.category-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.category-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
+.category-select {
+  width: 100%;
+  padding: 12px 16px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+  font-size: 14px;
   font-family: var(--font-main);
-}
-
-.category-option:hover {
-  border-color: var(--color-main);
   background: #f8f9fa;
+  cursor: pointer;
 }
 
-.category-option input[type='radio'] {
-  display: none;
-}
-
-.category-option input[type='radio']:checked + span {
-  color: var(--color-main);
-  font-weight: 600;
+.category-select:focus {
+  outline: none;
+  border-color: var(--color-main);
+  background: white;
 }
 
 .room-setting {
@@ -313,21 +361,26 @@ const createChallenge = () => {
 }
 
 .room-type-option {
+  flex: 1 1 0;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  border-radius: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: border 0.2s, color 0.2s;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+  justify-content: center;
   font-family: var(--font-main);
-  flex: 1;
+  text-align: center;
 }
 
-.room-type-option:hover {
-  border-color: var(--color-main);
-  background: #f8f9fa;
+.room-type-option.active {
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
 }
 
 .room-type-option input[type='radio'] {
