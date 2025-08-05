@@ -30,7 +30,24 @@ const props = defineProps({
 
 const router = useRouter();
 
-const goBack = () => router.back();
+const goBack = () => {
+  // 현재 라우트에 따라 다른 동작 수행
+  const currentRoute = router.currentRoute.value.name;
+
+  if (
+    currentRoute === 'ChallengeCreate' ||
+    currentRoute === 'ChallengeRanking'
+  ) {
+    // 챌린지 생성 페이지나 랭킹 페이지에서는 ChallengeHome2로 이동
+    router.push('/challenge2');
+  } else if (currentRoute === 'ChallengeHome2') {
+    // 챌린지 홈 페이지에서는 메인 홈페이지로 이동
+    router.push('/');
+  } else {
+    // 다른 페이지에서는 이전 페이지로 이동
+    router.back();
+  }
+};
 const goToCreate = () => router.push('/challenge2/create'); // 원하는 경로로 수정
 const goToRanking = () => router.push('/challenge2/ranking'); // 원하는 경로로 수정
 </script>
