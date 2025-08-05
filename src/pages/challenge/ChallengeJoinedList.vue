@@ -1,131 +1,40 @@
 <template>
   <div class="challenge-joined-list">
-    <ChallengeHeader title="참여 중인 챌린지" />
-
     <div class="content">
       <!-- 공통 챌린지 섹션 -->
-      <section class="challenge-section">
-        <h2 class="section-title">
-          <i class="fas fa-users"></i>
-          공통 챌린지
-        </h2>
-        <div class="challenge-cards">
-          <div
-            v-for="challenge in commonChallenges"
-            :key="challenge.id"
-            class="challenge-card"
-          >
-            <div class="card-header">
-              <h3 class="challenge-title">{{ challenge.title }}</h3>
-            </div>
-            <div class="card-content">
-              <p class="challenge-description">{{ challenge.description }}</p>
-              <div class="progress-info">
-                <div class="progress-bar">
-                  <div
-                    class="progress-fill"
-                    :style="{ width: challenge.progress + '%' }"
-                  ></div>
-                </div>
-                <span class="progress-text"
-                  >{{ challenge.progress }}% 완료</span
-                >
-              </div>
-              <div class="challenge-stats">
-                <span class="stat">D-{{ challenge.remainingDays }}</span>
-                <span class="stat">{{ challenge.participants }}명 참여</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ChallengeSection
+        title="공통 챌린지"
+        :challenges="commonChallenges"
+        type="common"
+        icon-class="fas fa-users"
+      />
 
       <!-- 개인 챌린지 섹션 -->
-      <section class="challenge-section">
-        <h2 class="section-title">
-          <i class="fas fa-user"></i>
-          개인 챌린지
-          <span class="count">({{ personalChallenges.length }}/3)</span>
-        </h2>
-        <div class="challenge-cards">
-          <div
-            v-for="challenge in personalChallenges"
-            :key="challenge.id"
-            class="challenge-card"
-          >
-            <div class="card-header">
-              <h3 class="challenge-title">{{ challenge.title }}</h3>
-            </div>
-            <div class="card-content">
-              <p class="challenge-description">{{ challenge.description }}</p>
-              <div class="progress-info">
-                <div class="progress-bar">
-                  <div
-                    class="progress-fill"
-                    :style="{ width: challenge.progress + '%' }"
-                  ></div>
-                </div>
-                <span class="progress-text"
-                  >{{ challenge.progress }}% 완료</span
-                >
-              </div>
-              <div class="challenge-stats">
-                <span class="stat">D-{{ challenge.remainingDays }}</span>
-                <span class="stat">{{ challenge.target }}원 목표</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ChallengeSection
+        title="개인 챌린지"
+        :challenges="personalChallenges"
+        type="personal"
+        icon-class="fas fa-user"
+        :max-count="3"
+        :show-count="true"
+      />
 
       <!-- 소그룹 챌린지 섹션 -->
-      <section class="challenge-section">
-        <h2 class="section-title">
-          <i class="fas fa-user-friends"></i>
-          소그룹 챌린지
-          <span class="count">({{ groupChallenges.length }}/3)</span>
-        </h2>
-        <div class="challenge-cards">
-          <div
-            v-for="challenge in groupChallenges"
-            :key="challenge.id"
-            class="challenge-card"
-          >
-            <div class="card-header">
-              <h3 class="challenge-title">{{ challenge.title }}</h3>
-            </div>
-            <div class="card-content">
-              <p class="challenge-description">{{ challenge.description }}</p>
-              <div class="progress-info">
-                <div class="progress-bar">
-                  <div
-                    class="progress-fill"
-                    :style="{ width: challenge.progress + '%' }"
-                  ></div>
-                </div>
-                <span class="progress-text"
-                  >{{ challenge.progress }}% 완료</span
-                >
-              </div>
-              <div class="challenge-stats">
-                <span class="stat">D-{{ challenge.remainingDays }}</span>
-                <span class="stat"
-                  >{{ challenge.participants }}/{{
-                    challenge.maxParticipants
-                  }}명</span
-                >
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      <ChallengeSection
+        title="소그룹 챌린지"
+        :challenges="groupChallenges"
+        type="group"
+        icon-class="fas fa-user-friends"
+        :max-count="3"
+        :show-count="true"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import ChallengeHeader from '@/components/challenge/ChallengeHeader.vue';
+import ChallengeSection from '@/components/challenge/ChallengeSection.vue';
 
 // 공통 챌린지 데이터
 const commonChallenges = ref([
@@ -191,114 +100,5 @@ const groupChallenges = ref([
 .content {
   padding-top: 20px;
   padding-bottom: 20px;
-}
-
-.challenge-section {
-  margin-bottom: 30px;
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 16px 16px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-title i {
-  font-size: 16px;
-  color: #666;
-}
-
-.count {
-  font-size: 14px;
-  color: #666;
-  font-weight: normal;
-  margin-left: 8px;
-}
-
-.challenge-cards {
-  padding: 0 16px;
-}
-
-.challenge-card {
-  background: white;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.challenge-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
-}
-
-.card-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.challenge-description {
-  font-size: 14px;
-  color: #666;
-  margin: 0;
-  line-height: 1.4;
-}
-
-.progress-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.progress-bar {
-  flex: 1;
-  height: 8px;
-  background-color: #e0e0e0;
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    var(--color-main),
-    var(--color-main-light)
-  );
-  border-radius: 4px;
-  transition: width 0.3s ease;
-}
-
-.progress-text {
-  font-size: 12px;
-  color: #666;
-  min-width: 60px;
-}
-
-.challenge-stats {
-  display: flex;
-  gap: 16px;
-}
-
-.stat {
-  font-size: 12px;
-  color: #999;
-  background-color: #f5f5f5;
-  padding: 4px 8px;
-  border-radius: 8px;
 }
 </style>
