@@ -48,11 +48,17 @@
       <div class="form-group">
         <label>챌린지 유형</label>
         <div class="challenge-type-options">
-          <label class="challenge-type-option">
+          <label
+            class="challenge-type-option"
+            :class="{ active: challengeType === 'individual' }"
+          >
             <input type="radio" v-model="challengeType" value="individual" />
             <span>개인 챌린지</span>
           </label>
-          <label class="challenge-type-option">
+          <label
+            class="challenge-type-option"
+            :class="{ active: challengeType === 'group' }"
+          >
             <input type="radio" v-model="challengeType" value="group" />
             <span>소그룹 챌린지</span>
           </label>
@@ -60,36 +66,34 @@
       </div>
 
       <div class="form-group">
-        <label>챌린지 카테고리</label>
-        <div class="category-options">
-          <label class="category-option">
-            <input type="radio" v-model="category" value="health" />
-            <span>건강</span>
-          </label>
-          <label class="category-option">
-            <input type="radio" v-model="category" value="finance" />
-            <span>재테크</span>
-          </label>
-          <label class="category-option">
-            <input type="radio" v-model="category" value="study" />
-            <span>학습</span>
-          </label>
-          <label class="category-option">
-            <input type="radio" v-model="category" value="lifestyle" />
-            <span>라이프스타일</span>
-          </label>
-        </div>
+        <label for="challenge-category">챌린지 카테고리</label>
+        <select
+          id="challenge-category"
+          v-model="category"
+          class="category-select"
+        >
+          <option value="health">건강</option>
+          <option value="finance">재테크</option>
+          <option value="study">학습</option>
+          <option value="lifestyle">라이프스타일</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label>방 설정</label>
         <div class="room-setting">
           <div class="room-type-options">
-            <label class="room-type-option">
+            <label
+              class="room-type-option"
+              :class="{ active: roomType === 'public' }"
+            >
               <input type="radio" v-model="roomType" value="public" />
               <span>공개방</span>
             </label>
-            <label class="room-type-option">
+            <label
+              class="room-type-option"
+              :class="{ active: roomType === 'private' }"
+            >
               <input type="radio" v-model="roomType" value="private" />
               <span>비공개방</span>
             </label>
@@ -244,21 +248,26 @@ const createChallenge = () => {
 }
 
 .challenge-type-option {
+  flex: 1 1 0;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  border-radius: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: border 0.2s, color 0.2s;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+  justify-content: center;
   font-family: var(--font-main);
-  flex: 1;
+  text-align: center;
 }
 
-.challenge-type-option:hover {
-  border-color: var(--color-main);
-  background: #f8f9fa;
+.challenge-type-option.active {
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
 }
 
 .challenge-type-option input[type='radio'] {
@@ -270,36 +279,21 @@ const createChallenge = () => {
   font-weight: 600;
 }
 
-.category-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.category-option {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px;
+.category-select {
+  width: 100%;
+  padding: 12px 16px;
   border: 1px solid #ddd;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+  font-size: 14px;
   font-family: var(--font-main);
-}
-
-.category-option:hover {
-  border-color: var(--color-main);
   background: #f8f9fa;
+  cursor: pointer;
 }
 
-.category-option input[type='radio'] {
-  display: none;
-}
-
-.category-option input[type='radio']:checked + span {
-  color: var(--color-main);
-  font-weight: 600;
+.category-select:focus {
+  outline: none;
+  border-color: var(--color-main);
+  background: white;
 }
 
 .room-setting {
@@ -313,21 +307,26 @@ const createChallenge = () => {
 }
 
 .room-type-option {
+  flex: 1 1 0;
+  border: 1.5px solid var(--color-bg-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-medium);
+  border-radius: 12px;
+  padding: 10px 0;
+  cursor: pointer;
+  transition: border 0.2s, color 0.2s;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s;
+  justify-content: center;
   font-family: var(--font-main);
-  flex: 1;
+  text-align: center;
 }
 
-.room-type-option:hover {
-  border-color: var(--color-main);
-  background: #f8f9fa;
+.room-type-option.active {
+  border: 1.5px solid var(--color-main);
+  color: var(--color-main);
 }
 
 .room-type-option input[type='radio'] {
