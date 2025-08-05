@@ -22,15 +22,11 @@
       <div class="ranking-card">
         <div class="target-section">
           <div class="target-icon">
-            <div class="target">
-              <div class="target-rings">
-                <div class="ring outer"></div>
-                <div class="ring middle"></div>
-                <div class="ring inner"></div>
-                <div class="bullseye"></div>
-              </div>
-              <div class="arrow"></div>
-            </div>
+            <img
+              src="@/assets/challenge/target-dynamic-color.png"
+              alt="타겟"
+              class="target-image"
+            />
           </div>
         </div>
 
@@ -57,19 +53,42 @@
           class="ranking-item"
           :class="{ 'top-three': index < 3 }"
         >
-          <div class="rank-number" :class="{ 'top-rank': index < 3 }">
-            {{ index + 1 }}
+          <div
+            class="rank-number"
+            :class="{
+              'top-rank': index < 3,
+              'rank-1': index === 0,
+              'rank-2': index === 1,
+              'rank-3': index === 2,
+            }"
+          >
+            <span v-if="index >= 3">{{ index + 1 }}</span>
+            <img
+              v-if="index === 0"
+              src="@/assets/challenge/금메달.png"
+              alt="금메달"
+              class="medal-image"
+            />
+            <img
+              v-if="index === 1"
+              src="@/assets/challenge/은메달.png"
+              alt="은메달"
+              class="medal-image"
+            />
+            <img
+              v-if="index === 2"
+              src="@/assets/challenge/동메달.png"
+              alt="동메달"
+              class="medal-image"
+            />
           </div>
           <div class="challenge-info">
-            <h3 class="challenge-title">{{ challenge.title }}</h3>
+            <h3 class="user-nickname">{{ challenge.nickname }}</h3>
             <div class="challenge-stats">
               <span class="participants"
                 >{{ challenge.participants }}명 참여</span
               >
               <span class="progress">진행률 {{ challenge.progress }}%</span>
-            </div>
-            <div class="challenge-category">
-              <span class="category-tag">{{ challenge.category }}</span>
             </div>
           </div>
           <div class="challenge-score">
@@ -107,67 +126,31 @@ const activeTab = ref('common');
 const rankingData = ref([
   {
     id: 1,
-    title: '일주일에 3번 이상 운동하기',
+    nickname: '김철수',
     participants: 156,
     progress: 85,
-    category: '건강',
     score: 8450,
   },
   {
     id: 2,
-    title: '하루 8시간 이상 수면하기',
+    nickname: '이영희',
     participants: 142,
     progress: 72,
-    category: '건강',
     score: 7890,
   },
   {
     id: 3,
-    title: '커피 5회 이하 마시기',
+    nickname: '박민수',
     participants: 98,
     progress: 65,
-    category: '라이프스타일',
     score: 6720,
   },
   {
     id: 4,
-    title: '매일 독서 30분하기',
+    nickname: '최지영',
     participants: 87,
     progress: 58,
-    category: '학습',
     score: 5430,
-  },
-  {
-    id: 5,
-    title: '일주일에 2번 이상 요리하기',
-    participants: 76,
-    progress: 45,
-    category: '라이프스타일',
-    score: 4210,
-  },
-  {
-    id: 6,
-    title: '매일 물 2L 마시기',
-    participants: 134,
-    progress: 78,
-    category: '건강',
-    score: 3890,
-  },
-  {
-    id: 7,
-    title: '일주일에 1번 이상 정리정돈하기',
-    participants: 65,
-    progress: 52,
-    category: '라이프스타일',
-    score: 3450,
-  },
-  {
-    id: 8,
-    title: '매일 영어 단어 10개 외우기',
-    participants: 89,
-    progress: 68,
-    category: '학습',
-    score: 3120,
   },
 ]);
 </script>
@@ -190,7 +173,7 @@ const rankingData = ref([
 .ranking-card {
   background: var(--color-bg);
   border-radius: 16px;
-  padding: 32px 24px;
+  padding: 0px 24px 32px 24px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   max-width: 320px;
@@ -301,11 +284,11 @@ const rankingData = ref([
 
 .total-participants strong {
   font-weight: bold;
-  font-size: 18px;
+  font-size: 24px;
 }
 
 .rank-position {
-  font-size: 32px;
+  font-size: 52px;
   font-weight: bold;
   color: #333;
   margin-bottom: 16px;
@@ -325,7 +308,11 @@ const rankingData = ref([
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(135deg, #b0a8f8, #8b7cf6);
+  background: linear-gradient(
+    to right,
+    var(--color-main),
+    var(--color-main-light)
+  );
   border-radius: 4px;
   transition: width 0.3s ease;
 }
@@ -386,9 +373,21 @@ const rankingData = ref([
 }
 
 .ranking-item.top-three {
-  background: linear-gradient(135deg, #fff5f5 0%, #fef7ff 100%);
+  background: linear-gradient(135deg, #fff8e1 0%, #fffde7 100%);
   border-radius: 12px;
   margin-bottom: 8px;
+}
+
+.ranking-item.top-three:nth-child(1) {
+  background: linear-gradient(135deg, #fff8e1 0%, #fffde7 100%);
+}
+
+.ranking-item.top-three:nth-child(2) {
+  background: linear-gradient(135deg, #f5f5f5 0%, #fafafa 100%);
+}
+
+.ranking-item.top-three:nth-child(3) {
+  background: linear-gradient(135deg, #fff3e0 0%, #fff8e1 100%);
 }
 
 .rank-number {
@@ -408,18 +407,27 @@ const rankingData = ref([
   background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
   color: #333;
   font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.rank-number.top-rank:nth-child(1) {
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+.rank-number.rank-1 {
+  background: transparent;
 }
 
-.rank-number.top-rank:nth-child(2) {
-  background: linear-gradient(135deg, #c0c0c0 0%, #e5e5e5 100%);
+.rank-number.rank-2 {
+  background: transparent;
 }
 
-.rank-number.top-rank:nth-child(3) {
-  background: linear-gradient(135deg, #cd7f32 0%, #daa520 100%);
+.rank-number.rank-3 {
+  background: transparent;
+}
+
+.medal-image {
+  width: 30px;
+  height: 60px;
+  object-fit: contain;
 }
 
 .challenge-info {
@@ -427,7 +435,7 @@ const rankingData = ref([
   margin-right: 16px;
 }
 
-.challenge-title {
+.user-nickname {
   font-size: 16px;
   font-weight: 600;
   color: #333;
@@ -445,23 +453,6 @@ const rankingData = ref([
 .progress {
   font-size: 12px;
   color: #666;
-}
-
-.challenge-category {
-  margin-top: 4px;
-}
-
-.category-tag {
-  background: linear-gradient(
-    135deg,
-    var(--color-main-light) 0%,
-    var(--color-main) 100%
-  );
-  color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 10px;
-  font-weight: 500;
 }
 
 .challenge-score {
