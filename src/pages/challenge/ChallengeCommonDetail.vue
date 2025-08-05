@@ -5,7 +5,13 @@
     <div class="content">
       <!-- 챌린지 기본 정보 -->
       <div class="challenge-info">
-        <h1 class="challenge-title">{{ challenge.title }}</h1>
+        <div class="title-section">
+          <h1 class="challenge-title">{{ challenge.title }}</h1>
+          <div class="challenge-date">
+            {{ formatDate(challenge.startDate) }} ~
+            {{ formatDate(challenge.endDate) }}
+          </div>
+        </div>
         <p class="challenge-description">{{ challenge.description }}</p>
 
         <div class="challenge-stats">
@@ -45,79 +51,6 @@
         </div>
       </div>
 
-      <!-- 챌린지 일정 -->
-      <div class="schedule-section">
-        <h2 class="section-title">
-          <i class="fas fa-calendar"></i>
-          챌린지 일정
-        </h2>
-        <div class="schedule-info">
-          <div class="schedule-item">
-            <span class="schedule-label">시작일</span>
-            <span class="schedule-date">{{
-              formatDate(challenge.startDate)
-            }}</span>
-          </div>
-          <div class="schedule-item">
-            <span class="schedule-label">종료일</span>
-            <span class="schedule-date">{{
-              formatDate(challenge.endDate)
-            }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 챌린지 규칙 -->
-      <div class="rules-section">
-        <h2 class="section-title">
-          <i class="fas fa-list-check"></i>
-          챌린지 규칙
-        </h2>
-        <div class="rules-list">
-          <div class="rule-item">
-            <i class="fas fa-check"></i>
-            <span>매일 1만원씩 저축하기</span>
-          </div>
-          <div class="rule-item">
-            <i class="fas fa-check"></i>
-            <span>30일 동안 총 30만원 모으기</span>
-          </div>
-          <div class="rule-item">
-            <i class="fas fa-check"></i>
-            <span>매일 저축 인증 사진 업로드</span>
-          </div>
-          <div class="rule-item">
-            <i class="fas fa-check"></i>
-            <span>성공 시 보상 지급</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 참여자 목록 -->
-      <div class="participants-section">
-        <h2 class="section-title">
-          <i class="fas fa-users"></i>
-          참여자 목록
-        </h2>
-        <div class="participants-list">
-          <div
-            v-for="participant in participants"
-            :key="participant.id"
-            class="participant-item"
-          >
-            <div class="participant-avatar">
-              <img :src="participant.avatar" :alt="participant.name" />
-            </div>
-            <div class="participant-info">
-              <span class="participant-name">{{ participant.name }}</span>
-              <span class="participant-progress"
-                >{{ participant.progress }}% 완료</span
-              >
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- 참여 버튼 -->
       <div class="join-section">
         <button v-if="!isParticipating" class="join-button" @click="handleJoin">
@@ -149,34 +82,6 @@ const challenge = ref({
   startDate: '2024-01-15',
   endDate: '2024-02-15',
 });
-
-// 참여자 목록 (더미 데이터)
-const participants = ref([
-  {
-    id: 1,
-    name: '김철수',
-    avatar: '/avatar1.jpg',
-    progress: 85,
-  },
-  {
-    id: 2,
-    name: '이영희',
-    avatar: '/avatar2.jpg',
-    progress: 92,
-  },
-  {
-    id: 3,
-    name: '박민수',
-    avatar: '/avatar3.jpg',
-    progress: 78,
-  },
-  {
-    id: 4,
-    name: '최지영',
-    avatar: '/avatar4.jpg',
-    progress: 95,
-  },
-]);
 
 const isParticipating = ref(false);
 
@@ -234,6 +139,11 @@ const handleJoin = () => {
 
 .content {
   padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px); /* 헤더 높이를 제외한 전체 높이 */
 }
 
 .challenge-info {
@@ -242,13 +152,25 @@ const handleJoin = () => {
   padding: 20px;
   margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+}
+
+.title-section {
+  margin-bottom: 12px;
 }
 
 .challenge-title {
   font-size: 24px;
   font-weight: bold;
   color: #333;
-  margin: 0 0 12px 0;
+  margin: 0 0 8px 0;
+}
+
+.challenge-date {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 0;
 }
 
 .challenge-description {
@@ -326,134 +248,10 @@ const handleJoin = () => {
   transition: width 0.3s ease;
 }
 
-.schedule-section,
-.rules-section,
-.participants-section {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 16px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-title i {
-  font-size: 16px;
-  color: #666;
-}
-
-.schedule-info {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.schedule-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.schedule-label {
-  font-size: 14px;
-  color: #666;
-}
-
-.schedule-date {
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-}
-
-.rules-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.rule-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.rule-item i {
-  color: var(--color-main);
-  font-size: 14px;
-}
-
-.rule-item span {
-  font-size: 14px;
-  color: #333;
-}
-
-.participants-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.participant-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.participant-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #ddd;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.participant-avatar img {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.participant-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.participant-name {
-  font-size: 14px;
-  font-weight: bold;
-  color: #333;
-}
-
-.participant-progress {
-  font-size: 12px;
-  color: #666;
-}
-
 .join-section {
   padding: 20px 0;
+  width: 100%;
+  max-width: 500px;
 }
 
 .join-button {
