@@ -34,14 +34,24 @@
         <label for="target-amount">목표 금액</label>
         <div class="amount-input-wrapper">
           <input
-            type="number"
+            type="text"
             id="target-amount"
-            v-model="targetAmount"
-            min="1000"
-            step="1000"
+            :value="formatAmount(targetAmount)"
+            @input="handleAmountInput"
             placeholder="목표 금액을 입력하세요"
           />
           <span class="amount-unit">원</span>
+        </div>
+        <div class="amount-buttons">
+          <button
+            v-for="unit in [1000, 10000, 50000, 100000, 1000000]"
+            :key="unit"
+            type="button"
+            class="btn custom-amount-btn"
+            @click="addAmount(unit)"
+          >
+            +{{ unit.toLocaleString() }}
+          </button>
         </div>
       </div>
 
@@ -138,6 +148,20 @@ const goBack = () => {
   router.back();
 };
 
+const addAmount = (amount) => {
+  targetAmount.value += amount;
+};
+
+const formatAmount = (value) => {
+  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+};
+
+const handleAmountInput = (event) => {
+  // 콤마 제거 후 숫자만 추출
+  const numericValue = event.target.value.replace(/,/g, '');
+  targetAmount.value = parseInt(numericValue) || 0;
+};
+
 const createChallenge = () => {
   // 챌린지 생성 로직
   console.log('챌린지 생성:', {
@@ -160,7 +184,7 @@ const createChallenge = () => {
 
 <style scoped>
 .challenge-create {
-  padding: 0px 16px 20px 16px;
+  padding: 10px 16px 20px 16px;
   background: var(--color-bg-light);
   min-height: 100vh;
 }
@@ -231,6 +255,8 @@ const createChallenge = () => {
 .amount-input-wrapper input {
   flex: 1;
   padding-right: 40px;
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .amount-unit {
@@ -240,6 +266,34 @@ const createChallenge = () => {
   font-weight: 500;
   font-family: var(--font-main);
   pointer-events: none;
+}
+
+.amount-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.custom-amount-btn {
+  flex: 1;
+  min-width: 80px;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: #f8f9fa;
+  color: #333;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: var(--font-main);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.custom-amount-btn:active {
+  border-color: var(--color-main);
+  background: var(--color-main);
+  color: white;
 }
 
 .challenge-type-options {
