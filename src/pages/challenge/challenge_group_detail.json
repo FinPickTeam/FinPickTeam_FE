@@ -11,7 +11,7 @@
     "endDate": "2025-08-20",
     "goalType": "소비",
     "goalValue": 100000,
-    "isParticipating": true,
+    "isParticipating": false,
     "isMine": true,
     "myProgress": 1,
     "participantsCount": 2,
