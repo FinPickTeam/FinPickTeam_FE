@@ -4,7 +4,12 @@
       <i class="fas fa-fire"></i>
       <span>HOT</span>
     </div>
-    <h4 class="challenge-title">{{ challenge.title }}</h4>
+    <div class="challenge-header">
+      <h4 class="challenge-title">{{ challenge.title }}</h4>
+      <div class="challenge-category">
+        {{ getCategoryName(challenge.categoryId) }}
+      </div>
+    </div>
     <div class="challenge-date">
       {{ formatDate(challenge.startDate) }} ~
       {{ formatDate(challenge.endDate) }}
@@ -61,6 +66,18 @@ const formatDate = (dateString) => {
   )}.${String(date.getDate()).padStart(2, '0')}`;
 };
 
+// 카테고리 이름 반환 함수
+const getCategoryName = (categoryId) => {
+  const categories = {
+    1: '전체 소비 줄이기',
+    2: '식비 줄이기',
+    3: '카페·간식 줄이기',
+    4: '교통비 줄이기',
+    5: '미용·쇼핑 줄이기',
+  };
+  return categories[categoryId] || '기타';
+};
+
 const handleParticipate = () => {
   emit('participate', props.challenge);
 };
@@ -112,12 +129,31 @@ const handleCardClick = () => {
   color: #ff9800;
 }
 
+.challenge-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin: 40px 0 8px 0;
+}
+
 .challenge-title {
   font-size: 16px;
   font-weight: bold;
   color: #333;
-  margin: 40px 0 8px 0;
+  margin: 0;
   line-height: 1.4;
+  flex: 1;
+  margin-right: 8px;
+}
+
+.challenge-category {
+  font-size: 12px;
+  color: var(--color-main);
+  background: rgba(107, 70, 193, 0.1);
+  padding: 4px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+  font-weight: 500;
 }
 
 .challenge-date {
