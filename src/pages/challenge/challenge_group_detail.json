@@ -1,0 +1,35 @@
+{
+  "status": 200,
+  "message": "챌린지 상세 조회 성공",
+  "data": {
+    "id": 8,
+    "title": "간식값 줄이기 챌린지!",
+    "description": "간식을 줄여보자!! 커피를 줄이자!!!",
+    "type": "GROUP",
+    "status": "IN_PROGRESS",
+    "startDate": "2025-07-31",
+    "endDate": "2025-08-20",
+    "goalType": "소비",
+    "goalValue": 100000,
+    "isParticipating": true,
+    "isMine": true,
+    "myProgress": 1,
+    "participantsCount": 2,
+    "isResultCheck": false,
+    "categoryName": "snack",
+    "members": [
+      {
+        "userId": 9,
+        "nickname": "코딩하는토끼",
+        "progress": 0.5,
+        "avatarImage": null
+      },
+      {
+        "userId": 10,
+        "nickname": "주식부자모몽가",
+        "progress": 0.8,
+        "avatarImage": null
+      }
+    ]
+  }
+}

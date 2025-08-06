@@ -15,36 +15,62 @@
         <div class="challenge-stats">
           <div class="stat-item">
             <span class="stat-label">참여자</span>
-            <span class="stat-value">{{ challenge.participants }}명</span>
+            <span class="stat-value">{{ challenge.participantsCount }}명</span>
           </div>
           <div class="stat-item">
-            <span class="stat-label">최대 인원</span>
-            <span class="stat-value">{{ challenge.maxParticipants }}명</span>
+            <span class="stat-label">목표 {{ challenge.goalType }}</span>
+            <span class="stat-value"
+              >{{ challenge.goalValue.toLocaleString() }}원</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">남은 기간</span>
-            <span class="stat-value">D-{{ challenge.remainingDays }}</span>
+            <span class="stat-value">D-{{ getRemainingDays() }}</span>
           </div>
         </div>
 
         <div class="progress-section">
           <div class="progress-header">
-            <span class="progress-label">참여 진행률</span>
+            <span class="progress-label">달성률</span>
             <span class="progress-percentage"
-              >{{ challenge.participants }}/{{
-                challenge.maxParticipants
-              }}</span
+              >{{ Math.round(challenge.myProgress * 100) }}%</span
             >
           </div>
           <div class="progress-bar">
             <div
               class="progress-fill"
               :style="{
-                width:
-                  (challenge.participants / challenge.maxParticipants) * 100 +
-                  '%',
+                width: Math.round(challenge.myProgress * 100) + '%',
               }"
             ></div>
+          </div>
+        </div>
+
+        <!-- 참여자 목록 섹션 -->
+        <div
+          class="members-section"
+          v-if="challenge.members && challenge.members.length > 0"
+        >
+          <h3 class="members-title">참여자 목록</h3>
+          <div class="members-list">
+            <div
+              v-for="member in challenge.members"
+              :key="member.userId"
+              class="member-item"
+            >
+              <div class="member-info">
+                <span class="member-nickname">{{ member.nickname }}</span>
+                <span class="member-progress"
+                  >{{ Math.round(member.progress * 100) }}%</span
+                >
+              </div>
+              <div class="member-progress-bar">
+                <div
+                  class="member-progress-fill"
+                  :style="{ width: Math.round(member.progress * 100) + '%' }"
+                ></div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -63,23 +89,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import challengeGroupDetailData from './challenge_group_detail.json';
 
 const route = useRoute();
 const router = useRouter();
 
-// 챌린지 데이터 (실제로는 API에서 가져올 데이터)
-const challenge = ref({
-  id: 1,
-  title: '매일 운동하기',
-  description: '매일 30분씩 운동하여 건강한 습관 만들기',
-  progress: 0,
-  remainingDays: 21,
-  participants: 3,
-  maxParticipants: 6,
-  startDate: '2024-01-20',
-  endDate: '2024-02-10',
-  creator: '김철수',
-});
+// 챌린지 데이터 (JSON 파일에서 가져온 데이터)
+const challenge = ref(challengeGroupDetailData.data);
 
 const isParticipating = ref(false);
 
@@ -111,21 +127,30 @@ const formatDate = (dateString) => {
 
 const checkParticipationStatus = () => {
   // 실제로는 API 호출로 사용자의 참여 여부 확인
-  isParticipating.value = false;
+  isParticipating.value = challenge.value.isParticipating;
 };
 
 const handleJoin = () => {
   // 챌린지 참여 로직
-  if (challenge.value.participants >= challenge.value.maxParticipants) {
+  if (challenge.value.participantsCount >= 6) {
     alert('참여 인원이 마감되었습니다.');
     return;
   }
 
   // 실제로는 API 호출로 참여 처리
   isParticipating.value = true;
-  challenge.value.participants += 1;
+  challenge.value.participantsCount += 1;
 
   alert('챌린지에 참여했습니다!');
+};
+
+// 남은 일수 계산 함수
+const getRemainingDays = () => {
+  const today = new Date();
+  const endDate = new Date(challenge.value.endDate);
+  const diffTime = endDate.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
 };
 </script>
 
@@ -307,5 +332,67 @@ const handleJoin = () => {
   font-size: 16px;
   font-weight: bold;
   cursor: not-allowed;
+}
+
+/* 참여자 목록 스타일 */
+.members-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.members-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 16px 0;
+}
+
+.members-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.member-item {
+  padding: 12px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.member-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.member-nickname {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.member-progress {
+  font-size: 12px;
+  color: #666;
+}
+
+.member-progress-bar {
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.member-progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    var(--color-main),
+    var(--color-main-light)
+  );
+  border-radius: 3px;
+  transition: width 0.3s ease;
 }
 </style>
