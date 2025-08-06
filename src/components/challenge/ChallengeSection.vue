@@ -12,7 +12,7 @@
         v-for="challenge in challenges"
         :key="challenge.id"
         :challenge="challenge"
-        :type="type"
+        :isRecruitingPage="isRecruitingPage"
         @cardClick="handleCardClick"
       />
     </div>
@@ -45,6 +45,10 @@ const props = defineProps({
     default: null,
   },
   showCount: {
+    type: Boolean,
+    default: false,
+  },
+  isRecruitingPage: {
     type: Boolean,
     default: false,
   },

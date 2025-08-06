@@ -92,8 +92,8 @@
       "type": "GROUP",
       "startDate": "2025-08-02",
       "endDate": "2025-08-29",
-      "participating": false,
-      "myProgressRate": null,
+      "participating": true,
+      "myProgressRate": 0.4,
       "participantsCount": 5,
       "isResultCheck": false,
       "categoryId": 5

@@ -7,6 +7,7 @@
         :challenges="commonChallenges"
         type="common"
         icon-class="fas fa-users"
+        @cardClick="handleCardClick"
       />
 
       <!-- 개인 챌린지 섹션 -->
@@ -28,110 +29,45 @@
         icon-class="fas fa-user-friends"
         :max-count="3"
         :show-count="true"
+        @cardClick="handleCardClick"
       />
-
-      <!-- 성공 테스트 버튼 -->
-      <div class="success-test-section">
-        <button class="success-test-btn" @click="showSuccessModal">
-          챌린지 성공 테스트
-        </button>
-      </div>
     </div>
-
-    <!-- 챌린지 성공 모달 -->
-    <ChallengeSuccessModal
-      :is-visible="isSuccessModalVisible"
-      :challenge="successChallengeData"
-      @close="hideSuccessModal"
-    />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ChallengeSection from '@/components/challenge/ChallengeSection.vue';
-import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
+import challengeListData from './challenge_list.json';
 
-// 공통 챌린지 데이터
-const commonChallenges = ref([
-  {
-    id: 1,
-    title: '매일 저축하기',
-    description: '매일 1만원씩 저축하여 30일 동안 30만원 모으기',
-    progress: 100,
-    remainingDays: 10,
-    participants: 1250,
-  },
-]);
-
-// 개인 챌린지 데이터
-const personalChallenges = ref([
-  {
-    id: 2,
-    title: '카페 음료 줄이기',
-    description: '한 달 동안 카페 음료 구매를 줄이고 저축하기',
-    progress: 80,
-    remainingDays: 5,
-    target: 50000,
-  },
-  {
-    id: 3,
-    title: '교통비 절약하기',
-    description: '대중교통을 이용하여 교통비 절약하기',
-    progress: 45,
-    remainingDays: 15,
-    target: 30000,
-  },
-]);
-
-// 소그룹 챌린지 데이터
-const groupChallenges = ref([
-  {
-    id: 4,
-    title: '친구들과 저축 챌린지',
-    description: '친구들과 함께 매주 5만원씩 저축하기',
-    progress: 70,
-    remainingDays: 8,
-    participants: 4,
-    maxParticipants: 6,
-  },
-  {
-    id: 5,
-    title: '가족 저축 챌린지',
-    description: '가족과 함께 목표 금액 모으기',
-    progress: 55,
-    remainingDays: 12,
-    participants: 3,
-    maxParticipants: 5,
-  },
-]);
-
-const router = useRouter();
-
-// 성공 모달 관련 상태
-const isSuccessModalVisible = ref(false);
-const successChallengeData = ref({
-  title: '매일 5천원 저축하기',
-  description: '매일 5천원씩 저축하여 30일 동안 15만원 모으기',
-  targetAmount: 150000,
-  currentAmount: 150000,
-  duration: 30,
-  reward: {
-    points: 500,
-    badge: '저축 마스터',
-  },
+// 참여중인 챌린지 필터링 (participating: true)
+const joinedChallenges = computed(() => {
+  return challengeListData.data.filter((challenge) => challenge.participating);
 });
 
-// 성공 모달 표시
-const showSuccessModal = () => {
-  isSuccessModalVisible.value = true;
-};
+// 공통 챌린지 필터링 (참여중이면서 COMMON 타입)
+const commonChallenges = computed(() => {
+  return joinedChallenges.value.filter(
+    (challenge) => challenge.type === 'COMMON'
+  );
+});
 
-// 성공 모달 숨기기
-const hideSuccessModal = () => {
-  isSuccessModalVisible.value = false;
-};
+// 개인 챌린지 필터링 (참여중이면서 PERSONAL 타입)
+const personalChallenges = computed(() => {
+  return joinedChallenges.value.filter(
+    (challenge) => challenge.type === 'PERSONAL'
+  );
+});
+
+// 소그룹 챌린지 필터링 (참여중이면서 GROUP 타입)
+const groupChallenges = computed(() => {
+  return joinedChallenges.value.filter(
+    (challenge) => challenge.type === 'GROUP'
+  );
+});
+
+const router = useRouter();
 
 const handleCardClick = (data) => {
   const { challenge, type } = data;
@@ -166,37 +102,13 @@ const handleCardClick = (data) => {
 
 <style scoped>
 .challenge-joined-list {
+  padding: 0;
+  background: var(--color-bg-light);
   min-height: 100vh;
-  background-color: #f8f9fa;
 }
 
 .content {
   padding-top: 20px;
   padding-bottom: 20px;
-}
-
-/* 성공 테스트 버튼 */
-.success-test-section {
-  margin-top: 20px;
-  text-align: center;
-  padding: 0 16px;
-}
-
-.success-test-btn {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
-  color: #333;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
-}
-
-.success-test-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
 }
 </style>
