@@ -17,8 +17,11 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 1</div>
-      <div class="question-desc">투자 경험이 어느 정도 되시나요?</div>
+      <div class="question-title">문항 8</div>
+      <div class="question-desc">
+        투자경험이 있는 금융투자상품과 투자경험 기간
+      </div>
+
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -42,7 +45,13 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
+const options = [
+  "국채, 지방채, 보증채, MMF 등 [초저위험]",
+  "금융채, 신용도가 높은 회사채, 채권형펀드, 원금지급형 ELS 등 [저위험]",
+  "신용도 중간 등급의 회사채, 원금의 일부만 보장되는 ELS, 혼합형 펀드 등 [중위험]",
+  "신용도가 낮은 회사채, 주식, 원금이 보장되지 않는 ELS, 시장수익률 수준의 수익을 추구하는 주식형펀드 등 [고위험]",
+  "ELW, 선물옵션, 시장수익률 이상의 수익을 추구하는 주식형펀드, 파생상품펀드, 주식 신용거래등 [초고위험]",
+];
 const selected = ref(null);
 
 // 동적 progress-bar 설정 (투자성향 재검사는 항상 9단계)
@@ -115,6 +124,12 @@ const goNext = () => {
   color: #222;
 }
 .question-desc {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+.question-subtitle {
   font-size: 16px;
   color: #222;
   margin-bottom: 24px;

@@ -16,7 +16,7 @@
     <!-- 총 자산 카드 -->
     <div class="account-total-card">
       <div class="account-total-title">총 자산</div>
-      <div class="account-total-amount">
+      <div class="account-total-amount" :class="{ negative: totalAssets < 0 }">
         {{ totalAssets.toLocaleString()
         }}<span class="account-total-won">원</span>
       </div>
@@ -50,7 +50,10 @@
                   {{ account.type }}
                 </div>
               </div>
-              <div class="account-balance">
+              <div
+                class="account-balance"
+                :class="{ negative: account.balance < 0 }"
+              >
                 {{ account.balance.toLocaleString() }}원
               </div>
             </div>
@@ -85,7 +88,10 @@
                   {{ account.type }}
                 </div>
               </div>
-              <div class="account-balance">
+              <div
+                class="account-balance"
+                :class="{ negative: account.balance < 0 }"
+              >
                 {{ account.balance.toLocaleString() }}원
               </div>
             </div>
@@ -123,7 +129,10 @@
                   {{ account.type }}
                 </div>
               </div>
-              <div class="account-balance">
+              <div
+                class="account-balance"
+                :class="{ negative: account.balance < 0 }"
+              >
                 {{ account.balance.toLocaleString() }}원
               </div>
             </div>
@@ -451,6 +460,10 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 
+.account-total-amount.negative {
+  color: #e11d48;
+}
+
 .account-total-won {
   font-size: 1.1rem;
   font-weight: 400;
@@ -555,6 +568,10 @@ onMounted(() => {
   font-size: 1.2rem;
   font-weight: 700;
   color: #4318d1;
+}
+
+.account-balance.negative {
+  color: #e11d48;
 }
 
 .account-item-details {

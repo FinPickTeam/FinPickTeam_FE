@@ -18,7 +18,7 @@
     <!-- 질문 -->
     <div class="question-section">
       <div class="question-title">문항 4</div>
-      <div class="question-desc">투자 경험이 어느 정도 되시나요?</div>
+      <div class="question-desc">투자경험</div>
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -43,7 +43,7 @@ import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
-const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
+const options = ["1년 미만", "1년 이상 ~ 3년 미만", "3년 이상", "경험 없음"];
 const selected = ref(null);
 
 // 동적 progress-bar 설정
@@ -128,6 +128,12 @@ const goNext = () => {
   color: #222;
 }
 .question-desc {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+.question-subtitle {
   font-size: 16px;
   color: #222;
   margin-bottom: 24px;

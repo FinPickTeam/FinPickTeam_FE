@@ -16,4 +16,10 @@ export default defineConfig({
     port: 5173,
     host: true,
   },
+  define: {
+    // 환경 변수 정의
+    "process.env.VUE_APP_API_BASE_URL": JSON.stringify(
+      process.env.VUE_APP_API_BASE_URL || "http://localhost:8080"
+    ),
+  },
 });

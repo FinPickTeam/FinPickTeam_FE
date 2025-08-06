@@ -44,7 +44,9 @@
                 {{ card.type }}
               </div>
             </div>
-            <div class="card-balance">{{ card.amount.toLocaleString() }}원</div>
+            <div class="card-balance" :class="{ negative: card.amount < 0 }">
+              {{ card.amount.toLocaleString() }}원
+            </div>
           </div>
           <div class="card-item-details">
             <div class="card-name">{{ card.name }}</div>
@@ -464,7 +466,11 @@ onMounted(() => {
 .card-balance {
   font-size: 1.1rem;
   font-weight: 700;
-  color: #dc2626;
+  color: #4318d1;
+}
+
+.card-balance.negative {
+  color: #4318d1;
 }
 
 .card-item-details {

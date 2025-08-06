@@ -17,8 +17,9 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 1</div>
-      <div class="question-desc">투자 경험이 어느 정도 되시나요?</div>
+      <div class="question-title">문항 9</div>
+      <div class="question-desc">기대수익률 및 손실감내도</div>
+
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -42,7 +43,12 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
+const options = [
+  "제한된 손실을 감수하며 시중금리 수준의 수익을 기대",
+  "원금의 일부 손실을 감수하며 시중금리보다 다소 높은 수준의 수익을 기대",
+  "원금 손실을 감수하며 시장성과 비슷한 수준의 수익을 기대",
+  "초과 손실까지 감수하며 적극적인 투자를 통하여 시중수익률(예: 주가지수)을 초과하는 높은 수익 추구",
+];
 const selected = ref(null);
 
 // 동적 progress-bar 설정 (투자성향 재검사는 항상 9단계)
@@ -115,6 +121,12 @@ const goNext = () => {
   color: #222;
 }
 .question-desc {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+.question-subtitle {
   font-size: 16px;
   color: #222;
   margin-bottom: 24px;

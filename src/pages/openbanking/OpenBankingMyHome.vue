@@ -26,7 +26,7 @@
           <span class="obmyhome-asset-time">{{ refreshTimeText }}</span>
         </div>
       </div>
-      <div class="obmyhome-asset-amount">
+      <div class="obmyhome-asset-amount" :class="{ negative: totalAssets < 0 }">
         {{ totalAssets.toLocaleString()
         }}<span class="obmyhome-asset-won">원</span>
       </div>
@@ -58,7 +58,10 @@
             <div class="obmyhome-account-name">{{ acc.name }}</div>
             <div class="obmyhome-account-number">***-***-****</div>
           </div>
-          <div class="obmyhome-account-balance">
+          <div
+            class="obmyhome-account-balance"
+            :class="{ negative: acc.balance < 0 }"
+          >
             {{ acc.balance.toLocaleString() }}원
           </div>
         </div>
@@ -84,7 +87,10 @@
               <div class="obmyhome-card-name">{{ card.name }}</div>
               <div class="obmyhome-card-number">***-***-****</div>
             </div>
-            <div class="obmyhome-card-amount">
+            <div
+              class="obmyhome-card-amount"
+              :class="{ negative: card.amount < 0 }"
+            >
               {{ card.amount.toLocaleString() }}원
             </div>
           </div>
@@ -106,12 +112,9 @@
 </template>
 
 <script setup>
-const goToDictionary = () => {
-  router.push("/dictionary");
-};
 import { ref, computed, onMounted } from "vue";
-import Navbar from "../../components/Navbar.vue";
 import { useRouter } from "vue-router";
+import Navbar from "../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -121,6 +124,7 @@ import {
   faTriangleExclamation,
   faAngleRight,
 } from "@fortawesome/free-solid-svg-icons";
+
 library.add(faAngleLeft, faSearch, faPlus, faTriangleExclamation, faAngleRight);
 
 // 은행 로고 이미지 import
@@ -130,9 +134,6 @@ import kakaoLogo from "@/assets/bank_logo/카카오뱅크.png";
 import transactionData from "./Transaction_dummy.json";
 
 const router = useRouter();
-const goBack = () => {
-  router.push("/");
-};
 
 // Transaction_dummy.json에서 계좌 정보 추출
 const extractAccountsFromTransactions = () => {
@@ -415,28 +416,34 @@ const monthlyChangeText = computed(() => {
     return "전월 대비 0% 변화없음";
   }
 });
+
+const goBack = () => {
+  router.push("/");
+};
+
+const goToDictionary = () => {
+  router.push("/dictionary");
+};
 </script>
 
 <style scoped>
 .myhome-scroll-container {
-  max-height: calc(100vh - 64px);
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto;
+  background: #f7f8fa;
+  min-height: 844px;
+  font-family: "Noto Sans KR", sans-serif;
+  position: relative;
+  padding-top: 55px;
+  padding-bottom: 0;
   overflow-y: auto;
-  padding-bottom: 100px;
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 
 .myhome-scroll-container::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
-}
-.obmyhome-container {
-  width: 390px;
-  min-height: 844px;
-  margin: 0 auto;
-  background: #f7f8fa;
-  font-family: "Noto Sans KR", sans-serif;
-  box-sizing: border-box;
-  padding-bottom: 0;
 }
 .obmyhome-header {
   width: 100%;
@@ -445,12 +452,16 @@ const monthlyChangeText = computed(() => {
   align-items: center;
   justify-content: space-between;
   background: #fff;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   z-index: 100;
   padding: 0 16px;
   box-sizing: border-box;
   border-bottom: 1px solid #ececec;
+  margin-bottom: 0;
 }
 .obmyhome-back {
   background: none;
@@ -486,9 +497,8 @@ const monthlyChangeText = computed(() => {
 .obmyhome-asset-card {
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
-  margin: 18px 16px 16px 16px;
-  padding: 22px 20px 18px 20px;
+  margin: 12px 16px 16px 16px;
+  padding: 20px 20px 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -509,7 +519,6 @@ const monthlyChangeText = computed(() => {
   align-items: center;
   gap: 8px;
 }
-
 .obmyhome-refresh-btn {
   background: none;
   border: none;
@@ -533,6 +542,10 @@ const monthlyChangeText = computed(() => {
   color: #4318d1;
   margin-bottom: 2px;
 }
+
+.obmyhome-asset-amount.negative {
+  color: #e11d48;
+}
 .obmyhome-asset-won {
   font-size: 1.1rem;
   font-weight: 400;
@@ -555,9 +568,8 @@ const monthlyChangeText = computed(() => {
 .obmyhome-section-card {
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
-  margin: 0 16px 16px 16px;
-  padding: 18px 20px 18px 20px;
+  margin: 0 16px 12px 16px;
+  padding: 16px 20px 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -612,7 +624,7 @@ const monthlyChangeText = computed(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 16px 18px;
+  padding: 14px 18px;
   border-bottom: 1px solid #ececec;
   transition: background-color 0.15s;
 }
@@ -661,6 +673,10 @@ const monthlyChangeText = computed(() => {
   text-align: right;
 }
 
+.obmyhome-account-balance.negative {
+  color: #e11d48;
+}
+
 .obmyhome-card-list {
   display: flex;
   flex-direction: column;
@@ -674,7 +690,7 @@ const monthlyChangeText = computed(() => {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 18px;
+  padding: 10px 18px;
   border-bottom: 1px solid #ececec;
   transition: background-color 0.15s;
 }
@@ -691,6 +707,25 @@ const monthlyChangeText = computed(() => {
   font-size: 0.95rem;
   color: #222;
   font-weight: 600;
+}
+
+.obmyhome-card-number {
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 400;
+}
+
+.obmyhome-card-amount {
+  font-size: 1.05rem;
+  color: #4318d1;
+  font-weight: 700;
+  text-align: right;
+  flex-shrink: 0;
+  min-width: fit-content;
+}
+
+.obmyhome-card-amount.negative {
+  color: #4318d1;
 }
 
 .obmyhome-card-content {
@@ -711,21 +746,6 @@ const monthlyChangeText = computed(() => {
   font-size: 0.95rem;
   color: #222;
   font-weight: 600;
-}
-
-.obmyhome-card-number {
-  font-size: 0.85rem;
-  color: #888;
-  font-weight: 400;
-}
-
-.obmyhome-card-amount {
-  font-size: 1.05rem;
-  color: #e11d48;
-  font-weight: 700;
-  text-align: right;
-  flex-shrink: 0;
-  min-width: fit-content;
 }
 
 .obmyhome-spend-table {
@@ -751,7 +771,7 @@ const monthlyChangeText = computed(() => {
 .obmyhome-report-buttons {
   display: flex;
   gap: 8px;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .obmyhome-report-btn {

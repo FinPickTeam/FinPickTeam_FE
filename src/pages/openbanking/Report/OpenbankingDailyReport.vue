@@ -630,6 +630,7 @@ updateCurrentWeekStart();
   background: #f7f8fa;
   font-family: "Noto Sans KR", sans-serif;
   box-sizing: border-box;
+  padding-top: 56px;
 }
 .diaryhome-header {
   width: 100%;
@@ -638,8 +639,11 @@ updateCurrentWeekStart();
   align-items: center;
   justify-content: space-between;
   background: #fff;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   z-index: 100;
   padding: 0 16px;
   box-sizing: border-box;
@@ -679,7 +683,6 @@ updateCurrentWeekStart();
 .diaryhome-month-card {
   background: #fff;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
   margin: 18px 16px 16px 16px;
   padding: 22px 20px 18px 20px;
   display: flex;
@@ -850,7 +853,6 @@ updateCurrentWeekStart();
   background: #fff;
   border-radius: 12px;
   padding: 14px 14px;
-  box-shadow: 0 1px 4px rgba(67, 24, 209, 0.04);
 }
 .diaryhome-list-item {
   display: flex;
