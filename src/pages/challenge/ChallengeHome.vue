@@ -80,6 +80,7 @@ import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
 import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
+import challengeListData from './challenge_list.json';
 
 // 통계 데이터
 const totalChallenges = ref(10); // 전체 참여 수
@@ -87,30 +88,7 @@ const successCount = ref(8); // 성공 수
 const achievementRate = ref(80.0); // 성공률
 
 // 챌린지 리스트 데이터
-const challengeList = ref([
-  {
-    id: 1,
-    title: '커피값 줄이기 챌린지',
-    type: 'PERSONAL',
-    startDate: '2025-07-30',
-    endDate: '2025-08-02',
-    participating: true,
-    myProgressRate: 0.65,
-    participantsCount: 0,
-    isResultCheck: true,
-  },
-  {
-    id: 2,
-    title: '술값 줄이기 챌린지',
-    type: 'GROUP',
-    startDate: '2025-08-01',
-    endDate: '2025-08-26',
-    participating: false,
-    myProgressRate: null,
-    participantsCount: 4,
-    isResultCheck: false,
-  },
-]);
+const challengeList = ref(challengeListData.data);
 
 // 참여중인 챌린지 필터링
 const participatingChallenges = computed(() => {

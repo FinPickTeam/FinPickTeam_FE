@@ -1,0 +1,28 @@
+{
+  "status": 200,
+  "message": "챌린지 리스트 조회 성공",
+  "data": [
+    {
+      "id": 1,
+      "title": "커피값 줄이기 챌린지",
+      "type": "PERSONAL",
+      "startDate": "2025-07-30",
+      "endDate": "2025-08-02",
+      "participating": true,
+      "myProgressRate": 0.65,
+      "participantsCount": 0,
+      "isResultCheck": true
+    },
+    {
+      "id": 2,
+      "title": "술값 줄이기 챌린지",
+      "type": "GROUP",
+      "startDate": "2025-08-01",
+      "endDate": "2025-08-26",
+      "participating": false,
+      "myProgressRate": null,
+      "participantsCount": 4,
+      "isResultCheck": false
+    }
+  ]
+}
