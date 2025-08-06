@@ -1,8 +1,24 @@
 <template>
   <div class="challenge-card" @click="$emit('click')">
     <h4 class="challenge-title">{{ challenge.title }}</h4>
-    <div class="challenge-date">{{ challenge.date }}</div>
-    <div class="challenge-progress">진행률 {{ challenge.progress }}%</div>
+    <div class="challenge-date">
+      {{ formatDate(challenge.startDate) }} ~
+      {{ formatDate(challenge.endDate) }}
+    </div>
+    <div class="challenge-footer">
+      <div class="progress-category-group">
+        <div
+          class="challenge-progress"
+          v-if="challenge.myProgressRate !== null"
+        >
+          진행률 {{ Math.round(challenge.myProgressRate * 100) }}%
+        </div>
+        <div class="challenge-progress" v-else>진행률 0%</div>
+        <div class="challenge-category">
+          {{ getCategoryName(challenge.categoryId) }}
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -12,14 +28,43 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({
+      id: 0,
       title: '',
-      date: '',
-      progress: 0,
+      type: 'PERSONAL',
+      categoryId: 1,
+      startDate: '',
+      endDate: '',
+      participating: false,
+      myProgressRate: null,
+      participantsCount: 0,
+      isResultCheck: false,
     }),
   },
 });
 
 defineEmits(['click']);
+
+// 날짜 포맷팅 함수
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
+    2,
+    '0'
+  )}.${String(date.getDate()).padStart(2, '0')}`;
+};
+
+// 카테고리 이름 반환 함수
+const getCategoryName = (categoryId) => {
+  const categories = {
+    1: '전체 소비 줄이기',
+    2: '식비 줄이기',
+    3: '카페·간식 줄이기',
+    4: '교통비 줄이기',
+    5: '미용·쇼핑 줄이기',
+  };
+  return categories[categoryId] || '기타';
+};
 </script>
 
 <style scoped>
@@ -47,6 +92,29 @@ defineEmits(['click']);
   line-height: 1.4;
 }
 
+.challenge-footer {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.progress-category-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.challenge-category {
+  font-size: 12px;
+  color: var(--color-main);
+  background: rgba(107, 70, 193, 0.1);
+  padding: 6px 12px;
+  border-radius: 14px;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
 .challenge-date {
   font-size: 14px;
   color: #666;
@@ -63,7 +131,7 @@ defineEmits(['click']);
   );
   color: white;
   padding: 6px 12px;
-  border-radius: 20px;
+  border-radius: 14px;
   display: inline-block;
   font-size: 12px;
 }

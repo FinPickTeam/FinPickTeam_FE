@@ -12,17 +12,17 @@
       <div class="stats-section">
         <div class="stats-container">
           <div class="stat-item">
-            <div class="stat-number">10</div>
+            <div class="stat-number">{{ totalChallenges }}</div>
             <div class="stat-label">회</div>
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
-            <div class="stat-number">8</div>
+            <div class="stat-number">{{ successCount }}</div>
             <div class="stat-label">회</div>
           </div>
           <div class="stat-divider"></div>
           <div class="stat-item">
-            <div class="stat-number">80</div>
+            <div class="stat-number">{{ Math.round(achievementRate) }}</div>
             <div class="stat-label">%</div>
           </div>
         </div>
@@ -76,57 +76,51 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
 import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
 
-// 참여중인 챌린지 데이터
-const participatingChallenges = ref([
+// 통계 데이터
+const totalChallenges = ref(10); // 전체 참여 수
+const successCount = ref(8); // 성공 수
+const achievementRate = ref(80.0); // 성공률
+
+// 챌린지 리스트 데이터
+const challengeList = ref([
   {
     id: 1,
-    title: '이번 달 외식 10번 이하로 하기',
-    date: '2025.07.01 ~ 07.31',
-    progress: 70,
+    title: '커피값 줄이기 챌린지',
+    type: 'PERSONAL',
+    startDate: '2025-07-30',
+    endDate: '2025-08-02',
+    participating: true,
+    myProgressRate: 0.65,
+    participantsCount: 0,
+    isResultCheck: true,
   },
   {
     id: 2,
-    title: '일주일에 3번 이상 운동하기',
-    date: '2025.07.01 ~ 07.31',
-    progress: 85,
-  },
-  {
-    id: 3,
-    title: '하루 8시간 이상 수면하기',
-    date: '2025.07.01 ~ 07.31',
-    progress: 60,
+    title: '술값 줄이기 챌린지',
+    type: 'GROUP',
+    startDate: '2025-08-01',
+    endDate: '2025-08-26',
+    participating: false,
+    myProgressRate: null,
+    participantsCount: 4,
+    isResultCheck: false,
   },
 ]);
 
-// HOT 챌린지 데이터
-const hotChallenges = ref([
-  {
-    id: 1,
-    title: '커피 5회 이하 마시기',
-    date: '2020.00.00 - 11.31',
-    currentParticipants: 4,
-    maxParticipants: 5,
-  },
-  {
-    id: 2,
-    title: '커피 5회 이하 마시기',
-    date: '2020.00.00 - 11.31',
-    currentParticipants: 4,
-    maxParticipants: 5,
-  },
-  {
-    id: 3,
-    title: '커피 5회 이하 마시기',
-    date: '2020.00.00 - 11.31',
-    currentParticipants: 4,
-    maxParticipants: 5,
-  },
-]);
+// 참여중인 챌린지 필터링
+const participatingChallenges = computed(() => {
+  return challengeList.value.filter((challenge) => challenge.participating);
+});
+
+// HOT 챌린지 필터링 (참여하지 않은 챌린지들)
+const hotChallenges = computed(() => {
+  return challengeList.value.filter((challenge) => !challenge.participating);
+});
 
 const router = useRouter();
 
