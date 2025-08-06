@@ -7,6 +7,7 @@
         :challenges="commonChallenges"
         type="common"
         icon-class="fas fa-users"
+        :isRecruitingPage="true"
         @cardClick="handleCardClick"
       />
 
@@ -16,6 +17,7 @@
         :challenges="groupChallenges"
         type="group"
         icon-class="fas fa-user-friends"
+        :isRecruitingPage="true"
         @cardClick="handleCardClick"
       />
     </div>
@@ -23,76 +25,29 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ChallengeSection from '@/components/challenge/ChallengeSection.vue';
+import challengeListData from './challenge_list.json';
 
-// 공통 챌린지 데이터 (모집 중)
-const commonChallenges = ref([
-  {
-    id: 1,
-    title: '매일 저축하기',
-    description: '매일 1만원씩 저축하여 30일 동안 30만원 모으기',
-    progress: 0, // 모집 중이므로 진행률 0
-    remainingDays: 30,
-    participants: 1250,
-    maxParticipants: 2000,
-    startDate: '2024-01-15',
-    endDate: '2024-02-15',
-  },
-]);
+// 모집중인 챌린지 필터링 (participating: false)
+const recruitingChallenges = computed(() => {
+  return challengeListData.data.filter((challenge) => !challenge.participating);
+});
 
-// 소그룹 챌린지 데이터 (모집 중)
-const groupChallenges = ref([
-  {
-    id: 2,
-    title: '친구들과 저축 챌린지',
-    description: '친구들과 함께 매주 5만원씩 저축하기',
-    progress: 0,
-    remainingDays: 15,
-    participants: 2,
-    maxParticipants: 6,
-    startDate: '2024-01-20',
-    endDate: '2024-02-20',
-    creator: '김철수',
-  },
-  {
-    id: 3,
-    title: '가족 저축 챌린지',
-    description: '가족과 함께 목표 금액 모으기',
-    progress: 0,
-    remainingDays: 20,
-    participants: 1,
-    maxParticipants: 5,
-    startDate: '2024-01-25',
-    endDate: '2024-02-25',
-    creator: '이영희',
-  },
-  {
-    id: 4,
-    title: '동네 친구들과 절약 챌린지',
-    description: '동네 친구들과 함께 생활비 절약하기',
-    progress: 0,
-    remainingDays: 12,
-    participants: 3,
-    maxParticipants: 6,
-    startDate: '2024-01-30',
-    endDate: '2024-02-28',
-    creator: '박민수',
-  },
-  {
-    id: 5,
-    title: '회사 동료들과 투자 챌린지',
-    description: '회사 동료들과 함께 주식 투자 학습하기',
-    progress: 0,
-    remainingDays: 25,
-    participants: 4,
-    maxParticipants: 6,
-    startDate: '2024-02-01',
-    endDate: '2024-03-01',
-    creator: '최지영',
-  },
-]);
+// 공통 챌린지 필터링 (모집중이면서 COMMON 타입)
+const commonChallenges = computed(() => {
+  return recruitingChallenges.value.filter(
+    (challenge) => challenge.type === 'COMMON'
+  );
+});
+
+// 소그룹 챌린지 필터링 (모집중이면서 GROUP 타입)
+const groupChallenges = computed(() => {
+  return recruitingChallenges.value.filter(
+    (challenge) => challenge.type === 'GROUP'
+  );
+});
 
 const router = useRouter();
 
@@ -121,8 +76,9 @@ const handleCardClick = (data) => {
 
 <style scoped>
 .challenge-recruiting-list {
+  padding: 0;
+  background: var(--color-bg-light);
   min-height: 100vh;
-  background-color: #f8f9fa;
 }
 
 .content {
