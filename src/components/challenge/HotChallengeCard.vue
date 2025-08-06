@@ -5,10 +5,23 @@
       <span>HOT</span>
     </div>
     <h4 class="challenge-title">{{ challenge.title }}</h4>
-    <div class="challenge-date">{{ challenge.date }}</div>
+    <div class="challenge-date">
+      {{ formatDate(challenge.startDate) }} ~
+      {{ formatDate(challenge.endDate) }}
+    </div>
     <div class="challenge-participants">
-      ({{ challenge.currentParticipants }}명 /
-      {{ challenge.maxParticipants }}명)
+      <div class="participants-info">
+        <span class="participants-text"
+          >{{ challenge.participantsCount }}명 참여중</span
+        >
+        <span class="max-participants">/ 6명</span>
+      </div>
+      <div class="progress-bar">
+        <div
+          class="progress-fill"
+          :style="{ width: `${(challenge.participantsCount / 6) * 100}%` }"
+        ></div>
+      </div>
     </div>
     <button class="participate-btn" @click.stop="handleParticipate">
       참여하러 가기
@@ -22,15 +35,31 @@ const props = defineProps({
     type: Object,
     required: true,
     default: () => ({
+      id: 0,
       title: '',
-      date: '',
-      currentParticipants: 0,
-      maxParticipants: 0,
+      type: 'GROUP',
+      categoryId: 1,
+      startDate: '',
+      endDate: '',
+      participating: false,
+      myProgressRate: null,
+      participantsCount: 0,
+      isResultCheck: false,
     }),
   },
 });
 
 const emit = defineEmits(['participate', 'click']);
+
+// 날짜 포맷팅 함수
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return `${date.getFullYear()}.${String(date.getMonth() + 1).padStart(
+    2,
+    '0'
+  )}.${String(date.getDate()).padStart(2, '0')}`;
+};
 
 const handleParticipate = () => {
   emit('participate', props.challenge);
@@ -98,9 +127,43 @@ const handleCardClick = () => {
 }
 
 .challenge-participants {
+  margin-bottom: 16px;
+}
+
+.participants-info {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.participants-text {
   font-size: 14px;
   color: #666;
-  margin-bottom: 16px;
+}
+
+.max-participants {
+  font-size: 14px;
+  color: #999;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    135deg,
+    var(--color-main-dark) 0%,
+    var(--color-main-light) 100%
+  );
+  border-radius: 3px;
+  transition: width 0.3s ease;
 }
 
 .participate-btn {
