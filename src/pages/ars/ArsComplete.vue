@@ -43,7 +43,9 @@
 
         <div class="support_section">
           <div class="support_question">문제가 있으신가요?</div>
-          <a href="#" class="support_link">고객센터 문의</a>
+          <a href="#" class="support_link" @click="goToCustomerSupport"
+            >고객센터 문의</a
+          >
         </div>
       </div>
     </div>
@@ -70,8 +72,12 @@ function formatCurrentTime() {
 }
 
 function goToNextStep() {
-  // ArsLinkBanking 페이지로 이동
-  router.push("/ars/link-banking");
+  // CertificateCreate 페이지로 이동
+  router.push("/openbanking/create-certificate");
+}
+
+function goToCustomerSupport() {
+  router.push("/customer-support");
 }
 
 onMounted(() => {

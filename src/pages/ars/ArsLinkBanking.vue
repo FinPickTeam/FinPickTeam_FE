@@ -72,7 +72,9 @@
 
         <div class="support_section">
           <div class="support_question">문제가 있으신가요?</div>
-          <a href="#" class="support_link">고객센터 문의</a>
+          <a href="#" class="support_link" @click="goToCustomerSupport"
+            >고객센터 문의</a
+          >
         </div>
       </div>
     </div>
@@ -90,6 +92,10 @@ const isButtonActive = ref(false);
 
 function goToOpenBanking() {
   router.push("/openbanking/myhome");
+}
+
+function goToCustomerSupport() {
+  router.push("/customer-support");
 }
 
 onMounted(() => {
@@ -166,7 +172,7 @@ onMounted(() => {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  text-fill-color: transparent;
+  /* text-fill-color: transparent; */
 }
 .login-logo p {
   color: #888;

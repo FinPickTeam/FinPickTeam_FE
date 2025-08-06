@@ -1,60 +1,85 @@
 <template>
   <div class="password-change-container">
-    <!-- 헤더 영역 -->
-    <div class="header-bar">
-      <button class="back-btn" @click="goBack">
+    <!-- 상단 헤더 -->
+    <div class="password-header">
+      <button class="password-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="header-title">비밀번호 변경</span>
+      <span class="password-title center-title">비밀번호 변경</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
-    <div class="main-content">
-      <div class="step-indicator">
-        <div class="step active">1</div>
-        <div class="step-line"></div>
-        <div class="step">2</div>
-        <div class="step-line"></div>
-        <div class="step">3</div>
+    <div class="password-content">
+      <!-- 진행 단계 표시 -->
+      <div class="progress-section">
+        <div class="progress-steps">
+          <div class="step active">
+            <div class="step-number">1</div>
+            <span class="step-text">현재 비밀번호</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <span class="step-text">새 비밀번호</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <span class="step-text">확인</span>
+          </div>
+        </div>
       </div>
 
-      <div class="content-area">
-        <div class="title-text">
-          <p>핀픽 인증서를 생성합니다.</p>
-          <p>현재 비밀번호를 입력해주세요</p>
-        </div>
+      <!-- 제목 -->
+      <h1 class="main-title">현재 비밀번호 입력</h1>
 
-        <!-- 비밀번호 입력 필드 -->
-        <div class="password-input-container">
-          <div class="password-dots">
-            <div
-              v-for="(dot, index) in 6"
-              :key="index"
-              :class="[
-                'password-dot',
-                index < currentPassword.length ? 'filled' : 'empty',
-              ]"
-            ></div>
+      <!-- 설명 -->
+      <div class="description-section">
+        <p class="description-text">현재 인증서 비밀번호를 입력해주세요.</p>
+      </div>
+
+      <!-- 비밀번호 입력 폼 -->
+      <div class="password-form">
+        <div class="input-group">
+          <label class="input-label">현재 비밀번호</label>
+          <div class="password-display">
+            <div class="password-dots">
+              <div
+                v-for="i in 6"
+                :key="i"
+                class="password-dot"
+                :class="{ filled: i <= currentPassword.length }"
+              ></div>
+            </div>
           </div>
         </div>
 
-        <!-- 숫자 키패드 -->
-        <div class="keypad-container">
-          <div class="keypad-grid">
+        <!-- 숫자 패드 -->
+        <div class="number-pad">
+          <div class="number-row" v-for="row in numberPad" :key="row.join('')">
             <button
-              v-for="(number, index) in keypadNumbers.slice(0, 9)"
-              :key="`keypad-${index}-${number}`"
-              class="keypad-btn"
+              v-for="number in row"
+              :key="number"
+              class="number-btn"
               @click="addNumber(number)"
+              :disabled="currentPassword.length >= 6"
             >
               {{ number }}
             </button>
-            <button class="keypad-btn empty"></button>
-            <button class="keypad-btn" @click="addNumber(keypadNumbers[9])">
-              {{ keypadNumbers[9] }}
+          </div>
+          <div class="number-row">
+            <button class="number-btn clear-btn" @click="clearPassword">
+              <font-awesome-icon :icon="['fas', 'times']" />
             </button>
-            <button class="keypad-btn delete-btn" @click="deleteNumber">
-              <font-awesome-icon :icon="['fas', 'delete-left']" />
+            <button
+              class="number-btn"
+              @click="addNumber(0)"
+              :disabled="currentPassword.length >= 6"
+            >
+              0
+            </button>
+            <button class="number-btn delete-btn" @click="deleteNumber">
+              <font-awesome-icon :icon="['fas', 'backspace']" />
             </button>
           </div>
         </div>
@@ -64,45 +89,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft, faDeleteLeft } from "@fortawesome/free-solid-svg-icons";
+import {
+  faAngleLeft,
+  faTimes,
+  faBackspace,
+} from "@fortawesome/free-solid-svg-icons";
 
-library.add(faAngleLeft, faDeleteLeft);
+library.add(faAngleLeft, faTimes, faBackspace);
 
 const router = useRouter();
+
 const currentPassword = ref("");
-const keypadNumbers = ref([]);
 
-// 키패드 숫자를 랜덤하게 생성하는 함수
-const generateRandomKeypad = () => {
-  const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 0];
-  const shuffled = [...numbers].sort(() => Math.random() - 0.5);
-  keypadNumbers.value = shuffled;
+// 숫자 패드 배열을 랜덤하게 생성
+const generateRandomNumberPad = () => {
+  const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const shuffled = numbers.sort(() => Math.random() - 0.5);
+  return [shuffled.slice(0, 3), shuffled.slice(3, 6), shuffled.slice(6, 9)];
 };
 
-onMounted(() => {
-  generateRandomKeypad();
+const numberPad = ref(generateRandomNumberPad());
+
+// 비밀번호 유효성 검사 (6자리 숫자)
+const isPasswordValid = computed(() => {
+  return (
+    currentPassword.value.length === 6 && /^\d{6}$/.test(currentPassword.value)
+  );
 });
-
-const goBack = () => {
-  router.back();
-};
 
 const addNumber = (number) => {
   if (currentPassword.value.length < 6) {
     currentPassword.value += number.toString();
 
-    // 6자리가 입력되면 다음 페이지로 이동
+    // 6자리 입력 완료 시 자동으로 다음 페이지로 이동
     if (currentPassword.value.length === 6) {
       setTimeout(() => {
-        router.push({
-          name: "certificate-password-change-new",
-          query: { currentPassword: currentPassword.value },
-        });
-      }, 300);
+        nextStep();
+      }, 300); // 0.3초 후 자동 이동
     }
   }
 };
@@ -112,217 +139,244 @@ const deleteNumber = () => {
     currentPassword.value = currentPassword.value.slice(0, -1);
   }
 };
+
+const clearPassword = () => {
+  currentPassword.value = "";
+};
+
+const goBack = () => {
+  router.back();
+};
+
+const nextStep = () => {
+  if (isPasswordValid.value) {
+    router.push({
+      name: "certificate-password-change-new",
+      query: { currentPassword: currentPassword.value },
+    });
+  }
+};
 </script>
 
 <style scoped>
 .password-change-container {
+  width: 100%;
   max-width: 390px;
   margin: 0 auto;
+  background: #f7f8fa;
   min-height: 100vh;
-  background-color: #fff;
-  padding: 120px 20px 80px 20px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-}
-
-/* 헤더 스타일 */
-.header-bar {
+  font-family: "Noto Sans KR", sans-serif;
   position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  height: 48px;
-  padding: 0;
-  margin-bottom: 40px;
-  z-index: 1100;
+  padding-bottom: 120px;
 }
 
-.header-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+.password-header {
   width: 100%;
-  text-align: center;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
-  margin: 0;
+  background: #fff;
+  padding: 0 16px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #ececec;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.back-btn {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
+.password-back {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
   background: none;
   border: none;
-  font-size: 22px;
+  font-size: 24px;
   color: #222;
   cursor: pointer;
-  padding: 2px 8px 2px 2px;
-  border-radius: 8px;
-  transition: background 0.15s;
-  position: relative;
-  z-index: 1200;
 }
 
-.back-btn:hover {
-  background: #f3f3f3;
+.password-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
 }
 
-/* 메인 콘텐츠 */
-.main-content {
-  flex: 1;
+.center-title {
+  text-align: center;
+}
+
+.password-content {
+  padding: 24px 20px;
+}
+
+.progress-section {
+  margin-bottom: 32px;
+}
+
+.progress-steps {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0 20px;
-}
-
-/* 단계 표시 */
-.step-indicator {
-  display: flex;
-  align-items: center;
-  margin-bottom: 60px;
+  gap: 8px;
 }
 
 .step {
-  width: 32px;
-  height: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
+  background: #e0e0e0;
+  color: #999;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: bold;
-  background: #e0e0e0;
-  color: #666;
+  font-size: 12px;
+  font-weight: 600;
 }
 
-.step.active {
-  background: #4318d1;
-  color: white;
+.step.completed .step-number {
+  background: var(--color-success);
+  color: #fff;
 }
 
-.step-line {
-  width: 40px;
-  height: 2px;
-  background: #e0e0e0;
-  margin: 0 8px;
+.step.active .step-number {
+  background: var(--color-main);
+  color: #fff;
 }
 
-/* 콘텐츠 영역 */
-.content-area {
-  width: 100%;
-  max-width: 320px;
-  text-align: center;
-}
-
-.title-text {
-  margin-bottom: 60px;
-}
-
-.title-text p {
-  margin: 8px 0;
-  font-size: 18px;
-  color: #333;
+.step-text {
+  font-size: 10px;
+  color: #999;
   font-weight: 500;
 }
 
-.title-text p:first-child {
-  font-size: 20px;
-  font-weight: bold;
-  color: #4318d1;
+.step.completed .step-text,
+.step.active .step-text {
+  color: #222;
 }
 
-/* 비밀번호 입력 필드 */
-.password-input-container {
-  margin-bottom: 80px;
+.step-line {
+  width: 20px;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.main-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222;
+  margin: 0 0 12px 0;
+  text-align: center;
+}
+
+.description-section {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.description-text {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.password-form {
+  margin-bottom: 32px;
+}
+
+.input-group {
+  margin-bottom: 32px;
+}
+
+.input-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+.password-display {
+  background: #fff;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60px;
 }
 
 .password-dots {
   display: flex;
-  justify-content: center;
   gap: 16px;
 }
 
 .password-dot {
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.password-dot.empty {
   background: #e0e0e0;
-  border: 2px solid #e0e0e0;
+  transition: all 0.2s ease;
 }
 
 .password-dot.filled {
-  background: #4318d1;
-  border: 2px solid #4318d1;
+  background: var(--color-main);
 }
 
-/* 키패드 */
-.keypad-container {
-  width: 100%;
+.number-pad {
+  margin-top: 24px;
 }
 
-.keypad-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  max-width: 280px;
-  margin: 0 auto;
-}
-
-.keypad-btn {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  border: none;
-  background: #f5f5f5;
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.2s ease;
+.number-row {
   display: flex;
-  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
   justify-content: center;
 }
 
-.keypad-btn:hover {
-  background: #e0e0e0;
-  transform: scale(1.05);
+.number-btn {
+  width: 60px;
+  height: 60px;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  color: #222;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
 }
 
-.keypad-btn:active {
-  transform: scale(0.95);
+.number-btn:hover:not(:disabled) {
+  background: #f0f0f0;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-.keypad-btn.empty {
-  background: transparent;
-  cursor: default;
+.number-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
-.keypad-btn.empty:hover {
-  background: transparent;
-  transform: none;
+.clear-btn {
+  color: #f44336;
 }
 
 .delete-btn {
-  font-size: 20px;
   color: #666;
-}
-
-@media (max-width: 540px) {
-  .password-change-container {
-    max-width: 100vw;
-  }
 }
 </style>

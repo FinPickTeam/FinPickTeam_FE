@@ -497,7 +497,8 @@ onMounted(() => {
   padding: 20px;
   box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
   cursor: pointer;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: all 0.15s;
+  border: 2px solid transparent;
   position: relative; /* 체크박스를 위한 상대 위치 */
 }
 
@@ -507,25 +508,8 @@ onMounted(() => {
 }
 
 .account-item-selected {
-  background: #22c55e !important;
-  color: #fff;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
-}
-
-.account-item-selected .account-bank-name,
-.account-item-selected .account-name,
-.account-item-selected .account-number {
-  color: #fff;
-}
-
-.account-item-selected .account-balance {
-  color: #fff;
-}
-
-.account-item-selected .account-type-badge {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: #fff;
+  border-color: #dc2626;
+  background: #fef2f2;
 }
 
 .account-item-header {
@@ -590,41 +574,33 @@ onMounted(() => {
 }
 
 .delete-section {
-  position: sticky;
-  bottom: 0;
-  left: 0;
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 100;
+  padding: 0 16px;
   width: 100%;
-  background: #fff;
-  padding: 16px 20px;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-  z-index: 99;
+  max-width: 390px;
+  box-sizing: border-box;
 }
 
 .delete-accounts-btn {
   width: 100%;
-  padding: 14px 20px;
   background: #dc2626;
   color: #fff;
   border: none;
   border-radius: 12px;
+  padding: 16px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
+  transition: background 0.15s;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
-.delete-accounts-btn:hover:not(:disabled) {
-  background: #c02626;
-}
-
-.delete-accounts-btn:disabled {
-  background: #e0e0e0;
-  color: #888;
-  cursor: not-allowed;
+.delete-accounts-btn:hover {
+  background: #b91c1c;
 }
 
 /* 모달 스타일 */

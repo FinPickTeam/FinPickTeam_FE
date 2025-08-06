@@ -1,11 +1,11 @@
 <template>
-  <div class="password-change-container">
+  <div class="set-password-container">
     <!-- 상단 헤더 -->
     <div class="password-header">
       <button class="password-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="password-title center-title">비밀번호 변경</span>
+      <span class="password-title center-title">인증서 비밀번호 설정</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
@@ -15,12 +15,12 @@
         <div class="progress-steps">
           <div class="step completed">
             <div class="step-number">1</div>
-            <span class="step-text">현재 비밀번호</span>
+            <span class="step-text">시작</span>
           </div>
           <div class="step-line"></div>
           <div class="step active">
             <div class="step-number">2</div>
-            <span class="step-text">새 비밀번호</span>
+            <span class="step-text">비밀번호</span>
           </div>
           <div class="step-line"></div>
           <div class="step">
@@ -31,24 +31,26 @@
       </div>
 
       <!-- 제목 -->
-      <h1 class="main-title">새 비밀번호 입력</h1>
+      <h1 class="main-title">인증서 비밀번호 설정</h1>
 
       <!-- 설명 -->
       <div class="description-section">
-        <p class="description-text">새로운 인증서 비밀번호를 입력해주세요.</p>
+        <p class="description-text">
+          안전한 인증서 사용을 위해 6자리 숫자 비밀번호를 설정해주세요.
+        </p>
       </div>
 
       <!-- 비밀번호 입력 폼 -->
       <div class="password-form">
         <div class="input-group">
-          <label class="input-label">새 비밀번호</label>
+          <label class="input-label">비밀번호</label>
           <div class="password-display">
             <div class="password-dots">
               <div
                 v-for="i in 6"
                 :key="i"
                 class="password-dot"
-                :class="{ filled: i <= newPassword.length }"
+                :class="{ filled: i <= password.length }"
               ></div>
             </div>
           </div>
@@ -62,7 +64,7 @@
               :key="number"
               class="number-btn"
               @click="addNumber(number)"
-              :disabled="newPassword.length >= 6"
+              :disabled="password.length >= 6"
             >
               {{ number }}
             </button>
@@ -74,7 +76,7 @@
             <button
               class="number-btn"
               @click="addNumber(0)"
-              :disabled="newPassword.length >= 6"
+              :disabled="password.length >= 6"
             >
               0
             </button>
@@ -89,8 +91,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -102,10 +104,8 @@ import {
 library.add(faAngleLeft, faTimes, faBackspace);
 
 const router = useRouter();
-const route = useRoute();
 
-const newPassword = ref("");
-const currentPassword = ref("");
+const password = ref("");
 
 // 숫자 패드 배열을 랜덤하게 생성
 const generateRandomNumberPad = () => {
@@ -118,19 +118,15 @@ const numberPad = ref(generateRandomNumberPad());
 
 // 비밀번호 유효성 검사 (6자리 숫자)
 const isPasswordValid = computed(() => {
-  return newPassword.value.length === 6 && /^\d{6}$/.test(newPassword.value);
-});
-
-onMounted(() => {
-  currentPassword.value = route.query.currentPassword || "";
+  return password.value.length === 6 && /^\d{6}$/.test(password.value);
 });
 
 const addNumber = (number) => {
-  if (newPassword.value.length < 6) {
-    newPassword.value += number.toString();
+  if (password.value.length < 6) {
+    password.value += number.toString();
 
     // 6자리 입력 완료 시 자동으로 다음 페이지로 이동
-    if (newPassword.value.length === 6) {
+    if (password.value.length === 6) {
       setTimeout(() => {
         nextStep();
       }, 300); // 0.3초 후 자동 이동
@@ -139,13 +135,13 @@ const addNumber = (number) => {
 };
 
 const deleteNumber = () => {
-  if (newPassword.value.length > 0) {
-    newPassword.value = newPassword.value.slice(0, -1);
+  if (password.value.length > 0) {
+    password.value = password.value.slice(0, -1);
   }
 };
 
 const clearPassword = () => {
-  newPassword.value = "";
+  password.value = "";
 };
 
 const goBack = () => {
@@ -154,19 +150,14 @@ const goBack = () => {
 
 const nextStep = () => {
   if (isPasswordValid.value) {
-    router.push({
-      name: "certificate-password-change-confirm",
-      query: {
-        currentPassword: currentPassword.value,
-        newPassword: newPassword.value,
-      },
-    });
+    sessionStorage.setItem("certificatePassword", password.value);
+    router.push("/openbanking/confirm-certificate-password");
   }
 };
 </script>
 
 <style scoped>
-.password-change-container {
+.set-password-container {
   width: 100%;
   max-width: 390px;
   margin: 0 auto;

@@ -57,7 +57,9 @@
         <!-- 도움말 링크 -->
         <div class="ars_fail_help_group">
           <div class="ars_fail_help">문제가 있으신가요?</div>
-          <a href="#" class="ars_fail_help_link">고객센터 문의</a>
+          <a href="#" class="ars_fail_help_link" @click="goToCustomerSupport"
+            >고객센터 문의</a
+          >
         </div>
       </div>
     </div>
@@ -73,6 +75,10 @@ const currentTime = ref("");
 
 function retryArs() {
   router.push("/ars/verification");
+}
+
+function goToCustomerSupport() {
+  router.push("/customer-support");
 }
 
 function updateCurrentTime() {
