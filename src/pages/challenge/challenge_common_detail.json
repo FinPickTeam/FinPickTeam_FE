@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "message": "챌린지 상세 조회 성공",
+  "data": {
+    "id": 10,
+    "title": "한 달 지출 기록하기",
+    "description": "매일 지출 내용을 기록하며 소비 습관을 파악해보자!",
+    "type": "COMMON",
+    "status": "IN_PROGRESS",
+    "startDate": "2025-08-01",
+    "endDate": "2025-08-31",
+    "goalType": "소비",
+    "goalValue": 0,
+    "isParticipating": false,
+    "isMine": false,
+    "myProgress": 0.95,
+    "participantsCount": 1000000,
+    "isResultCheck": true,
+    "categoryName": "전체 소비 줄이기",
+    "members": null
+  }
+}

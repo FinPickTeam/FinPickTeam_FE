@@ -116,7 +116,7 @@
       "type": "COMMON",
       "startDate": "2025-08-01",
       "endDate": "2025-08-31",
-      "participating": true,
+      "participating": false,
       "myProgressRate": 0.95,
       "participantsCount": 0,
       "isResultCheck": true,
