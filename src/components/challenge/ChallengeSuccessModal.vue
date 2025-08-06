@@ -1,18 +1,20 @@
 <template>
-  <div v-if="isVisible" class="modal-overlay" @click="closeModal">
+  <div v-if="isVisible" class="modal-overlay" @click="handleOverlayClick">
     <div class="modal-content" @click.stop>
+      <!-- 제목 -->
+      <h2 class="modal-title">축하합니다! 🎉</h2>
       <!-- 성공 아이콘 -->
       <div class="success-icon">
         <i class="fas fa-trophy"></i>
       </div>
 
-      <!-- 제목 -->
-      <h2 class="modal-title">축하합니다! 🎉</h2>
-
       <!-- 챌린지 정보 -->
       <div class="challenge-info">
         <h3 class="challenge-title">{{ challenge.title }}</h3>
-        <p class="challenge-description">{{ challenge.description }}</p>
+        <p class="success-description">
+          축하합니다! 챌린지 목표를 달성했습니다.<br />
+          당신의 노력이 빛나는 순간입니다!
+        </p>
       </div>
 
       <!-- 성과 통계 -->
@@ -70,7 +72,10 @@
 </template>
 
 <script setup>
+import { defineProps, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const props = defineProps({
   isVisible: {
@@ -94,7 +99,6 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['close']);
-const router = useRouter();
 
 const closeModal = () => {
   emit('close');
@@ -147,6 +151,7 @@ const goToNextChallenge = () => {
   position: relative;
   text-align: center;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
 }
 
 .success-icon {
@@ -320,24 +325,6 @@ const goToNextChallenge = () => {
 .close-btn:hover {
   background: #f8f9fa;
   color: #666;
-}
-
-/* 애니메이션 */
-.modal-overlay {
-  animation: fadeIn 0.3s ease;
-}
-
-.modal-content {
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
 }
 
 @keyframes slideIn {

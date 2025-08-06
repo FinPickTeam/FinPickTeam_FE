@@ -1,5 +1,14 @@
 <template>
   <div class="challenge-common-detail">
+    <!-- 챌린지 실패 모달 -->
+    <ChallengeFailModal
+      :isVisible="showFailModal"
+      :challengeTitle="challenge?.title || ''"
+      :progressRate="challenge?.myProgress || 0"
+      :goalValue="challenge?.goalValue || 0"
+      @close="showFailModal = false"
+      @retry="handleRetry"
+    />
     <!-- 로딩 상태 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -83,6 +92,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import challengeCommonDetailData from './challenge_common_detail.json';
+import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -90,6 +100,7 @@ const router = useRouter();
 // 상태 관리
 const loading = ref(true);
 const challenge = ref(null);
+const showFailModal = ref(false);
 
 // 챌린지 데이터 fetch 함수
 const fetchChallenge = async (challengeId) => {
@@ -158,6 +169,13 @@ const handleJoin = () => {
   challenge.value.isParticipating = true;
 
   alert('챌린지에 참여했습니다!');
+};
+
+const handleRetry = () => {
+  // 챌린지 재도전 로직
+  console.log('챌린지 재도전');
+  showFailModal.value = false;
+  // 여기에 재도전 로직 추가
 };
 </script>
 

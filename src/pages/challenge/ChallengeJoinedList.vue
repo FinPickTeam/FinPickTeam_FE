@@ -1,5 +1,21 @@
 <template>
   <div class="challenge-joined-list">
+    <!-- 성공 모달 -->
+    <ChallengeSuccessModal
+      :isVisible="showSuccessModal"
+      :challenge="testChallenge"
+      @close="showSuccessModal = false"
+    />
+
+    <!-- 실패 모달 -->
+    <ChallengeFailModal
+      :isVisible="showFailModal"
+      :challengeTitle="testChallengeTitle"
+      :progressRate="testProgressRate"
+      :goalValue="testGoalValue"
+      @close="showFailModal = false"
+      @retry="handleRetry"
+    />
     <div class="content">
       <!-- 공통 챌린지 섹션 -->
       <ChallengeSection
@@ -31,6 +47,16 @@
         :show-count="true"
         @cardClick="handleCardClick"
       />
+
+      <!-- 테스트용 모달 버튼들 -->
+      <div class="test-buttons">
+        <button class="test-success-btn" @click="showSuccessModalExample">
+          성공 모달 테스트
+        </button>
+        <button class="test-fail-btn" @click="showFailModalExample">
+          실패 모달 테스트
+        </button>
+      </div>
     </div>
   </div>
 </template>
@@ -39,6 +65,8 @@
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ChallengeSection from '@/components/challenge/ChallengeSection.vue';
+import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
+import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 import challengeListData from './challenge_list.json';
 
 // 참여중인 챌린지 필터링 (participating: true)
@@ -68,6 +96,24 @@ const groupChallenges = computed(() => {
 });
 
 const router = useRouter();
+
+// 모달 상태 관리
+const showSuccessModal = ref(false);
+const showFailModal = ref(false);
+
+// 테스트용 데이터
+const testChallenge = ref({
+  title: '커피값 줄이기 챌린지',
+  description: '매일 커피값을 절약하여 한 달 동안 5만원 모으기',
+  targetAmount: 50000,
+  currentAmount: 50000,
+  duration: 30,
+  reward: {
+    points: 1000,
+    badge: '절약 마스터',
+  },
+});
+const testGoalValue = ref(100000);
 
 const handleCardClick = (data) => {
   const { challenge, type } = data;
@@ -105,6 +151,23 @@ const handleCardClick = (data) => {
     });
   }
 };
+
+// 모달 핸들러 함수들
+
+const handleRetry = () => {
+  console.log('챌린지 재도전');
+  showFailModal.value = false;
+  // 여기에 재도전 로직 추가
+};
+
+// 테스트용 모달 표시 함수들
+const showSuccessModalExample = () => {
+  showSuccessModal.value = true;
+};
+
+const showFailModalExample = () => {
+  showFailModal.value = true;
+};
 </script>
 
 <style scoped>
@@ -117,5 +180,46 @@ const handleCardClick = (data) => {
 .content {
   padding-top: 20px;
   padding-bottom: 20px;
+}
+
+.test-buttons {
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.test-success-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.test-success-btn:hover {
+  transform: translateY(-2px);
+}
+
+.test-fail-btn {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.test-fail-btn:hover {
+  transform: translateY(-2px);
 }
 </style>
