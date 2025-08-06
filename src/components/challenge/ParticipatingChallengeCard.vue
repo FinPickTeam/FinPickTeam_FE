@@ -17,6 +17,9 @@
         <div class="challenge-category">
           {{ getCategoryName(challenge.categoryId) }}
         </div>
+        <div class="challenge-type">
+          {{ getChallengeTypeName(challenge.type) }}
+        </div>
       </div>
     </div>
   </div>
@@ -65,6 +68,16 @@ const getCategoryName = (categoryId) => {
   };
   return categories[categoryId] || '기타';
 };
+
+// 챌린지 타입 이름 반환 함수
+const getChallengeTypeName = (type) => {
+  const types = {
+    COMMON: '공통',
+    PERSONAL: '개인',
+    GROUP: '그룹',
+  };
+  return types[type] || '기타';
+};
 </script>
 
 <style scoped>
@@ -109,6 +122,16 @@ const getCategoryName = (categoryId) => {
   font-size: 12px;
   color: var(--color-main);
   background: rgba(107, 70, 193, 0.1);
+  padding: 6px 12px;
+  border-radius: 14px;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.challenge-type {
+  font-size: 12px;
+  color: #666;
+  background: rgba(102, 102, 102, 0.1);
   padding: 6px 12px;
   border-radius: 14px;
   white-space: nowrap;
