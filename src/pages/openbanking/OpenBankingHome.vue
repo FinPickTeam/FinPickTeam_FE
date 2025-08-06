@@ -57,7 +57,7 @@ function goToMyAssets() {
 <style scoped>
 .openbankinghome-container {
   width: 390px;
-  min-height: 844px;
+  height: 844px;
   max-width: 390px;
   margin: 0 auto;
   background: #fff;
@@ -66,6 +66,8 @@ function goToMyAssets() {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
+  padding-top: 80px;
+  overflow: hidden;
 }
 .ob-header {
   width: 100%;

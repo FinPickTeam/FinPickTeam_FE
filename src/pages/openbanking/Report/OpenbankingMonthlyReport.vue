@@ -136,8 +136,11 @@
       <div class="top3-list">
         <div class="top3-item" v-for="(item, idx) in top3" :key="item.label">
           <div class="top3-rank">{{ idx + 1 }}위</div>
-          <div class="top3-icon" :class="iconClass(item.label)">
-            <i :class="iconName(item.label)"></i>
+          <div class="top3-icon">
+            <img
+              :src="getSpendingLogo(item.label)"
+              :alt="item.label + ' 로고'"
+            />
           </div>
           <div class="top3-info">
             <div class="top3-label">{{ item.label }}</div>
@@ -406,18 +409,24 @@ const getMonthLabel = (idx) => {
   return `${d.getMonth() + 1}월`;
 };
 
-// 아이콘 클래스 및 이름 매핑
-const iconClass = (label) => {
-  if (label === "식비") return "food";
-  if (label === "카페/간식") return "cafe";
-  if (label === "온라인쇼핑") return "online";
-  return "etc";
-};
-const iconName = (label) => {
-  if (label === "식비") return "fas fa-utensils";
-  if (label === "카페/간식") return "fas fa-coffee";
-  if (label === "온라인쇼핑") return "fas fa-shopping-bag";
-  return "fas fa-ellipsis-h";
+// spending_logo 매핑 함수
+const getSpendingLogo = (label) => {
+  const logoMap = {
+    식비: "식비.png",
+    "카페/간식": "카페, 간식.png",
+    온라인쇼핑: "쇼핑, 미용.png",
+    "그 외": "기타.png",
+  };
+
+  const logoFileName = logoMap[label] || "기타.png";
+
+  try {
+    return new URL(`/src/assets/spending_logo/${logoFileName}`, import.meta.url)
+      .href;
+  } catch (error) {
+    // 로고 파일을 찾을 수 없는 경우 기본 로고 반환
+    return new URL("/src/assets/spending_logo/기타.png", import.meta.url).href;
+  }
 };
 </script>
 
@@ -425,7 +434,8 @@ const iconName = (label) => {
 .monthly-report-container {
   background: var(--color-bg-light);
   min-height: 100vh;
-  padding-bottom: 90px;
+  padding-top: 0;
+  padding-bottom: 20px;
 }
 
 /* 상단 헤더 스타일 */
@@ -478,7 +488,7 @@ const iconName = (label) => {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 24px 0 12px 0;
+  padding: 16px 0 8px 0;
 }
 .report-title {
   font-size: var(--font-size-title-main);
@@ -499,7 +509,6 @@ const iconName = (label) => {
   border-radius: 18px;
   margin: 0 16px 18px 16px;
   padding: 18px 18px 16px 18px;
-  box-shadow: 0 2px 8px #0001;
 }
 .section-title {
   font-size: var(--font-size-title-sub);
@@ -679,19 +688,15 @@ const iconName = (label) => {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  font-size: 18px;
+  overflow: hidden;
+  flex-shrink: 0;
 }
-.top3-icon.food {
-  background: var(--color-main-light);
-  color: #fff;
-}
-.top3-icon.online {
-  background: var(--color-main-light-2);
-  color: #fff;
-}
-.top3-icon.cafe {
-  background: #e6c1b6;
-  color: #fff;
+
+.top3-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 50%;
 }
 .top3-info {
   flex: 1;

@@ -9,8 +9,8 @@
     </div>
     <!-- 진행 바 -->
     <div class="progress-bar">
-      <div 
-        v-for="step in totalSteps" 
+      <div
+        v-for="step in totalSteps"
         :key="step"
         :class="['progress', { active: step === 2 }]"
       ></div>
@@ -18,7 +18,7 @@
     <!-- 질문 -->
     <div class="question-section">
       <div class="question-title">문항 2</div>
-      <div class="question-desc">투자 경험이 어느 정도 되시나요?</div>
+      <div class="question-desc">금융투자상품 취득 및 처분목적</div>
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -43,14 +43,21 @@ import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
-const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
+const options = [
+  "자산증식",
+  "주택마련",
+  "생활비",
+  "교육비",
+  "채무상환",
+  "결혼자금",
+];
 const selected = ref(null);
 
 // 동적 progress-bar 설정
 const totalSteps = ref(4); // 기본값
 
 // 라우터 쿼리에서 from 파라미터 확인하여 단계 수 결정
-if (route.query.from === 'mypage') {
+if (route.query.from === "mypage") {
   totalSteps.value = 9; // 투자성향 재검사는 9단계
 } else {
   totalSteps.value = 4; // 회원가입은 4단계
@@ -123,6 +130,12 @@ const goNext = () => {
   color: #222;
 }
 .question-desc {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+.question-subtitle {
   font-size: 16px;
   color: #222;
   margin-bottom: 24px;

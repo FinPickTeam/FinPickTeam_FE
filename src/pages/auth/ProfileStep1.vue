@@ -18,7 +18,7 @@
     <!-- 질문 -->
     <div class="question-section">
       <div class="question-title">문항 1</div>
-      <div class="question-desc">투자 경험이 어느 정도 되시나요?</div>
+      <div class="question-desc">금융 지식 수준 / 이해도</div>
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -43,7 +43,12 @@ import { useRouter, useRoute } from "vue-router";
 
 const router = useRouter();
 const route = useRoute();
-const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
+const options = [
+  "금융투자상품에 투자해 본 경험이 없음",
+  "널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 일정 부분 이해하고 있음",
+  "널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 깊이 있게 이해하고 있음",
+  "파생상품을 포함한 대부분의 금융투자상품의 구조 및 위험을 이해하고 있음",
+];
 const selected = ref(null);
 
 // 동적 progress-bar 설정
@@ -124,6 +129,12 @@ const goNext = () => {
   color: #222;
 }
 .question-desc {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+.question-subtitle {
   font-size: 16px;
   color: #222;
   margin-bottom: 24px;

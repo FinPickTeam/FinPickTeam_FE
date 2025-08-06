@@ -84,10 +84,11 @@ function goToPasswordChange() {
 .certificate-container {
   max-width: 390px;
   margin: 0 auto;
-  min-height: 100vh;
+  min-height: 844px;
   background-color: #fff;
-  padding: 120px 20px 80px 20px;
+  padding: 0 20px 80px 20px;
   box-sizing: border-box;
+  position: relative;
 }
 
 .certificate-container::-webkit-scrollbar {
@@ -96,15 +97,21 @@ function goToPasswordChange() {
 
 /* 헤더 스타일 */
 .dictionary-header-bar {
-  margin-top: 32px;
-  position: relative;
+  margin-top: 0;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   width: 100%;
-  height: 48px;
-  padding: 0;
+  max-width: 390px;
+  height: 56px;
+  padding: 0 20px;
   margin-bottom: 18px;
   z-index: 1100;
+  background: #fff;
+  border-bottom: 1px solid #ececec;
 }
 
 .dictionary-header-title {
@@ -146,8 +153,8 @@ function goToPasswordChange() {
 .security-banner {
   width: 100%;
   max-width: 350px;
-  margin: 0 auto 20px auto;
-  padding: 12px 16px;
+  margin: 80px auto 16px auto;
+  padding: 10px 14px;
   background: #e8f5e8;
   border-radius: 8px;
   text-align: center;
@@ -155,16 +162,16 @@ function goToPasswordChange() {
 
 .security-text {
   color: #2e7d32;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
 }
 
 /* 인증서 카드 */
 .certificate-card {
   width: 100%;
-  max-width: 180px;
-  margin: 0 auto 20px auto;
-  padding: 24px 20px;
+  max-width: 160px;
+  margin: 0 auto 16px auto;
+  padding: 20px 16px;
   background: var(--color-main-light);
   border-radius: 16px;
   color: white;
@@ -172,7 +179,7 @@ function goToPasswordChange() {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  height: 280px;
+  height: 240px;
 }
 
 .certificate-header {
@@ -183,12 +190,12 @@ function goToPasswordChange() {
 }
 
 .certificate-name {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 600;
 }
 
 .user-icon {
-  font-size: 18px;
+  font-size: 16px;
   color: rgba(255, 255, 255, 0.8);
 }
 
@@ -201,7 +208,7 @@ function goToPasswordChange() {
 }
 
 .user-name {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   margin-bottom: 0;
 }
@@ -214,38 +221,45 @@ function goToPasswordChange() {
 }
 
 .expiry-date {
-  font-size: 11px;
+  font-size: 10px;
   color: rgba(255, 255, 255, 0.9);
 }
 
 .status-badge {
   background: rgba(255, 255, 255, 0.25);
   color: white;
-  padding: 3px 8px;
-  border-radius: 10px;
-  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 9px;
   font-weight: 600;
 }
 
 /* 메뉴 리스트 */
 .menu-list {
+  margin: 6px 0 0 0;
+  max-width: 390px;
   width: 100%;
-  max-width: 350px;
-  margin: 0 auto;
+  padding: 0 30px 0 30px;
+  box-sizing: border-box;
+  overflow-x: hidden;
+  margin-bottom: 0;
+  padding-bottom: 0;
   background: #fff;
-  overflow: hidden;
+  border-radius: 12px;
 }
 
 .menu-item {
   width: 100%;
+  margin: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 20px;
-  border-bottom: 1px solid #333;
+  padding: 16px 20px;
   font-size: 15px;
-  color: #000000;
+  color: var(--color-text);
   box-sizing: border-box;
+  word-break: keep-all;
+  overflow-x: hidden;
   cursor: pointer;
   transition: background 0.15s;
 }
@@ -255,11 +269,13 @@ function goToPasswordChange() {
 }
 
 .menu-item:last-child {
-  border-bottom: 2px solid #000;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 
 .menu-item.danger {
-  color: #e53935;
+  color: var(--color-accent);
 }
 
 .chevron {
@@ -268,7 +284,7 @@ function goToPasswordChange() {
 }
 
 .danger-chevron {
-  color: #e53935;
+  color: var(--color-accent);
 }
 
 /* 토글 스위치 */

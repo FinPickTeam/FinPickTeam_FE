@@ -17,8 +17,8 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 1</div>
-      <div class="question-desc">투자 경험이 어느 정도 되시나요?</div>
+      <div class="question-title">문항 6</div>
+      <div class="question-desc">연간 소득 현황</div>
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -42,7 +42,13 @@ import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
-const options = ["전혀 없음", "1년 미만", "1-3년", "3-5년", "5년 이상"];
+const options = [
+  "2천만원 미만",
+  "2천만원 이상 ~ 5천만원 미만",
+  "5천만원 이상 ~ 7천만원 미만",
+  "7천만원 이상 ~ 1억원 미만",
+  "1억원 이상",
+];
 const selected = ref(null);
 
 // 동적 progress-bar 설정 (투자성향 재검사는 항상 9단계)
@@ -115,6 +121,12 @@ const goNext = () => {
   color: #222;
 }
 .question-desc {
+  font-size: 18px;
+  font-weight: bold;
+  color: #222;
+  margin-bottom: 8px;
+}
+.question-subtitle {
   font-size: 16px;
   color: #222;
   margin-bottom: 24px;

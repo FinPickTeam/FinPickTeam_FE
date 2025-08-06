@@ -27,7 +27,10 @@
             <div class="card-type-badge">{{ cardInfo.type }}</div>
           </div>
         </div>
-        <div class="card-balance">
+        <div
+          class="card-balance"
+          :class="{ negative: (cardInfo.amount || 0) < 0 }"
+        >
           {{ (cardInfo.amount || 0).toLocaleString() }}원
         </div>
       </div>
@@ -396,7 +399,6 @@ onMounted(() => {
   margin: 16px;
   padding: 24px 20px;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
 }
 
 .card-info-header {
@@ -445,7 +447,11 @@ onMounted(() => {
 .card-balance {
   font-size: 1.3rem;
   font-weight: 700;
-  color: #dc2626;
+  color: #4318d1;
+}
+
+.card-balance.negative {
+  color: #4318d1;
 }
 
 .card-number {
@@ -460,7 +466,6 @@ onMounted(() => {
   margin: 16px;
   border-radius: 18px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
 }
 
 .card-transaction-header {
@@ -608,7 +613,6 @@ onMounted(() => {
 .date-input:focus {
   outline: none;
   border-color: #4318d1;
-  box-shadow: 0 0 0 3px rgba(67, 24, 209, 0.1);
 }
 
 /* 모달 스타일 */
@@ -631,8 +635,6 @@ onMounted(() => {
   width: 90%;
   max-width: 350px;
   overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .modal-header {

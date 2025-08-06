@@ -20,7 +20,7 @@
           {{ account?.type }}
         </div>
       </div>
-      <div class="account-balance">
+      <div class="account-balance" :class="{ negative: account?.balance < 0 }">
         {{ account?.balance?.toLocaleString() }}원
       </div>
       <div class="account-name">{{ account?.name }}</div>
@@ -76,7 +76,9 @@
       </div>
       <div class="detail-row">
         <span class="detail-label">잔액</span>
-        <span class="detail-value balance"
+        <span
+          class="detail-value balance"
+          :class="{ negative: account?.balance < 0 }"
           >{{ account?.balance?.toLocaleString() }}원</span
         >
       </div>
@@ -416,6 +418,10 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 
+.account-balance.negative {
+  color: #e11d48;
+}
+
 .account-name {
   font-size: 0.95rem;
   color: #666;
@@ -462,6 +468,10 @@ onMounted(() => {
 .detail-value.balance {
   color: #4318d1;
   font-size: 1.1rem;
+}
+
+.detail-value.balance.negative {
+  color: #e11d48;
 }
 
 .account-transactions {
