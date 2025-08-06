@@ -1,6 +1,13 @@
 <template>
   <div class="challenge-personal-detail">
-    <div class="content">
+    <!-- 로딩 상태 -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">챌린지 정보를 불러오는 중...</p>
+    </div>
+
+    <!-- 챌린지 상세 정보 -->
+    <div v-else-if="challenge" class="content">
       <!-- 챌린지 기본 정보 -->
       <div class="challenge-info">
         <div class="title-section">
@@ -69,6 +76,11 @@
         </div>
       </div>
     </div>
+
+    <!-- 에러 상태 -->
+    <div v-else class="error-container">
+      <p class="error-text">챌린지 정보를 불러올 수 없습니다.</p>
+    </div>
   </div>
 </template>
 
@@ -80,22 +92,40 @@ import challengeDetailData from './challenge_personal_detail.json';
 const route = useRoute();
 const router = useRouter();
 
-// 챌린지 데이터 (JSON 파일에서 가져온 데이터)
-const challenge = ref(challengeDetailData.data);
+// 상태 관리
+const loading = ref(true);
+const challenge = ref(null);
 
 onMounted(() => {
   // URL 파라미터에서 챌린지 ID 가져오기
   const challengeId = route.params.id;
 
-  // 라우터 state에서 전달받은 챌린지 데이터 확인
-  if (route.state && route.state.challengeData) {
-    challenge.value = route.state.challengeData;
-  }
-
-  // 실제로는 API 호출로 챌린지 데이터 가져오기
-  console.log('챌린지 ID:', challengeId);
-  console.log('챌린지 데이터:', challenge.value);
+  // 챌린지 데이터 fetch
+  fetchChallenge(challengeId);
 });
+
+// 챌린지 데이터 fetch 함수
+const fetchChallenge = async (challengeId) => {
+  try {
+    loading.value = true;
+
+    // 실제로는 API 호출
+    // const response = await fetch(`/api/challenges/${challengeId}`);
+    // const data = await response.json();
+
+    // JSON 파일에서 데이터 가져오기 (실제로는 API에서 가져올 데이터)
+    const data = challengeDetailData.data;
+    challenge.value = data;
+
+    console.log('챌린지 ID:', challengeId);
+    console.log('챌린지 데이터:', challenge.value);
+  } catch (error) {
+    console.error('챌린지 데이터 로드 실패:', error);
+    challenge.value = null;
+  } finally {
+    loading.value = false;
+  }
+};
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -121,6 +151,57 @@ const getRemainingDays = () => {
 .challenge-personal-detail {
   min-height: 100vh;
   background-color: #f8f9fa;
+}
+
+/* 로딩 스타일 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  padding: 20px 16px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--color-main);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 16px;
+  color: #666;
+  text-align: center;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 에러 스타일 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  padding: 20px 16px;
+}
+
+.error-text {
+  font-size: 16px;
+  color: #666;
+  text-align: center;
 }
 
 .content {

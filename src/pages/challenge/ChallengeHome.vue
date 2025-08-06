@@ -49,7 +49,7 @@
           v-for="challenge in participatingChallenges"
           :key="challenge.id"
           :challenge="challenge"
-          @click="handleCardClick(challenge)"
+          @cardClick="handleCardClick"
         />
       </div>
     </div>
@@ -106,21 +106,44 @@ const handleParticipate = (challenge) => {
   console.log('참여하기 클릭:', challenge);
   // 챌린지 상세 페이지로 이동
   router.push({
-    path: `/challenge/common-detail/${challenge.id}`,
+    name: 'ChallengeCommonDetail',
+    params: { id: challenge.id },
     state: {
       previousPage: '/challenge',
     },
   });
 };
 
-const handleCardClick = (challenge) => {
-  // 참여중인 챌린지 상세 페이지로 이동
-  router.push({
-    path: `/challenge/personal-detail/${challenge.id}`,
-    state: {
-      previousPage: '/challenge',
-    },
-  });
+const handleCardClick = (data) => {
+  // data가 객체인 경우 (ChallengeCard에서 온 경우)
+  const challenge = data.challenge || data;
+
+  // 챌린지 타입에 따른 상세 페이지로 이동
+  if (challenge.type === 'COMMON') {
+    router.push({
+      name: 'ChallengeCommonDetail',
+      params: { id: challenge.id },
+      state: {
+        previousPage: '/challenge',
+      },
+    });
+  } else if (challenge.type === 'GROUP') {
+    router.push({
+      name: 'ChallengeGroupDetail',
+      params: { id: challenge.id },
+      state: {
+        previousPage: '/challenge',
+      },
+    });
+  } else if (challenge.type === 'PERSONAL') {
+    router.push({
+      name: 'ChallengePersonalDetail',
+      params: { id: challenge.id },
+      state: {
+        previousPage: '/challenge',
+      },
+    });
+  }
 };
 </script>
 
