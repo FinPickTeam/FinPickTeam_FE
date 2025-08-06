@@ -15,28 +15,34 @@
         <div class="challenge-stats">
           <div class="stat-item">
             <span class="stat-label">진행률</span>
-            <span class="stat-value">{{ challenge.progress }}%</span>
+            <span class="stat-value"
+              >{{ Math.round(challenge.myProgress * 100) }}%</span
+            >
           </div>
           <div class="stat-item">
-            <span class="stat-label">목표 금액</span>
-            <span class="stat-value">{{ challenge.targetAmount }}원</span>
+            <span class="stat-label">목표 {{ challenge.goalType }}</span>
+            <span class="stat-value"
+              >{{ challenge.goalValue.toLocaleString() }}원</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">남은 기간</span>
-            <span class="stat-value">D-{{ challenge.remainingDays }}</span>
+            <span class="stat-value">D-{{ getRemainingDays() }}</span>
           </div>
         </div>
 
         <div class="progress-section">
           <div class="progress-header">
-            <span class="progress-label">저축 진행률</span>
-            <span class="progress-percentage">{{ challenge.progress }}%</span>
+            <span class="progress-label">{{ challenge.goalType }} 진행률</span>
+            <span class="progress-percentage"
+              >{{ Math.round(challenge.myProgress * 100) }}%</span
+            >
           </div>
           <div class="progress-bar">
             <div
               class="progress-fill"
               :style="{
-                width: challenge.progress + '%',
+                width: Math.round(challenge.myProgress * 100) + '%',
               }"
             ></div>
           </div>
@@ -45,12 +51,20 @@
         <!-- 개인 챌린지 특별 정보 -->
         <div class="personal-info">
           <div class="savings-info">
-            <span class="savings-label">현재 저축액</span>
-            <span class="savings-amount">{{ challenge.currentAmount }}원</span>
+            <span class="savings-label">현재 {{ challenge.goalType }}</span>
+            <span class="savings-amount"
+              >{{
+                Math.round(
+                  challenge.goalValue * challenge.myProgress
+                ).toLocaleString()
+              }}원</span
+            >
           </div>
           <div class="daily-goal">
-            <span class="goal-label">일일 목표</span>
-            <span class="goal-amount">{{ challenge.dailyGoal }}원</span>
+            <span class="goal-label">목표 {{ challenge.goalType }}</span>
+            <span class="goal-amount"
+              >{{ challenge.goalValue.toLocaleString() }}원</span
+            >
           </div>
         </div>
       </div>
@@ -61,23 +75,13 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import challengeDetailData from './challenge_personal_detail.json';
 
 const route = useRoute();
 const router = useRouter();
 
-// 챌린지 데이터 (실제로는 API에서 가져올 데이터)
-const challenge = ref({
-  id: 1,
-  title: '매일 5천원 저축하기',
-  description: '매일 5천원씩 저축하여 30일 동안 15만원 모으기',
-  progress: 65,
-  remainingDays: 12,
-  targetAmount: 150000,
-  currentAmount: 97500,
-  dailyGoal: 5000,
-  startDate: '2024-01-01',
-  endDate: '2024-01-31',
-});
+// 챌린지 데이터 (JSON 파일에서 가져온 데이터)
+const challenge = ref(challengeDetailData.data);
 
 onMounted(() => {
   // URL 파라미터에서 챌린지 ID 가져오기
@@ -100,6 +104,16 @@ const formatDate = (dateString) => {
     month: 'long',
     day: 'numeric',
   });
+};
+
+// 남은 일수 계산 함수
+const getRemainingDays = () => {
+  if (!challenge.value.endDate) return 0;
+  const endDate = new Date(challenge.value.endDate);
+  const today = new Date();
+  const diffTime = endDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
 };
 </script>
 
