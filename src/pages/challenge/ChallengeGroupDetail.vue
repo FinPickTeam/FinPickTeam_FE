@@ -36,7 +36,7 @@
           </div>
         </div>
 
-        <div class="progress-section">
+        <div class="progress-section" v-if="challenge.isParticipating">
           <div class="progress-header">
             <span class="progress-label">달성률</span>
             <span class="progress-percentage"
@@ -53,10 +53,32 @@
           </div>
         </div>
 
-        <!-- 참여자 목록 섹션 -->
+        <!-- 모집 인원 progress bar (참여하지 않을 때만 표시) -->
+        <div class="recruitment-section" v-if="!challenge.isParticipating">
+          <div class="progress-header">
+            <span class="progress-label">모집 현황</span>
+            <span class="progress-percentage"
+              >{{ challenge.participantsCount }}/6명</span
+            >
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              :style="{
+                width: (challenge.participantsCount / 6) * 100 + '%',
+              }"
+            ></div>
+          </div>
+        </div>
+
+        <!-- 참여자 목록 섹션 (참여 중일 때만 표시) -->
         <div
           class="members-section"
-          v-if="challenge.members && challenge.members.length > 0"
+          v-if="
+            challenge.isParticipating &&
+            challenge.members &&
+            challenge.members.length > 0
+          "
         >
           <h3 class="members-title">참여자 목록</h3>
           <div class="members-list">
@@ -82,12 +104,9 @@
         </div>
       </div>
 
-      <!-- 참여 버튼 -->
-      <div class="join-section">
-        <button v-if="!isParticipating" class="join-button" @click="handleJoin">
-          챌린지 참여하기
-        </button>
-        <button v-else class="joined-button" disabled>참여 중</button>
+      <!-- 참여 버튼 (참여하지 않을 때만 표시) -->
+      <div class="join-section" v-if="!challenge.isParticipating">
+        <button class="join-button" @click="handleJoin">챌린지 참여하기</button>
       </div>
     </div>
 
@@ -109,7 +128,6 @@ const router = useRouter();
 // 상태 관리
 const loading = ref(true);
 const challenge = ref(null);
-const isParticipating = ref(false);
 
 onMounted(() => {
   // URL 파라미터에서 챌린지 ID 가져오기
@@ -135,8 +153,7 @@ const fetchChallenge = async (challengeId) => {
     console.log('챌린지 ID:', challengeId);
     console.log('챌린지 데이터:', challenge.value);
 
-    // 사용자의 참여 여부 확인
-    checkParticipationStatus();
+    // 사용자의 참여 여부는 challenge.isParticipating에서 직접 확인
   } catch (error) {
     console.error('챌린지 데이터 로드 실패:', error);
     challenge.value = null;
@@ -154,10 +171,7 @@ const formatDate = (dateString) => {
   });
 };
 
-const checkParticipationStatus = () => {
-  // 실제로는 API 호출로 사용자의 참여 여부 확인
-  isParticipating.value = challenge.value.isParticipating;
-};
+// checkParticipationStatus 함수 제거 - challenge.isParticipating을 직접 사용
 
 const handleJoin = () => {
   // 챌린지 참여 로직
@@ -167,7 +181,7 @@ const handleJoin = () => {
   }
 
   // 실제로는 API 호출로 참여 처리
-  isParticipating.value = true;
+  challenge.value.isParticipating = true;
   challenge.value.participantsCount += 1;
 
   alert('챌린지에 참여했습니다!');
@@ -349,6 +363,10 @@ const getRemainingDays = () => {
   );
   border-radius: 4px;
   transition: width 0.3s ease;
+}
+
+.recruitment-section {
+  margin-bottom: 20px;
 }
 
 .group-info {

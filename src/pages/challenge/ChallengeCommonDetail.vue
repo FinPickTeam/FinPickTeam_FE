@@ -1,5 +1,14 @@
 <template>
   <div class="challenge-common-detail">
+    <!-- 챌린지 실패 모달 -->
+    <ChallengeFailModal
+      :isVisible="showFailModal"
+      :challengeTitle="challenge?.title || ''"
+      :progressRate="challenge?.myProgress || 0"
+      :goalValue="challenge?.goalValue || 0"
+      @close="showFailModal = false"
+      @retry="handleRetry"
+    />
     <!-- 로딩 상태 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -38,7 +47,7 @@
           </div>
         </div>
 
-        <div class="progress-section">
+        <div class="progress-section" v-if="challenge.isParticipating">
           <div class="progress-header">
             <span class="progress-label">달성률</span>
             <span class="progress-percentage"
@@ -67,11 +76,8 @@
       </div>
 
       <!-- 참여 버튼 -->
-      <div class="join-section">
-        <button v-if="!isParticipating" class="join-button" @click="handleJoin">
-          챌린지 참여하기
-        </button>
-        <button v-else class="joined-button" disabled>참여 중</button>
+      <div class="join-section" v-if="!challenge.isParticipating">
+        <button class="join-button" @click="handleJoin">챌린지 참여하기</button>
       </div>
     </div>
 
@@ -86,6 +92,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import challengeCommonDetailData from './challenge_common_detail.json';
+import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -93,7 +100,7 @@ const router = useRouter();
 // 상태 관리
 const loading = ref(true);
 const challenge = ref(null);
-const isParticipating = ref(false);
+const showFailModal = ref(false);
 
 // 챌린지 데이터 fetch 함수
 const fetchChallenge = async (challengeId) => {
@@ -113,8 +120,7 @@ const fetchChallenge = async (challengeId) => {
       challenge.value = data;
     }
 
-    // 사용자의 참여 여부 확인
-    checkParticipationStatus();
+    // 사용자의 참여 여부는 challenge.isParticipating에서 직접 확인
   } catch (error) {
     console.error('챌린지 데이터 로드 실패:', error);
     challenge.value = null;
@@ -150,10 +156,7 @@ const getRemainingDays = () => {
   return Math.max(0, diffDays);
 };
 
-const checkParticipationStatus = () => {
-  // 실제로는 API 호출로 사용자의 참여 여부 확인
-  isParticipating.value = challenge.value?.isParticipating || false;
-};
+// checkParticipationStatus 함수 제거 - challenge.isParticipating을 직접 사용
 
 const handleJoin = () => {
   // 챌린지 참여 로직
@@ -163,10 +166,16 @@ const handleJoin = () => {
   }
 
   // 실제로는 API 호출로 참여 처리
-  isParticipating.value = true;
   challenge.value.isParticipating = true;
 
   alert('챌린지에 참여했습니다!');
+};
+
+const handleRetry = () => {
+  // 챌린지 재도전 로직
+  console.log('챌린지 재도전');
+  showFailModal.value = false;
+  // 여기에 재도전 로직 추가
 };
 </script>
 

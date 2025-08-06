@@ -76,7 +76,11 @@ const goToRanking = () => router.push('/challenge/ranking'); // 원하는 경로
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(to right, #c8c4f8, var(--color-main-dark));
+  background: linear-gradient(
+    to right,
+    var(--color-main-light-2),
+    var(--color-main-dark)
+  );
   padding: 0 16px;
   position: fixed;
   top: 0;
