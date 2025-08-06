@@ -11,7 +11,8 @@
       "participating": true,
       "myProgressRate": 0.65,
       "participantsCount": 0,
-      "isResultCheck": true
+      "isResultCheck": true,
+      "categoryId": 3
     },
     {
       "id": 2,
@@ -22,7 +23,104 @@
       "participating": false,
       "myProgressRate": null,
       "participantsCount": 4,
-      "isResultCheck": false
+      "isResultCheck": false,
+      "categoryId": 3
+    },
+    {
+      "id": 3,
+      "title": "택시비 아끼기 챌린지",
+      "type": "PERSONAL",
+      "startDate": "2025-08-01",
+      "endDate": "2025-08-10",
+      "participating": true,
+      "myProgressRate": 0.8,
+      "participantsCount": 1,
+      "isResultCheck": true,
+      "categoryId": 4
+    },
+    {
+      "id": 4,
+      "title": "외식 줄이기 챌린지",
+      "type": "GROUP",
+      "startDate": "2025-08-03",
+      "endDate": "2025-08-20",
+      "participating": false,
+      "myProgressRate": null,
+      "participantsCount": 1,
+      "isResultCheck": false,
+      "categoryId": 2
+    },
+    {
+      "id": 5,
+      "title": "편의점 이용 줄이기",
+      "type": "PERSONAL",
+      "startDate": "2025-08-05",
+      "endDate": "2025-08-15",
+      "participating": true,
+      "myProgressRate": 0.5,
+      "participantsCount": 0,
+      "isResultCheck": false,
+      "categoryId": 1
+    },
+    {
+      "id": 6,
+      "title": "화장품 소비 줄이기",
+      "type": "GROUP",
+      "startDate": "2025-08-01",
+      "endDate": "2025-08-30",
+      "participating": false,
+      "myProgressRate": null,
+      "participantsCount": 3,
+      "isResultCheck": false,
+      "categoryId": 5
+    },
+    {
+      "id": 7,
+      "title": "배달비 아끼기",
+      "type": "PERSONAL",
+      "startDate": "2025-08-01",
+      "endDate": "2025-08-07",
+      "participating": true,
+      "myProgressRate": 0.7,
+      "participantsCount": 0,
+      "isResultCheck": true,
+      "categoryId": 2
+    },
+    {
+      "id": 8,
+      "title": "불필요한 쇼핑 줄이기",
+      "type": "GROUP",
+      "startDate": "2025-08-02",
+      "endDate": "2025-08-29",
+      "participating": false,
+      "myProgressRate": null,
+      "participantsCount": 5,
+      "isResultCheck": false,
+      "categoryId": 5
+    },
+    {
+      "id": 9,
+      "title": "대중교통 이용하기",
+      "type": "PERSONAL",
+      "startDate": "2025-08-01",
+      "endDate": "2025-08-21",
+      "participating": true,
+      "myProgressRate": 0.9,
+      "participantsCount": 0,
+      "isResultCheck": true,
+      "categoryId": 4
+    },
+    {
+      "id": 10,
+      "title": "한 달 지출 기록하기",
+      "type": "COMMON",
+      "startDate": "2025-08-01",
+      "endDate": "2025-08-31",
+      "participating": true,
+      "myProgressRate": 0.95,
+      "participantsCount": 0,
+      "isResultCheck": true,
+      "categoryId": 1
     }
   ]
 }

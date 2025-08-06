@@ -57,11 +57,11 @@ const formatDate = (dateString) => {
 // 카테고리 이름 반환 함수
 const getCategoryName = (categoryId) => {
   const categories = {
-    1: '전체 소비 줄이기',
-    2: '식비 줄이기',
-    3: '카페·간식 줄이기',
-    4: '교통비 줄이기',
-    5: '미용·쇼핑 줄이기',
+    1: '전체 소비',
+    2: '식비',
+    3: '카페·간식',
+    4: '교통비',
+    5: '미용·쇼핑',
   };
   return categories[categoryId] || '기타';
 };
@@ -112,7 +112,7 @@ const getCategoryName = (categoryId) => {
   padding: 6px 12px;
   border-radius: 14px;
   white-space: nowrap;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .challenge-date {
