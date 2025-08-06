@@ -124,6 +124,7 @@ const emit = defineEmits(['cardClick']);
 const handleCardClick = () => {
   emit('cardClick', {
     challenge: props.challenge,
+    type: props.challenge.type.toLowerCase(),
   });
 };
 </script>

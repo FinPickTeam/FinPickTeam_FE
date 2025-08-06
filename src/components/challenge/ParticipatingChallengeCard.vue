@@ -1,5 +1,5 @@
 <template>
-  <div class="challenge-card" @click="$emit('click')">
+  <div class="challenge-card" @click="handleCardClick">
     <h4 class="challenge-title">{{ challenge.title }}</h4>
     <div class="challenge-date">
       {{ formatDate(challenge.startDate) }} ~
@@ -45,7 +45,14 @@ const props = defineProps({
   },
 });
 
-defineEmits(['click']);
+const emit = defineEmits(['click', 'cardClick']);
+
+const handleCardClick = () => {
+  emit('cardClick', {
+    challenge: props.challenge,
+    type: props.challenge.type.toLowerCase(),
+  });
+};
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {

@@ -100,15 +100,18 @@ const fetchChallenge = async (challengeId) => {
   try {
     loading.value = true;
 
-    // 실제로는 API 호출
-    // const response = await fetch(`/api/challenges/${challengeId}`);
-    // const data = await response.json();
+    // 라우터 state에서 전달받은 챌린지 데이터 확인
+    if (route.state && route.state.challengeData) {
+      challenge.value = route.state.challengeData;
+    } else {
+      // 실제로는 API 호출
+      // const response = await fetch(`/api/challenges/${challengeId}`);
+      // const data = await response.json();
 
-    // JSON 파일에서 데이터 가져오기 (실제로는 API에서 가져올 데이터)
-    const data = challengeCommonDetailData.data;
-
-    // 데이터 설정
-    challenge.value = data;
+      // JSON 파일에서 데이터 가져오기 (실제로는 API에서 가져올 데이터)
+      const data = challengeCommonDetailData.data;
+      challenge.value = data;
+    }
 
     // 사용자의 참여 여부 확인
     checkParticipationStatus();

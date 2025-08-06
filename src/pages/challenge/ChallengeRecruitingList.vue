@@ -54,20 +54,25 @@ const router = useRouter();
 const handleCardClick = (data) => {
   const { challenge, type } = data;
 
-  if (type === 'common') {
-    // 공통 챌린지 상세 페이지로 이동
+  // 챌린지 타입에 따른 라우팅
+  if (challenge.type === 'COMMON') {
+    // 공통 챌린지 상세 페이지로 이동 (ID 기반)
     router.push({
-      path: `/challenge/common-detail/${challenge.id}`,
+      name: 'ChallengeCommonDetail',
+      params: { id: challenge.id },
       state: {
         previousPage: '/challenge/recruiting-list',
+        challengeData: challenge,
       },
     });
-  } else if (type === 'group') {
-    // 소그룹 챌린지 상세 페이지로 이동
+  } else if (challenge.type === 'GROUP') {
+    // 소그룹 챌린지 상세 페이지로 이동 (ID 기반)
     router.push({
-      path: `/challenge/group-detail/${challenge.id}`,
+      name: 'ChallengeGroupDetail',
+      params: { id: challenge.id },
       state: {
         previousPage: '/challenge/recruiting-list',
+        challengeData: challenge,
       },
     });
   }

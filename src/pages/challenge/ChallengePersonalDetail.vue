@@ -88,8 +88,8 @@ onMounted(() => {
   const challengeId = route.params.id;
 
   // 라우터 state에서 전달받은 챌린지 데이터 확인
-  if (route.state && route.state.challenge) {
-    challenge.value = route.state.challenge;
+  if (route.state && route.state.challengeData) {
+    challenge.value = route.state.challengeData;
   }
 
   // 실제로는 API 호출로 챌린지 데이터 가져오기

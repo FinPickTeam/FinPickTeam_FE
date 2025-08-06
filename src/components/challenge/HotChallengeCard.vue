@@ -54,7 +54,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['participate', 'click']);
+const emit = defineEmits(['participate', 'click', 'cardClick']);
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {
@@ -83,6 +83,10 @@ const handleParticipate = () => {
 };
 
 const handleCardClick = () => {
+  emit('cardClick', {
+    challenge: props.challenge,
+    type: props.challenge.type.toLowerCase(),
+  });
   emit('click', props.challenge);
 };
 </script>

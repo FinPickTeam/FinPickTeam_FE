@@ -57,7 +57,11 @@ const props = defineProps({
 const emit = defineEmits(['cardClick']);
 
 const handleCardClick = (data) => {
-  emit('cardClick', data);
+  // type 정보를 추가하여 전달
+  emit('cardClick', {
+    ...data,
+    type: props.type,
+  });
 };
 </script>
 
