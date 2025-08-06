@@ -17,16 +17,18 @@
     <!-- 약관 목록 -->
     <div class="ars-agreement-list">
       <!-- 전체동의 -->
-      <div class="ars-agreement-item" @click="toggleAllAgreements">
-        <div class="ars-agreement-checkbox" :class="{ checked: allAgreed }">
+      <div class="ars-agreement-item-all" @click="toggleAllAgreements">
+        <div class="ars-agreement-checkbox-all" :class="{ checked: allAgreed }">
           <font-awesome-icon
             v-if="allAgreed"
             :icon="['fas', 'check']"
             class="check-icon"
           />
         </div>
-        <span class="ars-agreement-text">전체동의하기</span>
-        <font-awesome-icon :icon="['fas', 'angle-right']" class="arrow-icon" />
+        <div class="ars-agreement-text-all">
+          <span class="ars-agreement-title-all">전체동의하기</span>
+          <span class="ars-agreement-desc-all">모든 약관에 동의합니다</span>
+        </div>
       </div>
 
       <!-- 개별 약관 -->
@@ -34,23 +36,41 @@
         class="ars-agreement-item"
         v-for="(agreement, index) in agreements"
         :key="index"
-        @click="toggleAgreement(index)"
       >
-        <div
-          class="ars-agreement-checkbox"
-          :class="{ checked: agreement.checked }"
-        >
+        <div class="ars-agreement-item-header" @click="toggleAgreement(index)">
+          <div
+            class="ars-agreement-checkbox"
+            :class="{ checked: agreement.checked }"
+          >
+            <font-awesome-icon
+              v-if="agreement.checked"
+              :icon="['fas', 'check']"
+              class="check-icon"
+            />
+          </div>
+          <div class="ars-agreement-content">
+            <span class="ars-agreement-text">{{ agreement.securities }}</span>
+            <span class="ars-agreement-subtext">{{ agreement.bank }}</span>
+          </div>
           <font-awesome-icon
-            v-if="agreement.checked"
-            :icon="['fas', 'check']"
-            class="check-icon"
+            :icon="['fas', agreement.expanded ? 'angle-up' : 'angle-right']"
+            class="arrow-icon"
           />
         </div>
-        <div class="ars-agreement-content">
-          <span class="ars-agreement-text">{{ agreement.securities }}</span>
-          <span class="ars-agreement-subtext">{{ agreement.bank }}</span>
+        <div class="ars-agreement-content-section" v-show="agreement.expanded">
+          <div
+            class="ars-agreement-content-detail"
+            v-html="agreement.content"
+          ></div>
+          <div class="ars-agreement-content-footer">
+            <button
+              class="ars-agreement-content-btn"
+              @click="confirmAgreement(index)"
+            >
+              동의
+            </button>
+          </div>
         </div>
-        <font-awesome-icon :icon="['fas', 'angle-right']" class="arrow-icon" />
       </div>
     </div>
 
@@ -88,11 +108,8 @@ const route = useRoute();
 const allAgreements = {
   // 은행
   KB국민은행: { bank: "KB국민은행", securities: "KB국민은행", type: "bank" },
-  "신한은행, 제주은행": {
-    bank: "신한은행, 제주은행",
-    securities: "신한은행, 제주은행",
-    type: "bank",
-  },
+  신한은행: { bank: "신한은행", securities: "신한은행", type: "bank" },
+  제주은행: { bank: "제주은행", securities: "제주은행", type: "bank" },
   우리은행: { bank: "우리은행", securities: "우리은행", type: "bank" },
   하나은행: {
     bank: "하나은행",
@@ -114,16 +131,10 @@ const allAgreements = {
     securities: "iM뱅크",
     type: "bank",
   },
-  "광주은행, 전북은행": {
-    bank: "광주은행, 전북은행",
-    securities: "광주은행, 전북은행",
-    type: "bank",
-  },
-  "경남은행, 부산은행": {
-    bank: "경남은행, 부산은행",
-    securities: "경남은행, 부산은행",
-    type: "bank",
-  },
+  광주은행: { bank: "광주은행", securities: "광주은행", type: "bank" },
+  전북은행: { bank: "전북은행", securities: "전북은행", type: "bank" },
+  경남은행: { bank: "경남은행", securities: "경남은행", type: "bank" },
+  부산은행: { bank: "부산은행", securities: "부산은행", type: "bank" },
 
   // 카드
   삼성카드: { bank: "삼성카드", securities: "삼성카드", type: "card" },
@@ -138,7 +149,7 @@ const allAgreements = {
   // 증권
   KB증권: { bank: "KB국민은행", securities: "KB증권", type: "securities" },
   신한투자증권: {
-    bank: "신한은행, 제주은행",
+    bank: "신한은행",
     securities: "신한투자증권",
     type: "securities",
   },
@@ -184,9 +195,12 @@ const allAgreements = {
 // 선택된 항목들
 const selectedItems = ref([]);
 
+// 약관 상태 관리를 위한 별도 ref
+const agreementStates = ref({});
+
 // 선택된 항목들에 해당하는 약관만 필터링
 const agreements = computed(() => {
-  return selectedItems.value.map((item) => {
+  return selectedItems.value.map((item, index) => {
     const agreement = allAgreements[item.name];
     if (!agreement) {
       console.warn(`약관을 찾을 수 없습니다: ${item.name}`);
@@ -195,12 +209,52 @@ const agreements = computed(() => {
         bank: item.name,
         securities: item.name,
         type: item.type || "unknown",
-        checked: false,
+        checked: agreementStates.value[index]?.checked || false,
+        expanded: agreementStates.value[index]?.expanded || false,
+        content: `
+          <h4>${item.name} 이용약관</h4>
+          <p>이 약관은 ${item.name}의 서비스 이용과 관련하여 서비스 제공자와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+          
+          <h4>제1조 (목적)</h4>
+          <p>이 약관은 ${item.name}의 서비스 이용과 관련하여 서비스 제공자와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+          
+          <h4>제2조 (정의)</h4>
+          <p>1. "서비스"란 ${item.name}에서 제공하는 모든 서비스를 말합니다.</p>
+          <p>2. "이용자"란 이 약관에 동의하고 서비스를 이용하는 고객을 말합니다.</p>
+          
+          <h4>제3조 (서비스 이용)</h4>
+          <p>1. 이용자는 본인의 정보에 한하여 서비스를 이용할 수 있습니다.</p>
+          <p>2. 이용자는 서비스 이용 시 관련 법령과 약관을 준수해야 합니다.</p>
+          
+          <h4>제4조 (개인정보 보호)</h4>
+          <p>1. 서비스 제공자는 이용자의 개인정보를 보호하기 위해 최선을 다합니다.</p>
+          <p>2. 이용자의 개인정보는 관련 법령에 따라 안전하게 관리됩니다.</p>
+        `,
       };
     }
     return {
       ...agreement,
-      checked: false,
+      checked: agreementStates.value[index]?.checked || false,
+      expanded: agreementStates.value[index]?.expanded || false,
+      content: `
+        <h4>${agreement.securities} 이용약관</h4>
+        <p>이 약관은 ${agreement.securities}의 서비스 이용과 관련하여 서비스 제공자와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+        
+        <h4>제1조 (목적)</h4>
+        <p>이 약관은 ${agreement.securities}의 서비스 이용과 관련하여 서비스 제공자와 이용자 간의 권리, 의무 및 책임사항을 규정함을 목적으로 합니다.</p>
+        
+        <h4>제2조 (정의)</h4>
+        <p>1. "서비스"란 ${agreement.securities}에서 제공하는 모든 서비스를 말합니다.</p>
+        <p>2. "이용자"란 이 약관에 동의하고 서비스를 이용하는 고객을 말합니다.</p>
+        
+        <h4>제3조 (서비스 이용)</h4>
+        <p>1. 이용자는 본인의 정보에 한하여 서비스를 이용할 수 있습니다.</p>
+        <p>2. 이용자는 서비스 이용 시 관련 법령과 약관을 준수해야 합니다.</p>
+        
+        <h4>제4조 (개인정보 보호)</h4>
+        <p>1. 서비스 제공자는 이용자의 개인정보를 보호하기 위해 최선을 다합니다.</p>
+        <p>2. 이용자의 개인정보는 관련 법령에 따라 안전하게 관리됩니다.</p>
+      `,
     };
   });
 });
@@ -233,13 +287,37 @@ const canProceed = computed(() => {
 
 const toggleAllAgreements = () => {
   allAgreed.value = !allAgreed.value;
-  agreements.value.forEach((agreement) => {
-    agreement.checked = allAgreed.value;
+  agreements.value.forEach((agreement, index) => {
+    if (!agreementStates.value[index]) {
+      agreementStates.value[index] = { checked: false, expanded: false };
+    }
+    agreementStates.value[index].checked = allAgreed.value;
   });
 };
 
 const toggleAgreement = (index) => {
-  agreements.value[index].checked = !agreements.value[index].checked;
+  // 다른 모든 항목들을 접기
+  Object.keys(agreementStates.value).forEach((i) => {
+    if (parseInt(i) !== index) {
+      agreementStates.value[i].expanded = false;
+    }
+  });
+
+  // 현재 항목 토글
+  if (!agreementStates.value[index]) {
+    agreementStates.value[index] = { checked: false, expanded: false };
+  }
+  agreementStates.value[index].expanded =
+    !agreementStates.value[index].expanded;
+};
+
+const confirmAgreement = (index) => {
+  if (!agreementStates.value[index]) {
+    agreementStates.value[index] = { checked: false, expanded: false };
+  }
+  agreementStates.value[index].checked = true;
+  agreementStates.value[index].expanded = false;
+
   // 전체동의 상태 업데이트
   const allChecked = agreements.value.every((agreement) => agreement.checked);
   allAgreed.value = allChecked;
@@ -330,12 +408,61 @@ const goToNext = () => {
   overflow: hidden;
 }
 
-.ars-agreement-item {
+.ars-agreement-item-all {
   display: flex;
   align-items: center;
-  padding: 16px 20px;
+  padding: 20px;
   border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
+  transition: background 0.15s;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.ars-agreement-item-all:hover {
+  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+}
+
+.ars-agreement-checkbox-all {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #d1d5db;
+  border-radius: 6px;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.ars-agreement-checkbox-all.checked {
+  background: #10b981;
+  border-color: #10b981;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.ars-agreement-text-all {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ars-agreement-title-all {
+  font-size: 1.1rem;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.ars-agreement-desc-all {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.ars-agreement-item {
+  border-bottom: 1px solid #f3f4f6;
   transition: background 0.15s;
 }
 
@@ -343,8 +470,63 @@ const goToNext = () => {
   border-bottom: none;
 }
 
-.ars-agreement-item:hover {
+.ars-agreement-item-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ars-agreement-item-header:hover {
   background: #f9fafb;
+}
+
+.ars-agreement-content-section {
+  background: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  animation: slideDown 0.3s ease-out;
+}
+
+.ars-agreement-content-detail {
+  padding: 20px;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: #374151;
+}
+
+.ars-agreement-content-detail h4 {
+  margin: 16px 0 8px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.ars-agreement-content-detail p {
+  margin: 8px 0;
+}
+
+.ars-agreement-content-footer {
+  padding: 16px 20px 20px 20px;
+  border-top: 1px solid #e9ecef;
+  background: #f8f9fa;
+}
+
+.ars-agreement-content-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  background: #4318d1;
+  color: #fff;
+}
+
+.ars-agreement-content-btn:hover {
+  background: #3a16b8;
 }
 
 .ars-agreement-checkbox {
@@ -429,6 +611,17 @@ const goToNext = () => {
 
 .ars-agreement-next-btn:disabled {
   cursor: not-allowed;
+}
+
+@keyframes slideDown {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+  to {
+    max-height: 500px;
+    opacity: 1;
+  }
 }
 
 @media (max-width: 430px) {
