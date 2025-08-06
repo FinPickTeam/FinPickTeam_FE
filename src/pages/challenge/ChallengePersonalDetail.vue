@@ -1,6 +1,13 @@
 <template>
   <div class="challenge-personal-detail">
-    <div class="content">
+    <!-- 로딩 상태 -->
+    <div v-if="loading" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p class="loading-text">챌린지 정보를 불러오는 중...</p>
+    </div>
+
+    <!-- 챌린지 상세 정보 -->
+    <div v-else-if="challenge" class="content">
       <!-- 챌린지 기본 정보 -->
       <div class="challenge-info">
         <div class="title-section">
@@ -15,28 +22,34 @@
         <div class="challenge-stats">
           <div class="stat-item">
             <span class="stat-label">진행률</span>
-            <span class="stat-value">{{ challenge.progress }}%</span>
+            <span class="stat-value"
+              >{{ Math.round(challenge.myProgress * 100) }}%</span
+            >
           </div>
           <div class="stat-item">
-            <span class="stat-label">목표 금액</span>
-            <span class="stat-value">{{ challenge.targetAmount }}원</span>
+            <span class="stat-label">목표 {{ challenge.goalType }}</span>
+            <span class="stat-value"
+              >{{ challenge.goalValue.toLocaleString() }}원</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">남은 기간</span>
-            <span class="stat-value">D-{{ challenge.remainingDays }}</span>
+            <span class="stat-value">D-{{ getRemainingDays() }}</span>
           </div>
         </div>
 
         <div class="progress-section">
           <div class="progress-header">
-            <span class="progress-label">저축 진행률</span>
-            <span class="progress-percentage">{{ challenge.progress }}%</span>
+            <span class="progress-label">{{ challenge.goalType }} 진행률</span>
+            <span class="progress-percentage"
+              >{{ Math.round(challenge.myProgress * 100) }}%</span
+            >
           </div>
           <div class="progress-bar">
             <div
               class="progress-fill"
               :style="{
-                width: challenge.progress + '%',
+                width: Math.round(challenge.myProgress * 100) + '%',
               }"
             ></div>
           </div>
@@ -45,15 +58,28 @@
         <!-- 개인 챌린지 특별 정보 -->
         <div class="personal-info">
           <div class="savings-info">
-            <span class="savings-label">현재 저축액</span>
-            <span class="savings-amount">{{ challenge.currentAmount }}원</span>
+            <span class="savings-label">현재 {{ challenge.goalType }}</span>
+            <span class="savings-amount"
+              >{{
+                Math.round(
+                  challenge.goalValue * challenge.myProgress
+                ).toLocaleString()
+              }}원</span
+            >
           </div>
           <div class="daily-goal">
-            <span class="goal-label">일일 목표</span>
-            <span class="goal-amount">{{ challenge.dailyGoal }}원</span>
+            <span class="goal-label">목표 {{ challenge.goalType }}</span>
+            <span class="goal-amount"
+              >{{ challenge.goalValue.toLocaleString() }}원</span
+            >
           </div>
         </div>
       </div>
+    </div>
+
+    <!-- 에러 상태 -->
+    <div v-else class="error-container">
+      <p class="error-text">챌린지 정보를 불러올 수 없습니다.</p>
     </div>
   </div>
 </template>
@@ -61,37 +87,45 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import challengeDetailData from './challenge_personal_detail.json';
 
 const route = useRoute();
 const router = useRouter();
 
-// 챌린지 데이터 (실제로는 API에서 가져올 데이터)
-const challenge = ref({
-  id: 1,
-  title: '매일 5천원 저축하기',
-  description: '매일 5천원씩 저축하여 30일 동안 15만원 모으기',
-  progress: 65,
-  remainingDays: 12,
-  targetAmount: 150000,
-  currentAmount: 97500,
-  dailyGoal: 5000,
-  startDate: '2024-01-01',
-  endDate: '2024-01-31',
-});
+// 상태 관리
+const loading = ref(true);
+const challenge = ref(null);
 
 onMounted(() => {
   // URL 파라미터에서 챌린지 ID 가져오기
   const challengeId = route.params.id;
 
-  // 라우터 state에서 전달받은 챌린지 데이터 확인
-  if (route.state && route.state.challenge) {
-    challenge.value = route.state.challenge;
-  }
-
-  // 실제로는 API 호출로 챌린지 데이터 가져오기
-  console.log('챌린지 ID:', challengeId);
-  console.log('챌린지 데이터:', challenge.value);
+  // 챌린지 데이터 fetch
+  fetchChallenge(challengeId);
 });
+
+// 챌린지 데이터 fetch 함수
+const fetchChallenge = async (challengeId) => {
+  try {
+    loading.value = true;
+
+    // 실제로는 API 호출
+    // const response = await fetch(`/api/challenges/${challengeId}`);
+    // const data = await response.json();
+
+    // JSON 파일에서 데이터 가져오기 (실제로는 API에서 가져올 데이터)
+    const data = challengeDetailData.data;
+    challenge.value = data;
+
+    console.log('챌린지 ID:', challengeId);
+    console.log('챌린지 데이터:', challenge.value);
+  } catch (error) {
+    console.error('챌린지 데이터 로드 실패:', error);
+    challenge.value = null;
+  } finally {
+    loading.value = false;
+  }
+};
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -101,12 +135,73 @@ const formatDate = (dateString) => {
     day: 'numeric',
   });
 };
+
+// 남은 일수 계산 함수
+const getRemainingDays = () => {
+  if (!challenge.value.endDate) return 0;
+  const endDate = new Date(challenge.value.endDate);
+  const today = new Date();
+  const diffTime = endDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+};
 </script>
 
 <style scoped>
 .challenge-personal-detail {
   min-height: 100vh;
   background-color: #f8f9fa;
+}
+
+/* 로딩 스타일 */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  padding: 20px 16px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--color-main);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 16px;
+  color: #666;
+  text-align: center;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 에러 스타일 */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px);
+  padding: 20px 16px;
+}
+
+.error-text {
+  font-size: 16px;
+  color: #666;
+  text-align: center;
 }
 
 .content {

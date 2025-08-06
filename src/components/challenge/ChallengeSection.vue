@@ -12,7 +12,7 @@
         v-for="challenge in challenges"
         :key="challenge.id"
         :challenge="challenge"
-        :type="type"
+        :isRecruitingPage="isRecruitingPage"
         @cardClick="handleCardClick"
       />
     </div>
@@ -48,12 +48,20 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  isRecruitingPage: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits(['cardClick']);
 
 const handleCardClick = (data) => {
-  emit('cardClick', data);
+  // type 정보를 추가하여 전달
+  emit('cardClick', {
+    ...data,
+    type: props.type,
+  });
 };
 </script>
 

@@ -1,0 +1,22 @@
+{
+  "status": 200,
+  "message": "챌린지 상세 조회 성공",
+  "data": {
+    "id": 1,
+    "title": "커피값 줄이기 챌린지",
+    "description": "하루 커피 한 잔을 참아보자!",
+    "type": "PERSONAL",
+    "status": "COMPLETED",
+    "startDate": "2025-07-30",
+    "endDate": "2025-08-02",
+    "goalType": "소비",
+    "goalValue": 50000,
+    "isParticipating": true,
+    "isMine": true,
+    "myProgress": 0.65,
+    "participantsCount": 0,
+    "isResultCheck": true,
+    "categoryName": "카페·간식 줄이기",
+    "members": null
+  }
+}

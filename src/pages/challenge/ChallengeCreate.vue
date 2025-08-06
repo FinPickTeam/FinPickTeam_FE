@@ -6,7 +6,7 @@
         <input
           type="text"
           id="challenge-title"
-          v-model="challengeTitle"
+          v-model="title"
           placeholder="챌린지 제목을 입력하세요"
         />
       </div>
@@ -15,7 +15,7 @@
         <label for="challenge-description">챌린지 설명</label>
         <textarea
           id="challenge-description"
-          v-model="challengeDescription"
+          v-model="description"
           placeholder="챌린지에 대한 설명을 입력하세요"
           rows="4"
         ></textarea>
@@ -36,7 +36,7 @@
           <input
             type="text"
             id="target-amount"
-            :value="formatAmount(targetAmount)"
+            :value="formatAmount(goalValue)"
             @input="handleAmountInput"
             placeholder="목표 금액을 입력하세요"
           />
@@ -44,7 +44,7 @@
         </div>
         <div class="amount-buttons">
           <button
-            v-for="unit in [1000, 10000, 50000, 100000, 1000000]"
+            v-for="unit in [10000, 100000, 1000000]"
             :key="unit"
             type="button"
             class="btn custom-amount-btn"
@@ -55,60 +55,56 @@
         </div>
       </div>
 
+      <!-- 챌린지 카테고리 드롭다운 부분 -->
+      <div class="form-group">
+        <label for="challenge-category">챌린지 카테고리</label>
+        <select
+          id="challenge-category"
+          v-model="categoryId"
+          class="category-select"
+        >
+          <option :value="1">전체 소비 줄이기</option>
+          <option :value="2">식비 줄이기</option>
+          <option :value="3">카페·간식 줄이기</option>
+          <option :value="4">교통비 줄이기</option>
+          <option :value="5">미용·쇼핑 줄이기</option>
+        </select>
+      </div>
+
       <div class="form-group">
         <label>챌린지 유형</label>
         <div class="challenge-type-options">
           <label
             class="challenge-type-option"
-            :class="{ active: challengeType === 'individual' }"
+            :class="{ active: type === 'PERSONAL' }"
           >
-            <input type="radio" v-model="challengeType" value="individual" />
+            <input type="radio" v-model="type" value="PERSONAL" />
             <span>개인 챌린지</span>
           </label>
           <label
             class="challenge-type-option"
-            :class="{ active: challengeType === 'group' }"
+            :class="{ active: type === 'GROUP' }"
           >
-            <input type="radio" v-model="challengeType" value="group" />
+            <input type="radio" v-model="type" value="GROUP" />
             <span>소그룹 챌린지</span>
           </label>
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="challenge-category">챌린지 카테고리</label>
-        <select
-          id="challenge-category"
-          v-model="category"
-          class="category-select"
-        >
-          <option value="health">건강</option>
-          <option value="finance">재테크</option>
-          <option value="study">학습</option>
-          <option value="lifestyle">라이프스타일</option>
-        </select>
-      </div>
-
-      <div class="form-group">
+      <div class="form-group" v-if="type === 'GROUP'">
         <label>방 설정</label>
         <div class="room-setting">
           <div class="room-type-options">
-            <label
-              class="room-type-option"
-              :class="{ active: roomType === 'public' }"
-            >
-              <input type="radio" v-model="roomType" value="public" />
+            <label class="room-type-option" :class="{ active: !usePassword }">
+              <input type="radio" v-model="usePassword" :value="false" />
               <span>공개방</span>
             </label>
-            <label
-              class="room-type-option"
-              :class="{ active: roomType === 'private' }"
-            >
-              <input type="radio" v-model="roomType" value="private" />
+            <label class="room-type-option" :class="{ active: usePassword }">
+              <input type="radio" v-model="usePassword" :value="true" />
               <span>비공개방</span>
             </label>
           </div>
-          <div v-if="roomType === 'private'" class="password-input">
+          <div v-if="usePassword" class="password-input">
             <input
               type="password"
               v-model="roomPassword"
@@ -134,22 +130,22 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 // 폼 데이터
-const challengeTitle = ref('');
-const challengeDescription = ref('');
-const startDate = ref('');
-const endDate = ref('');
-const targetAmount = ref(100000);
-const challengeType = ref('individual');
-const category = ref('health');
-const roomType = ref('public');
-const roomPassword = ref('');
+const title = ref(''); // 챌린지 제목
+const description = ref(''); // 챌린지 설명
+const startDate = ref(''); // 챌린지 시작일
+const endDate = ref(''); // 챌린지 종료일
+const goalValue = ref(100000); // 목표 금액
+const type = ref('PERSONAL'); // 챌린지 유형
+const categoryId = ref(1); // 카테고리 ID   (1: 전체 소비 줄이기, 2: 식비 줄이기, 3: 카페·간식 줄이기, 4: 교통비 줄이기, 5: 미용·쇼핑 줄이기)
+const usePassword = ref(false); // 비밀번호 사용 여부
+const roomPassword = ref(''); // 비밀번호
 
 const goBack = () => {
   router.back();
 };
 
 const addAmount = (amount) => {
-  targetAmount.value += amount;
+  goalValue.value += amount;
 };
 
 const formatAmount = (value) => {
@@ -159,22 +155,23 @@ const formatAmount = (value) => {
 const handleAmountInput = (event) => {
   // 콤마 제거 후 숫자만 추출
   const numericValue = event.target.value.replace(/,/g, '');
-  targetAmount.value = parseInt(numericValue) || 0;
+  goalValue.value = parseInt(numericValue) || 0;
 };
 
 const createChallenge = () => {
   // 챌린지 생성 로직
-  console.log('챌린지 생성:', {
-    title: challengeTitle.value,
-    description: challengeDescription.value,
+  const challengeData = {
+    title: title.value,
+    description: description.value,
     startDate: startDate.value,
     endDate: endDate.value,
-    targetAmount: targetAmount.value,
-    challengeType: challengeType.value,
-    category: category.value,
-    roomType: roomType.value,
-    roomPassword: roomType.value === 'private' ? roomPassword.value : '',
-  });
+    goalValue: goalValue.value,
+    type: type.value,
+    categoryId: categoryId.value,
+    usePassword: usePassword.value,
+    roomPassword: usePassword.value ? roomPassword.value : '',
+  };
+  console.log('챌린지 생성 요청:', challengeData);
 
   // 성공 메시지 후 이전 페이지로 이동
   alert('챌린지가 성공적으로 생성되었습니다!');

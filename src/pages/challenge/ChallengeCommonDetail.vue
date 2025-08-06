@@ -21,37 +21,47 @@
 
         <div class="challenge-stats">
           <div class="stat-item">
-            <span class="stat-label">참여자</span>
-            <span class="stat-value">{{ challenge.participants }}명</span>
+            <span class="stat-label">진행률</span>
+            <span class="stat-value"
+              >{{ Math.round(challenge.myProgress * 100) }}%</span
+            >
           </div>
           <div class="stat-item">
-            <span class="stat-label">최대 인원</span>
-            <span class="stat-value">{{ challenge.maxParticipants }}명</span>
+            <span class="stat-label">목표 {{ challenge.goalType }}</span>
+            <span class="stat-value"
+              >{{ challenge.goalValue.toLocaleString() }}원</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">남은 기간</span>
-            <span class="stat-value">D-{{ challenge.remainingDays }}</span>
+            <span class="stat-value">D-{{ getRemainingDays() }}</span>
           </div>
         </div>
 
         <div class="progress-section">
           <div class="progress-header">
-            <span class="progress-label">참여 진행률</span>
+            <span class="progress-label">달성률</span>
             <span class="progress-percentage"
-              >{{ challenge.participants }}/{{
-                challenge.maxParticipants
-              }}</span
+              >{{ Math.round(challenge.myProgress * 100) }}%</span
             >
           </div>
           <div class="progress-bar">
             <div
               class="progress-fill"
               :style="{
-                width:
-                  (challenge.participants / challenge.maxParticipants) * 100 +
-                  '%',
+                width: Math.round(challenge.myProgress * 100) + '%',
               }"
             ></div>
+          </div>
+        </div>
+
+        <!-- 참여자 수 표시 -->
+        <div class="participants-section">
+          <div class="participants-count">
+            <span class="participants-number">{{
+              challenge.participantsCount.toLocaleString()
+            }}</span>
+            <span class="participants-label">명 참여중</span>
           </div>
         </div>
       </div>
@@ -75,6 +85,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
+import challengeCommonDetailData from './challenge_common_detail.json';
 
 const route = useRoute();
 const router = useRouter();
@@ -89,25 +100,18 @@ const fetchChallenge = async (challengeId) => {
   try {
     loading.value = true;
 
-    // 실제로는 API 호출
-    // const response = await fetch(`/api/challenges/${challengeId}`);
-    // const data = await response.json();
+    // 라우터 state에서 전달받은 챌린지 데이터 확인
+    if (route.state && route.state.challengeData) {
+      challenge.value = route.state.challengeData;
+    } else {
+      // 실제로는 API 호출
+      // const response = await fetch(`/api/challenges/${challengeId}`);
+      // const data = await response.json();
 
-    // 임시 데이터 (실제로는 API에서 가져올 데이터)
-    const data = {
-      id: challengeId,
-      title: '매일 저축하기',
-      description: '매일 1만원씩 저축하여 30일 동안 30만원 모으기',
-      progress: 0,
-      remainingDays: 30,
-      participants: 1250,
-      maxParticipants: 2000,
-      startDate: '2024-01-15',
-      endDate: '2024-02-15',
-    };
-
-    // 데이터 설정
-    challenge.value = data;
+      // JSON 파일에서 데이터 가져오기 (실제로는 API에서 가져올 데이터)
+      const data = challengeCommonDetailData.data;
+      challenge.value = data;
+    }
 
     // 사용자의 참여 여부 확인
     checkParticipationStatus();
@@ -136,21 +140,31 @@ const formatDate = (dateString) => {
   });
 };
 
+// 남은 일수 계산 함수
+const getRemainingDays = () => {
+  if (!challenge.value?.endDate) return 0;
+  const endDate = new Date(challenge.value.endDate);
+  const today = new Date();
+  const diffTime = endDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+};
+
 const checkParticipationStatus = () => {
   // 실제로는 API 호출로 사용자의 참여 여부 확인
-  isParticipating.value = false;
+  isParticipating.value = challenge.value?.isParticipating || false;
 };
 
 const handleJoin = () => {
   // 챌린지 참여 로직
-  if (challenge.value.participants >= challenge.value.maxParticipants) {
-    alert('참여 인원이 마감되었습니다.');
+  if (challenge.value.isParticipating) {
+    alert('이미 참여 중인 챌린지입니다.');
     return;
   }
 
   // 실제로는 API 호출로 참여 처리
   isParticipating.value = true;
-  challenge.value.participants += 1;
+  challenge.value.isParticipating = true;
 
   alert('챌린지에 참여했습니다!');
 };
@@ -321,6 +335,29 @@ const handleJoin = () => {
   );
   border-radius: 4px;
   transition: width 0.3s ease;
+}
+
+.participants-section {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.participants-count {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+}
+
+.participants-number {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--color-main);
+}
+
+.participants-label {
+  font-size: 16px;
+  color: #666;
 }
 
 .join-section {
