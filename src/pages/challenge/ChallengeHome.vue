@@ -160,7 +160,11 @@ const handleCardClick = (data) => {
   max-width: 390px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(to right, #c8c4f8, var(--color-main-dark));
+  background: linear-gradient(
+    to right,
+    var(--color-main-light-2),
+    var(--color-main-dark)
+  );
   border-radius: 0;
   padding: 16px 16px 0px 16px;
   margin-bottom: 12px;
