@@ -50,7 +50,9 @@
         </div>
         <div class="ars_help_group">
           <div class="ars_help">전화가 오지 않나요?</div>
-          <a href="#" class="ars_help_link">고객센터 문의</a>
+          <a href="#" class="ars_help_link" @click="goToCustomerSupport"
+            >고객센터 문의</a
+          >
         </div>
       </div>
     </div>
@@ -68,6 +70,10 @@ let totalSeconds = 180; // 3분 = 180초
 
 function goToComplete() {
   router.push("/ars/complete");
+}
+
+function goToCustomerSupport() {
+  router.push("/customer-support");
 }
 
 function updateTimer() {
