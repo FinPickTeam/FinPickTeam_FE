@@ -2,7 +2,7 @@
   <div class="stock-card">
     <div class="stock-chart">
       <StockChart
-        :chartData="product.stockChartData"
+        :chartData="product.stockReturnsData"
         :isUp="isUp"
         :isDown="isDown"
       />
@@ -52,27 +52,35 @@ function toggleFavorite() {
 }
 
 // 가격, 등락률 등 표시 포맷
-const displayPrice = computed(() =>
-  Number(props.product.stockPrice.replace(/[+-]/, '')).toLocaleString()
-);
+const displayPrice = computed(() => {
+  const price = props.product.stockPrice;
+  // 숫자인 경우 그대로 사용, 문자열인 경우 숫자로 변환
+  const numericPrice =
+    typeof price === 'string' ? Number(price.replace(/[+-]/, '')) : price;
+  return numericPrice.toLocaleString();
+});
+
 const isUp = computed(() => {
   const rate = String(props.product.stockChangeRate);
   return (
     rate.startsWith('+') || (!rate.startsWith('-') && parseFloat(rate) > 0)
   );
 });
+
 const isDown = computed(() => {
   const rate = String(props.product.stockChangeRate);
   return (
     rate.startsWith('-') || (!rate.startsWith('+') && parseFloat(rate) < 0)
   );
 });
-const displayChange = computed(
-  () =>
-    (props.product.stockPredictedPrice.startsWith('+') ? '▲' : '▼') +
-    ' ' +
-    props.product.stockPredictedPrice.replace(/[+-]/, '')
-);
+
+const displayChange = computed(() => {
+  const predictedPrice = props.product.stockPredictedPrice;
+  const isPositive = predictedPrice.startsWith('+');
+  const numericValue = predictedPrice.replace(/[+-]/, '');
+  return (isPositive ? '▲' : '▼') + ' ' + numericValue;
+});
+
 const displayRate = computed(() => {
   const rate = String(props.product.stockChangeRate);
   if (rate.startsWith('+') || rate.startsWith('-')) {

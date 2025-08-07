@@ -8,32 +8,7 @@
         </div>
       </div>
 
-      <!-- 사용자 통계 섹션 -->
-      <div class="stats-section">
-        <div class="stats-container">
-          <div class="stat-item">
-            <div class="stat-number">{{ totalChallenges }}</div>
-            <div class="stat-label">회</div>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <div class="stat-number">{{ successCount }}</div>
-            <div class="stat-label">회</div>
-          </div>
-          <div class="stat-divider"></div>
-          <div class="stat-item">
-            <div class="stat-number">{{ Math.round(achievementRate) }}</div>
-            <div class="stat-label">%</div>
-          </div>
-        </div>
-        <div class="pagination-dots">
-          <div class="dot active"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-          <div class="dot"></div>
-        </div>
-      </div>
+      <ChallengeStatsSwiper />
     </div>
 
     <!-- 참여중인 소그룹 섹션 -->
@@ -81,6 +56,7 @@ import { useRouter } from 'vue-router';
 import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
 import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
 import challengeListData from './challenge_list.json';
+import ChallengeStatsSwiper from '@/components/challenge/ChallengeStatsSwiper.vue';
 
 // 통계 데이터
 const totalChallenges = ref(10); // 전체 참여 수
@@ -207,7 +183,7 @@ const handleCardClick = (data) => {
   font-size: var(--font-size-title-sub);
   margin-top: 12px;
   margin-bottom: 12px;
-  margin-left: 35px;
+  margin-left: 19px;
 }
 
 .username {

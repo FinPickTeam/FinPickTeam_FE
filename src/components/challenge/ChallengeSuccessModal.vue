@@ -2,7 +2,7 @@
   <div v-if="isVisible" class="modal-overlay" @click="handleOverlayClick">
     <div class="modal-content" @click.stop>
       <!-- 제목 -->
-      <h2 class="modal-title">축하합니다! 🎉</h2>
+      <h2 class="modal-title">챌린지 성공🎉</h2>
       <!-- 성공 아이콘 -->
       <div class="success-icon">
         <i class="fas fa-trophy"></i>
@@ -10,69 +10,78 @@
 
       <!-- 챌린지 정보 -->
       <div class="challenge-info">
-        <h3 class="challenge-title">{{ challenge.title }}</h3>
+        <h3 class="challenge-title">
+          <span class="highlight-amount"
+            >{{ challengeResult.savedAmount.toLocaleString() }}원</span
+          >을 아꼈어요
+        </h3>
         <p class="success-description">
           축하합니다! 챌린지 목표를 달성했습니다.<br />
           당신의 노력이 빛나는 순간입니다!
         </p>
       </div>
 
-      <!-- 성과 통계 -->
-      <div class="achievement-stats">
-        <div class="stat-item">
-          <div class="stat-value">
-            {{ challenge.targetAmount.toLocaleString() }}원
+      <!-- 보상 정보 -->
+
+      <div class="stock-card">
+        <div class="stock-header">
+          <div class="stock-info">
+            <h5 class="stock-name">
+              {{ challengeResult.stockRecommendation.stockName }}
+            </h5>
+            <p class="stock-code">
+              {{ challengeResult.stockRecommendation.stockCode }}
+            </p>
           </div>
-          <div class="stat-label">목표 금액</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">
-            {{ challenge.currentAmount.toLocaleString() }}원
+          <div class="stock-price">
+            <span class="current-price"
+              >{{
+                challengeResult.stockRecommendation.currentPrice.toLocaleString()
+              }}원</span
+            >
+            <span
+              class="price-change"
+              :class="{
+                positive: challengeResult.stockRecommendation.priceChange > 0,
+                negative: challengeResult.stockRecommendation.priceChange < 0,
+              }"
+            >
+              {{ challengeResult.stockRecommendation.priceChange > 0 ? '+' : ''
+              }}{{
+                challengeResult.stockRecommendation.priceChange.toLocaleString()
+              }}원 ({{
+                challengeResult.stockRecommendation.priceChangeRate > 0
+                  ? '+'
+                  : ''
+              }}{{
+                challengeResult.stockRecommendation.priceChangeRate.toFixed(2)
+              }}%)
+            </span>
           </div>
-          <div class="stat-label">달성 금액</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ challenge.duration }}일</div>
-          <div class="stat-label">챌린지 기간</div>
         </div>
       </div>
-
       <!-- 보상 정보 -->
-      <div class="reward-section">
-        <h4 class="reward-title">획득한 보상</h4>
-        <div class="reward-items">
-          <div class="reward-item">
-            <i class="fas fa-coins"></i>
-            <span>{{ challenge.reward.points }} 포인트</span>
-          </div>
-          <div class="reward-item">
-            <i class="fas fa-medal"></i>
-            <span>{{ challenge.reward.badge }}</span>
-          </div>
-        </div>
+
+      <div class="reward-card">
+        <i class="fas fa-coins"></i>
+        <span>{{ challengeResult.actualRewardPoint }} 포인트 보상</span>
       </div>
 
       <!-- 액션 버튼들 -->
       <div class="modal-actions">
-        <button class="btn btn-secondary" @click="shareChallenge">
-          <i class="fas fa-share-alt"></i>
-          공유하기
+        <button class="btn btn-secondary" @click="closeModal">
+          <i class="fas fa-times"></i>
+          닫기
         </button>
         <button class="btn btn-primary" @click="goToNextChallenge">
           다음 챌린지 시작
         </button>
       </div>
-
-      <!-- 닫기 버튼 -->
-      <button class="close-btn" @click="closeModal">
-        <i class="fas fa-times"></i>
-      </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { defineProps, defineEmits } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -90,10 +99,15 @@ const props = defineProps({
       targetAmount: 150000,
       currentAmount: 150000,
       duration: 30,
-      reward: {
-        points: 500,
-        badge: '저축 마스터',
-      },
+    }),
+  },
+  challengeResult: {
+    type: Object,
+    default: () => ({
+      resultType: 'SUCCESS_WIN',
+      actualRewardPoint: 110,
+      savedAmount: 450000,
+      stockRecommendation: null,
     }),
   },
 });
@@ -102,23 +116,6 @@ const emit = defineEmits(['close']);
 
 const closeModal = () => {
   emit('close');
-};
-
-const shareChallenge = () => {
-  // 공유 기능 구현
-  if (navigator.share) {
-    navigator.share({
-      title: '챌린지 성공!',
-      text: `${props.challenge.title} 챌린지를 성공했습니다!`,
-      url: window.location.href,
-    });
-  } else {
-    // 공유 API가 지원되지 않는 경우 클립보드에 복사
-    navigator.clipboard.writeText(
-      `${props.challenge.title} 챌린지를 성공했습니다!`
-    );
-    alert('링크가 클립보드에 복사되었습니다.');
-  }
 };
 
 const goToNextChallenge = () => {
@@ -189,60 +186,20 @@ const goToNextChallenge = () => {
   margin: 0 0 8px 0;
 }
 
-.challenge-description {
+.success-description {
   font-size: 14px;
   color: #666;
-  line-height: 1.4;
+  line-height: 1.5;
   margin: 0;
 }
 
-.achievement-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  margin-bottom: 24px;
-  padding: 20px;
-  background: #f8f9fa;
-  border-radius: 12px;
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 18px;
+.highlight-amount {
+  color: var(--color-main);
   font-weight: bold;
-  color: #333;
-  margin-bottom: 4px;
+  font-size: 20px;
 }
 
-.stat-label {
-  font-size: 12px;
-  color: #666;
-}
-
-.reward-section {
-  margin-bottom: 32px;
-  padding: 20px;
-  background: linear-gradient(135deg, #f0f8ff, #e6f3ff);
-  border-radius: 12px;
-}
-
-.reward-title {
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 16px 0;
-}
-
-.reward-items {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.reward-item {
+.reward-card {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -250,22 +207,87 @@ const goToNextChallenge = () => {
   background: white;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 16px;
+  border: 2px solid #ffd700;
 }
 
-.reward-item i {
+.reward-card i {
   font-size: 18px;
   color: #ffd700;
 }
 
-.reward-item span {
+.reward-card span {
   font-size: 14px;
   font-weight: 500;
   color: #333;
 }
 
+/* .reward-section {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: var(--color-bg-light);
+  border-radius: 12px;
+} */
+
+.stock-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stock-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.stock-info {
+  text-align: left;
+}
+
+.stock-name {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.stock-code {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.stock-price {
+  text-align: right;
+}
+
+.current-price {
+  font-size: 20px;
+  font-weight: bold;
+  color: var(--color-main);
+}
+
+.price-change {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.price-change.positive {
+  color: var(--color-success);
+}
+
+.price-change.negative {
+  color: var(--color-danger);
+}
+
 .modal-actions {
   display: flex;
   gap: 12px;
+  margin-top: 16px;
   margin-bottom: 16px;
 }
 
@@ -306,25 +328,6 @@ const goToNextChallenge = () => {
 
 .btn-secondary:hover {
   background: #e9ecef;
-}
-
-.close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  color: #999;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 50%;
-  transition: all 0.2s ease;
-}
-
-.close-btn:hover {
-  background: #f8f9fa;
-  color: #666;
 }
 
 @keyframes slideIn {
