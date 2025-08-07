@@ -109,16 +109,25 @@ const fetchChallenge = async (challengeId) => {
   try {
     loading.value = true;
 
-    // 실제로는 API 호출
-    // const response = await fetch(`/api/challenges/${challengeId}`);
-    // const data = await response.json();
+    // 라우터 state에서 전달된 데이터 확인
+    const stateData = router.currentRoute.value.state?.challengeData;
 
-    // JSON 파일에서 데이터 가져오기 (실제로는 API에서 가져올 데이터)
-    const data = challengeDetailData.data;
-    challenge.value = data;
+    if (stateData) {
+      // 라우터 state에서 전달된 데이터 사용
+      challenge.value = {
+        ...challengeDetailData.data,
+        isParticipating:
+          stateData.participating || stateData.isParticipating || false,
+      };
+    } else {
+      // JSON 파일에서 데이터 가져오기 (실제로는 API에서 가져올 데이터)
+      const data = challengeDetailData.data;
+      challenge.value = data;
+    }
 
     console.log('챌린지 ID:', challengeId);
     console.log('챌린지 데이터:', challenge.value);
+    console.log('라우터 state:', router.currentRoute.value.state);
   } catch (error) {
     console.error('챌린지 데이터 로드 실패:', error);
     challenge.value = null;
