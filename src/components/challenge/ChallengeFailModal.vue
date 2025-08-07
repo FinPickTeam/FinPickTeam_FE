@@ -1,43 +1,29 @@
 <template>
   <div v-if="isVisible" class="modal-overlay" @click="handleOverlayClick">
     <div class="modal-content" @click.stop>
-      <div class="modal-header">
-        <h2 class="modal-title">챌린지 실패</h2>
-      </div>
-
-      <div class="modal-body">
-        <div class="fail-icon">
-          <div class="fail-circle">
-            <span class="fail-x">✕</span>
-          </div>
-        </div>
-
-        <div class="fail-message">
-          <h3 class="fail-title">{{ challengeTitle }}</h3>
-          <p class="fail-description">
-            아쉽게도 챌린지 목표를 달성하지 못했습니다.<br />
-            하지만 포기하지 마세요! 다시 도전해보세요.
-          </p>
-        </div>
-
-        <div class="fail-stats">
-          <div class="stat-item">
-            <span class="stat-label">목표 달성률</span>
-            <span class="stat-value"
-              >{{ Math.round(progressRate * 100) }}%</span
-            >
-          </div>
-          <div class="stat-item">
-            <span class="stat-label">목표 금액</span>
-            <span class="stat-value">{{ goalValue.toLocaleString() }}원</span>
-          </div>
+      <!-- 제목 -->
+      <h2 class="modal-title">챌린지 실패</h2>
+      <div class="fail-icon">
+        <div class="fail-circle">
+          <span class="fail-x">✕</span>
         </div>
       </div>
 
-      <div class="modal-footer">
-        <button class="retry-button" @click="handleRetry">다시 도전하기</button>
-        <button class="home-button" @click="handleGoHome">
-          홈으로 돌아가기
+      <div class="fail-message">
+        <p class="fail-description">
+          아쉽게도 챌린지 목표를 달성하지 못했습니다.<br />
+          하지만 포기하지 마세요! 다시 도전해보세요.
+        </p>
+      </div>
+
+      <!-- 액션 버튼들 -->
+      <div class="modal-actions">
+        <button class="btn btn-secondary" @click="closeModal">
+          <i class="fas fa-times"></i>
+          닫기
+        </button>
+        <button class="btn btn-primary" @click="goToNextChallenge">
+          다음 챌린지 시작
         </button>
       </div>
     </div>
@@ -54,33 +40,30 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  challengeTitle: {
-    type: String,
-    default: '챌린지',
-  },
-  progressRate: {
-    type: Number,
-    default: 0,
-  },
-  goalValue: {
-    type: Number,
-    default: 0,
+  challengeResult: {
+    type: Object,
+    default: () => ({
+      resultType: 'FAIL',
+      actualRewardPoint: 0,
+      savedAmount: 0,
+      stockRecommendation: null,
+    }),
   },
 });
 
-const emit = defineEmits(['close', 'retry']);
+const emit = defineEmits(['close']);
 
 const handleOverlayClick = () => {
   emit('close');
 };
 
-const handleRetry = () => {
-  emit('retry');
+const closeModal = () => {
+  emit('close');
 };
 
-const handleGoHome = () => {
-  router.push('/challenge');
-  emit('close');
+const goToNextChallenge = () => {
+  closeModal();
+  router.push('/challenge/recruiting-list');
 };
 </script>
 
@@ -101,28 +84,21 @@ const handleGoHome = () => {
 
 .modal-content {
   background: white;
-  border-radius: 16px;
-  width: 100%;
+  border-radius: 20px;
+  padding: 32px 24px;
   max-width: 400px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-  padding: 24px 24px 0 24px;
+  width: 100%;
+  position: relative;
   text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.3s ease;
 }
 
 .modal-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
   color: #333;
-  margin: 0;
-}
-
-.modal-body {
-  padding: 24px;
+  margin: 0 0 20px 0;
 }
 
 .fail-icon {
@@ -149,15 +125,7 @@ const handleGoHome = () => {
 }
 
 .fail-message {
-  text-align: center;
   margin-bottom: 24px;
-}
-
-.fail-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 12px 0;
 }
 
 .fail-description {
@@ -167,105 +135,59 @@ const handleGoHome = () => {
   margin: 0;
 }
 
-.fail-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  margin-bottom: 24px;
-}
-
-.stat-item {
-  text-align: center;
-  padding: 16px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-}
-
-.stat-label {
-  display: block;
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.stat-value {
-  display: block;
-  font-size: 16px;
-  font-weight: bold;
-  color: #333;
-}
-
-.modal-footer {
-  padding: 0 24px 24px 24px;
+.modal-actions {
   display: flex;
-  flex-direction: column;
   gap: 12px;
+  margin-bottom: 16px;
 }
 
-.retry-button {
-  width: 100%;
-  padding: 16px;
+.btn {
+  flex: 1;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
   background: linear-gradient(
-    to right,
+    135deg,
     var(--color-main),
-    var(--color-main-light)
+    var(--color-main-dark)
   );
   color: white;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: transform 0.2s ease;
 }
 
-.retry-button:hover {
+.btn-primary:hover {
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
 }
 
-.home-button {
-  width: 100%;
-  padding: 16px;
-  background-color: #f8f9fa;
+.btn-secondary {
+  background: #f8f9fa;
   color: #666;
   border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
-.home-button:hover {
-  background-color: #e9ecef;
-}
-
-/* 애니메이션 */
-.modal-overlay {
-  animation: fadeIn 0.3s ease;
-}
-
-.modal-content {
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+.btn-secondary:hover {
+  background: #e9ecef;
 }
 
 @keyframes slideIn {
   from {
-    transform: translateY(-20px);
     opacity: 0;
+    transform: translateY(-20px) scale(0.95);
   }
   to {
-    transform: translateY(0);
     opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 </style>
