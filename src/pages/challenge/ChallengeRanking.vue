@@ -144,7 +144,7 @@ const lastUpdated = ref(null);
 const rankingData = ref([
   {
     id: 1,
-    nickname: '김철수',
+    nickname: '김민서',
     participants: 156,
     progress: 85,
     score: 8450,
@@ -169,6 +169,13 @@ const rankingData = ref([
     participants: 87,
     progress: 58,
     score: 5430,
+  },
+  {
+    id: 5,
+    nickname: '홍길동',
+    participants: 87,
+    progress: 58,
+    score: 4239,
   },
 ]);
 
