@@ -83,35 +83,36 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref, reactive, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { signup } from '@/api/authApi'; // API 함수 import
 
 const router = useRouter();
 
 const form = reactive({
-  email: "",
-  password: "",
-  confirmPassword: "",
+  email: '',
+  password: '',
+  confirmPassword: '',
 });
 
 const errors = reactive({
-  email: "",
-  password: "",
-  confirmPassword: "",
+  email: '',
+  password: '',
+  confirmPassword: '',
 });
 
 const isEmailChecked = ref(false);
-const warningMessage = ref("");
+const warningMessage = ref('');
 let warningTimeout = null;
 
 const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!form.email) {
-    errors.email = "";
+    errors.email = '';
   } else if (!emailRegex.test(form.email)) {
-    errors.email = "올바른 이메일 형식이 아닙니다";
+    errors.email = '올바른 이메일 형식이 아닙니다';
   } else {
-    errors.email = "";
+    errors.email = '';
   }
 };
 
@@ -119,23 +120,23 @@ const validatePassword = () => {
   const passwordRegex =
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
   if (!form.password) {
-    errors.password = "";
+    errors.password = '';
   } else if (form.password.length < 8) {
-    errors.password = "비밀번호는 8자 이상이어야 합니다";
+    errors.password = '비밀번호는 8자 이상이어야 합니다';
   } else if (!passwordRegex.test(form.password)) {
-    errors.password = "영문, 숫자, 특수문자를 포함해야 합니다";
+    errors.password = '영문, 숫자, 특수문자를 포함해야 합니다';
   } else {
-    errors.password = "";
+    errors.password = '';
   }
 };
 
 const validateConfirmPassword = () => {
   if (!form.confirmPassword) {
-    errors.confirmPassword = "";
+    errors.confirmPassword = '';
   } else if (form.password !== form.confirmPassword) {
-    errors.confirmPassword = "비밀번호가 일치하지 않습니다";
+    errors.confirmPassword = '비밀번호가 일치하지 않습니다';
   } else {
-    errors.confirmPassword = "";
+    errors.confirmPassword = '';
   }
 };
 
@@ -144,7 +145,7 @@ const checkEmailDuplicate = async () => {
   // TODO: 실제 API 연동
   await new Promise((resolve) => setTimeout(resolve, 500));
   isEmailChecked.value = true;
-  alert("사용 가능한 이메일입니다.");
+  alert('사용 가능한 이메일입니다.');
 };
 
 const isFormValid = computed(() => {
@@ -160,20 +161,36 @@ const isFormValid = computed(() => {
 
 const handleSignup = async () => {
   if (!isFormValid.value) {
-    warningMessage.value = "모든 항목을 올바르게 입력해주세요.";
+    warningMessage.value = '모든 항목을 올바르게 입력해주세요.';
     if (warningTimeout) clearTimeout(warningTimeout);
     warningTimeout = setTimeout(() => {
-      warningMessage.value = "";
+      warningMessage.value = '';
     }, 2000);
     return;
   }
-  // TODO: 실제 회원가입 API 연동
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  // 회원가입 완료 페이지로 이동 (사용자 이름을 쿼리 파라미터로 전달)
-  router.push({
-    path: "/auth/signupcomplete",
-    query: { userName: form.email.split("@")[0] }, // 이메일에서 사용자명 추출
-  });
+
+  try {
+    const requestBody = {
+      email: form.email,
+      password: form.password,
+      passwordConfirm: form.confirmPassword,
+    };
+
+    const response = await signup(requestBody);
+
+    if (response.status === 200) {
+      router.push({
+        path: '/auth/signupcomplete',
+        query: { userName: form.email.split('@')[0] },
+      });
+    } else {
+      warningMessage.value = response.message || '회원가입에 실패했습니다.';
+    }
+  } catch (error) {
+    // 백엔드에서 400 에러 내려줄 때 예외 처리
+    warningMessage.value =
+      error.response?.data?.message || '오류가 발생했습니다.';
+  }
 };
 </script>
 
@@ -182,7 +199,7 @@ const handleSignup = async () => {
   min-height: 100vh;
   background-color: #fff;
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .status-bar {
   display: flex;

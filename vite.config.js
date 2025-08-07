@@ -12,7 +12,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://52.79.124.217:8080',
+        changeOrigin: true,
+      },
+    },
+  },
   define: {
     // 환경 변수 정의
     'process.env.VUE_APP_API_BASE_URL': JSON.stringify(
