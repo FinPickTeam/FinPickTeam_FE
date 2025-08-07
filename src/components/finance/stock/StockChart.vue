@@ -30,12 +30,31 @@ let chart = null;
 const parseChartData = (chartDataString) => {
   try {
     const data = JSON.parse(chartDataString);
-    return data
-      .map((item) => ({
-        date: item.dt,
-        price: parseFloat(item.cur_prc),
-      }))
-      .reverse(); // 최신 데이터가 뒤에 오도록 역순으로 정렬
+
+    // 새로운 데이터 형식: {"2025-07-03":4950,"2025-07-04":4825,...}
+    if (typeof data === 'object' && !Array.isArray(data)) {
+      // 객체를 배열로 변환하고 날짜순으로 정렬
+      const sortedEntries = Object.entries(data).sort(([dateA], [dateB]) => {
+        return new Date(dateA) - new Date(dateB);
+      });
+
+      return sortedEntries.map(([date, price]) => ({
+        date: date,
+        price: parseFloat(price),
+      }));
+    }
+
+    // 기존 배열 형식도 지원 (하위 호환성)
+    if (Array.isArray(data)) {
+      return data
+        .map((item) => ({
+          date: item.dt,
+          price: parseFloat(item.cur_prc),
+        }))
+        .reverse();
+    }
+
+    return [];
   } catch (error) {
     console.error('차트 데이터 파싱 오류:', error);
     return [];
