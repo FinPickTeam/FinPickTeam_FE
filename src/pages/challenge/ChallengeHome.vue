@@ -183,7 +183,7 @@ const handleCardClick = (data) => {
   font-size: var(--font-size-title-sub);
   margin-top: 12px;
   margin-bottom: 12px;
-  margin-left: 35px;
+  margin-left: 19px;
 }
 
 .username {
