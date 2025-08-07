@@ -43,7 +43,6 @@
       <!-- 비밀번호 확인 폼 -->
       <div class="confirm-form">
         <div class="input-group">
-          <label class="input-label">비밀번호 확인</label>
           <div class="password-display">
             <div class="password-dots">
               <div

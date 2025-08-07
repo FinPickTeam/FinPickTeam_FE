@@ -190,7 +190,7 @@ function openKakaoChat() {
   margin: 0 auto;
   min-height: 100vh;
   background-color: #fff;
-  padding: 120px 20px 80px 20px;
+  padding: 76px 20px 80px 20px;
   box-sizing: border-box;
 }
 
@@ -200,15 +200,20 @@ function openKakaoChat() {
 
 /* 헤더 스타일 */
 .dictionary-header-bar {
-  margin-top: 32px;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   width: 100%;
-  height: 48px;
-  padding: 0;
-  margin-bottom: 30px;
+  max-width: 390px;
+  height: 56px;
+  padding: 0 16px;
+  margin-bottom: 0;
   z-index: 1100;
+  background: #fff;
+  border-bottom: 1px solid #e5e6ea;
 }
 
 .dictionary-header-title {

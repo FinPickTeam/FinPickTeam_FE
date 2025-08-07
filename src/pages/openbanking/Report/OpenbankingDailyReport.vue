@@ -103,7 +103,6 @@
           </span>
         </div>
       </div>
-      <hr class="diaryhome-divider" />
       <!-- 거래 내역 리스트 -->
       <div class="diaryhome-list-section">
         <div class="diaryhome-list-title">선택된 날짜 거래 내역</div>
@@ -627,7 +626,7 @@ updateCurrentWeekStart();
   width: 390px;
   min-height: 844px;
   margin: 0 auto;
-  background: #f7f8fa;
+  background: #f3f4f6;
   font-family: "Noto Sans KR", sans-serif;
   box-sizing: border-box;
   padding-top: 56px;
@@ -638,7 +637,7 @@ updateCurrentWeekStart();
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  background: #f3f4f6;
   position: fixed;
   top: 0;
   left: 50%;
@@ -647,7 +646,6 @@ updateCurrentWeekStart();
   z-index: 100;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
 }
 .diaryhome-back {
   background: none;
@@ -865,7 +863,7 @@ updateCurrentWeekStart();
 }
 
 .diaryhome-list-item:hover {
-  background: #f8f9fa;
+  background: #4318d1;
 }
 
 .diaryhome-list-item:last-child {
@@ -921,7 +919,7 @@ updateCurrentWeekStart();
 
 .diaryhome-more-btn {
   width: 100%;
-  background: #f7f8fa;
+  background: #f3f4f6;
   color: #4318d1;
   border: none;
   border-radius: 8px;
@@ -963,11 +961,16 @@ updateCurrentWeekStart();
 }
 .diaryhome-date.selected,
 .diaryhome-calendar-grid span.selected {
-  background: #4318d1;
-  color: #fff;
+  background: #4318d1 !important;
+  color: #fff !important;
   border-radius: 50%;
-  padding: 8px;
+  padding: 6px;
   font-weight: 700;
+  min-width: 32px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .diaryhome-calendar-grid {
@@ -1016,11 +1019,6 @@ updateCurrentWeekStart();
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-}
-.diaryhome-divider {
-  border: none;
-  border-top: 1.5px solid #ececec;
-  margin: 0 0 10px 0;
 }
 
 @media (max-width: 430px) {

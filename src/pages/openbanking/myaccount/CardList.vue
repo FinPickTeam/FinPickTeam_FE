@@ -368,7 +368,6 @@ onMounted(() => {
   margin: 16px;
   padding: 24px 20px;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
 }
 
 .card-total-header {
@@ -412,14 +411,13 @@ onMounted(() => {
   background: #fff;
   border-radius: 18px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
   cursor: pointer;
   transition: all 0.15s;
   border: 2px solid transparent;
 }
 
 .card-item:hover {
-  box-shadow: 0 4px 12px rgba(67, 24, 209, 0.12);
+  /* 그림자 효과 제거 */
 }
 
 .card-item-selected {
@@ -510,8 +508,6 @@ onMounted(() => {
   width: 90%;
   max-width: 350px;
   overflow: hidden;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .modal-header {
@@ -624,7 +620,6 @@ onMounted(() => {
   font-weight: 600;
   cursor: pointer;
   transition: background 0.15s;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
 }
 
 .delete-button:hover {

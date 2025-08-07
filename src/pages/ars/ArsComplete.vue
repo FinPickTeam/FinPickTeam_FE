@@ -1,13 +1,15 @@
 <template>
   <div class="ars_complete_bg">
+    <!-- 상단 헤더 -->
+    <div class="ars-complete-header">
+      <button class="ars-complete-back" @click="goBack">
+        <font-awesome-icon :icon="['fas', 'angle-left']" />
+      </button>
+      <span class="ars-complete-title center-title">ARS 인증</span>
+    </div>
+
     <div class="ars_complete_outer_box">
-      <div class="ars_complete_header">
-        <div class="login-logo">
-          <h1 class="logo">FinPick</h1>
-          <p>금융 생활의 새로운 시작</p>
-        </div>
-        <div class="main_title">ARS 인증 완료</div>
-      </div>
+      <div class="ars_complete_header"></div>
 
       <div class="ars_complete_wrapper">
         <div class="ars_complete_card">
@@ -55,9 +57,18 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+
+library.add(faAngleLeft);
 
 const router = useRouter();
 const currentTime = ref("");
+
+function goBack() {
+  router.back();
+}
 
 function formatCurrentTime() {
   const now = new Date();
@@ -88,27 +99,88 @@ onMounted(() => {
 <style scoped>
 .ars_complete_bg {
   width: 100%;
-  min-height: 100vh;
-  background: #ffffff;
+  max-width: 390px;
+  height: 100vh;
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
+}
+
+/* 상단 헤더 */
+.ars-complete-header {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  padding: 0 16px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
+  z-index: 100;
+}
+
+.ars-complete-back {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #222;
+  cursor: pointer;
+  padding: 4px 8px 4px 0;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.ars-complete-back:hover {
+  background: #f3f3f3;
+}
+
+.ars-complete-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.center-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
 .ars_complete_outer_box {
   width: 100%;
-  max-width: 540px;
-  min-height: 100vh;
-  background: #fff;
+  max-width: 390px;
+  height: 100vh;
+  background: #f3f4f6;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 20px;
+  padding: 8px;
   box-sizing: border-box;
+  padding-top: 56px;
+  overflow: hidden;
 }
 
 .ars_complete_header {
@@ -156,12 +228,16 @@ onMounted(() => {
 .ars_complete_wrapper {
   width: 100%;
   flex: 1 1 auto;
+  min-height: 0;
+  background: transparent;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
+  position: relative;
   padding-top: 0;
   padding-bottom: 24px;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -172,37 +248,37 @@ onMounted(() => {
   border: 1.5px solid #e5e6ea;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 36px 24px 24px 24px;
+  padding: 40px 24px 24px 24px;
   margin-bottom: 24px;
   text-align: center;
 }
 
 .success_icon {
-  width: 80px;
-  height: 80px;
+  width: 90px;
+  height: 90px;
   background: #8e74e3;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 24px auto;
+  margin: 0 auto 28px auto;
 }
 
 .checkmark {
   color: #fff;
-  font-size: 40px;
+  font-size: 45px;
   font-weight: bold;
 }
 
 .success_message {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .primary_message {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
   color: #222;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .secondary_message {
@@ -213,35 +289,35 @@ onMounted(() => {
 .auth_details_box {
   border: 1px solid #8e74e3;
   border-radius: 8px;
-  padding: 20px;
-  margin-bottom: 24px;
+  padding: 28px;
+  margin-bottom: 32px;
   background: #faf7ff;
 }
 
 .auth_time_label {
-  font-size: 14px;
+  font-size: 16px;
   color: #666;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .auth_timestamp {
-  font-size: 18px;
+  font-size: 24px;
   font-weight: 700;
   color: #4318d1;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .auth_confirmation {
-  font-size: 12px;
+  font-size: 14px;
   color: #666;
 }
 
 .info_list {
   text-align: left;
-  font-size: 13px;
+  font-size: 16px;
   color: #444;
-  margin-bottom: 32px;
-  padding-left: 20px;
+  margin-bottom: 40px;
+  padding-left: 28px;
   line-height: 1.6;
 }
 
@@ -253,11 +329,11 @@ onMounted(() => {
   width: 100%;
   background: #8e74e3;
   color: #fff;
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 700;
   border: none;
   border-radius: 8px;
-  padding: 16px 0;
+  padding: 20px 0;
   cursor: pointer;
   transition: background 0.2s;
 }

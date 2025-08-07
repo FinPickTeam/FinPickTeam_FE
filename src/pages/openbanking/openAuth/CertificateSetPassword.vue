@@ -43,7 +43,6 @@
       <!-- 비밀번호 입력 폼 -->
       <div class="password-form">
         <div class="input-group">
-          <label class="input-label">비밀번호</label>
           <div class="password-display">
             <div class="password-dots">
               <div
@@ -174,10 +173,9 @@ const nextStep = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: #f3f4f6;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
   position: sticky;
   top: 0;
   z-index: 100;
@@ -206,7 +204,7 @@ const nextStep = () => {
 }
 
 .password-content {
-  padding: 24px 20px;
+  padding: 16px 20px 24px 20px;
 }
 
 .progress-section {

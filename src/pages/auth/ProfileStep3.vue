@@ -147,8 +147,8 @@ const goNext = () => {
 .option {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 16px 0;
-  text-align: center;
+  padding: 16px 20px;
+  text-align: left;
   font-size: 16px;
   color: #222;
   background: #fff;
