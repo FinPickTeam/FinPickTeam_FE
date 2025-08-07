@@ -4,17 +4,15 @@
     <ChallengeSuccessModal
       :isVisible="showSuccessModal"
       :challenge="testChallenge"
+      :challengeResult="testChallengeResult"
       @close="showSuccessModal = false"
     />
 
     <!-- 실패 모달 -->
     <ChallengeFailModal
       :isVisible="showFailModal"
-      :challengeTitle="testChallengeTitle"
-      :progressRate="testProgressRate"
-      :goalValue="testGoalValue"
+      :challengeResult="testFailChallengeResult"
       @close="showFailModal = false"
-      @retry="handleRetry"
     />
     <div class="content">
       <!-- 공통 챌린지 섹션 -->
@@ -113,6 +111,31 @@ const testChallenge = ref({
     badge: '절약 마스터',
   },
 });
+
+// 성공 모달용 테스트 데이터
+const testChallengeResult = ref({
+  resultType: 'SUCCESS_WIN',
+  actualRewardPoint: 110,
+  savedAmount: 450000,
+  stockRecommendation: {
+    stockName: '삼성전자',
+    stockCode: '005930',
+    currentPrice: 75000,
+    priceChange: 2500,
+    priceChangeRate: 3.45,
+    recommendationReason:
+      'AI 반도체 시장 성장과 함께 삼성전자의 기술 경쟁력이 향상되고 있어 투자 가치가 높습니다.',
+  },
+});
+
+// 실패 모달용 테스트 데이터
+const testFailChallengeResult = ref({
+  resultType: 'FAIL',
+  actualRewardPoint: 0,
+  savedAmount: 30000,
+  stockRecommendation: null,
+});
+
 const testGoalValue = ref(100000);
 
 const handleCardClick = (data) => {
@@ -153,12 +176,6 @@ const handleCardClick = (data) => {
 };
 
 // 모달 핸들러 함수들
-
-const handleRetry = () => {
-  console.log('챌린지 재도전');
-  showFailModal.value = false;
-  // 여기에 재도전 로직 추가
-};
 
 // 테스트용 모달 표시 함수들
 const showSuccessModalExample = () => {
