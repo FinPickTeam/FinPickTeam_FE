@@ -44,8 +44,7 @@
         <h3 class="notice-title">주의사항</h3>
         <ul class="notice-list">
           <li>인증서 비밀번호는 분실 시 복구가 불가능합니다.</li>
-          <li>안전한 곳에 보관하시기 바랍니다.</li>
-          <li>타인에게 알려주지 마세요.</li>
+          <li>비밀번호를 타인에게 알려주지 마세요.</li>
           <li>인증서는 1년간 유효합니다.</li>
         </ul>
       </div>
@@ -103,9 +102,13 @@ const goToOpenBanking = () => {
   max-width: 390px;
   margin: 0 auto;
   background: #f7f8fa;
-  min-height: 100vh;
+  height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
   padding-bottom: 120px;
 }
 
@@ -246,7 +249,7 @@ const goToOpenBanking = () => {
 
 .complete-bottom {
   position: fixed;
-  bottom: 80px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;

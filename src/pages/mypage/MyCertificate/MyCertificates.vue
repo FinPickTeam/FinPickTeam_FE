@@ -246,6 +246,8 @@ function goToPasswordChange() {
   padding-bottom: 0;
   background: #fff;
   border-radius: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .menu-item {
@@ -262,14 +264,20 @@ function goToPasswordChange() {
   overflow-x: hidden;
   cursor: pointer;
   transition: background 0.15s;
+  height: 56px; /* 고정 높이 설정 */
+  min-height: 56px; /* 최소 높이 보장 */
 }
 
 .menu-item:hover {
   background: #f9f9f9;
 }
 
-.menu-item:last-child {
+.menu-item {
   border-bottom: 1px solid #f3f4f6;
+}
+
+.menu-item:last-child {
+  border-bottom: none;
   margin-bottom: 0;
   padding-bottom: 0;
 }

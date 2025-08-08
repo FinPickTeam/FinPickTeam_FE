@@ -1,38 +1,34 @@
 <template>
   <div class="ars_bg">
-    <div class="ars_outer_box">
-      <div class="ars_header">
-        <div class="login-logo">
-          <h1 class="logo">FinPick</h1>
-          <p>금융 생활의 새로운 시작</p>
-        </div>
-        <div class="subtitle">ARS 인증 진행 중</div>
-      </div>
-      <div class="ars_verification_wrapper">
-        <div class="ars_card">
-          <div class="ars_info">
-            <div class="ars_call_msg">ARS 전화가 발신되었습니다</div>
-            <div class="ars_desc">
-              전화를 받으신 후 아래 인증번호를 입력해 주세요
-            </div>
-            <div class="ars_code_box">
-              <div class="ars_label">인증번호</div>
-              <div class="ars_code">3847</div>
-              <div class="ars_code_desc">
-                위 4자리 숫자를 전화에서 입력하세요
-              </div>
-            </div>
-            <div class="ars_waiting">
-              <span class="waiting_icon">📞</span>
-              <span class="waiting_label">통화 대기 중</span>
-              <span class="waiting_timer">{{ timerDisplay }}</span>
-            </div>
-            <ul class="ars_guide_list">
-              <li>전화를 받으신 후 안내에 따라 인증번호를 입력하세요</li>
-              <li>인증번호 입력 후 통화가 자동으로 종료됩니다</li>
-              <li>3분 이내에 인증을 완료해주세요</li>
-            </ul>
+    <!-- 상단 헤더 -->
+    <div class="ars-verification-header">
+      <button class="ars-verification-back" @click="goBack">
+        <font-awesome-icon :icon="['fas', 'angle-left']" />
+      </button>
+      <span class="ars-verification-title center-title">ARS 인증</span>
+    </div>
+    <div class="ars_verification_wrapper">
+      <div class="ars_card">
+        <div class="ars_info">
+          <div class="ars_call_msg">ARS 전화가 발신되었습니다</div>
+          <div class="ars_desc">
+            전화를 받으신 후 아래 인증번호를 입력해 주세요
           </div>
+          <div class="ars_code_box">
+            <div class="ars_label">인증번호</div>
+            <div class="ars_code">3847</div>
+            <div class="ars_code_desc">위 4자리 숫자를 전화에서 입력하세요</div>
+          </div>
+          <div class="ars_waiting">
+            <span class="waiting_icon">📞</span>
+            <span class="waiting_label">통화 대기 중</span>
+            <span class="waiting_timer">{{ timerDisplay }}</span>
+          </div>
+          <ul class="ars_guide_list">
+            <li>전화를 받으신 후 안내에 따라 인증번호를 입력하세요</li>
+            <li>인증번호 입력 후 통화가 자동으로 종료됩니다</li>
+            <li>3분 이내에 인증을 완료해주세요</li>
+          </ul>
         </div>
         <button class="ars_next_btn" @click="goToComplete">
           다음 단계로 진행
@@ -62,6 +58,11 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref, onMounted, onUnmounted } from "vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+
+library.add(faAngleLeft);
 
 const router = useRouter();
 const timerDisplay = ref("3:00");
@@ -74,6 +75,10 @@ function goToComplete() {
 
 function goToCustomerSupport() {
   router.push("/customer-support");
+}
+
+function goBack() {
+  router.back();
 }
 
 function updateTimer() {
@@ -106,17 +111,77 @@ onUnmounted(() => {
 <style scoped>
 .ars_bg {
   width: 100%;
-  min-height: 100vh;
-  background: #ffffff;
+  max-width: 390px;
+  height: 100vh;
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   box-sizing: border-box;
+  padding-top: 56px;
+  overflow: hidden;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
+/* 상단 헤더 */
+.ars-verification-header {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  padding: 0 16px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
+  z-index: 100;
+}
+
+.ars-verification-back {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #222;
+  cursor: pointer;
+  padding: 4px 8px 4px 0;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.ars-verification-back:hover {
+  background: #f3f3f3;
+}
+
+.ars-verification-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.center-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
 .ars_outer_box {
   width: 100%;
-  max-width: 540px;
+  max-width: 390px;
   min-height: 100vh;
   background: #fff;
   margin: 0 auto;
@@ -178,7 +243,7 @@ onUnmounted(() => {
   position: relative;
   padding-top: 0;
   padding-bottom: 24px;
-  overflow-y: visible;
+  overflow: hidden;
   box-sizing: border-box;
 }
 .ars_card,
@@ -190,7 +255,7 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 .ars_card {
-  background: #fafbfc;
+  background: #fff;
   border: 1.5px solid #e5e6ea;
   border-radius: 12px;
   box-shadow: none;

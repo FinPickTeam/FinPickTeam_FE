@@ -10,14 +10,6 @@
 
     <!-- 메인 콘텐츠 -->
     <div class="certificate-content">
-      <!-- 인증서 아이콘 -->
-      <div class="certificate-icon">
-        <font-awesome-icon :icon="['fas', 'certificate']" />
-      </div>
-
-      <!-- 제목 -->
-      <h1 class="main-title">핀픽 인증서 만들기</h1>
-
       <!-- 설명 -->
       <div class="description-section">
         <p class="description-text">
@@ -121,25 +113,32 @@ const startCertificate = () => {
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
-  background: #f7f8fa;
-  min-height: 100vh;
+  background: #f3f4f6;
+  height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
   padding-bottom: 120px;
 }
 
 .certificate-header {
   width: 100%;
-  height: 56px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: #f3f4f6;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
-  position: sticky;
+  border-bottom: none;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   z-index: 100;
 }
 
@@ -166,6 +165,9 @@ const startCertificate = () => {
   font-size: 1.1rem;
   font-weight: 600;
   color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .center-title {
@@ -176,7 +178,7 @@ const startCertificate = () => {
 }
 
 .certificate-content {
-  padding: 40px 20px;
+  padding: 120px 20px 40px 20px;
   text-align: center;
 }
 
@@ -263,6 +265,7 @@ const startCertificate = () => {
   border-radius: 12px;
   padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
 }
 
 .notice-title {
@@ -301,7 +304,7 @@ const startCertificate = () => {
 
 .certificate-bottom {
   position: fixed;
-  bottom: 80px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;

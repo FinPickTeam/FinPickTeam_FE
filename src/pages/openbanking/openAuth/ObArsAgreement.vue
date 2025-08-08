@@ -232,7 +232,7 @@ const goToNext = () => {
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
-  background: #f7f8fa;
+  background: #f3f4f6;
   min-height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
   position: relative;
@@ -245,12 +245,14 @@ const goToNext = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: #f3f4f6;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   z-index: 100;
 }
 
@@ -277,6 +279,9 @@ const goToNext = () => {
   font-size: 1.1rem;
   font-weight: 600;
   color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .center-title {
   position: absolute;
@@ -327,11 +332,11 @@ const goToNext = () => {
   border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
   transition: background 0.15s;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #fff;
 }
 
 .ars-agreement-item-all:hover {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  background: #f8f9fa;
 }
 
 .ars-agreement-checkbox-all {
@@ -503,10 +508,10 @@ const goToNext = () => {
   transform: translateX(-50%);
   width: 100%;
   max-width: 390px;
-  padding: 16px;
-  background: #fff;
+  background: transparent;
   border-top: 1px solid #e5e7eb;
   margin-bottom: 80px;
+  padding: 16px;
 }
 
 .ars-agreement-next-btn {
