@@ -256,10 +256,17 @@ const goToNext = () => {
   max-width: 390px;
   margin: 0 auto;
   background: #f3f4f6;
-  min-height: 100vh;
+  height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
   position: relative;
   padding-top: 56px;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.agreement-container::-webkit-scrollbar {
+  display: none;
 }
 
 .agreement-header {

@@ -164,7 +164,7 @@ const goNext = () => {
   transition: background 0.2s;
 }
 .next-btn:disabled {
-  background-color: #8e74e3;
+  background-color: #9ca3af;
   cursor: not-allowed;
 }
 .next-btn:hover {

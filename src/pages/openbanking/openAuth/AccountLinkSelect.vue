@@ -141,7 +141,14 @@
 
     <!-- 연결하기 버튼 -->
     <div class="connect-section">
-      <button class="connect-btn" @click="connectAccounts">연결하기</button>
+      <button
+        class="connect-btn"
+        :class="{ disabled: !hasSelectedItems }"
+        :disabled="!hasSelectedItems"
+        @click="connectAccounts"
+      >
+        연결하기
+      </button>
     </div>
 
     <!-- 오픈뱅킹 연동 혜택 -->
@@ -522,6 +529,15 @@ const selectedSecurities = computed(() =>
   securitiesList.value.filter((security) => security.selected)
 );
 
+// 선택된 항목이 있는지 확인
+const hasSelectedItems = computed(() => {
+  return (
+    selectedBanks.value.length > 0 ||
+    selectedCards.value.length > 0 ||
+    selectedSecurities.value.length > 0
+  );
+});
+
 function goBack() {
   router.back();
 }
@@ -593,11 +609,6 @@ function connectAccounts() {
     }))
   );
 
-  if (selectedItems.length === 0) {
-    alert("연결할 항목을 선택해주세요.");
-    return;
-  }
-
   // 선택된 항목들을 저장하고 AccountAgreement 페이지로 이동
   console.log("선택된 항목들:", selectedItems);
 
@@ -613,11 +624,14 @@ function connectAccounts() {
 .account-link-select-container {
   max-width: 390px;
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
   color: #333;
   padding: 0 20px 120px 20px; /* 좌우 여백 추가, 하단 여백 추가 (고정 버튼 높이 + 패딩) */
   background: #f3f4f6;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 
 .account-link-select-container::-webkit-scrollbar {
@@ -1019,6 +1033,14 @@ function connectAccounts() {
 
 .connect-btn:active {
   transform: translateY(0);
+}
+
+.connect-btn.disabled {
+  background-color: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* 혜택 섹션 */

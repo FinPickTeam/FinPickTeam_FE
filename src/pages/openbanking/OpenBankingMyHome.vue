@@ -495,7 +495,7 @@ const goToDictionary = () => {
 .obmyhome-asset-card {
   background: #fff;
   border-radius: 18px;
-  margin: 12px 16px 16px 16px;
+  margin: 1px 16px 16px 16px;
   padding: 20px 20px 16px 20px;
   display: flex;
   flex-direction: column;
@@ -567,7 +567,7 @@ const goToDictionary = () => {
   background: #fff;
   border-radius: 18px;
   margin: 0 16px 12px 16px;
-  padding: 16px 20px 16px 20px;
+  padding: 6px 20px 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;

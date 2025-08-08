@@ -136,6 +136,7 @@
             class="account-item"
             :class="{
               'account-item-selected': selectedAccounts.includes(account),
+              'account-item-disabled': account.type === '투자' && !isDeleteMode,
             }"
             v-for="(account, index) in investmentAccounts"
             :key="`investment-${index}`"
@@ -354,6 +355,10 @@ const handleAccountClick = (account) => {
   if (isDeleteMode.value) {
     toggleAccountSelection(account);
   } else {
+    // 투자 계좌는 상세보기 비활성화
+    if (account.type === "투자") {
+      return;
+    }
     selectAccount(account);
   }
 };
@@ -424,6 +429,14 @@ onMounted(() => {
   background: #f7f8fa;
   padding-bottom: 100px;
   padding-top: 56px;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  height: 100vh;
+}
+
+.account-list-container::-webkit-scrollbar {
+  display: none;
 }
 
 .account-header {
@@ -572,6 +585,12 @@ onMounted(() => {
 .account-item-selected {
   border-color: #dc2626;
   background: #fef2f2;
+}
+
+.account-item-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 
 .account-item-header {

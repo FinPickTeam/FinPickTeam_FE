@@ -382,6 +382,14 @@ onMounted(() => {
   background: #f7f8fa;
   padding-bottom: 120px;
   padding-top: 56px;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  height: 100vh;
+}
+
+.card-detail-container::-webkit-scrollbar {
+  display: none;
 }
 
 .account-header {

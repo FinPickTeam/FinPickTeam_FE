@@ -64,6 +64,12 @@ import AccountLinkSelect from "../pages/openbanking/openAuth/AccountLinkSelect.v
 import AccountAgreement from "../pages/openbanking/openAuth/AccountAgreement.vue";
 import ObAgreement from "../pages/openbanking/openAuth/ObAgreement.vue";
 
+// 핀픽 인증서 관련 컴포넌트들
+import CreateCertificate from "../pages/openbanking/openAuth/CertificateCreate.vue";
+import SetCertificatePassword from "../pages/openbanking/openAuth/CertificateSetPassword.vue";
+import ConfirmCertificatePassword from "../pages/openbanking/openAuth/CrrtificateConfirmPass.vue";
+import CertificateComplete from "../pages/openbanking/openAuth/CertificateComplete.vue";
+
 import AccountList from "../pages/openbanking/myaccount/AccountList.vue";
 import AccountDetail from "../pages/openbanking/myaccount/AccountDetail.vue";
 import CardList from "../pages/openbanking/myaccount/CardList.vue";
@@ -234,6 +240,37 @@ const router = createRouter({
       name: "FavoriteProducts",
       component: FavoriteProducts,
     },
+    {
+      path: "/withdraw",
+      name: "withdraw",
+      component: Withdraw,
+    },
+    {
+      path: "/withdraw-success",
+      name: "withdraw-success",
+      component: WithdrawSuccess,
+    },
+    // 핀픽 인증서 (상단/하단 레이아웃 없음)
+    {
+      path: "/openbanking/create-certificate",
+      name: "CreateCertificate",
+      component: CreateCertificate,
+    },
+    {
+      path: "/openbanking/set-certificate-password",
+      name: "SetCertificatePassword",
+      component: SetCertificatePassword,
+    },
+    {
+      path: "/openbanking/confirm-certificate-password",
+      name: "ConfirmCertificatePassword",
+      component: ConfirmCertificatePassword,
+    },
+    {
+      path: "/openbanking/certificate-complete",
+      name: "CertificateComplete",
+      component: CertificateComplete,
+    },
 
     // 공통 레이아웃 적용 구간
     {
@@ -286,7 +323,7 @@ const router = createRouter({
             import("../pages/openbanking/openAuth/ObArsAgreement.vue"),
         },
         {
-          path: "/openbanking/agreement",
+          path: "openbanking/agreement",
           name: "OpenBankingAgreement",
           component: () =>
             import("../pages/openbanking/openAuth/ObAgreement.vue"),
@@ -300,30 +337,6 @@ const router = createRouter({
           path: "openbanking/account-agreement",
           name: "AccountAgreement",
           component: AccountAgreement,
-        },
-        {
-          path: "openbanking/create-certificate",
-          name: "CreateCertificate",
-          component: () =>
-            import("../pages/openbanking/openAuth/CertificateCreate.vue"),
-        },
-        {
-          path: "openbanking/set-certificate-password",
-          name: "SetCertificatePassword",
-          component: () =>
-            import("../pages/openbanking/openAuth/CertificateSetPassword.vue"),
-        },
-        {
-          path: "openbanking/confirm-certificate-password",
-          name: "ConfirmCertificatePassword",
-          component: () =>
-            import("../pages/openbanking/openAuth/CrrtificateConfirmPass.vue"),
-        },
-        {
-          path: "openbanking/certificate-complete",
-          name: "CertificateComplete",
-          component: () =>
-            import("../pages/openbanking/openAuth/CertificateComplete.vue"),
         },
 
         {
@@ -348,14 +361,7 @@ const router = createRouter({
             import("../pages/openbanking/myaccount/CardDetail.vue"),
         },
 
-        // 마이페이지
         { path: "mypage", name: "mypage", component: Mypage },
-        { path: "withdraw", name: "withdraw", component: Withdraw },
-        {
-          path: "withdraw-success",
-          name: "withdraw-success",
-          component: WithdrawSuccess,
-        },
         { path: "profile", name: "profile", component: Profile },
         { path: "my-history", name: "my-history", component: MyHistory },
         {

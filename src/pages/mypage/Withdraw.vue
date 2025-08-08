@@ -1,6 +1,5 @@
 <template>
   <div class="withdraw-container">
-    <Headerbar />
     <!-- 기존 컨텐츠 영역 유지 -->
     <div class="withdraw-content">
       <div class="info-circle">
@@ -30,14 +29,11 @@
         <button class="btn withdraw" @click="handleWithdraw">회원 탈퇴</button>
       </div>
     </div>
-    <Navbar />
   </div>
 </template>
 
 <script setup>
 import { useRouter } from "vue-router";
-import Headerbar from "../../components/Headerbar.vue";
-import Navbar from "../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
@@ -70,7 +66,7 @@ function goBack() {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 24px;
+  margin-top: 40px;
   padding: 0 16px;
   box-sizing: border-box;
 }

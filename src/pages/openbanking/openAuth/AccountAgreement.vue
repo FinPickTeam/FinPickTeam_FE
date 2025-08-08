@@ -384,11 +384,17 @@ const goToNext = () => {
   max-width: 390px;
   margin: 0 auto;
   background: #f3f4f6;
-  min-height: 100vh;
+  height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
   position: relative;
   padding-bottom: 120px; /* 하단 버튼과 navbar 공간 확보 */
   overflow-y: auto; /* 스크롤 활성화 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.ars-agreement-container::-webkit-scrollbar {
+  display: none;
 }
 
 .ars-agreement-header {
