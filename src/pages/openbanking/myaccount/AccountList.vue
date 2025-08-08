@@ -423,6 +423,7 @@ onMounted(() => {
   min-height: 100vh;
   background: #f7f8fa;
   padding-bottom: 100px;
+  padding-top: 56px;
 }
 
 .account-header {
@@ -431,7 +432,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #f3f4f6;
+  background: #f7f8fa;
   position: fixed;
   top: 0;
   left: 50%;

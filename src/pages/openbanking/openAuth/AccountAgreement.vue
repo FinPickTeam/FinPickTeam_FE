@@ -655,10 +655,9 @@ const goToNext = () => {
   transform: translateX(-50%);
   width: 100%;
   max-width: 390px;
-  padding: 16px;
-  background: #fff;
-  border-top: 1px solid #e5e7eb;
+  background: transparent;
   z-index: 1000; /* 다른 요소들 위에 표시 */
+  padding: 16px;
 }
 
 .ars-agreement-next-btn {

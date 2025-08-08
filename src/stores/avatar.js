@@ -2,13 +2,15 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 
 export const useAvatarStore = defineStore("avatar", () => {
-  const coin = ref(1000);
+  const coin = ref(61000);
 
   // 아바타 아이템 상태 관리
   const avatarItems = ref({
     titles: {
-      "title-wizardhat": { purchased: false, wearing: false },
-      "title-sprout": { purchased: false, wearing: false },
+      "hat-3wizardhat": { purchased: false, wearing: false },
+      "hat-1sprout": { purchased: false, wearing: false },
+      "hat-4dosa": { purchased: false, wearing: false },
+      "hat-2beginner": { purchased: false, wearing: false },
     },
     shirts: {
       "shirt-blue": { purchased: false, wearing: false },
@@ -20,7 +22,8 @@ export const useAvatarStore = defineStore("avatar", () => {
     },
     glasses: {
       "sport-glasses": { purchased: false, wearing: false },
-      "sun-glasses": { purchased: false, wearing: false },
+      "etc-sunglasses": { purchased: false, wearing: false },
+      "etc-blush": { purchased: false, wearing: false },
     },
   });
 
@@ -30,6 +33,12 @@ export const useAvatarStore = defineStore("avatar", () => {
       type: "init",
       amount: 1000,
       desc: "초기 지급",
+      date: new Date().toISOString(),
+    },
+    {
+      type: "earn",
+      amount: 60000,
+      desc: "누적 포인트",
       date: new Date().toISOString(),
     },
   ]);
@@ -79,6 +88,18 @@ export const useAvatarStore = defineStore("avatar", () => {
       }
     }
     return null;
+  }
+
+  // 현재 착용 중인 모든 아이템 가져오기 (액세서리용)
+  function getWearingItems(category) {
+    const items = avatarItems.value[category];
+    const wearingItems = [];
+    for (const [id, item] of Object.entries(items)) {
+      if (item.wearing) {
+        wearingItems.push({ id, ...item });
+      }
+    }
+    return wearingItems;
   }
 
   // 아이템 구매 상태 확인
@@ -163,8 +184,10 @@ export const useAvatarStore = defineStore("avatar", () => {
     coin.value = 900;
     avatarItems.value = {
       titles: {
-        "title-wizardhat": { purchased: false, wearing: false },
-        "title-sprout": { purchased: false, wearing: false },
+        "hat-3wizardhat": { purchased: false, wearing: false },
+        "hat-1sprout": { purchased: false, wearing: false },
+        "hat-4dosa": { purchased: false, wearing: false },
+        "hat-2beginner": { purchased: false, wearing: false },
       },
       shirts: {
         "shirt-blue": { purchased: false, wearing: false },
@@ -176,7 +199,8 @@ export const useAvatarStore = defineStore("avatar", () => {
       },
       glasses: {
         "sport-glasses": { purchased: false, wearing: false },
-        "sun-glasses": { purchased: false, wearing: false },
+        "etc-sunglasses": { purchased: false, wearing: false },
+        "etc-blush": { purchased: false, wearing: false },
       },
     };
     addCoinHistory("초기화", 900, "아바타 리셋");
@@ -186,11 +210,22 @@ export const useAvatarStore = defineStore("avatar", () => {
     return coinHistory.value;
   }
 
+  // 누적 포인트 계산 (획득한 포인트의 총합)
+  function getTotalEarnedPoints() {
+    return coinHistory.value.reduce((total, record) => {
+      if (record.amount > 0) {
+        return total + record.amount;
+      }
+      return total;
+    }, 0);
+  }
+
   return {
     coin,
     avatarItems,
     buyOrToggleItem,
     getWearingItem,
+    getWearingItems,
     isItemPurchased,
     isItemWearing,
     setItemState,
@@ -198,6 +233,7 @@ export const useAvatarStore = defineStore("avatar", () => {
     coinHistory,
     addCoinHistory,
     getCoinHistory,
+    getTotalEarnedPoints,
     setAvatar,
     loadAvatar,
   };

@@ -508,10 +508,10 @@ const goToNext = () => {
   transform: translateX(-50%);
   width: 100%;
   max-width: 390px;
-  padding: 16px;
-  background: #fff;
+  background: transparent;
   border-top: 1px solid #e5e7eb;
   margin-bottom: 80px;
+  padding: 16px;
 }
 
 .ars-agreement-next-btn {

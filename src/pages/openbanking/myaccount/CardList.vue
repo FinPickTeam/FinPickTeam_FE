@@ -180,7 +180,7 @@ const isDeleteMode = ref(false);
 const selectedCards = ref([]);
 const showDeleteModal = ref(false);
 
-// 카드 사용 내역 총량 계산 (당월만)
+// 카드 사용 내역 총량 계산 (당월만) - 삭제된 카드 제외
 const cardTotalAmount = computed(() => {
   if (!transactionData?.transactions) return 0;
 
@@ -191,12 +191,26 @@ const cardTotalAmount = computed(() => {
   const thisMonthTransactions = transactionData.transactions.filter(
     (transaction) => {
       const transactionDate = new Date(transaction.date);
-      return (
-        (transaction.account.includes("체크카드") ||
-          transaction.account.includes("신용카드")) &&
+      const isCardTransaction =
+        transaction.account.includes("체크카드") ||
+        transaction.account.includes("신용카드");
+      const isThisMonth =
         transactionDate.getFullYear() === currentYear &&
-        transactionDate.getMonth() === currentMonth
-      );
+        transactionDate.getMonth() === currentMonth;
+
+      if (!isCardTransaction || !isThisMonth) return false;
+
+      // 삭제된 카드의 거래인지 확인 - 현재 존재하는 카드들과 매칭
+      const transactionCardKey = `${transaction.bank}-${transaction.account}`;
+      const isExistingCard = cards.value.some((card) => {
+        const cardKey = `${card.bank}-${card.name.replace(
+          card.bank + " ",
+          ""
+        )}`;
+        return cardKey === transactionCardKey;
+      });
+
+      return isExistingCard;
     }
   );
 
@@ -301,6 +315,7 @@ onMounted(() => {
   min-height: 100vh;
   background: #f7f8fa;
   padding-bottom: 120px;
+  padding-top: 56px;
 }
 
 .account-header {
@@ -309,13 +324,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  position: sticky;
+  background: #f7f8fa;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   z-index: 100;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
 }
 
 .account-back {

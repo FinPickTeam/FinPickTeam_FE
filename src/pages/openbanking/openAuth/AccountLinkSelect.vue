@@ -616,7 +616,7 @@ function connectAccounts() {
   min-height: 100vh;
   box-sizing: border-box;
   color: #333;
-  padding: 0 20px; /* 좌우 여백 추가 */
+  padding: 0 20px 120px 20px; /* 좌우 여백 추가, 하단 여백 추가 (고정 버튼 높이 + 패딩) */
   background: #f3f4f6;
 }
 
@@ -985,10 +985,16 @@ function connectAccounts() {
 
 /* 연결하기 버튼 */
 .connect-section {
-  margin-top: 50px;
-  margin-bottom: 50px;
+  position: fixed;
+  bottom: 80px; /* navbar 높이만큼 위로 이동 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 390px;
+  background: transparent;
+  z-index: 1000; /* 다른 요소들 위에 표시 */
+  padding: 16px;
   text-align: center;
-  background: #f3f4f6;
 }
 
 .connect-btn {
@@ -1155,6 +1161,10 @@ function connectAccounts() {
 
 @media (max-width: 540px) {
   .account-link-select-container {
+    max-width: 100vw;
+  }
+
+  .connect-section {
     max-width: 100vw;
   }
 }

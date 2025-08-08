@@ -62,6 +62,7 @@ import ProductCard_installment from "../components/finance/installment/ProductCa
 import OpenBankingHome from "../pages/openbanking/OpenBankingHome.vue";
 import AccountLinkSelect from "../pages/openbanking/openAuth/AccountLinkSelect.vue";
 import AccountAgreement from "../pages/openbanking/openAuth/AccountAgreement.vue";
+import ObAgreement from "../pages/openbanking/openAuth/ObAgreement.vue";
 
 import AccountList from "../pages/openbanking/myaccount/AccountList.vue";
 import AccountDetail from "../pages/openbanking/myaccount/AccountDetail.vue";
@@ -277,17 +278,18 @@ const router = createRouter({
           name: "DailyReportDetail",
           component: DailyReportDetail,
         },
-        {
-          path: "openbanking/agreement",
-          name: "OpenBankingAgreement",
-          component: () =>
-            import("../pages/openbanking/openAuth/ObAgreement.vue"),
-        },
+
         {
           path: "openbanking/ars-agreement",
           name: "ObArsAgreement",
           component: () =>
             import("../pages/openbanking/openAuth/ObArsAgreement.vue"),
+        },
+        {
+          path: "/openbanking/agreement",
+          name: "OpenBankingAgreement",
+          component: () =>
+            import("../pages/openbanking/openAuth/ObAgreement.vue"),
         },
         {
           path: "openbanking/account-link-select",
