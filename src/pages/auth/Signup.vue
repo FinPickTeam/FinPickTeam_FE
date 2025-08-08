@@ -45,14 +45,23 @@
       <!-- 비밀번호 -->
       <div class="form-group">
         <label for="password">비밀번호</label>
-        <input
-          id="password"
-          v-model="form.password"
-          type="password"
-          placeholder="비밀번호를 입력하세요"
-          :class="{ error: errors.password }"
-          @blur="validatePassword"
-        />
+        <div class="input-wrapper">
+          <input
+            id="password"
+            v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="비밀번호를 입력하세요"
+            :class="{ error: errors.password }"
+            @blur="validatePassword"
+          />
+          <span class="icon" @click="togglePassword">
+            <i
+              :class="
+                showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'
+              "
+            ></i>
+          </span>
+        </div>
         <span v-if="errors.password" class="error-message">{{
           errors.password
         }}</span>
@@ -64,14 +73,25 @@
       <!-- 비밀번호 확인 -->
       <div class="form-group">
         <label for="confirmPassword">비밀번호 확인</label>
-        <input
-          id="confirmPassword"
-          v-model="form.confirmPassword"
-          type="password"
-          placeholder="비밀번호를 다시 입력하세요"
-          :class="{ error: errors.confirmPassword }"
-          @blur="validateConfirmPassword"
-        />
+        <div class="input-wrapper">
+          <input
+            id="confirmPassword"
+            v-model="form.confirmPassword"
+            :type="showConfirmPassword ? 'text' : 'password'"
+            placeholder="비밀번호를 다시 입력하세요"
+            :class="{ error: errors.confirmPassword }"
+            @blur="validateConfirmPassword"
+          />
+          <span class="icon" @click="toggleConfirmPassword">
+            <i
+              :class="
+                showConfirmPassword
+                  ? 'fa-solid fa-eye'
+                  : 'fa-solid fa-eye-slash'
+              "
+            ></i>
+          </span>
+        </div>
         <span v-if="errors.confirmPassword" class="error-message">{{
           errors.confirmPassword
         }}</span>
@@ -113,7 +133,17 @@ const isEmailChecked = ref(false);
 const warningMessage = ref('');
 const emailCheckMessage = ref('');
 const emailCheckMessageClass = ref('');
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 let warningTimeout = null;
+
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
+
+const toggleConfirmPassword = () => {
+  showConfirmPassword.value = !showConfirmPassword.value;
+};
 
 const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -302,6 +332,28 @@ const handleSignup = async () => {
 }
 .input-group input {
   flex: 1;
+}
+.input-wrapper {
+  position: relative;
+  margin-bottom: 0;
+}
+.input-wrapper input {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.input-wrapper .icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #888;
 }
 input {
   width: 100%;
