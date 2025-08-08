@@ -10,7 +10,7 @@
           <button class="diaryhome-icon-btn" @click="goToDictionary">
             <font-awesome-icon :icon="['fas', 'search']" />
           </button>
-          <button class="diaryhome-icon-btn">
+          <button class="diaryhome-icon-btn" @click="goToAccountLinkSelect">
             <font-awesome-icon :icon="['fas', 'plus']" />
           </button>
         </div>
@@ -572,6 +572,10 @@ const goToReport = () => {
 
 const goCalendarDetail = () => {
   toggleCalendarMode();
+};
+
+const goToAccountLinkSelect = () => {
+  router.push("/openbanking/account-link-select");
 };
 
 // 거래 객체로부터 전체 배열에서의 인덱스를 찾는 함수
