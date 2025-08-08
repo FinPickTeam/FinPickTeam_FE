@@ -74,7 +74,12 @@
           <!-- 한달 달력 -->
           <div v-else class="diaryhome-calendar-month">
             <div class="diaryhome-calendar-header">
-              <span v-for="day in weekDays" :key="day">{{ day }}</span>
+              <span
+                v-for="day in weekDays"
+                :key="day"
+                class="diaryhome-weekday-header"
+                >{{ day }}</span
+              >
             </div>
             <div class="diaryhome-calendar-grid">
               <span
@@ -749,13 +754,25 @@ updateCurrentWeekStart();
   font-weight: 600;
   color: #222;
   margin-bottom: 2px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  min-height: 40px;
+  width: 100%;
+  padding: 0;
+}
+
+.diaryhome-weekday-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  text-align: center;
-  min-height: 70px; /* 버튼과 컬럼의 높이 증가 */
-  width: 100%;
-  gap: 2px; /* 버튼과 컬럼 사이 간격 줄임 */
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  height: 40px;
+  padding: 0;
+  margin: 0;
 }
 
 .diaryhome-calendar-columns {
@@ -863,7 +880,12 @@ updateCurrentWeekStart();
 }
 
 .diaryhome-list-item:hover {
-  background: #4318d1;
+  background: #0890fe;
+}
+
+.diaryhome-list-item:hover .diaryhome-list-amount,
+.diaryhome-list-item:hover .diaryhome-list-name {
+  color: white;
 }
 
 .diaryhome-list-item:last-child {
@@ -978,6 +1000,8 @@ updateCurrentWeekStart();
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
   margin-top: 8px;
+  align-items: center;
+  padding: 0;
 }
 
 .diaryhome-calendar-grid span {
@@ -991,6 +1015,8 @@ updateCurrentWeekStart();
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 40px;
+  margin: 0;
 }
 
 .diaryhome-calendar-grid span:hover {

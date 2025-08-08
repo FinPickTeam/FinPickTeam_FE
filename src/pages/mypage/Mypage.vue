@@ -6,6 +6,12 @@
         <div class="avatar-pixel">
           <img :src="baseAvatar" class="avatar-img" alt="아바타" />
           <img
+            v-if="wearingTitle"
+            :src="getTitleImage"
+            class="title-img"
+            alt="칭호"
+          />
+          <img
             v-if="wearingShirt"
             :src="getShirtImage"
             class="shirt-img"
@@ -17,11 +23,13 @@
             class="shoes-img"
             alt="신발"
           />
+          <!-- 여러 액세서리를 동시에 표시 -->
           <img
-            v-if="wearingGlasses"
-            :src="getGlassesImage"
+            v-for="(image, index) in getGlassesImages"
+            :key="index"
+            :src="image"
             class="glasses-img"
-            alt="안경"
+            alt="액세서리"
           />
         </div>
       </div>
@@ -115,12 +123,17 @@ import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAvatarStore } from "../../stores/avatar.js";
 import baseAvatar from "./avatar/avatarimg/avatar-base.png";
+import hatWizardhat from "./avatar/avatarimg/hat-3wizardhat.png";
+import hatSprout from "./avatar/avatarimg/hat-1sprout.png";
+import hatDosa from "./avatar/avatarimg/hat-4dosa.png";
+import hatBeginner from "./avatar/avatarimg/hat-2beginner.png";
 import shirtBlue from "./avatar/avatarimg/shirts-blue.png";
 import shirtRed from "./avatar/avatarimg/shirt-red.png";
 import shoesBrown from "./avatar/avatarimg/shoese-brown.png";
 import shoes from "./avatar/avatarimg/shoese.png";
 import sportGlasses from "./avatar/avatarimg/sporglasses.png";
-import sunGlasses from "./avatar/avatarimg/sunglasses.png";
+import sunGlasses from "./avatar/avatarimg/etc-sunglasses.png";
+import blush from "./avatar/avatarimg/etc-blush.png";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
@@ -133,6 +146,11 @@ const avatarStore = useAvatarStore();
 const { coin } = storeToRefs(avatarStore);
 
 // 착용 중인 아이템 확인
+const wearingTitle = computed(() => {
+  const wearingItem = avatarStore.getWearingItem("titles");
+  return wearingItem ? wearingItem.id : null;
+});
+
 const wearingShirt = computed(() => {
   const wearingItem = avatarStore.getWearingItem("shirts");
   return wearingItem ? wearingItem.id : null;
@@ -143,12 +161,21 @@ const wearingShoes = computed(() => {
   return wearingItem ? wearingItem.id : null;
 });
 
+// 여러 액세서리를 동시에 착용할 수 있도록 수정
 const wearingGlasses = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("glasses");
-  return wearingItem ? wearingItem.id : null;
+  const wearingItems = avatarStore.getWearingItems("glasses");
+  return wearingItems.map((item) => item.id);
 });
 
 // 착용 중인 아이템 이미지 가져오기
+const getTitleImage = computed(() => {
+  if (wearingTitle.value === "hat-1sprout") return hatSprout;
+  if (wearingTitle.value === "hat-2beginner") return hatBeginner;
+  if (wearingTitle.value === "hat-3wizardhat") return hatWizardhat;
+  if (wearingTitle.value === "hat-4dosa") return hatDosa;
+  return null;
+});
+
 const getShirtImage = computed(() => {
   if (wearingShirt.value === "shirt-blue") return shirtBlue;
   if (wearingShirt.value === "shirt-red") return shirtRed;
@@ -161,10 +188,15 @@ const getShoesImage = computed(() => {
   return null;
 });
 
-const getGlassesImage = computed(() => {
-  if (wearingGlasses.value === "sport-glasses") return sportGlasses;
-  if (wearingGlasses.value === "sun-glasses") return sunGlasses;
-  return null;
+// 여러 액세서리 이미지를 반환하는 함수
+const getGlassesImages = computed(() => {
+  const images = [];
+  wearingGlasses.value.forEach((glassesId) => {
+    if (glassesId === "sport-glasses") images.push(sportGlasses);
+    if (glassesId === "etc-sunglasses") images.push(sunGlasses);
+    if (glassesId === "etc-blush") images.push(blush);
+  });
+  return images;
 });
 
 function goToMyHistory() {
@@ -196,16 +228,17 @@ onMounted(() => {
 
 <style scoped>
 .mypage-container {
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
   background: var(--color-bg);
   position: relative;
-  padding-top: 80px;
-  padding-bottom: 80px;
+  padding-top: 90px;
+  padding-bottom: 0;
   box-sizing: border-box;
   font-family: var(--font-main);
+  overflow: hidden;
 }
 .profile-section,
 .user-info-card,
@@ -231,8 +264,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   margin: 0 30px;
-  margin-top: 80px;
-  padding: 20px;
+  margin-top: 100px;
+  padding: 15px 0 0 0;
   border: 2px solid #ffffff;
   border-radius: 12px;
   background: var(--color-bg);
@@ -244,8 +277,8 @@ onMounted(() => {
 
 .avatar-container {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -253,22 +286,27 @@ onMounted(() => {
 
 .avatar-pixel {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .shoes-img,
-.glasses-img {
+.glasses-img,
+.title-img {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+.title-img {
+  z-index: 2;
 }
 
 .shoes-img {
@@ -302,8 +340,8 @@ onMounted(() => {
   justify-content: center;
 }
 .avatar-img {
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   z-index: 1;
 }
 .shirt-img,
@@ -312,8 +350,8 @@ onMounted(() => {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -327,10 +365,10 @@ onMounted(() => {
   z-index: 3;
 }
 .user-info-card {
-  margin-top: 8px;
+  margin-top: 2px;
   margin-left: 30px;
   margin-right: 30px;
-  padding: 10px 0;
+  padding: 8px 0;
   border: 2px solid #4318d1;
   border-radius: 12px;
   background: var(--color-bg);
@@ -409,7 +447,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 0;
+  padding: 16px 0;
   border-bottom: 1px solid var(--color-border);
   font-size: 15px;
   color: var(--color-text);

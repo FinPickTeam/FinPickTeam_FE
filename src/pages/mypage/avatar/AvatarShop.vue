@@ -10,40 +10,52 @@
 
     <!-- 아바타 및 코인 (항상 표시) -->
     <div class="avatar-section">
-      <div class="avatar-pixel">
-        <img :src="avatarBase" class="avatar-img" alt="아바타" />
-        <img
-          v-if="titleItems.find((item) => item.wearing)"
-          :src="titleItems.find((item) => item.wearing)?.image"
-          class="title-img"
-          alt="칭호"
-        />
-        <img
-          v-if="shirtItems.find((item) => item.wearing)"
-          :src="shirtItems.find((item) => item.wearing)?.image"
-          class="shirt-img"
-          alt="상의"
-        />
-        <img
-          v-if="shoesItems.find((item) => item.wearing)"
-          :src="shoesItems.find((item) => item.wearing)?.image"
-          class="shoes-img"
-          alt="신발"
-        />
-        <img
-          v-if="glassesItems.find((item) => item.wearing)"
-          :src="glassesItems.find((item) => item.wearing)?.image"
-          class="glasses-img"
-          alt="안경"
-        />
+      <div class="avatar-container">
+        <div class="avatar-pixel">
+          <img :src="avatarBase" class="avatar-img" alt="아바타" />
+          <img
+            v-if="tempWearingTitle"
+            :src="
+              titleItems.find((item) => item.id === tempWearingTitle)?.image
+            "
+            class="title-img"
+            alt="칭호"
+          />
+          <img
+            v-if="tempWearingShirt"
+            :src="
+              shirtItems.find((item) => item.id === tempWearingShirt)?.image
+            "
+            class="shirt-img"
+            alt="상의"
+          />
+          <img
+            v-if="tempWearingShoes"
+            :src="
+              shoesItems.find((item) => item.id === tempWearingShoes)?.image
+            "
+            class="shoes-img"
+            alt="신발"
+          />
+          <!-- 여러 액세서리를 동시에 표시 -->
+          <img
+            v-for="glassesId in tempWearingGlasses"
+            :key="glassesId"
+            :src="glassesItems.find((item) => item.id === glassesId)?.image"
+            class="glasses-img"
+            :alt="glassesItems.find((item) => item.id === glassesId)?.name"
+          />
+        </div>
       </div>
-      <div class="coin-error-space">
-        <span v-if="showCoinError" class="coin-error"
-          >포인트가 부족합니다!</span
-        >
-      </div>
-      <div class="coin-balance">
-        <span class="coin-icon">🪙</span> {{ avatarStore.coin }}
+      <div class="coin-container">
+        <div class="coin-error-space">
+          <span v-if="showCoinError" class="coin-error"
+            >포인트가 부족합니다!</span
+          >
+        </div>
+        <div class="coin-balance">
+          <span class="coin-icon">🪙</span> {{ avatarStore.coin }}
+        </div>
       </div>
     </div>
 
@@ -74,21 +86,42 @@
       <div class="item-list">
         <div
           class="item-card"
-          :class="{ selected: item.wearing, purchased: item.purchased }"
+          :class="{
+            selected: currentWearingTitle === item.id,
+            active: getTitleItemStatus(item).isActive,
+            inactive: !getTitleItemStatus(item).isActive,
+          }"
           v-for="item in titleItems"
           :key="item.id"
-          @click="handleBuyOrToggleTitle(item)"
+          @click="handleTitleItemClick(item)"
         >
           <img :src="item.image" class="item-img" :alt="item.name" />
-          <span class="item-price">🪙 {{ item.price }}</span>
-          <span v-if="item.purchased" class="own-label">보유중</span>
-          <span v-if="item.wearing" class="wearing-label">착용중</span>
+          <span class="item-requirement">
+            {{
+              item.requiredPoints === 0
+                ? "기본"
+                : `누적 ${item.requiredPoints.toLocaleString()}P`
+            }}
+          </span>
+          <span v-if="currentWearingTitle === item.id" class="wearing-label"
+            >착용중</span
+          >
+          <div
+            v-if="!getTitleItemStatus(item).isActive"
+            class="inactive-overlay"
+          >
+            <div class="inactive-text">
+              <div>누적</div>
+              <div>{{ item.requiredPoints.toLocaleString() }}P</div>
+              <div>필요</div>
+            </div>
+          </div>
           <font-awesome-icon
-            v-if="item.purchased"
+            v-if="currentWearingTitle === item.id"
             class="check-icon"
             :icon="['fas', 'check-circle']"
           />
-          <div v-if="item.wearing" class="wearing-overlay">
+          <div v-if="currentWearingTitle === item.id" class="wearing-overlay">
             <font-awesome-icon
               class="wearing-icon"
               :icon="['fas', 'check-circle']"
@@ -102,7 +135,10 @@
       <div class="item-list">
         <div
           class="item-card"
-          :class="{ selected: item.wearing, purchased: item.purchased }"
+          :class="{
+            selected: tempWearingShirt === item.id,
+            purchased: item.purchased,
+          }"
           v-for="item in shirtItems"
           :key="item.id"
           @click="handleBuyOrToggleShirt(item)"
@@ -110,13 +146,15 @@
           <img :src="item.image" class="item-img" :alt="item.name" />
           <span class="item-price">🪙 {{ item.price }}</span>
           <span v-if="item.purchased" class="own-label">보유중</span>
-          <span v-if="item.wearing" class="wearing-label">착용중</span>
+          <span v-if="tempWearingShirt === item.id" class="wearing-label"
+            >착용중</span
+          >
           <font-awesome-icon
             v-if="item.purchased"
             class="check-icon"
             :icon="['fas', 'check-circle']"
           />
-          <div v-if="item.wearing" class="wearing-overlay">
+          <div v-if="tempWearingShirt === item.id" class="wearing-overlay">
             <font-awesome-icon
               class="wearing-icon"
               :icon="['fas', 'check-circle']"
@@ -132,7 +170,10 @@
       <div class="item-list">
         <div
           class="item-card"
-          :class="{ selected: item.wearing, purchased: item.purchased }"
+          :class="{
+            selected: tempWearingShoes === item.id,
+            purchased: item.purchased,
+          }"
           v-for="item in shoesItems"
           :key="item.id"
           @click="handleBuyOrToggleShoes(item)"
@@ -140,13 +181,15 @@
           <img :src="item.image" class="item-img" :alt="item.name" />
           <span class="item-price">🪙 {{ item.price }}</span>
           <span v-if="item.purchased" class="own-label">보유중</span>
-          <span v-if="item.wearing" class="wearing-label">착용중</span>
+          <span v-if="tempWearingShoes === item.id" class="wearing-label"
+            >착용중</span
+          >
           <font-awesome-icon
             v-if="item.purchased"
             class="check-icon"
             :icon="['fas', 'check-circle']"
           />
-          <div v-if="item.wearing" class="wearing-overlay">
+          <div v-if="tempWearingShoes === item.id" class="wearing-overlay">
             <font-awesome-icon
               class="wearing-icon"
               :icon="['fas', 'check-circle']"
@@ -162,7 +205,10 @@
       <div class="item-list">
         <div
           class="item-card"
-          :class="{ selected: item.wearing, purchased: item.purchased }"
+          :class="{
+            selected: tempWearingGlasses.includes(item.id),
+            purchased: item.purchased,
+          }"
           v-for="item in glassesItems"
           :key="item.id"
           @click="handleBuyOrToggleGlasses(item)"
@@ -170,13 +216,20 @@
           <img :src="item.image" class="item-img" :alt="item.name" />
           <span class="item-price">🪙 {{ item.price }}</span>
           <span v-if="item.purchased" class="own-label">보유중</span>
-          <span v-if="item.wearing" class="wearing-label">착용중</span>
+          <span
+            v-if="tempWearingGlasses.includes(item.id)"
+            class="wearing-label"
+            >착용중</span
+          >
           <font-awesome-icon
             v-if="item.purchased"
             class="check-icon"
             :icon="['fas', 'check-circle']"
           />
-          <div v-if="item.wearing" class="wearing-overlay">
+          <div
+            v-if="tempWearingGlasses.includes(item.id)"
+            class="wearing-overlay"
+          >
             <font-awesome-icon
               class="wearing-icon"
               :icon="['fas', 'check-circle']"
@@ -330,6 +383,19 @@
         </div>
       </div>
     </div>
+
+    <!-- 아바타 적용 성공 모달 -->
+    <div v-if="showSuccessModal" class="success-modal-overlay">
+      <div class="success-modal">
+        <div class="success-modal-icon">✅</div>
+        <div class="success-modal-message">아바타가 적용되었습니다!</div>
+        <div class="success-modal-actions">
+          <button class="modal-confirm-btn" @click="closeSuccessModal">
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -344,18 +410,21 @@ import {
   faCheckCircle,
   faCheckDouble,
 } from "@fortawesome/free-solid-svg-icons";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 
 // 아바타 이미지 import
 import avatarBase from "./avatarimg/avatar-base.png";
-import titleWizardhat from "./avatarimg/title-wizardhat.png";
-import titleSprout from "./avatarimg/title-sprout.png";
+import hatWizardhat from "./avatarimg/hat-3wizardhat.png";
+import hatSprout from "./avatarimg/hat-1sprout.png";
+import hatDosa from "./avatarimg/hat-4dosa.png";
+import hatBeginner from "./avatarimg/hat-2beginner.png";
 import shirtBlue from "./avatarimg/shirts-blue.png";
 import shirtRed from "./avatarimg/shirt-red.png";
 import shoesBrown from "./avatarimg/shoese-brown.png";
 import shoes from "./avatarimg/shoese.png";
 import sportGlasses from "./avatarimg/sporglasses.png";
-import sunGlasses from "./avatarimg/sunglasses.png";
+import sunGlasses from "./avatarimg/etc-sunglasses.png";
+import blush from "./avatarimg/etc-blush.png";
 
 // 기프티콘 이미지 import
 import twosomeColdBrew from "./giftshopimg/TWOSOMEPLACE  COLDBRUE.png";
@@ -373,24 +442,82 @@ const avatarStore = useAvatarStore();
 const showCoinError = ref(false);
 const activeTab = ref("avatar");
 const selectedCategory = ref("coffee");
+const showSuccessModal = ref(false);
+
+// 임시 착용 상태를 저장하는 변수들
+const tempWearingTitle = ref(null);
+const tempWearingShirt = ref(null);
+const tempWearingShoes = ref(null);
+const tempWearingGlasses = ref([]);
+
+// computed 속성들
+const totalEarnedPoints = computed(() => {
+  return avatarStore.getTotalEarnedPoints();
+});
+
+const isItemActive = (requiredPoints) => {
+  return totalEarnedPoints.value >= requiredPoints;
+};
+
+// 칭호 아이템 활성화 상태 확인
+const getTitleItemStatus = (item) => {
+  const isActive = isItemActive(item.requiredPoints);
+  return {
+    isActive,
+    canWear: isActive,
+    isWearing: item.wearing,
+  };
+};
+
+// 현재 선택된 칭호 (없으면 첫 번째 활성화된 칭호)
+const currentWearingTitle = computed(() => {
+  if (tempWearingTitle.value) {
+    return tempWearingTitle.value;
+  }
+  // 선택된 칭호가 없으면 첫 번째 활성화된 칭호 반환
+  const firstActiveTitle = titleItems.value.find(
+    (item) => getTitleItemStatus(item).isActive
+  );
+  return firstActiveTitle ? firstActiveTitle.id : null;
+});
 
 // 아바타 아이템 데이터
 const titleItems = ref([
   {
-    id: "title-wizardhat",
-    name: "마법사 모자",
-    price: 100000,
-    image: titleWizardhat,
-    purchased: false,
-    wearing: false,
-  },
-  {
-    id: "title-sprout",
+    id: "hat-1sprout",
     name: "씨앗",
     price: 50000,
-    image: titleSprout,
+    image: hatSprout,
     purchased: false,
     wearing: false,
+    requiredPoints: 0,
+  },
+  {
+    id: "hat-2beginner",
+    name: "초보자 모자",
+    price: 25000,
+    image: hatBeginner,
+    purchased: false,
+    wearing: false,
+    requiredPoints: 20000,
+  },
+  {
+    id: "hat-3wizardhat",
+    name: "마법사 모자",
+    price: 100000,
+    image: hatWizardhat,
+    purchased: false,
+    wearing: false,
+    requiredPoints: 40000,
+  },
+  {
+    id: "hat-4dosa",
+    name: "도사 모자",
+    price: 75000,
+    image: hatDosa,
+    purchased: false,
+    wearing: false,
+    requiredPoints: 60000,
   },
 ]);
 
@@ -442,10 +569,18 @@ const glassesItems = ref([
     wearing: false,
   },
   {
-    id: "sun-glasses",
+    id: "etc-sunglasses",
     name: "선글라스",
     price: 40,
     image: sunGlasses,
+    purchased: false,
+    wearing: false,
+  },
+  {
+    id: "etc-blush",
+    name: "블러시",
+    price: 30,
+    image: blush,
     purchased: false,
     wearing: false,
   },
@@ -453,15 +588,9 @@ const glassesItems = ref([
 
 // store 상태를 로컬 상태에 동기화하는 함수
 function syncStoreState() {
-  // 칭호 아이템 동기화
+  // 칭호 아이템 동기화 - 누적 포인트에 따른 활성화 상태는 computed로 처리되므로 착용 상태만 동기화
   titleItems.value.forEach((item) => {
-    const purchased = avatarStore.isItemPurchased("titles", item.id);
     const wearing = avatarStore.isItemWearing("titles", item.id);
-
-    // 구매 상태는 한번 true가 되면 영구적으로 유지
-    if (purchased) {
-      item.purchased = true;
-    }
     item.wearing = wearing;
   });
 
@@ -504,8 +633,63 @@ function syncStoreState() {
 
 // 컴포넌트 마운트 시 store 상태 동기화 및 저장된 아바타 정보 불러오기
 onMounted(() => {
+  // 초기 상태로 설정 - 아무것도 구매하지 않은 상태
+  localStorage.removeItem("currentAvatar");
+
+  // 아바타 아이템 상태만 초기화 (코인은 유지)
+  avatarStore.avatarItems.value = {
+    titles: {
+      "hat-3wizardhat": { purchased: false, wearing: false },
+      "hat-1sprout": { purchased: false, wearing: false },
+      "hat-4dosa": { purchased: false, wearing: false },
+      "hat-2beginner": { purchased: false, wearing: false },
+    },
+    shirts: {
+      "shirt-blue": { purchased: false, wearing: false },
+      "shirt-red": { purchased: false, wearing: false },
+    },
+    shoes: {
+      "shoes-brown": { purchased: false, wearing: false },
+      shoes: { purchased: false, wearing: false },
+    },
+    glasses: {
+      "sport-glasses": { purchased: false, wearing: false },
+      "etc-sunglasses": { purchased: false, wearing: false },
+      "etc-blush": { purchased: false, wearing: false },
+    },
+  };
+
   avatarStore.loadAvatar();
   syncStoreState();
+
+  // 기존 착용 상태를 임시 착용 상태로 복사
+  const wearingTitle = titleItems.value.find((item) => item.wearing);
+  if (wearingTitle) {
+    tempWearingTitle.value = wearingTitle.id;
+  } else {
+    // 착용 중인 칭호가 없으면 첫 번째 활성화된 칭호 자동 선택
+    const firstActiveTitle = titleItems.value.find(
+      (item) => getTitleItemStatus(item).isActive
+    );
+    if (firstActiveTitle) {
+      tempWearingTitle.value = firstActiveTitle.id;
+    }
+  }
+
+  const wearingShirt = shirtItems.value.find((item) => item.wearing);
+  if (wearingShirt) {
+    tempWearingShirt.value = wearingShirt.id;
+  }
+
+  const wearingShoes = shoesItems.value.find((item) => item.wearing);
+  if (wearingShoes) {
+    tempWearingShoes.value = wearingShoes.id;
+  }
+
+  const wearingGlasses = glassesItems.value.filter((item) => item.wearing);
+  if (wearingGlasses.length > 0) {
+    tempWearingGlasses.value = wearingGlasses.map((item) => item.id);
+  }
 });
 
 // 기프티콘 상품 데이터
@@ -591,6 +775,11 @@ function closePurchaseModal() {
   pendingPurchase.value = null;
   pendingPurchaseType.value = "";
 }
+
+function closeSuccessModal() {
+  showSuccessModal.value = false;
+}
+
 function confirmPurchase() {
   if (!pendingPurchase.value) return;
   if (pendingPurchaseType.value === "title") {
@@ -608,24 +797,9 @@ function confirmPurchase() {
 }
 
 function actuallyBuyTitle(item) {
-  if (!item.purchased && avatarStore.coin < item.price) {
-    showCoinError.value = true;
-    setTimeout(() => {
-      showCoinError.value = false;
-    }, 2000);
-    return;
-  }
-  if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-    avatarStore.setItemState("titles", item.id, true, false); // 구매만 하고 착용은 안함
-
-    // 구매 후 자동으로 착용
-    handleBuyOrToggleTitle(item, true);
-  } else {
-    // 착용/해제 토글 기존 로직
-    handleBuyOrToggleTitle(item, true);
-  }
+  // 칭호 아이템은 구매가 아닌 누적 포인트에 따른 활성화이므로 이 함수는 사용하지 않음
+  // 대신 handleTitleItemClick 함수를 사용
+  handleTitleItemClick(item);
 }
 function actuallyBuyShirt(item) {
   if (!item.purchased && avatarStore.coin < item.price) {
@@ -701,67 +875,6 @@ function goBack() {
   router.back();
 }
 
-function handleBuyOrToggleTitle(item, skipModal = false) {
-  if (!item.purchased && !skipModal) {
-    openPurchaseModal(item, "title");
-    return;
-  }
-  if (!item.purchased && avatarStore.coin < item.price) {
-    showCoinError.value = true;
-    setTimeout(() => {
-      showCoinError.value = false;
-    }, 2000);
-    return;
-  }
-  if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-    avatarStore.setItemState("titles", item.id, true, false); // 구매 상태만 설정
-
-    // 같은 카테고리의 다른 아이템 착용 해제
-    titleItems.value.forEach((otherItem) => {
-      if (otherItem.id !== item.id) {
-        otherItem.wearing = false;
-        avatarStore.setItemState(
-          "titles",
-          otherItem.id,
-          otherItem.purchased,
-          false
-        );
-      }
-    });
-
-    // 현재 아이템 착용
-    item.wearing = true;
-    avatarStore.setItemState("titles", item.id, true, true);
-  } else {
-    // 착용/해제 토글
-    if (item.wearing) {
-      // 착용 해제
-      item.wearing = false;
-      avatarStore.setItemState("titles", item.id, true, false);
-    } else {
-      // 착용 - 다른 아이템 착용 해제 후 착용
-      titleItems.value.forEach((otherItem) => {
-        if (otherItem.id !== item.id) {
-          otherItem.wearing = false;
-          avatarStore.setItemState(
-            "titles",
-            otherItem.id,
-            otherItem.purchased,
-            false
-          );
-        }
-      });
-      item.wearing = true;
-      avatarStore.setItemState("titles", item.id, true, true);
-    }
-  }
-
-  // 상태 변경 후 동기화
-  syncStoreState();
-}
-
 function handleBuyOrToggleShirt(item, skipModal = false) {
   if (!item.purchased && !skipModal) {
     openPurchaseModal(item, "shirt");
@@ -778,49 +891,16 @@ function handleBuyOrToggleShirt(item, skipModal = false) {
     avatarStore.coin -= item.price;
     item.purchased = true;
     avatarStore.setItemState("shirts", item.id, true, false); // 구매 상태만 설정
-
-    // 같은 카테고리의 다른 아이템 착용 해제
-    shirtItems.value.forEach((otherItem) => {
-      if (otherItem.id !== item.id) {
-        otherItem.wearing = false;
-        avatarStore.setItemState(
-          "shirts",
-          otherItem.id,
-          otherItem.purchased,
-          false
-        );
-      }
-    });
-
-    // 현재 아이템 착용
-    item.wearing = true;
-    avatarStore.setItemState("shirts", item.id, true, true);
-  } else {
-    // 착용/해제 토글
-    if (item.wearing) {
-      // 착용 해제
-      item.wearing = false;
-      avatarStore.setItemState("shirts", item.id, true, false);
-    } else {
-      // 착용 - 다른 아이템 착용 해제 후 착용
-      shirtItems.value.forEach((otherItem) => {
-        if (otherItem.id !== item.id) {
-          otherItem.wearing = false;
-          avatarStore.setItemState(
-            "shirts",
-            otherItem.id,
-            otherItem.purchased,
-            false
-          );
-        }
-      });
-      item.wearing = true;
-      avatarStore.setItemState("shirts", item.id, true, true);
-    }
   }
 
-  // 상태 변경 후 동기화
-  syncStoreState();
+  // 임시 착용 상태 토글
+  if (tempWearingShirt.value === item.id) {
+    // 착용 해제
+    tempWearingShirt.value = null;
+  } else {
+    // 현재 아이템 착용 (다른 아이템은 자동으로 해제됨)
+    tempWearingShirt.value = item.id;
+  }
 }
 
 function handleBuyOrToggleShoes(item, skipModal = false) {
@@ -839,49 +919,16 @@ function handleBuyOrToggleShoes(item, skipModal = false) {
     avatarStore.coin -= item.price;
     item.purchased = true;
     avatarStore.setItemState("shoes", item.id, true, false); // 구매 상태만 설정
-
-    // 같은 카테고리의 다른 아이템 착용 해제
-    shoesItems.value.forEach((otherItem) => {
-      if (otherItem.id !== item.id) {
-        otherItem.wearing = false;
-        avatarStore.setItemState(
-          "shoes",
-          otherItem.id,
-          otherItem.purchased,
-          false
-        );
-      }
-    });
-
-    // 현재 아이템 착용
-    item.wearing = true;
-    avatarStore.setItemState("shoes", item.id, true, true);
-  } else {
-    // 착용/해제 토글
-    if (item.wearing) {
-      // 착용 해제
-      item.wearing = false;
-      avatarStore.setItemState("shoes", item.id, true, false);
-    } else {
-      // 착용 - 다른 아이템 착용 해제 후 착용
-      shoesItems.value.forEach((otherItem) => {
-        if (otherItem.id !== item.id) {
-          otherItem.wearing = false;
-          avatarStore.setItemState(
-            "shoes",
-            otherItem.id,
-            otherItem.purchased,
-            false
-          );
-        }
-      });
-      item.wearing = true;
-      avatarStore.setItemState("shoes", item.id, true, true);
-    }
   }
 
-  // 상태 변경 후 동기화
-  syncStoreState();
+  // 임시 착용 상태 토글
+  if (tempWearingShoes.value === item.id) {
+    // 착용 해제
+    tempWearingShoes.value = null;
+  } else {
+    // 현재 아이템 착용 (다른 아이템은 자동으로 해제됨)
+    tempWearingShoes.value = item.id;
+  }
 }
 
 function handleBuyOrToggleGlasses(item, skipModal = false) {
@@ -900,49 +947,17 @@ function handleBuyOrToggleGlasses(item, skipModal = false) {
     avatarStore.coin -= item.price;
     item.purchased = true;
     avatarStore.setItemState("glasses", item.id, true, false); // 구매 상태만 설정
-
-    // 같은 카테고리의 다른 아이템 착용 해제
-    glassesItems.value.forEach((otherItem) => {
-      if (otherItem.id !== item.id) {
-        otherItem.wearing = false;
-        avatarStore.setItemState(
-          "glasses",
-          otherItem.id,
-          otherItem.purchased,
-          false
-        );
-      }
-    });
-
-    // 현재 아이템 착용
-    item.wearing = true;
-    avatarStore.setItemState("glasses", item.id, true, true);
-  } else {
-    // 착용/해제 토글
-    if (item.wearing) {
-      // 착용 해제
-      item.wearing = false;
-      avatarStore.setItemState("glasses", item.id, true, false);
-    } else {
-      // 착용 - 다른 아이템 착용 해제 후 착용
-      glassesItems.value.forEach((otherItem) => {
-        if (otherItem.id !== item.id) {
-          otherItem.wearing = false;
-          avatarStore.setItemState(
-            "glasses",
-            otherItem.id,
-            otherItem.purchased,
-            false
-          );
-        }
-      });
-      item.wearing = true;
-      avatarStore.setItemState("glasses", item.id, true, true);
-    }
   }
 
-  // 상태 변경 후 동기화
-  syncStoreState();
+  // 임시 착용 상태 토글 (다른 아이템에 영향 없음)
+  const index = tempWearingGlasses.value.indexOf(item.id);
+  if (index > -1) {
+    // 착용 해제
+    tempWearingGlasses.value.splice(index, 1);
+  } else {
+    // 착용 (다른 아이템 착용 해제하지 않음)
+    tempWearingGlasses.value.push(item.id);
+  }
 }
 
 function handleBuyGifticon(item, skipModal = false) {
@@ -961,27 +976,117 @@ function handleBuyGifticon(item, skipModal = false) {
   item.purchased = true;
 }
 
-function wearAvatar() {
-  // 현재 착용 중인 아바타 정보를 가져옴
-  const currentShirt = shirtItems.value.find((item) => item.wearing);
-  const currentShoes = shoesItems.value.find((item) => item.wearing);
-  const currentGlasses = glassesItems.value.find((item) => item.wearing);
+function handleTitleItemClick(item) {
+  const status = getTitleItemStatus(item);
 
-  // 착용 중인 아이템이 없으면 종료
-  if (!currentShirt && !currentShoes && !currentGlasses) {
+  // 비활성화된 아이템은 클릭 불가
+  if (!status.isActive) {
+    return;
+  }
+
+  // 칭호는 무조건 하나는 장착되어야 하므로 착용 해제 불가
+  // 다른 아이템을 선택하면 자동으로 교체됨
+  tempWearingTitle.value = item.id;
+}
+
+function wearAvatar() {
+  // 임시 착용 상태를 실제로 적용
+  if (
+    !tempWearingTitle.value &&
+    !tempWearingShirt.value &&
+    !tempWearingShoes.value &&
+    tempWearingGlasses.value.length === 0
+  ) {
     alert("착용할 아바타 아이템을 먼저 선택해주세요.");
     return;
   }
 
-  // 현재 착용 중인 아바타 정보를 스토어에 저장
-  avatarStore.setAvatar(
-    currentShirt?.id || null,
-    currentShoes?.id || null,
-    currentGlasses?.id || null
-  );
+  // 칭호가 없으면 기본 칭호(첫 번째 활성화된 아이템) 자동 선택
+  if (!tempWearingTitle.value) {
+    const firstActiveTitle = titleItems.value.find(
+      (item) => getTitleItemStatus(item).isActive
+    );
+    if (firstActiveTitle) {
+      tempWearingTitle.value = firstActiveTitle.id;
+    }
+  }
 
-  // 성공 메시지 표시
-  alert("아바타가 성공적으로 적용되었습니다!");
+  // 기존 착용 상태 초기화
+  titleItems.value.forEach((item) => {
+    item.wearing = false;
+    avatarStore.setItemState("titles", item.id, true, false);
+  });
+  shirtItems.value.forEach((item) => {
+    item.wearing = false;
+    avatarStore.setItemState("shirts", item.id, item.purchased, false);
+  });
+  shoesItems.value.forEach((item) => {
+    item.wearing = false;
+    avatarStore.setItemState("shoes", item.id, item.purchased, false);
+  });
+  glassesItems.value.forEach((item) => {
+    item.wearing = false;
+    avatarStore.setItemState("glasses", item.id, item.purchased, false);
+  });
+
+  // 임시 착용 상태를 실제로 적용
+  if (tempWearingTitle.value) {
+    const titleItem = titleItems.value.find(
+      (item) => item.id === tempWearingTitle.value
+    );
+    if (titleItem) {
+      titleItem.wearing = true;
+      avatarStore.setItemState("titles", titleItem.id, true, true);
+    }
+  }
+
+  if (tempWearingShirt.value) {
+    const shirtItem = shirtItems.value.find(
+      (item) => item.id === tempWearingShirt.value
+    );
+    if (shirtItem) {
+      shirtItem.wearing = true;
+      avatarStore.setItemState(
+        "shirts",
+        shirtItem.id,
+        shirtItem.purchased,
+        true
+      );
+    }
+  }
+
+  if (tempWearingShoes.value) {
+    const shoesItem = shoesItems.value.find(
+      (item) => item.id === tempWearingShoes.value
+    );
+    if (shoesItem) {
+      shoesItem.wearing = true;
+      avatarStore.setItemState(
+        "shoes",
+        shoesItem.id,
+        shoesItem.purchased,
+        true
+      );
+    }
+  }
+
+  tempWearingGlasses.value.forEach((glassesId) => {
+    const glassesItem = glassesItems.value.find(
+      (item) => item.id === glassesId
+    );
+    if (glassesItem) {
+      glassesItem.wearing = true;
+      avatarStore.setItemState(
+        "glasses",
+        glassesItem.id,
+        glassesItem.purchased,
+        true
+      );
+    }
+  });
+
+  // 성공 모달 표시
+  showSuccessModal.value = true;
 }
 </script>
 
@@ -1019,6 +1124,20 @@ function wearAvatar() {
   flex-direction: column;
   align-items: center;
   width: 100%;
+  gap: 5px;
+}
+
+.avatar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.coin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
 }
 
 .item-category,
@@ -1040,8 +1159,8 @@ function wearAvatar() {
 }
 
 .avatar-pixel {
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 250px;
   background: #fff;
   border-radius: 20px;
   border: 2px solid #ffffff;
@@ -1049,12 +1168,12 @@ function wearAvatar() {
   align-items: center;
   justify-content: center;
   position: relative;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 
 .avatar-img {
-  width: 100px;
-  height: 100px;
+  width: 160px;
+  height: 250px;
   z-index: 1;
 }
 
@@ -1062,8 +1181,8 @@ function wearAvatar() {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 120px;
-  height: 120px;
+  width: 160px;
+  height: 250px;
   transform: translate(-50%, -50%);
   z-index: 2;
   pointer-events: none;
@@ -1073,8 +1192,30 @@ function wearAvatar() {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 100px;
-  height: 100px;
+  width: 160px;
+  height: 250px;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.shoes-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160px;
+  height: 250px;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.glasses-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 160px;
+  height: 250px;
   transform: translate(-50%, -50%);
   z-index: 2;
   pointer-events: none;
@@ -1113,18 +1254,23 @@ function wearAvatar() {
 
 .item-list {
   display: flex;
-  gap: 18px;
+  gap: 6px;
   margin: 0 0 12px 24px;
+  justify-content: center;
+  max-width: 390px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .item-card {
   background: #f5f5f5;
   border-radius: 12px;
-  padding: 10px 8px 4px 8px;
+  padding: 8px 6px 4px 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  min-width: 60px;
+  width: 80px;
+  min-width: 80px;
   box-shadow: 0 2px 8px rgba(160, 120, 255, 0.06);
   font-size: 18px;
   font-weight: 500;
@@ -1132,6 +1278,22 @@ function wearAvatar() {
   cursor: pointer;
   border: 2px solid transparent;
   transition: border 0.2s;
+  flex-shrink: 0;
+}
+
+.item-card.active {
+  border: 2px solid #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.item-card.inactive {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border: 2px solid #e5e7eb;
+}
+
+.item-card.inactive:hover {
+  transform: none;
 }
 
 .item-card.selected {
@@ -1139,9 +1301,48 @@ function wearAvatar() {
   box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
 }
 
+.item-requirement {
+  font-size: 11px;
+  color: #6b7280;
+  margin-top: 2px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.inactive-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.inactive-text {
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+.inactive-text > div {
+  line-height: 1.3;
+}
+
 .item-img {
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   margin-bottom: 4px;
 }
 
@@ -1445,28 +1646,6 @@ function wearAvatar() {
   z-index: 10;
 }
 
-.shoes-img {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 100px;
-  height: 100px;
-  transform: translate(-50%, -50%);
-  z-index: 2;
-  pointer-events: none;
-}
-
-.glasses-img {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 100px;
-  height: 100px;
-  transform: translate(-50%, -50%);
-  z-index: 3;
-  pointer-events: none;
-}
-
 .item-card.purchased {
   border: 2px solid #10b981;
 }
@@ -1560,5 +1739,61 @@ function wearAvatar() {
 
 .wear-avatar-btn:hover {
   background: #9370ea;
+}
+
+/* 아바타 적용 성공 모달 스타일 */
+.success-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+.success-modal {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  padding: 32px 24px 24px 24px;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.success-modal-icon {
+  font-size: 48px;
+  color: #10b981;
+  margin-bottom: 16px;
+}
+.success-modal-message {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 24px;
+  color: #222;
+  text-align: center;
+}
+.success-modal-actions {
+  display: flex;
+  gap: 18px;
+}
+
+.success-modal-actions .modal-confirm-btn {
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  background: #4318d1;
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.success-modal-actions .modal-confirm-btn:hover {
+  background: #6c4cf1;
 }
 </style>

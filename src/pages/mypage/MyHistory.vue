@@ -42,7 +42,6 @@
             <span
               class="challenge-status"
               :class="{
-                ongoing: challenge.status === '진행중',
                 completed: challenge.status === '완료',
                 failed: challenge.status === '실패',
               }"
@@ -73,7 +72,7 @@
               class="answer-result"
               :class="{ correct: quiz.isCorrect, incorrect: !quiz.isCorrect }"
             >
-              {{ quiz.isCorrect ? "O" : "X" }}
+              {{ quiz.isCorrect ? "정답" : "오답" }}
             </span>
           </div>
         </div>
@@ -166,12 +165,6 @@ const activeTab = ref("challenge"); // 기본값은 챌린지 탭
 // 샘플 챌린지 히스토리 데이터
 const challengeHistory = ref([
   {
-    title: "매일 30분 운동하기",
-    status: "진행중",
-    startDate: "2024-01-01",
-    endDate: "2024-01-31",
-  },
-  {
     title: "한 달 저축 챌린지",
     status: "완료",
     startDate: "2023-12-01",
@@ -185,9 +178,15 @@ const challengeHistory = ref([
   },
   {
     title: "금연 챌린지",
-    status: "진행중",
+    status: "완료",
     startDate: "2024-01-15",
     endDate: "2024-02-15",
+  },
+  {
+    title: "운동 챌린지",
+    status: "실패",
+    startDate: "2024-01-01",
+    endDate: "2024-01-31",
   },
 ]);
 
@@ -403,11 +402,6 @@ const goBack = () => {
   margin-left: 8px;
 }
 
-.challenge-status.ongoing {
-  color: #f59e0b;
-  background: #fef3c7;
-}
-
 .challenge-status.completed {
   color: #22c55e;
   background: #e8f5e8;
@@ -486,14 +480,14 @@ const goBack = () => {
 }
 
 .answer-result {
-  width: 32px;
+  width: 50px;
   height: 32px;
-  font-size: 18px;
+  font-size: 12px;
   font-weight: bold;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 6px;
   background: #f3f3f3;
   margin-left: 8px;
 }
