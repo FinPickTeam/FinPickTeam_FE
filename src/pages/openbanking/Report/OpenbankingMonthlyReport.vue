@@ -226,7 +226,7 @@ const goBack = () => {
 };
 
 const goToChallengeCreate = () => {
-  router.push("/openbanking/challenge-create");
+  router.push("/challenge/create");
 };
 
 // 월 상태 - 현재 날짜로 초기화
@@ -513,8 +513,18 @@ const captureAndDownloadPDF = async () => {
 .monthly-report-container {
   background: #f3f4f6;
   min-height: 100vh;
-  padding-top: 0;
-  padding-bottom: 20px;
+  padding-top: 56px; /* 상단 헤더 높이만큼 패딩 추가 */
+  padding-bottom: 60px; /* 하단 NAVBAR 높이만큼 패딩 추가 (20px + 30px) */
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  height: 100vh; /* 명시적 높이 설정 */
+  box-sizing: border-box;
+}
+
+/* Webkit 브라우저(Chrome, Safari, Edge)에서 스크롤바 숨기기 */
+.monthly-report-container::-webkit-scrollbar {
+  display: none;
 }
 
 /* 상단 헤더 스타일 */

@@ -143,15 +143,14 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   padding: 20px;
   box-sizing: border-box;
 }
 
 .ars_link_header {
   width: 100%;
-  padding-top: 48px;
-  padding-bottom: 16px;
+  padding-top: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -160,8 +159,8 @@ onMounted(() => {
 
 .login-logo {
   text-align: center;
-  margin-bottom: 40px;
-  padding-top: 40px;
+  margin-bottom: 20px;
+  padding-top: 0;
 }
 .login-logo h1 {
   margin-bottom: 8px;
@@ -353,7 +352,6 @@ onMounted(() => {
   padding: 16px 0;
   cursor: not-allowed;
   transition: all 0.3s ease;
-  margin-bottom: 24px;
 }
 
 .next_step_btn.active {

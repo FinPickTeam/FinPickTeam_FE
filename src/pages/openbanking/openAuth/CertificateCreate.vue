@@ -16,7 +16,7 @@
           핀픽 인증서는 안전한 금융 거래를 위한 디지털 인증서입니다.
         </p>
         <p class="description-text">
-          인증서를 만들면 다음과 같은 서비스를 이용할 수 있습니다:
+          인증서를 만들면 다음과 같은 서비스를 이용할 수 있습니다.
         </p>
       </div>
 
@@ -41,16 +41,6 @@
           <div class="feature-content">
             <h3 class="feature-title">본인 인증</h3>
             <p class="feature-description">신원 확인 및 본인 인증 서비스</p>
-          </div>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon">
-            <font-awesome-icon :icon="['fas', 'file-contract']" />
-          </div>
-          <div class="feature-content">
-            <h3 class="feature-title">전자 서명</h3>
-            <p class="feature-description">전자 문서 서명 및 계약 체결</p>
           </div>
         </div>
       </div>
@@ -114,26 +104,20 @@ const startCertificate = () => {
   max-width: 390px;
   margin: 0 auto;
   background: #f3f4f6;
-  height: 100vh;
+  min-height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  overflow: hidden;
-  padding-bottom: 120px;
+  position: relative;
 }
 
 .certificate-header {
   width: 100%;
-  height: 80px;
+  height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f3f4f6;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: none;
   position: fixed;
   top: 0;
   left: 50%;
@@ -180,6 +164,7 @@ const startCertificate = () => {
 .certificate-content {
   padding: 120px 20px 40px 20px;
   text-align: center;
+  background: #f3f4f6;
 }
 
 .certificate-icon {
@@ -221,7 +206,6 @@ const startCertificate = () => {
   background: #fff;
   border-radius: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .feature-icon {
@@ -264,7 +248,6 @@ const startCertificate = () => {
   background: #fff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   text-align: left;
 }
 
@@ -310,8 +293,6 @@ const startCertificate = () => {
   width: 100%;
   max-width: 390px;
   padding: 16px;
-  background: #fff;
-  border-top: 1px solid #e5e7eb;
   z-index: 1000;
 }
 
@@ -324,14 +305,15 @@ const startCertificate = () => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #4318d1;
   color: #fff;
+  box-shadow: none;
+  outline: none;
 }
 
 .certificate-start-btn:hover {
   background: #3a16b8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(67, 24, 209, 0.3);
+  transform: none;
+  box-shadow: none;
 }
 
 .certificate-start-btn:active {
