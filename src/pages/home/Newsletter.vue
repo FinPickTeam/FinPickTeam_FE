@@ -18,7 +18,7 @@
             <div class="article-content">
               {{
                 article.content.length > 80
-                  ? article.content.slice(0, 80) + "..."
+                  ? article.content.slice(0, 80) + '...'
                   : article.content
               }}
             </div>
@@ -31,8 +31,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import news from "./news.json";
+import { ref } from 'vue';
+import news from './News.json';
 
 const keyword = ref(news.keywords[0]);
 const articles = ref(news.articles.filter((a) => a.keyword === keyword.value));
@@ -58,7 +58,7 @@ const articles = ref(news.articles.filter((a) => a.keyword === keyword.value));
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   max-width: 400px;
   width: 100%;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
 }
 .newsletter-header {
   display: flex;
