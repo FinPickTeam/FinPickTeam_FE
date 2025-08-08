@@ -10,7 +10,16 @@
     <form class="signup-form" @submit.prevent="handleSignup">
       <!-- 이메일 -->
       <div class="form-group">
-        <label for="email">이메일</label>
+        <div class="label-container">
+          <label for="email">이메일</label>
+          <span
+            v-if="emailCheckMessage"
+            :class="emailCheckMessageClass"
+            class="email-check-message"
+          >
+            {{ emailCheckMessage }}
+          </span>
+        </div>
         <div class="input-group">
           <input
             id="email"
@@ -23,8 +32,7 @@
           <button
             type="button"
             class="check-btn"
-            @click="checkEmailDuplicate"
-            :disabled="!form.email || errors.email"
+            @click="handleEmailDuplicateCheck"
           >
             중복확인
           </button>
@@ -85,7 +93,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { signup } from '@/api/authApi'; // API 함수 import
+import { signup, checkEmailDuplicate } from '@/api/authApi'; // API 함수 import
 
 const router = useRouter();
 
@@ -103,6 +111,8 @@ const errors = reactive({
 
 const isEmailChecked = ref(false);
 const warningMessage = ref('');
+const emailCheckMessage = ref('');
+const emailCheckMessageClass = ref('');
 let warningTimeout = null;
 
 const validateEmail = () => {
@@ -140,12 +150,33 @@ const validateConfirmPassword = () => {
   }
 };
 
-const checkEmailDuplicate = async () => {
-  if (!form.email || errors.email) return;
-  // TODO: 실제 API 연동
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  isEmailChecked.value = true;
-  alert('사용 가능한 이메일입니다.');
+const handleEmailDuplicateCheck = async () => {
+  if (!form.email || errors.email) {
+    return;
+  }
+
+  try {
+    const response = await checkEmailDuplicate(form.email);
+
+    if (response.status === 200) {
+      isEmailChecked.value = true;
+      emailCheckMessage.value = '사용 가능한 이메일입니다.';
+      emailCheckMessageClass.value = 'success';
+    } else if (response.status === 409) {
+      isEmailChecked.value = false;
+      emailCheckMessage.value = '중복된 이메일입니다.';
+      emailCheckMessageClass.value = 'error';
+    } else {
+      isEmailChecked.value = false;
+      emailCheckMessage.value = '예상치 못한 응답입니다.';
+      emailCheckMessageClass.value = 'error';
+    }
+  } catch (e) {
+    // 이미 사용 중인 이메일이면 이곳으로 옴
+    isEmailChecked.value = false;
+    emailCheckMessage.value = '중복된 이메일입니다.';
+    emailCheckMessageClass.value = 'error';
+  }
 };
 
 const isFormValid = computed(() => {
@@ -243,6 +274,27 @@ const handleSignup = async () => {
   font-weight: 600;
   color: #374151;
   margin-bottom: 8px;
+}
+
+.label-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.email-check-message {
+  display: inline;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.email-check-message.success {
+  color: #10b981;
+}
+
+.email-check-message.error {
+  color: #ef4444;
 }
 .input-group {
   display: flex;
@@ -351,10 +403,17 @@ input.error {
     font-size: 28px;
   }
   .input-group {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 8px;
+  }
+  .input-group input {
+    flex: 1;
   }
   .check-btn {
-    width: 100%;
+    width: auto;
+    min-width: 80px;
+    font-size: 12px;
+    padding: 12px 8px;
   }
 }
 
