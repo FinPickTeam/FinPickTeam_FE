@@ -24,29 +24,7 @@ export const loginApi = (email, password) => {
 };
 
 // 토큰 재발급 API
-export const refreshApi = (refreshToken) => {
-  console.log('토큰 재발급 API 요청:', {
-    refreshToken: refreshToken ? '***' : '없음',
-  });
-  return api
-    .post('/auth/refresh', { refreshToken })
-    .then((response) => {
-      console.log('토큰 재발급 API 응답 데이터:', {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
-      });
-      return response;
-    })
-    .catch((error) => {
-      console.log('토큰 재발급 API 에러 응답 데이터:', {
-        status: error.response?.data?.status,
-        message: error.response?.data?.message,
-        data: error.response?.data?.data,
-      });
-      throw error;
-    });
-};
+export const refreshApi = () => api.post('/auth/refresh');
 
 // 회원가입 API
 export const signup = async (formData) => {
