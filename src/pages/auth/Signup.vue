@@ -10,7 +10,16 @@
     <form class="signup-form" @submit.prevent="handleSignup">
       <!-- 이메일 -->
       <div class="form-group">
-        <label for="email">이메일</label>
+        <div class="label-container">
+          <label for="email">이메일</label>
+          <span
+            v-if="emailCheckMessage"
+            :class="emailCheckMessageClass"
+            class="email-check-message"
+          >
+            {{ emailCheckMessage }}
+          </span>
+        </div>
         <div class="input-group">
           <input
             id="email"
@@ -23,8 +32,7 @@
           <button
             type="button"
             class="check-btn"
-            @click="checkEmailDuplicate"
-            :disabled="!form.email || errors.email"
+            @click="handleEmailDuplicateCheck"
           >
             중복확인
           </button>
@@ -37,14 +45,23 @@
       <!-- 비밀번호 -->
       <div class="form-group">
         <label for="password">비밀번호</label>
-        <input
-          id="password"
-          v-model="form.password"
-          type="password"
-          placeholder="비밀번호를 입력하세요"
-          :class="{ error: errors.password }"
-          @blur="validatePassword"
-        />
+        <div class="input-wrapper">
+          <input
+            id="password"
+            v-model="form.password"
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="비밀번호를 입력하세요"
+            :class="{ error: errors.password }"
+            @blur="validatePassword"
+          />
+          <span class="icon" @click="togglePassword">
+            <i
+              :class="
+                showPassword ? 'fa-solid fa-eye' : 'fa-solid fa-eye-slash'
+              "
+            ></i>
+          </span>
+        </div>
         <span v-if="errors.password" class="error-message">{{
           errors.password
         }}</span>
@@ -56,14 +73,25 @@
       <!-- 비밀번호 확인 -->
       <div class="form-group">
         <label for="confirmPassword">비밀번호 확인</label>
-        <input
-          id="confirmPassword"
-          v-model="form.confirmPassword"
-          type="password"
-          placeholder="비밀번호를 다시 입력하세요"
-          :class="{ error: errors.confirmPassword }"
-          @blur="validateConfirmPassword"
-        />
+        <div class="input-wrapper">
+          <input
+            id="confirmPassword"
+            v-model="form.confirmPassword"
+            :type="showConfirmPassword ? 'text' : 'password'"
+            placeholder="비밀번호를 다시 입력하세요"
+            :class="{ error: errors.confirmPassword }"
+            @blur="validateConfirmPassword"
+          />
+          <span class="icon" @click="toggleConfirmPassword">
+            <i
+              :class="
+                showConfirmPassword
+                  ? 'fa-solid fa-eye'
+                  : 'fa-solid fa-eye-slash'
+              "
+            ></i>
+          </span>
+        </div>
         <span v-if="errors.confirmPassword" class="error-message">{{
           errors.confirmPassword
         }}</span>
@@ -85,7 +113,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { signup } from '@/api/authApi'; // API 함수 import
+import { signup, checkEmailDuplicate, loginApi } from '@/api/index.js'; // API 함수 import
 
 const router = useRouter();
 
@@ -103,7 +131,19 @@ const errors = reactive({
 
 const isEmailChecked = ref(false);
 const warningMessage = ref('');
+const emailCheckMessage = ref('');
+const emailCheckMessageClass = ref('');
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 let warningTimeout = null;
+
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
+
+const toggleConfirmPassword = () => {
+  showConfirmPassword.value = !showConfirmPassword.value;
+};
 
 const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -140,12 +180,33 @@ const validateConfirmPassword = () => {
   }
 };
 
-const checkEmailDuplicate = async () => {
-  if (!form.email || errors.email) return;
-  // TODO: 실제 API 연동
-  await new Promise((resolve) => setTimeout(resolve, 500));
-  isEmailChecked.value = true;
-  alert('사용 가능한 이메일입니다.');
+const handleEmailDuplicateCheck = async () => {
+  if (!form.email || errors.email) {
+    return;
+  }
+
+  try {
+    const response = await checkEmailDuplicate(form.email);
+
+    if (response.status === 200) {
+      isEmailChecked.value = true;
+      emailCheckMessage.value = '사용 가능한 이메일입니다.';
+      emailCheckMessageClass.value = 'success';
+    } else if (response.status === 409) {
+      isEmailChecked.value = false;
+      emailCheckMessage.value = '중복된 이메일입니다.';
+      emailCheckMessageClass.value = 'error';
+    } else {
+      isEmailChecked.value = false;
+      emailCheckMessage.value = '예상치 못한 응답입니다.';
+      emailCheckMessageClass.value = 'error';
+    }
+  } catch (e) {
+    // 이미 사용 중인 이메일이면 이곳으로 옴
+    isEmailChecked.value = false;
+    emailCheckMessage.value = '중복된 이메일입니다.';
+    emailCheckMessageClass.value = 'error';
+  }
 };
 
 const isFormValid = computed(() => {
@@ -179,6 +240,7 @@ const handleSignup = async () => {
     const response = await signup(requestBody);
 
     if (response.status === 200) {
+      await loginApi(form.email, form.password);
       router.push({
         path: '/auth/signupcomplete',
         query: { userName: form.email.split('@')[0] },
@@ -244,12 +306,55 @@ const handleSignup = async () => {
   color: #374151;
   margin-bottom: 8px;
 }
+
+.label-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.email-check-message {
+  display: inline;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.email-check-message.success {
+  color: #10b981;
+}
+
+.email-check-message.error {
+  color: #ef4444;
+}
 .input-group {
   display: flex;
   gap: 12px;
 }
 .input-group input {
   flex: 1;
+}
+.input-wrapper {
+  position: relative;
+  margin-bottom: 0;
+}
+.input-wrapper input {
+  width: 100%;
+  padding: 12px 40px 12px 16px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.input-wrapper .icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  font-size: 18px;
+  color: #888;
 }
 input {
   width: 100%;
@@ -351,10 +456,17 @@ input.error {
     font-size: 28px;
   }
   .input-group {
-    flex-direction: column;
+    flex-direction: row;
+    gap: 8px;
+  }
+  .input-group input {
+    flex: 1;
   }
   .check-btn {
-    width: 100%;
+    width: auto;
+    min-width: 80px;
+    font-size: 12px;
+    padding: 12px 8px;
   }
 }
 

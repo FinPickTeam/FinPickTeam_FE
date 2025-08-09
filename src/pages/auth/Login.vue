@@ -4,14 +4,16 @@
       <h1 class="logo">FinPick</h1>
       <p>금융 생활의 새로운 시작</p>
     </div>
-    <div class="form">
+
+    <form class="form" @submit.prevent="handleLogin">
       <label for="email">이메일</label>
       <div class="input-wrapper">
         <input
           id="email"
           type="email"
-          v-model="email"
+          v-model.trim="email"
           placeholder="이메일을 입력하세요"
+          required
         />
         <i class="fa-solid fa-envelope icon"></i>
       </div>
@@ -23,6 +25,7 @@
           :type="showPassword ? 'text' : 'password'"
           v-model="password"
           placeholder="비밀번호를 입력하세요"
+          required
         />
         <span class="icon" @click="togglePassword">
           <i
@@ -30,6 +33,7 @@
           ></i>
         </span>
       </div>
+
       <div class="find-password">
         <div class="find-links">
           <a href="#">아이디 찾기</a>
@@ -38,28 +42,50 @@
         </div>
       </div>
 
-      <button class="login-btn">로그인</button>
+      <button class="login-btn" type="submit" :disabled="auth.loading">
+        {{ auth.loading ? '로그인 중...' : '로그인' }}
+      </button>
+
+      <p v-if="auth.error" class="error-text">{{ auth.error }}</p>
+
       <div class="signup-link">
         아직 계정이 없으신가요?
         <router-link to="/signup">회원가입</router-link>
       </div>
-    </div>
+    </form>
   </div>
 </template>
 
 <script>
+import { useAuthStore } from '@/stores/auth';
+
 export default {
-  name: "Login",
+  name: 'Login',
   data() {
     return {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
       showPassword: false,
     };
+  },
+  computed: {
+    auth() {
+      return useAuthStore();
+    },
   },
   methods: {
     togglePassword() {
       this.showPassword = !this.showPassword;
+    },
+    async handleLogin() {
+      const ok = await this.auth.login({
+        email: this.email,
+        password: this.password,
+      });
+      if (ok) {
+        // 로그인 성공 → 원하는 경로로
+        this.$router.push('/');
+      }
     },
   },
 };
@@ -161,6 +187,10 @@ input:focus {
 .login-btn:hover {
   background: #6c4cf1;
 }
+.login-btn[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 .signup-link {
   text-align: center;
   color: #666666;
@@ -170,5 +200,11 @@ input:focus {
   color: #4318d1;
   text-decoration: none;
   margin-left: 4px;
+}
+.error-text {
+  color: #e11d48;
+  font-size: 14px;
+  margin-top: -8px;
+  margin-bottom: 12px;
 }
 </style>
