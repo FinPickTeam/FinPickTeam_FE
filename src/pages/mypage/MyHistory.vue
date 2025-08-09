@@ -80,70 +80,71 @@
     </div>
 
     <!-- Quiz Detail Modal -->
-    <div v-if="selectedQuiz" class="modal-overlay" @click="closeModal">
-      <div class="quiz-detail-modal" @click.stop>
-        <div class="modal-header">
-          <h3>오늘의 금융 퀴즈</h3>
-        </div>
+    <div v-if="selectedQuiz" class="quiz-modal-backdrop" @click="closeModal">
+      <div class="quiz-card">
+        <button class="quiz-close-btn" @click="closeModal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="quiz-title">👤퀴즈 결과👤</div>
+        <div class="quiz-question">{{ selectedQuiz.question }}</div>
 
-        <div class="question-section">
-          <p class="question">{{ selectedQuiz.question }}</p>
-        </div>
-
-        <div class="answer-options">
-          <div
-            class="answer-option"
+        <!-- O X 섹션 추가 -->
+        <div class="quiz-ox-group">
+          <button
+            class="quiz-ox-btn o"
             :class="{
-              correct: selectedQuiz.correctAnswer === 'correct',
-              selected: selectedQuiz.userAnswer === 'correct',
-              wrong:
-                selectedQuiz.userAnswer === 'correct' &&
-                !selectedQuiz.isCorrect,
+              correct: selectedQuiz.userAnswer === 'O',
             }"
+            disabled
           >
-            <span class="answer-icon">O</span>
-            <span class="answer-text">맞다</span>
-          </div>
-          <div
-            class="answer-option"
+            <div class="ox-circle">O</div>
+            <span>맞다</span>
+          </button>
+          <button
+            class="quiz-ox-btn x"
             :class="{
-              correct: selectedQuiz.correctAnswer === 'incorrect',
-              selected: selectedQuiz.userAnswer === 'incorrect',
-              wrong:
-                selectedQuiz.userAnswer === 'incorrect' &&
-                !selectedQuiz.isCorrect,
+              correct: selectedQuiz.userAnswer === 'X',
             }"
+            disabled
           >
-            <span class="answer-icon">X</span>
-            <span class="answer-text">틀리다</span>
+            <div class="ox-circle">X</div>
+            <span>틀리다</span>
+          </button>
+        </div>
+
+        <!-- 정답/오답 결과 UI -->
+        <div v-if="selectedQuiz.isCorrect" class="quiz-result correct">
+          <i class="fa-regular fa-circle-check"></i>
+          <div>
+            <div class="result-title">정답입니다</div>
+            <div class="result-desc">
+              {{ selectedQuiz.feedback }}
+            </div>
+          </div>
+        </div>
+        <div v-if="!selectedQuiz.isCorrect" class="quiz-result wrong">
+          <i class="fa-regular fa-circle-xmark"></i>
+          <div>
+            <div class="result-title">틀렸습니다.</div>
+            <div class="result-desc">
+              {{ selectedQuiz.feedback }}
+            </div>
           </div>
         </div>
 
-        <div
-          class="feedback-box"
-          :class="{
-            correct: selectedQuiz.isCorrect,
-            incorrect: !selectedQuiz.isCorrect,
-          }"
-        >
-          <div class="feedback-title">
-            {{ selectedQuiz.isCorrect ? "정답입니다" : "틀렸습니다" }}
+        <!-- 상세 해설 섹션 -->
+        <div class="quiz-explanation-section">
+          <div class="explanation-header">
+            <i class="fa-solid fa-lightbulb"></i>
+            <span>상세 해설</span>
           </div>
-          <div class="feedback-content">
-            {{ selectedQuiz.feedback }}
-          </div>
-        </div>
-
-        <div
-          v-if="selectedQuiz.isCorrect && selectedQuiz.explanation"
-          class="explanation-box"
-        >
           <div class="explanation-content">
             {{ selectedQuiz.explanation }}
           </div>
         </div>
 
-        <button class="close-modal-btn" @click="closeModal">닫기</button>
+        <!-- 버튼 -->
+        <button class="quiz-close-btn-bottom" @click="closeModal">닫기</button>
       </div>
     </div>
   </div>
@@ -155,8 +156,26 @@ import { useRouter } from "vue-router";
 import Navbar from "../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
-library.add(faAngleLeft);
+import {
+  faAngleLeft,
+  faTimes,
+  faCheckCircle,
+  faTimesCircle,
+  faLightbulb,
+  faInfoCircle,
+  faGraduationCap,
+  faCheck,
+} from "@fortawesome/free-solid-svg-icons";
+library.add(
+  faAngleLeft,
+  faTimes,
+  faCheckCircle,
+  faTimesCircle,
+  faLightbulb,
+  faInfoCircle,
+  faGraduationCap,
+  faCheck
+);
 
 const router = useRouter();
 const selectedQuiz = ref(null);
@@ -195,8 +214,8 @@ const quizHistory = ref([
   {
     question: "펀드 상품은 원금이 보장된다.",
     isCorrect: false,
-    userAnswer: "correct",
-    correctAnswer: "incorrect",
+    userAnswer: "O",
+    correctAnswer: "X",
     feedback: "틀렸습니다! 펀드 상품은 원금이 보장되지 않는 투자상품입니다.",
     explanation:
       "펀드와 주식은 환금을 모두 일할 수 있는 상품입니다. 투자상품의 특성상 시장 상황에 따라 손실이 발생할 수 있으며, 원금보장이 되지 않습니다.",
@@ -204,8 +223,8 @@ const quizHistory = ref([
   {
     question: "주식매매간 생긴 수수료 상당 부분은 증권사에 지급된다.",
     isCorrect: true,
-    userAnswer: "correct",
-    correctAnswer: "correct",
+    userAnswer: "O",
+    correctAnswer: "O",
     feedback: "맞습니다! 주식매매 수수료는 증권사에 지급됩니다.",
     explanation:
       "주식 거래 시 발생하는 수수료는 주로 증권사에 지급되며, 이는 증권사의 주요 수익원 중 하나입니다.",
@@ -213,8 +232,8 @@ const quizHistory = ref([
   {
     question: "ETF는 원금이 보장되는 투자상품이다.",
     isCorrect: false,
-    userAnswer: "incorrect",
-    correctAnswer: "incorrect",
+    userAnswer: "O",
+    correctAnswer: "X",
     feedback: "틀렸습니다! ETF는 원금이 보장되지 않는 투자상품입니다.",
     explanation:
       "ETF는 주식형 펀드의 일종으로 원금보장이 되지 않으며, 시장 상황에 따라 손실이 발생할 수 있습니다.",
@@ -222,11 +241,47 @@ const quizHistory = ref([
   {
     question: "예금자보호제도는 1인당 5천만원까지 보호한다.",
     isCorrect: true,
-    userAnswer: "correct",
-    correctAnswer: "correct",
+    userAnswer: "O",
+    correctAnswer: "O",
     feedback: "맞습니다! 예금자보호제도는 1인당 5천만원까지 보호합니다.",
     explanation:
       "예금자보호제도는 은행이 파산할 경우 예금자 1인당 원금과 이자를 합하여 5천만원까지 보호하는 제도입니다.",
+  },
+  {
+    question: "신용카드 연체 시 신용등급이 하락할 수 있다.",
+    isCorrect: true,
+    userAnswer: "X",
+    correctAnswer: "O",
+    feedback: "틀렸습니다! 신용카드 연체 시 신용등급이 하락할 수 있습니다.",
+    explanation:
+      "신용카드 결제일을 지키지 못하면 연체가 발생하고, 이는 신용정보에 부정적으로 기록되어 신용등급 하락의 원인이 됩니다.",
+  },
+  {
+    question: "적금은 만기 전에 중도해지할 수 없다.",
+    isCorrect: false,
+    userAnswer: "X",
+    correctAnswer: "X",
+    feedback: "맞습니다! 적금은 만기 전에 중도해지할 수 있습니다.",
+    explanation:
+      "적금은 만기 전에도 중도해지가 가능하며, 다만 중도해지 시 이자율이 낮아지거나 수수료가 발생할 수 있습니다.",
+  },
+  {
+    question: "주식투자는 원금손실 위험이 없다.",
+    isCorrect: false,
+    userAnswer: "X",
+    correctAnswer: "X",
+    feedback: "맞습니다! 주식투자는 원금손실 위험이 있습니다.",
+    explanation:
+      "주식투자는 시장 상황에 따라 원금손실이 발생할 수 있는 고위험 투자상품입니다. 투자 시 신중한 판단이 필요합니다.",
+  },
+  {
+    question: "예금은 원금이 보장되는 상품이다.",
+    isCorrect: true,
+    userAnswer: "X",
+    correctAnswer: "O",
+    feedback: "틀렸습니다! 예금은 원금이 보장되는 상품입니다.",
+    explanation:
+      "예금은 원금이 보장되는 안전한 금융상품으로, 은행이 파산하지 않는 한 원금과 약정이자를 받을 수 있습니다.",
   },
 ]);
 
@@ -297,7 +352,6 @@ const goBack = () => {
   background: #fff;
   border-radius: 12px;
   padding: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tab-button {
@@ -332,7 +386,6 @@ const goBack = () => {
 .challenge-history-card {
   background: var(--color-bg);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
@@ -416,7 +469,6 @@ const goBack = () => {
 .quiz-history-card {
   background: var(--color-bg);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
@@ -502,169 +554,216 @@ const goBack = () => {
   background: #ffebee;
 }
 
-/* Modal Styles */
-.modal-overlay {
+/* Quiz Modal Styles */
+.quiz-modal-backdrop {
   position: fixed;
-  top: 0;
+  z-index: 2000;
   left: 0;
+  top: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
 }
 
-.quiz-detail-modal {
-  background: var(--color-bg);
-  border-radius: 12px;
-  width: 90%;
-  max-width: 400px;
-  max-height: 80vh;
-  overflow-y: auto;
-  padding: 20px;
-}
-
-.modal-header {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
-.modal-header h3 {
-  font-size: 18px;
-  font-weight: bold;
-  color: var(--color-text);
-  margin: 0;
-}
-
-.question-section {
-  margin-bottom: 20px;
-}
-
-.question {
-  font-size: 16px;
-  color: var(--color-text);
-  line-height: 1.5;
-  margin: 0;
-  text-align: center;
-}
-
-.answer-options {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-.answer-option {
-  flex: 1;
+.quiz-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px 24px 24px 24px;
+  max-width: 360px;
+  width: 100%;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px;
-  border: 2px solid var(--color-border);
-  border-radius: 8px;
+  position: relative;
+}
+
+.quiz-close-btn {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #bbb;
   cursor: pointer;
-  transition: all 0.2s;
 }
 
-.answer-option.correct {
-  border-color: #4caf50;
-  background: #e8f5e8;
+.quiz-title {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #4318d1;
+  margin-bottom: 18px;
+  gap: 6px;
+  margin-top: 8px;
 }
 
-.answer-option.selected {
-  border-color: #4caf50;
+.quiz-title i {
+  font-size: 18px;
 }
 
-.answer-option.wrong {
-  border-color: var(--color-accent);
-  background: #ffebee;
+.quiz-question {
+  font-size: 17px;
+  color: #222;
+  font-weight: 500;
+  margin-bottom: 28px;
+  text-align: center;
 }
 
-.answer-icon {
-  font-size: 24px;
-  font-weight: bold;
-  margin-bottom: 5px;
+.quiz-ox-group {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 28px;
 }
 
-.answer-text {
-  font-size: 14px;
-  font-weight: bold;
+.quiz-ox-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: #fff;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 18px 24px 12px 24px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #222;
+  cursor: pointer;
+  transition: border 0.2s;
+  flex: 1;
 }
 
-.feedback-box {
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 15px;
+.quiz-ox-btn.selected {
+  border: 2px solid #4318d1 !important;
 }
 
-.feedback-box.correct {
-  background: #e8f5e8;
-  border: 1px solid #4caf50;
+.quiz-ox-btn.o .ox-circle {
+  background: #22c55e;
+  color: #fff;
 }
 
-.feedback-box.incorrect {
-  background: #ffebee;
-  border: 1px solid var(--color-accent);
+.quiz-ox-btn.x .ox-circle {
+  background: #ef4444;
+  color: #fff;
 }
 
-.feedback-title {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 5px;
+.quiz-ox-btn.o.correct {
+  border: 2.5px solid #22c55e;
 }
 
-.feedback-box.correct .feedback-title {
-  color: #2e7d32;
+.quiz-ox-btn.x.correct {
+  border: 2.5px solid #ef4444;
 }
 
-.feedback-box.incorrect .feedback-title {
-  color: var(--color-accent);
+.quiz-ox-btn.wrong {
+  border: 2.5px solid #ef4444;
 }
 
-.feedback-content {
+.ox-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.quiz-result {
+  width: 100%;
+  border-radius: 10px;
+  padding: 14px 12px 12px 12px;
+  margin-bottom: 12px;
+  font-size: 15px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1.5px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #16a34a;
+}
+
+.quiz-result i {
+  font-size: 20px;
+  margin-top: 2px;
+}
+
+.result-title {
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+
+.result-desc {
   font-size: 13px;
-  line-height: 1.4;
+  margin-top: 2px;
 }
 
-.feedback-box.correct .feedback-content {
-  color: #2e7d32;
-}
-
-.feedback-box.incorrect .feedback-content {
-  color: var(--color-accent);
-}
-
-.explanation-box {
-  background: var(--color-warning);
-  border: 1px solid #ffeaa7;
+.quiz-close-btn-bottom {
+  width: 100%;
+  background: #4318d1;
+  color: #ffffff;
+  border: none;
   border-radius: 8px;
-  padding: 15px;
-  margin-bottom: 20px;
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: 8px;
+  cursor: pointer;
+}
+
+.quiz-result.wrong {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #fecaca;
+}
+
+/* Quiz.vue와 동일한 O/X 버튼 스타일링 */
+.quiz-ox-btn.o.correct {
+  border: 2.5px solid #22c55e;
+}
+
+/* 상세 해설 섹션 스타일링 */
+.quiz-explanation-section {
+  background: #fef3c7;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1.5px solid #f59e0b;
+}
+
+.explanation-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #92400e;
+  font-size: 15px;
+}
+
+.explanation-header i {
+  font-size: 18px;
+  color: #f59e0b;
 }
 
 .explanation-content {
-  font-size: 13px;
-  color: #856404;
-  line-height: 1.4;
+  color: #78350f;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
 }
 
-.close-modal-btn {
-  width: 100%;
-  padding: 12px;
-  background: var(--color-bg-light);
-  color: var(--color-text);
-  border: none;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background 0.2s;
+.quiz-ox-btn.x.correct {
+  border: 2.5px solid #ef4444;
 }
 
-.close-modal-btn:hover {
-  background: var(--color-main-light);
-  color: #fff;
+.quiz-ox-btn.wrong {
+  border: 2.5px solid #ef4444;
 }
 </style>
