@@ -147,6 +147,7 @@ import ProductInputForm from '@/components/finance/deposit/ProductInputForm_depo
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
 import recommendData from '@/components/finance/deposit/deposit_recommend.json';
 import allData from '@/components/finance/deposit/deposit_all.json';
+import { getDepositList } from '@/api';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
@@ -199,12 +200,16 @@ const interestTags = ref([
   { value: '5% 이상', label: '5% 이상' },
 ]);
 
-onMounted(() => {
+onMounted(async () => {
+  try {
+    allProducts.value = await getDepositList();
+  } catch (e) {
+    console.error(e);
+  }
   // 추천 상품 데이터 로드
   recommendProducts.value = recommendData;
 
   // 전체 상품 데이터 로드
-  allProducts.value = allData;
 });
 
 function goTo(path) {

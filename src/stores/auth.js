@@ -1,7 +1,7 @@
 // src/stores/auth.js
 import { defineStore } from 'pinia';
 import Cookies from 'js-cookie';
-import api from '@/api'; // axios instance
+// import api from '@/api'; // axios instance
 import { loginApi, refreshApi } from '@/api/authApi'; // API 함수들 import
 // 필요 시 라우터로 이동하려면 아래 임포트
 import router from '@/router'; // 라우터 경로 맞춰서
