@@ -184,6 +184,12 @@ const createChallenge = () => {
   padding: 10px 16px 20px 16px;
   background: var(--color-bg-light);
   min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 10px;
+  padding-bottom: 150px;
+  box-sizing: border-box;
 }
 
 .create-form {
