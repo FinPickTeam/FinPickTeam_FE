@@ -1,5 +1,13 @@
 <template>
   <div class="challenge-group-detail">
+    <!-- 챌린지 참여 확인 모달 -->
+    <ChallengeJoinConfirmModal
+      :isVisible="showJoinConfirmModal"
+      :challenge="challenge"
+      @close="closeJoinConfirmModal"
+      @confirm="confirmJoin"
+    />
+
     <!-- 로딩 상태 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -121,6 +129,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import challengeGroupDetailData from './challenge_group_detail.json';
+import ChallengeJoinConfirmModal from '@/components/challenge/ChallengeJoinConfirmModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -128,6 +137,7 @@ const router = useRouter();
 // 상태 관리
 const loading = ref(true);
 const challenge = ref(null);
+const showJoinConfirmModal = ref(false);
 
 onMounted(() => {
   // URL 파라미터에서 챌린지 ID 가져오기
@@ -183,17 +193,31 @@ const formatDate = (dateString) => {
 // checkParticipationStatus 함수 제거 - challenge.isParticipating을 직접 사용
 
 const handleJoin = () => {
-  // 챌린지 참여 로직
+  // 참여 인원 마감 확인
   if (challenge.value.participantsCount >= 6) {
     alert('참여 인원이 마감되었습니다.');
     return;
   }
 
+  // 참여 확인 모달 표시
+  showJoinConfirmModal.value = true;
+};
+
+const confirmJoin = () => {
   // 실제로는 API 호출로 참여 처리
   challenge.value.isParticipating = true;
   challenge.value.participantsCount += 1;
+  
+  // 모달 닫기
+  showJoinConfirmModal.value = false;
+  
+  // 그룹 챌린지 상세 페이지로 이동 (참여 후)
+  const challengeId = route.params.id;
+  router.push(`/challenge/group-detail/${challengeId}`);
+};
 
-  alert('챌린지에 참여했습니다!');
+const closeJoinConfirmModal = () => {
+  showJoinConfirmModal.value = false;
 };
 
 // 남은 일수 계산 함수
