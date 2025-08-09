@@ -28,9 +28,37 @@ const router = useRouter();
 const isFavorite = ref(true); // 하트 활성화 여부(임시)
 
 const goBack = () => {
-  // 상세 페이지인 경우 이전 페이지로 이동
-  if (router.currentRoute.value.name?.includes('Detail')) {
-    router.back();
+  const currentRoute = router.currentRoute.value.name;
+  const query = router.currentRoute.value.query;
+  
+  // 상세 페이지인 경우 이전 탭으로 이동
+  if (currentRoute?.includes('Detail')) {
+    const fromTab = query.from || '전체 보기'; // 기본값은 전체 보기
+    
+    if (currentRoute === 'DepositDetail') {
+      router.push({ 
+        path: '/finance/deposit', 
+        query: { tab: fromTab }
+      });
+    } else if (currentRoute === 'InstallmentDetail') {
+      router.push({ 
+        path: '/finance/installment', 
+        query: { tab: fromTab }
+      });
+    } else if (currentRoute === 'FundDetail') {
+      router.push({ 
+        path: '/finance/fund', 
+        query: { tab: fromTab }
+      });
+    } else if (currentRoute === 'StockDetail') {
+      router.push({ 
+        path: '/finance/stock', 
+        query: { tab: fromTab }
+      });
+    } else {
+      // 알 수 없는 상세 페이지인 경우 이전 페이지로
+      router.back();
+    }
   } else {
     // 메인 금융 페이지인 경우 홈으로 이동
     router.push('/');
