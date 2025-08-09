@@ -98,6 +98,7 @@
       "isResultCheck": false,
       "categoryId": 5
     },
+
     {
       "id": 9,
       "title": "대중교통 이용하기",
@@ -121,6 +122,30 @@
       "participantsCount": 0,
       "isResultCheck": true,
       "categoryId": 1
+    },
+    {
+      "id": 11,
+      "title": "간식값 줄이기 챌린지",
+      "type": "GROUP",
+      "startDate": "2025-07-31",
+      "endDate": "2025-08-20",
+      "participating": false,
+      "myProgressRate": 0.4,
+      "participantsCount": 5,
+      "isResultCheck": false,
+      "categoryId": 5
+    },
+    {
+      "id": 12,
+      "title": "간식값 줄이기 챌린지",
+      "type": "GROUP",
+      "startDate": "2025-07-31",
+      "endDate": "2025-08-20",
+      "participating": false,
+      "myProgressRate": 0.4,
+      "participantsCount": 5,
+      "isResultCheck": false,
+      "categoryId": 5
     }
   ]
 }

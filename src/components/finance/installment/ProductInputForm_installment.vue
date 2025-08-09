@@ -225,7 +225,7 @@ const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 10px 0 0 0;
+  padding: 10px 0 20px 0;
 }
 .section-label {
   /*우대항목*/
