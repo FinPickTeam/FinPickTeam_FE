@@ -120,12 +120,19 @@
         <button class="btn-create" @click="createChallenge">챌린지 생성</button>
       </div>
     </div>
+
+    <!-- 성공 모달 -->
+    <ChallengeCreateSuccessModal
+      :isVisible="showSuccessModal"
+      @close="closeSuccessModal"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import ChallengeCreateSuccessModal from '@/components/challenge/ChallengeCreateSuccessModal.vue';
 
 const router = useRouter();
 
@@ -139,6 +146,9 @@ const type = ref('PERSONAL'); // 챌린지 유형
 const categoryId = ref(1); // 카테고리 ID   (1: 전체 소비 줄이기, 2: 식비 줄이기, 3: 카페·간식 줄이기, 4: 교통비 줄이기, 5: 미용·쇼핑 줄이기)
 const usePassword = ref(false); // 비밀번호 사용 여부
 const roomPassword = ref(''); // 비밀번호
+
+// 모달 상태
+const showSuccessModal = ref(false);
 
 const goBack = () => {
   router.back();
@@ -173,8 +183,12 @@ const createChallenge = () => {
   };
   console.log('챌린지 생성 요청:', challengeData);
 
-  // 성공 메시지 후 이전 페이지로 이동
-  alert('챌린지가 성공적으로 생성되었습니다!');
+  // 성공 모달 표시
+  showSuccessModal.value = true;
+};
+
+const closeSuccessModal = () => {
+  showSuccessModal.value = false;
   router.back();
 };
 </script>
