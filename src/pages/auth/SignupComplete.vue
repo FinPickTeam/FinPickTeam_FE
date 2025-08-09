@@ -1,9 +1,9 @@
 <template>
   <div class="signup-complete-container">
     <!-- 앱 브랜딩 -->
-    <div class="logo">
-      <h1>FinPick</h1>
-      <p>금융 생활의 새로운 시작</p>
+    <div class="app-logo">
+      <h1 class="app-title">FinPick</h1>
+      <p class="app-subtitle">금융 생활의 새로운 시작</p>
     </div>
 
     <!-- 중앙 섹션 -->
@@ -15,28 +15,34 @@
 
       <!-- 환영 메시지 -->
       <div class="welcome-message">
-        <h2>{{ userName }}님, 가입을 축하합니다.</h2>
+        <h2>
+          <span class="highlight-name">{{ userName }}</span
+          ><span class="small-text">님, 가입을 축하합니다.</span>
+        </h2>
+        <div class="analysis-notice">
+          <p>금융 상품 추천을 위해서는 투자 성향 분석이 필요해요.</p>
+        </div>
       </div>
     </div>
 
     <!-- 하단 버튼 -->
     <div class="bottom-section">
       <button class="analysis-btn" @click="goToProfile">
-        투자 성향 분석하러 가기
+        투자 성향 분석 하기
       </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
 
 // 사용자 이름 (실제로는 props나 store에서 가져올 수 있음)
-const userName = ref("금맹정");
+const userName = ref('금맹정음');
 
 // 컴포넌트 마운트 시 사용자 이름 설정
 onMounted(() => {
@@ -48,7 +54,7 @@ onMounted(() => {
 
 // 투자 성향 분석 페이지로 이동
 const goToProfile = () => {
-  router.push("/profile-step-1?from=signup");
+  router.push('/profile-step-1?from=signup');
 };
 </script>
 
@@ -57,25 +63,29 @@ const goToProfile = () => {
   min-height: 100vh;
   background-color: #fff;
   padding: 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.logo {
+.app-logo {
   text-align: center;
-  margin-top: 40px;
+  margin-bottom: 40px;
 }
 
-.logo h1 {
+.app-title {
   color: #4318d1;
   font-size: 48px;
   font-weight: 900;
   margin-bottom: 8px;
 }
 
-.logo p {
-  color: #666;
-  font-size: 16px;
-  margin: 0;
+.app-subtitle {
+  color: #888;
+  font-size: 15px;
+  text-align: center;
+  font-weight: 400;
+  margin-top: 4px;
+  margin-bottom: 0;
+  letter-spacing: 0;
 }
 
 .center-section {
@@ -91,7 +101,7 @@ const goToProfile = () => {
 }
 
 .complete-image img {
-  width: 200px;
+  width: 300px;
   height: auto;
   max-width: 100%;
 }
@@ -107,6 +117,36 @@ const goToProfile = () => {
   font-weight: 600;
   margin: 0;
   line-height: 1.4;
+}
+
+.highlight-name {
+  font-size: 20px;
+  font-weight: 700;
+  color: #4318d1;
+}
+
+.highlight-result {
+  font-size: 20px;
+  font-weight: 700;
+  color: #8e74e3;
+}
+
+.small-text {
+  font-size: 14px;
+  font-weight: 400;
+  color: #666;
+}
+
+.analysis-notice {
+  margin-top: 24px;
+}
+
+.analysis-notice p {
+  font-size: 14px;
+  font-weight: 400;
+  color: #666;
+  margin: 4px 0;
+  line-height: 1.5;
 }
 
 .bottom-section {
@@ -130,24 +170,5 @@ const goToProfile = () => {
 
 .analysis-btn:hover {
   background: #6c4cf1;
-}
-
-/* 반응형 디자인 */
-@media (max-width: 480px) {
-  .signup-complete-container {
-    padding: 16px;
-  }
-
-  .logo h1 {
-    font-size: 40px;
-  }
-
-  .complete-image img {
-    width: 160px;
-  }
-
-  .welcome-message h2 {
-    font-size: 18px;
-  }
 }
 </style>

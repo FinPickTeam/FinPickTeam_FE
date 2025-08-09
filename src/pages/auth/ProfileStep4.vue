@@ -38,19 +38,19 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
-const options = ["1년 미만", "1년 이상 ~ 3년 미만", "3년 이상", "경험 없음"];
+const options = ['1년 미만', '1년 이상 ~ 3년 미만', '3년 이상', '경험 없음'];
 const selected = ref(null);
 
 // 동적 progress-bar 설정
 const totalSteps = ref(4); // 기본값
 
 // 라우터 쿼리에서 from 파라미터 확인하여 단계 수 결정
-if (route.query.from === "mypage") {
+if (route.query.from === 'mypage') {
   totalSteps.value = 9; // 투자성향 재검사는 9단계
 } else {
   totalSteps.value = 4; // 회원가입은 4단계
@@ -61,12 +61,8 @@ const goBack = () => {
 };
 const goNext = () => {
   if (selected.value !== null) {
-    // SignupComplete에서 온 경우 home으로, Mypage에서 온 경우 ProfileStep5로
-    if (route.query.from === "signup") {
-      router.push("/");
-    } else {
-      router.push("/mypage/financetest/profile-step-5");
-    }
+    // 투자성향 분석 완료 후 ProfileComplete로 이동
+    router.push('/profile-complete');
   }
 };
 </script>
@@ -76,7 +72,7 @@ const goNext = () => {
   min-height: 100vh;
   background: #fff;
   padding: 0 20px 32px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .nav-bar {
   display: flex;
