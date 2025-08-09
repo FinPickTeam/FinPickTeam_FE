@@ -1,17 +1,147 @@
+<script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
+import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
+import ChallengeStatsSwiper from '@/components/challenge/ChallengeStatsSwiper.vue';
+import { getChallengeSummary, getChallengeList } from '@/api/challenge/challenge.js';
+import { getMonthlyPoints } from '@/api/coin/coin.js';
+import { useUserStore } from '@/stores/user';
+
+const router = useRouter();
+const userStore = useUserStore();
+
+// 로딩/에러 상태
+const loading = ref({
+  summary: false,
+  participating: false,
+  hot: false,
+  points: false,
+});
+const error = ref({
+  summary: null,
+  participating: null,
+  hot: null,
+  points: null,
+});
+
+// 데이터
+const summary = ref({ totalChallenges: 0, successCount: 0, achievementRate: 0 });
+const participatingChallenges = ref([]);
+const hotChallenges = ref([]);
+const monthlyPoints = ref(null); // ★ 월별 누적 포인트
+
+// 유저명 표시 (없으면 '사용자')
+const displayName = computed(() => userStore.userName || '사용자');
+
+// 이동 핸들러
+const handleParticipate = (challenge) => {
+  router.push({
+    name: 'ChallengeCommonDetail',
+    params: { id: challenge.id },
+    state: { previousPage: '/challenge' },
+  });
+};
+
+const goDetail = (challenge) => {
+  if (challenge.type === 'COMMON') {
+    router.push({ name: 'ChallengeCommonDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+  } else if (challenge.type === 'GROUP') {
+    router.push({ name: 'ChallengeGroupDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+  } else if (challenge.type === 'PERSONAL') {
+    router.push({ name: 'ChallengePersonalDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+  }
+};
+
+const handleCardClick = (payload) => {
+  const challenge = payload.challenge || payload;
+  goDetail(challenge);
+};
+
+// 초기 데이터 로드
+const fetchSummary = async () => {
+  loading.value.summary = true; error.value.summary = null;
+  try {
+    const data = await getChallengeSummary();
+    summary.value = data || { totalChallenges: 0, successCount: 0, achievementRate: 0 };
+  } catch (e) {
+    error.value.summary = e?.response?.data?.message || e.message || '요약 조회 실패';
+  } finally {
+    loading.value.summary = false;
+  }
+};
+
+const fetchParticipating = async () => {
+  loading.value.participating = true; error.value.participating = null;
+  try {
+    const list = await getChallengeList({ participating: true });
+    participatingChallenges.value = Array.isArray(list) ? list : [];
+  } catch (e) {
+    error.value.participating = e?.response?.data?.message || e.message || '참여중 목록 조회 실패';
+  } finally {
+    loading.value.participating = false;
+  }
+};
+
+const fetchHot = async () => {
+  loading.value.hot = true; error.value.hot = null;
+  try {
+    const list = await getChallengeList({ status: 'RECRUITING', participating: false });
+    hotChallenges.value = Array.isArray(list) ? list : [];
+  } catch (e) {
+    error.value.hot = e?.response?.data?.message || e.message || 'HOT 목록 조회 실패';
+  } finally {
+    loading.value.hot = false;
+  }
+};
+
+const fetchMonthlyPoints = async () => {
+  loading.value.points = true; error.value.points = null;
+  try {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = now.getMonth() + 1; // 1~12
+    const res = await getMonthlyPoints({ year: y, month: m });
+    // 백엔드 응답 키 이름에 맞춰서 사용
+    monthlyPoints.value = res?.monthlyCumulativeAmount ?? 0;
+  } catch (e) {
+    error.value.points = e?.response?.data?.message || e.message || '포인트 조회 실패';
+    monthlyPoints.value = null; // 슬라이드 숨김
+  } finally {
+    loading.value.points = false;
+  }
+};
+
+onMounted(async () => {
+  await Promise.all([
+    fetchSummary(),
+    fetchParticipating(),
+    fetchHot(),
+    fetchMonthlyPoints(), // ★ 포인트도 병렬로 불러오기
+  ]);
+});
+</script>
+
 <template>
   <div class="challenge-home">
     <div class="header-section">
-      <!-- 사용자 인사말 -->
       <div class="greeting-section">
         <div class="greeting">
-          안녕하세요, <span class="username">사용자님!</span>
+          안녕하세요, <span class="username">{{ displayName }}</span>!
         </div>
       </div>
 
-      <ChallengeStatsSwiper />
+      <!-- 스와이퍼 -->
+      <ChallengeStatsSwiper
+          :summary="summary"
+          :points="monthlyPoints"
+      />
+      <div v-if="loading.summary" style="color:#fff; margin:6px 20px 0;">요약 로딩중…</div>
+      <div v-else-if="error.summary" style="color:#fff; margin:6px 20px 0;">{{ error.summary }}</div>
+      <div v-if="error.points" style="color:#fff; margin:6px 20px 0;">{{ error.points }}</div>
     </div>
 
-    <!-- 참여중인 소그룹 섹션 -->
+    <!-- 참여중인 챌린지 -->
     <div class="participating-section">
       <div class="section-header">
         <i class="fas fa-calendar section-icon"></i>
@@ -19,17 +149,32 @@
           <h3 class="section-title">참여중인 챌린지</h3>
         </RouterLink>
       </div>
-      <div class="challenges-scroll">
+
+      <div v-if="loading.participating" class="challenges-scroll">로딩중…</div>
+      <div v-else-if="error.participating" class="challenges-scroll">{{ error.participating }}</div>
+      <div v-else class="challenges-scroll">
         <ParticipatingChallengeCard
-          v-for="challenge in participatingChallenges"
-          :key="challenge.id"
-          :challenge="challenge"
-          @cardClick="handleCardClick"
+            v-for="c in participatingChallenges"
+            :key="c.id"
+            :challenge="{
+            id: c.id,
+            title: c.title,
+            type: c.type,
+            categoryName: c.categoryName,
+            startDate: c.startDate,
+            endDate: c.endDate,
+            participating: c.isParticipating,
+            myProgressRate: c.myProgressRate ?? 0,
+            participantsCount: c.participantsCount ?? 0,
+            isResultCheck: c.isResultCheck ?? false
+          }"
+            @cardClick="handleCardClick"
         />
+        <div v-if="participatingChallenges.length === 0" style="color:#666;">참여중인 챌린지가 없어요.</div>
       </div>
     </div>
 
-    <!-- HOT 챌린지 섹션 -->
+    <!-- HOT 챌린지 -->
     <div class="hot-challenges-section">
       <div class="section-header">
         <i class="fas fa-search section-icon"></i>
@@ -37,91 +182,35 @@
           <h3 class="section-title">현재 HOT 한 챌린지</h3>
         </RouterLink>
       </div>
-      <div class="challenges-scroll">
+
+      <div v-if="loading.hot" class="challenges-scroll">로딩중…</div>
+      <div v-else-if="error.hot" class="challenges-scroll">{{ error.hot }}</div>
+      <div v-else class="challenges-scroll">
         <HotChallengeCard
-          v-for="challenge in hotChallenges"
-          :key="challenge.id"
-          :challenge="challenge"
-          @participate="handleParticipate"
-          @click="handleCardClick"
+            v-for="c in hotChallenges"
+            :key="c.id"
+            :challenge="{
+            id: c.id,
+            title: c.title,
+            type: c.type,
+            categoryId: null,
+            categoryName: c.categoryName,
+            startDate: c.startDate,
+            endDate: c.endDate,
+            participating: c.isParticipating,
+            myProgressRate: c.myProgressRate ?? null,
+            participantsCount: c.participantsCount ?? 0,
+            isResultCheck: c.isResultCheck ?? false
+          }"
+            @participate="handleParticipate"
+            @click="handleCardClick"
         />
+        <div v-if="hotChallenges.length === 0" style="color:#666;">모집 중인 챌린지가 없어요.</div>
       </div>
     </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
-import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
-import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
-import challengeListData from './challenge_list.json';
-import ChallengeStatsSwiper from '@/components/challenge/ChallengeStatsSwiper.vue';
-
-// 통계 데이터
-const totalChallenges = ref(10); // 전체 참여 수
-const successCount = ref(8); // 성공 수
-const achievementRate = ref(80.0); // 성공률
-
-// 챌린지 리스트 데이터
-const challengeList = ref(challengeListData.data);
-
-// 참여중인 챌린지 필터링
-const participatingChallenges = computed(() => {
-  return challengeList.value.filter((challenge) => challenge.participating);
-});
-
-// HOT 챌린지 필터링 (참여하지 않은 챌린지들)
-const hotChallenges = computed(() => {
-  return challengeList.value.filter((challenge) => !challenge.participating);
-});
-
-const router = useRouter();
-
-const handleParticipate = (challenge) => {
-  console.log('참여하기 클릭:', challenge);
-  // 챌린지 상세 페이지로 이동
-  router.push({
-    name: 'ChallengeCommonDetail',
-    params: { id: challenge.id },
-    state: {
-      previousPage: '/challenge',
-    },
-  });
-};
-
-const handleCardClick = (data) => {
-  // data가 객체인 경우 (ChallengeCard에서 온 경우)
-  const challenge = data.challenge || data;
-
-  // 챌린지 타입에 따른 상세 페이지로 이동
-  if (challenge.type === 'COMMON') {
-    router.push({
-      name: 'ChallengeCommonDetail',
-      params: { id: challenge.id },
-      state: {
-        previousPage: '/challenge',
-      },
-    });
-  } else if (challenge.type === 'GROUP') {
-    router.push({
-      name: 'ChallengeGroupDetail',
-      params: { id: challenge.id },
-      state: {
-        previousPage: '/challenge',
-      },
-    });
-  } else if (challenge.type === 'PERSONAL') {
-    router.push({
-      name: 'ChallengePersonalDetail',
-      params: { id: challenge.id },
-      state: {
-        previousPage: '/challenge',
-      },
-    });
-  }
-};
-</script>
 
 <style scoped>
 .challenge-home {
