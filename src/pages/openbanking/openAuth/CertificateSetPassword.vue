@@ -5,7 +5,7 @@
       <button class="password-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="password-title center-title">인증서 비밀번호 설정</span>
+      <span class="password-title center-title">간편 비밀번호 설정</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
@@ -31,12 +31,12 @@
       </div>
 
       <!-- 제목 -->
-      <h1 class="main-title">인증서 비밀번호 설정</h1>
+      <h1 class="main-title">간편 비밀번호 설정</h1>
 
       <!-- 설명 -->
       <div class="description-section">
         <p class="description-text">
-          안전한 인증서 사용을 위해 6자리 숫자 비밀번호를 설정해주세요.
+          안전한 오픈뱅킹 사용을 위해 6자리 숫자 비밀번호를 설정해주세요.
         </p>
       </div>
 

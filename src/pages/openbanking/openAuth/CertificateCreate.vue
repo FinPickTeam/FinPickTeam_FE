@@ -5,7 +5,7 @@
       <button class="certificate-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="certificate-title center-title">핀픽 인증서 만들기</span>
+      <span class="certificate-title center-title">간편 비밀번호 생성</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
@@ -13,10 +13,10 @@
       <!-- 설명 -->
       <div class="description-section">
         <p class="description-text">
-          핀픽 인증서는 안전한 금융 거래를 위한 디지털 인증서입니다.
+          간편 비밀번호는 안전한 오픈뱅킹 서비스 위한 디지털 보안 절차입니다.
         </p>
         <p class="description-text">
-          인증서를 만들면 다음과 같은 서비스를 이용할 수 있습니다.
+          간편 비밀번호를 만들면 다음과 같은 서비스를 이용할 수 있습니다.
         </p>
       </div>
 
@@ -27,14 +27,14 @@
             <font-awesome-icon :icon="['fas', 'shield-alt']" />
           </div>
           <div class="feature-content">
-            <h3 class="feature-title">안전한 거래</h3>
+            <h3 class="feature-title">안전한 오픈뱅킹 열람</h3>
             <p class="feature-description">
-              암호화된 보안으로 안전한 금융 거래
+              암호화된 보안으로 안전한 오픈뱅킹 열람
             </p>
           </div>
         </div>
 
-        <div class="feature-item">
+        <!-- <div class="feature-item">
           <div class="feature-icon">
             <font-awesome-icon :icon="['fas', 'user-check']" />
           </div>
@@ -42,7 +42,7 @@
             <h3 class="feature-title">본인 인증</h3>
             <p class="feature-description">신원 확인 및 본인 인증 서비스</p>
           </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- 주의사항 -->

@@ -80,7 +80,7 @@
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
     <div class="menu-item" @click="goToPinpickCertificate">
-      <span>핀픽 인증서 관리</span>
+      <span>간편 비밀번호 관리</span>
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
     <div class="menu-item" @click="goToInvestmentTest">
