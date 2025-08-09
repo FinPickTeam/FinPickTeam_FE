@@ -1,4 +1,4 @@
-import api from './index';
+import api from './instance';
 
 // 로그인 API
 export const loginApi = (email, password) => {

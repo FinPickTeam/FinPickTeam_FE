@@ -113,7 +113,7 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { signup, checkEmailDuplicate } from '@/api/authApi'; // API 함수 import
+import { signup, checkEmailDuplicate, loginApi } from '@/api/index.js'; // API 함수 import
 
 const router = useRouter();
 
@@ -240,6 +240,7 @@ const handleSignup = async () => {
     const response = await signup(requestBody);
 
     if (response.status === 200) {
+      await loginApi(form.email, form.password);
       router.push({
         path: '/auth/signupcomplete',
         query: { userName: form.email.split('@')[0] },
