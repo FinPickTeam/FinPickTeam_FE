@@ -1,8 +1,11 @@
 <template>
   <header class="finance-header">
-    <button class="icon-btn back-btn" @click="goBack">
-      <i class="fas fa-chevron-left"></i>
-    </button>
+    <div class="header-left">
+      <button class="icon-btn" @click="goBack">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+    </div>
+
     <div class="header-icons">
       <button class="icon-btn" @click="goToDictionary">
         <i class="fas fa-search"></i>
@@ -44,49 +47,41 @@ const toggleFavorite = () => {
 <style scoped>
 .finance-header {
   width: 100%;
+  max-width: 390px;
+  height: 60px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  background: var(--color-bg-light);
+  padding: 0 16px;
   position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  max-width: 390px;
-  background: var(--color-bg-light);
-  padding: 5px 0;
-  min-height: 80px;
   z-index: 100;
 }
-.icon-btn {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #222;
-  cursor: pointer;
-  padding: 6px;
-  display: flex;
-  align-items: center;
-}
-.back-btn {
-  margin-right: 8px;
-}
-.header-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: var(--font-size-title-main);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text);
-  letter-spacing: 1px;
-}
-.header-icons {
+.header-left {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-left: auto;
 }
+
+.icon-btn {
+  background: none;
+  border: none;
+  font-size: 22px;
+  color: #222;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.header-icons {
+  display: flex;
+  gap: 12px;
+}
+
 .heart-btn i {
   color: #e25a5a;
-  font-size: 24px;
+  font-size: 20px;
 }
 </style>
