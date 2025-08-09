@@ -83,9 +83,9 @@ function goToMyAssets() {
   margin-top: 18px;
 }
 .banner-img {
-  width: 90%;
-  max-width: 340px;
-  border-radius: 18px;
+  width: 100%;
+  max-width: 390px;
+  height: auto;
   box-shadow: 0 2px 16px rgba(67, 24, 209, 0.08);
 }
 .ob-desc {

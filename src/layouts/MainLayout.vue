@@ -52,6 +52,7 @@ const hideHeaderNames = [
   "CardDetail",
   "ObAgreement",
   "OpenBankingAgreement",
+  "ObArsAgreement",
 ];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);
