@@ -328,6 +328,12 @@ onMounted(async () => {
   font-family: var(--font-main);
   background: var(--color-bg-light);
   min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 20px;
+  padding-bottom: 150px;
+  box-sizing: border-box;
 }
 
 .title-section {
