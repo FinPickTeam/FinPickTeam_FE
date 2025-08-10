@@ -1,15 +1,15 @@
 <template>
   <div class="confirm-password-container">
     <!-- 상단 헤더 -->
-    <div class="confirm-header">
-      <button class="confirm-back" @click="goBack">
+    <div class="password-header">
+      <button class="password-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="confirm-title center-title">간편 비밀번호 확인</span>
+      <span class="password-title center-title">간편 비밀번호 확인</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
-    <div class="confirm-content">
+    <div class="password-content">
       <!-- 진행 단계 표시 -->
       <div class="progress-section">
         <div class="progress-steps">
@@ -41,7 +41,7 @@
       </div>
 
       <!-- 비밀번호 확인 폼 -->
-      <div class="confirm-form">
+      <div class="password-form">
         <div class="input-group">
           <div class="password-display">
             <div class="password-dots">
@@ -85,6 +85,7 @@
 
         <!-- 숫자 패드 -->
         <div class="number-pad">
+          <!-- 1-9 숫자 버튼들 (랜덤 순서) -->
           <div class="number-row" v-for="row in numberPad" :key="row.join('')">
             <button
               v-for="number in row"
@@ -96,21 +97,21 @@
               {{ number }}
             </button>
           </div>
-          <div class="number-row">
-            <button class="number-btn clear-btn" @click="clearPassword">
-              <font-awesome-icon :icon="['fas', 'times']" />
-            </button>
-            <button
-              class="number-btn"
-              @click="addNumber(0)"
-              :disabled="confirmPassword.length >= 6"
-            >
-              0
-            </button>
-            <button class="number-btn delete-btn" @click="deleteNumber">
-              <font-awesome-icon :icon="['fas', 'backspace']" />
-            </button>
-          </div>
+
+          <!-- 하단 3개 버튼: 전체삭제, 0, 백스페이스 -->
+          <button class="number-btn clear-btn" @click="clearPassword">
+            전체삭제
+          </button>
+          <button
+            class="number-btn"
+            @click="addNumber(0)"
+            :disabled="confirmPassword.length >= 6"
+          >
+            0
+          </button>
+          <button class="number-btn delete-btn" @click="deleteNumber">
+            <font-awesome-icon :icon="['fas', 'backspace']" />
+          </button>
         </div>
       </div>
     </div>
@@ -209,29 +210,29 @@ const completeCertificate = () => {
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
-  background: #f7f8fa;
+  background: #f3f4f6;
   min-height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
   position: relative;
-  padding-bottom: 120px;
+  display: flex;
+  flex-direction: column;
 }
 
-.confirm-header {
+.password-header {
   width: 100%;
   height: 56px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: #f3f4f6;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
-.confirm-back {
+.password-back {
   position: absolute;
   left: 16px;
   top: 50%;
@@ -243,7 +244,7 @@ const completeCertificate = () => {
   cursor: pointer;
 }
 
-.confirm-title {
+.password-title {
   font-size: 18px;
   font-weight: 600;
   color: #222;
@@ -253,8 +254,11 @@ const completeCertificate = () => {
   text-align: center;
 }
 
-.confirm-content {
+.password-content {
   padding: 24px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .progress-section {
@@ -335,8 +339,10 @@ const completeCertificate = () => {
   margin: 0;
 }
 
-.confirm-form {
-  margin-bottom: 32px;
+.password-form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .input-group {
@@ -405,37 +411,44 @@ const completeCertificate = () => {
 }
 
 .number-pad {
-  margin-top: 24px;
+  margin-top: auto;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  max-width: 100%;
+  height: 300px;
+  width: 100%;
 }
 
 .number-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-  justify-content: center;
+  display: contents;
 }
 
 .number-btn {
-  width: 60px;
-  height: 60px;
+  width: 100%;
+  height: 100%;
   border: none;
-  border-radius: 50%;
-  background: #fff;
+  border-radius: 0;
+  background: #f3f4f6;
   color: #222;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .number-btn:hover:not(:disabled) {
-  background: #f0f0f0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #e9ecef;
+}
+
+.number-btn:active:not(:disabled) {
+  background: #dee2e6;
 }
 
 .number-btn:disabled {
@@ -444,10 +457,23 @@ const completeCertificate = () => {
 }
 
 .clear-btn {
-  color: #f44336;
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+  background: #f3f4f6;
+}
+
+.clear-btn:hover:not(:disabled) {
+  background: #e9ecef;
 }
 
 .delete-btn {
-  color: #666;
+  color: #6c757d;
+  font-size: 18px;
+  background: #f3f4f6;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #e9ecef;
 }
 </style>

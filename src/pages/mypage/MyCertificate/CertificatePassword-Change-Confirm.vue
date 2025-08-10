@@ -86,6 +86,7 @@
 
         <!-- 숫자 패드 -->
         <div class="number-pad">
+          <!-- 1-9 숫자 버튼들 (랜덤 순서) -->
           <div class="number-row" v-for="row in numberPad" :key="row.join('')">
             <button
               v-for="number in row"
@@ -97,21 +98,21 @@
               {{ number }}
             </button>
           </div>
-          <div class="number-row">
-            <button class="number-btn clear-btn" @click="clearPassword">
-              <font-awesome-icon :icon="['fas', 'times']" />
-            </button>
-            <button
-              class="number-btn"
-              @click="addNumber(0)"
-              :disabled="confirmPassword.length >= 6"
-            >
-              0
-            </button>
-            <button class="number-btn delete-btn" @click="deleteNumber">
-              <font-awesome-icon :icon="['fas', 'backspace']" />
-            </button>
-          </div>
+
+          <!-- 하단 3개 버튼: 전체삭제, 0, 백스페이스 -->
+          <button class="number-btn clear-btn" @click="clearPassword">
+            전체삭제
+          </button>
+          <button
+            class="number-btn"
+            @click="addNumber(0)"
+            :disabled="confirmPassword.length >= 6"
+          >
+            0
+          </button>
+          <button class="number-btn delete-btn" @click="deleteNumber">
+            <font-awesome-icon :icon="['fas', 'backspace']" />
+          </button>
         </div>
       </div>
     </div>
@@ -207,7 +208,8 @@ const completePasswordChange = () => {
   min-height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
   position: relative;
-  padding-bottom: 120px;
+  display: flex;
+  flex-direction: column;
 }
 
 .password-header {
@@ -249,6 +251,9 @@ const completePasswordChange = () => {
 
 .password-content {
   padding: 24px 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .progress-section {
@@ -330,7 +335,9 @@ const completePasswordChange = () => {
 }
 
 .password-form {
-  margin-bottom: 32px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .input-group {
@@ -399,37 +406,44 @@ const completePasswordChange = () => {
 }
 
 .number-pad {
-  margin-top: 24px;
+  margin-top: auto;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  max-width: 100%;
+  height: 300px;
+  width: 100%;
 }
 
 .number-row {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-  justify-content: center;
+  display: contents;
 }
 
 .number-btn {
-  width: 60px;
-  height: 60px;
+  width: 100%;
+  height: 100%;
   border: none;
-  border-radius: 50%;
-  background: #fff;
+  border-radius: 0;
+  background: #f8f9fa;
   color: #222;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .number-btn:hover:not(:disabled) {
-  background: #f0f0f0;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: #e9ecef;
+}
+
+.number-btn:active:not(:disabled) {
+  background: #dee2e6;
 }
 
 .number-btn:disabled {
@@ -438,10 +452,23 @@ const completePasswordChange = () => {
 }
 
 .clear-btn {
-  color: #f44336;
+  color: #dc3545;
+  font-size: 14px;
+  font-weight: 500;
+  background: #f8f9fa;
+}
+
+.clear-btn:hover:not(:disabled) {
+  background: #e9ecef;
 }
 
 .delete-btn {
-  color: #666;
+  color: #6c757d;
+  font-size: 18px;
+  background: #f8f9fa;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #e9ecef;
 }
 </style>
