@@ -148,6 +148,7 @@ import { useRouter } from 'vue-router';
 import ProductInputForm from '../../components/finance/installment/ProductInputForm_installment.vue';
 import ProductCardList from '../../components/finance/installment/ProductCardList_installment.vue';
 import { getInstallmentList, getInstallmentRecommendList } from '@/api';
+import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
@@ -162,6 +163,7 @@ const formData = ref({
   savingType: '자유적립식',
   selectedPrefer: [],
 });
+const fav = useFavoriteStore();
 
 // 전체보기용 상태
 const searchKeyword = ref('');
@@ -202,6 +204,7 @@ const interestTags = ref([
 
 onMounted(() => {
   fetchInstallmentList();
+  fav.syncIdSet('INSTALLMENT');
 });
 
 //적금 상품 목록 가져오기

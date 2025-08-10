@@ -6,6 +6,7 @@ export * from './finance/deposit.js';
 export * from './finance/installment.js';
 export * from './finance/fund.js';
 export * from './finance/stock.js';
+export * from './finance/wishlist.js';
 
 export * from './coin/coin.js';
 export * from './authApi.js';

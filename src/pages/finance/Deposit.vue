@@ -146,6 +146,7 @@ import { useRouter } from 'vue-router';
 import ProductInputForm from '@/components/finance/deposit/ProductInputForm_deposit.vue';
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
 import { getDepositList, getDepositRecommendList } from '@/api';
+import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
@@ -161,6 +162,7 @@ const formData = ref({
   depositType: '정기예금',
   selectedPrefer: [],
 });
+const fav = useFavoriteStore();
 
 // 태그 필터 관련 상태
 const searchKeyword = ref('');
@@ -201,6 +203,7 @@ const interestTags = ref([
 
 onMounted(async () => {
   fetchDepositList();
+  fav.syncIdSet('DEPOSIT');
 });
 
 const fetchDepositList = async (params) => {

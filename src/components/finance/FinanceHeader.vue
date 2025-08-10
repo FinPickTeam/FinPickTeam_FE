@@ -53,7 +53,6 @@ const toggleFavorite = () => {
   transform: translateX(-50%);
   max-width: 390px;
   background: var(--color-bg-light);
-  padding: 5px 0;
   min-height: 80px;
   z-index: 100;
 }
@@ -68,7 +67,7 @@ const toggleFavorite = () => {
   align-items: center;
 }
 .back-btn {
-  margin-right: 8px;
+  margin-left: 10px;
 }
 .header-title {
   position: absolute;
@@ -84,6 +83,7 @@ const toggleFavorite = () => {
   align-items: center;
   gap: 12px;
   margin-left: auto;
+  padding-right: 15px;
 }
 .heart-btn i {
   color: #e25a5a;

@@ -122,11 +122,13 @@ import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductCardList_fund from '@/components/finance/fund/ProductCardList_fund.vue';
 import { getFundList, getFundRecommendedList } from '@/api';
+import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const showProducts = ref(false);
 const fundAllData = ref([]);
 const fundRecommendData = ref([]);
+const fav = useFavoriteStore();
 
 // 확정된(실제로 목록을 거르는) 값
 const selectedFundTypes = ref([]);
@@ -138,6 +140,7 @@ const draftRisks = ref([]);
 
 onMounted(() => {
   fetchFundList();
+  fav.syncIdSet('FUND');
 });
 
 const fetchFundList = async () => {
@@ -145,7 +148,7 @@ const fetchFundList = async () => {
     const res = await getFundList();
     fundAllData.value = res.data ?? [];
   } catch (error) {
-    console.log(error);
+    console.log('펀드 전체 목록 조회 실패', error);
   }
 };
 
