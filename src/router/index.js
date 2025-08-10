@@ -408,9 +408,9 @@ const router = createRouter({
           component: () => import('../pages/finance/FundDetail.vue'),
         },
         {
-          path: 'fund/:id',
+          path: 'stock/:id',
           name: 'StockDetail',
-          component: () => import('../pages/finance/FundDetail.vue'),
+          component: () => import('../pages/finance/StockDetail.vue'),
         },
         // ... 추가 재테크 탭들
       ],

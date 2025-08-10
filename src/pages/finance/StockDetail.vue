@@ -9,12 +9,7 @@
     <!-- 제목과 찜하기 -->
     <div v-else class="title-section">
       <div class="title-with-heart">
-        <img
-          :src="getLogoUrl(product.fundManager)"
-          :alt="`${product.fundManager} 로고`"
-          class="bank-logo"
-        />
-        <h1 class="product-title">{{ product.fundProductName }}</h1>
+        <h1 class="product-title">{{ product.stockName }}</h1>
         <i
           :class="isFavorite ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
           class="heart-icon"
@@ -36,27 +31,69 @@
     </div>
 
     <!-- 수익률 차트 섹션 -->
-    <div class="chart-section" v-if="product.fundReturnsData && !isLoading">
+    <div
+      class="chart-section"
+      v-if="unref(product).stockChartData && !isLoading"
+    >
       <div class="chart-card">
-        <h3 class="chart-title">펀드 수익률 추이</h3>
-        <FundChart :returnsData="product.fundReturnsData" />
+        <h3 class="chart-title">주가 상승률</h3>
+        <StockChart :chart-data="unref(product).stockChartData" />
       </div>
     </div>
 
     <!-- 상세 정보 섹션 -->
-    <div class="detail-section" v-if="product.fundProductName">
+    <div class="detail-section" v-if="product.stockName">
       <div class="detail-card">
         <div class="detail-item">
           <span class="detail-label">
             <FinancialTermSystem
-              text="펀드 특징"
+              text="주가"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
           </span>
           <span class="detail-value">
             <FinancialTermSystem
-              :text="product.fundProductFeatures"
+              :text="product.stockPrice + '원'"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+            /
+            <span
+              :class="
+                product.stockChangeRate.startsWith('-')
+                  ? 'negative'
+                  : 'positive'
+              "
+            >
+              {{ product.stockPredictedPrice }}원
+            </span>
+            /
+            <span
+              :class="
+                product.stockChangeRate.startsWith('-')
+                  ? 'negative'
+                  : 'positive'
+              "
+            >
+              {{ product.stockChangeRate }}%
+            </span>
+          </span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">
+            <FinancialTermSystem
+              text="연중 H/L"
+              :financial-terms="financialTerms"
+              :is-enabled="isHighlightEnabled"
+            />
+          </span>
+          <span class="detail-value">
+            <FinancialTermSystem
+              :text="`${String(product.stockYearHigh).replace(
+                /^[-+]/,
+                ''
+              )}원 / ${String(product.stockYearLow).replace(/^[-+]/, '')}원`"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
@@ -65,14 +102,14 @@
         <div class="detail-item">
           <span class="detail-label">
             <FinancialTermSystem
-              text="펀드 타입"
+              text="액면가"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
           </span>
           <span class="detail-value">
             <FinancialTermSystem
-              :text="product.fundType"
+              :text="product.stockFaceValue + '원'"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
@@ -81,14 +118,14 @@
         <div class="detail-item">
           <span class="detail-label">
             <FinancialTermSystem
-              text="위험도"
+              text="시가총액"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
           </span>
           <span class="detail-value">
             <FinancialTermSystem
-              :text="product.fundRiskLevel"
+              :text="`${Number(product.stockMarketCap).toLocaleString()}억 원`"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
@@ -97,14 +134,16 @@
         <div class="detail-item">
           <span class="detail-label">
             <FinancialTermSystem
-              text="3개월 수익률"
+              text="당기순이익"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
           </span>
           <span class="detail-value">
             <FinancialTermSystem
-              :text="getReturnValue(product.fund3MonthReturn)"
+              :text="`${Number(
+                product.stockSalesAmount
+              ).toLocaleString()}억 원`"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
@@ -113,70 +152,31 @@
         <div class="detail-item">
           <span class="detail-label">
             <FinancialTermSystem
-              text="설정일"
+              text="PER"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
           </span>
           <span class="detail-value">
             <FinancialTermSystem
-              :text="product.fundStartDate"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">
-            <FinancialTermSystem
-              text="순자산"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-          <span class="detail-value">
-            <FinancialTermSystem
-              :text="product.fundNetAssetValue"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">
-            <FinancialTermSystem
-              text="총보수비율"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-          <span class="detail-value">
-            <FinancialTermSystem
-              :text="product.fundTotalExpenseRatio"
+              :text="product.stockPer"
               :financial-terms="financialTerms"
               :is-enabled="isHighlightEnabled"
             />
           </span>
         </div>
       </div>
-    </div>
-
-    <!-- 이동하기 버튼 -->
-    <div class="action-section" v-if="product.fundProductName">
-      <p class="action-text">해당 상품을 보러가고 싶다면?</p>
-      <p class="action-subtext">아래를 클릭하면 해당 페이지로 이동해요</p>
-      <button class="action-btn" @click="goToProduct">이동하기</button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, unref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
-import FundChart from '../../components/finance/fund/FundChart.vue';
 import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
-import { getFundDetail } from '@/api';
+import { getStockDetail } from '@/api';
+import StockChart from '@/components/finance/stock/StockChart.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -189,6 +189,16 @@ const isLoading = ref(true);
 // 용어 하이라이팅 관련 상태
 const isHighlightEnabled = ref(false);
 const financialTerms = ref([]);
+
+onMounted(async () => {
+  console.log('상품 ID:', route.params.id);
+  try {
+    isLoading.value = true;
+    await Promise.all([+fetchStockDetail(), +loadFinancialTerms()]);
+  } finally {
+    isLoading.value = false;
+  }
+});
 
 // 금융 용어 사전 로드
 const loadFinancialTerms = async () => {
@@ -215,10 +225,10 @@ const loadFinancialTerms = async () => {
 };
 
 // 데이터 로드 함수
-const fetchFundDetail = async () => {
+const fetchStockDetail = async () => {
   try {
-    const id = route.params.id;
-    const res = await getFundDetail(id);
+    const stockCode = route.params.id;
+    const res = await getStockDetail(stockCode);
     product.value = res.data ?? [];
   } catch (error) {
     console.log(error);
@@ -245,11 +255,6 @@ function getReturnValue(returnValue) {
   return returnValue;
 }
 
-// 메서드들
-function goBack() {
-  router.back();
-}
-
 function toggleFavorite() {
   if (isFavorite.value) {
     favoriteStore.removeFavorite(product.value);
@@ -257,32 +262,6 @@ function toggleFavorite() {
     favoriteStore.addFavorite(product.value);
   }
 }
-
-function goToProduct() {
-  window.open(product.value.fundLink, '_blank');
-}
-
-const fundLogoMap = {
-  'KB 자산운용': 'KB 자산운용.png',
-};
-
-const getLogoUrl = (fundManager) => {
-  if (!fundManager) {
-    return '/src/assets/fund_logo/KB 자산운용.png';
-  }
-  const fileName = fundLogoMap[fundManager];
-  if (!fileName) {
-    return '/src/assets/fund_logo/KB 자산운용.png';
-  }
-  return `/src/assets/fund_logo/${fileName}`;
-};
-
-onMounted(async () => {
-  console.log('상품 ID:', route.params.id);
-  await fetchFundDetail();
-  await loadFinancialTerms();
-  isLoading.value = false;
-});
 </script>
 
 <style scoped>
@@ -299,7 +278,7 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   padding: 0px 0 8px 0;
 }
 
@@ -362,6 +341,13 @@ onMounted(async () => {
   100% {
     transform: rotate(360deg);
   }
+}
+
+.positive {
+  color: red;
+}
+.negative {
+  color: blue;
 }
 
 /* 토글 버튼 스타일 */
