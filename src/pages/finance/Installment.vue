@@ -129,10 +129,10 @@
 
       <!-- 전체 상품 리스트 -->
       <div
-        v-if="allProducts && allProducts.length > 0"
+        v-if="filteredAllInstallment && filteredAllInstallment.length > 0"
         class="products-list-container"
       >
-        <ProductCardList :products="allProducts" />
+        <ProductCardList :products="filteredAllInstallment" />
       </div>
       <div v-else class="no-results">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -147,7 +147,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductInputForm from '../../components/finance/installment/ProductInputForm_installment.vue';
 import ProductCardList from '../../components/finance/installment/ProductCardList_installment.vue';
-import { getInstallmentList } from '@/api';
+import { getInstallmentList, getInstallmentRecommendList } from '@/api';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
@@ -216,6 +216,7 @@ const fetchInstallmentList = async (params) => {
 
 //적금 추천 목록 가져오기
 const fetchInstallmentRecommendation = async (receivedFormData) => {
+  console.log(receivedFormData.value);
   try {
     const params = {
       amount: receivedFormData.amount,
@@ -238,6 +239,27 @@ const fetchInstallmentRecommendation = async (receivedFormData) => {
     console.log(e);
   }
 };
+
+// 전체보기 필터링된 데이터
+const filteredAllInstallment = computed(() => {
+  const list = Array.isArray(allProducts.value) ? allProducts.value : [];
+  const q = (searchKeyword.value ?? '').toLowerCase().replace(/\s+/g, '');
+  if (!q) return list;
+  return list.filter((d) =>
+    (d.installmentProductName ?? '')
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .includes(q)
+  );
+});
+
+function toMonths(periodLabel) {
+  if (typeof periodLabel === 'number') return periodLabel;
+  const m = String(periodLabel).match(/(\d+)/);
+  if (!m) return 12;
+  const n = Number(m[1]);
+  return /년/.test(periodLabel) ? n * 12 : n;
+}
 
 function goTo(path) {
   router.push(path);
@@ -273,6 +295,8 @@ function showSearchResults(receivedFormData) {
   } | 월 ${receivedFormData.amount.toLocaleString()}원 | ${
     receivedFormData.savingType
   }${preferText ? ' | ' + preferText : ''}`;
+
+  fetchInstallmentRecommendation(receivedFormData);
 }
 
 function hideSearchResults() {

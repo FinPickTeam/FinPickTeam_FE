@@ -47,7 +47,7 @@ export const getInstallmentDetail = (installmentProductId) => {
   }
 
   return api
-    .get('/v1/installment/depositDetail/', {
+    .get('/v1/installment/installmentDetail/', {
       params: { installmentProductId },
     })
     .then((res) => res.data)

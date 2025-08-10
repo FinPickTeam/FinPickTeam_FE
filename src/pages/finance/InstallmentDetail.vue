@@ -146,6 +146,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
 import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
+import { getInstallmentDetail } from '@/api';
 
 const route = useRoute();
 const router = useRouter();
@@ -180,59 +181,6 @@ const loadFinancialTerms = async () => {
   } catch (error) {
     console.error('금융 용어 사전 로드 실패:', error);
     financialTerms.value = [];
-  }
-};
-
-// 데이터 로드 함수
-const loadProductData = async () => {
-  try {
-    const response = await fetch(
-      '/src/components/finance/installment/installment_all.json'
-    );
-    const allProducts = await response.json();
-
-    // URL 파라미터의 상품명과 일치하는 상품 찾기
-    const requestedProductName = route.params.id;
-    const foundProduct = allProducts.data.find(
-      (product) => product.installmentProductName === requestedProductName
-    );
-
-    if (foundProduct) {
-      // 상세 정보를 위해 installment_detail.json도 로드
-      try {
-        const detailResponse = await fetch(
-          '/src/components/finance/installment/installment_detail.json'
-        );
-        const detailData = await detailResponse.json();
-
-        // 상세 정보의 상품명과 요청된 상품명이 일치하는지 확인
-        if (detailData.data.installmentProductName === requestedProductName) {
-          // 상세 정보와 기본 정보를 합침
-          product.value = {
-            ...foundProduct,
-            ...detailData.data,
-          };
-          isLoading.value = false;
-        } else {
-          // 상세 정보가 없거나 상품명이 일치하지 않으면 404 페이지로 리다이렉트
-          router.push('/404');
-          return;
-        }
-      } catch (detailError) {
-        // 상세 정보 로드 실패 시에도 404 페이지로 리다이렉트
-        router.push('/404');
-        return;
-      }
-    } else {
-      // 상품을 찾지 못했으면 404 페이지로 리다이렉트
-      router.push('/404');
-      return;
-    }
-  } catch (error) {
-    console.error('상품 데이터 로드 실패:', error);
-    // 에러 발생 시에도 404 페이지로 리다이렉트
-    router.push('/404');
-    return;
   }
 };
 
@@ -306,12 +254,12 @@ const bankLogoMap = {
   케이뱅크: '케이뱅크.png',
   토스뱅크: '토스뱅크.png',
   iM뱅크: 'iM뱅크.png',
-  광주은행: '광주은행, 전북은행.png',
-  전북은행: '광주은행, 전북은행.png',
-  신한은행: '신한은행, 제주은행.png',
-  제주은행: '신한은행, 제주은행.png',
-  경남은행: '경남은행, 부산은행.png',
-  부산은행: '경남은행, 부산은행.png',
+  광주은행: '광주은행.png',
+  전북은행: '전북은행.png',
+  신한은행: '신한은행.png',
+  제주은행: '제주은행.png',
+  경남은행: '경남은행.png',
+  부산은행: '부산은행.png',
 };
 
 const getLogoUrl = (bankName) => {
@@ -327,9 +275,20 @@ const getLogoUrl = (bankName) => {
 
 onMounted(async () => {
   console.log('상품 ID:', route.params.id);
-  await loadProductData();
   await loadFinancialTerms();
+  fetchInstallmentDetail();
+  isLoading.value = false;
 });
+
+const fetchInstallmentDetail = async () => {
+  try {
+    const id = route.params.id;
+    const res = await getInstallmentDetail(id);
+    product.value = res.data ?? [];
+  } catch (e) {
+    console.log(e);
+  }
+};
 </script>
 
 <style scoped>

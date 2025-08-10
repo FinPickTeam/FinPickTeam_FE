@@ -49,9 +49,9 @@ const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
 
 function goToDetail() {
   // 상품명을 기반으로 상세 페이지로 이동
-  const productName = props.product.installmentProductName;
-  if (productName) {
-    router.push(`/finance/installment/${productName}`);
+  const installmentProductId = props.product.id;
+  if (installmentProductId) {
+    router.push(`/finance/installment/${installmentProductId}`);
   }
 }
 
