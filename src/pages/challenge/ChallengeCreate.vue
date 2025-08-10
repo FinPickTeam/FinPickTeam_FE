@@ -126,56 +126,93 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+// Pinia에서 토큰 가져오는 경우 (스토어 이름 맞춰 바꿔줘)
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
+const auth = useAuthStore();
 
 // 폼 데이터
-const title = ref(''); // 챌린지 제목
-const description = ref(''); // 챌린지 설명
-const startDate = ref(''); // 챌린지 시작일
-const endDate = ref(''); // 챌린지 종료일
-const goalValue = ref(100000); // 목표 금액
-const type = ref('PERSONAL'); // 챌린지 유형
-const categoryId = ref(1); // 카테고리 ID   (1: 전체 소비 줄이기, 2: 식비 줄이기, 3: 카페·간식 줄이기, 4: 교통비 줄이기, 5: 미용·쇼핑 줄이기)
-const usePassword = ref(false); // 비밀번호 사용 여부
-const roomPassword = ref(''); // 비밀번호
+const title = ref('');
+const description = ref('');
+const startDate = ref('');
+const endDate = ref('');
+const goalValue = ref(100000);
+const type = ref('PERSONAL');
+const categoryId = ref(1);
+const usePassword = ref(false);
+const roomPassword = ref('');
+const loading = ref(false);
 
-const goBack = () => {
-  router.back();
-};
+const goBack = () => router.back();
 
-const addAmount = (amount) => {
-  goalValue.value += amount;
-};
-
-const formatAmount = (value) => {
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
-
-const handleAmountInput = (event) => {
-  // 콤마 제거 후 숫자만 추출
-  const numericValue = event.target.value.replace(/,/g, '');
+const addAmount = (amount) => { goalValue.value += amount; };
+const formatAmount = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+const handleAmountInput = (e) => {
+  const numericValue = e.target.value.replace(/,/g, '');
   goalValue.value = parseInt(numericValue) || 0;
 };
 
-const createChallenge = () => {
-  // 챌린지 생성 로직
-  const challengeData = {
+const validateClient = () => {
+  if (!title.value.trim()) return '제목을 입력해주세요.';
+  if (!description.value.trim()) return '설명을 입력해주세요.';
+  if (!startDate.value || !endDate.value) return '기간을 선택해주세요.';
+  if (new Date(startDate.value) > new Date(endDate.value)) return '시작일이 종료일보다 이후일 수 없어요.';
+  const diffDays = Math.floor((new Date(endDate.value) - new Date(startDate.value)) / 86400000) + 1;
+  if (diffDays < 3) return '기간은 최소 3일 이상이어야 해요.';
+  if (diffDays > 30) return '기간은 최대 30일까지 가능해요.';
+  const startDiff = Math.floor((new Date(startDate.value) - new Date()) / 86400000);
+  if (startDiff > 7) return '시작일은 7일 이내여야 해요.';
+  if (goalValue.value < 1000) return '목표금액은 1,000원 이상이어야 해요.';
+  if (goalValue.value > 10000000) return '목표금액은 10,000,000원 이하여야 해요.';
+  if (type.value === 'GROUP' && usePassword.value) {
+    if (!/^\d{4}$/.test(roomPassword.value)) return '비밀번호는 숫자 4자리여야 해요.';
+  }
+  return null;
+};
+
+const createChallenge = async () => {
+  const err = validateClient();
+  if (err) return alert(err);
+
+  const payload = {
     title: title.value,
     description: description.value,
-    startDate: startDate.value,
+    startDate: startDate.value,     // yyyy-MM-dd
     endDate: endDate.value,
     goalValue: goalValue.value,
-    type: type.value,
-    categoryId: categoryId.value,
+    type: type.value,               // "PERSONAL" | "GROUP" | (COMMON은 화면 미사용)
+    categoryId: Number(categoryId.value),
     usePassword: usePassword.value,
-    roomPassword: usePassword.value ? roomPassword.value : '',
+    password: usePassword.value ? Number(roomPassword.value) : null, // ★ 중요: null 또는 숫자
   };
-  console.log('챌린지 생성 요청:', challengeData);
 
-  // 성공 메시지 후 이전 페이지로 이동
-  alert('챌린지가 성공적으로 생성되었습니다!');
-  router.back();
+  try {
+    loading.value = true;
+    const token = auth.accessToken; // 스토어에서 액세스 토큰 꺼내오기 (키 이름 맞춰줘)
+    const res = await axios.post(
+        '/api/challenge/create',
+        payload,
+        { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // 서버 공통 응답 형태 사용 예: { status, message, data }
+    alert(res.data?.message || '챌린지가 성공적으로 생성되었습니다!');
+    // 생성된 챌린지 상세로 이동 시:
+    // const challengeId = res?.data?.data?.challengeId;
+    // router.push(`/challenge/${challengeId}`);
+    router.back();
+  } catch (e) {
+    // 서버에서 던진 예외 메시지 보여주기
+    const msg =
+        e?.response?.data?.message ||
+        e?.message ||
+        '챌린지 생성 중 오류가 발생했어요.';
+    alert(msg);
+  } finally {
+    loading.value = false;
+  }
 };
 </script>
 

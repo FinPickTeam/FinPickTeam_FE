@@ -6,10 +6,13 @@ import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChal
 import ChallengeStatsSwiper from '@/components/challenge/ChallengeStatsSwiper.vue';
 import { getChallengeSummary, getChallengeList } from '@/api/challenge/challenge.js';
 import { getMonthlyPoints } from '@/api/coin/coin.js';
+
 import { useUserStore } from '@/stores/user';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const userStore = useUserStore();
+const auth = useAuthStore();
 
 // 로딩/에러 상태
 const loading = ref({
@@ -31,8 +34,11 @@ const participatingChallenges = ref([]);
 const hotChallenges = ref([]);
 const monthlyPoints = ref(null); // ★ 월별 누적 포인트
 
-// 유저명 표시 (없으면 '사용자')
-const displayName = computed(() => userStore.userName || '사용자');
+// 닉네임 우선 표시(백엔드 키 NickName/nickname 모두 대응), 없으면 userName → '사용자'
+const displayName = computed(() => {
+  const u = auth.user || {};
+  return u.nickname || u.NickName || u.userName || '사용자';
+});
 
 // 이동 핸들러
 const handleParticipate = (challenge) => {
