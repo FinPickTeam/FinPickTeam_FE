@@ -176,6 +176,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
 import FundChart from '../../components/finance/fund/FundChart.vue';
 import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
+import { getFundDetail } from '@/api';
 
 const route = useRoute();
 const router = useRouter();
@@ -214,50 +215,13 @@ const loadFinancialTerms = async () => {
 };
 
 // 데이터 로드 함수
-const loadProductData = async () => {
+const fetchFundDetail = async () => {
   try {
-    // 먼저 전체 상품 목록에서 해당 상품을 찾습니다
-    const allResponse = await fetch(
-      '/src/components/finance/fund/fund_all.json'
-    );
-    const allProducts = await allResponse.json();
-
-    const requestedProductName = route.params.id;
-    const foundProduct = allProducts.data.find(
-      (p) => p.fundProductName === requestedProductName
-    );
-
-    if (foundProduct) {
-      // 상품이 존재하면 상세 정보를 로드합니다
-      const detailResponse = await fetch(
-        '/src/components/finance/fund/fund_detail.json'
-      );
-      const detailData = await detailResponse.json();
-
-      if (detailData.status === 200 && detailData.data) {
-        // 상세 정보의 상품명이 요청된 상품명과 일치하는지 확인
-        if (detailData.data.fundProductName === requestedProductName) {
-          product.value = detailData.data;
-          isLoading.value = false;
-        } else {
-          console.error('상세 정보의 상품명이 일치하지 않습니다');
-          router.push('/404');
-          return;
-        }
-      } else {
-        console.error('상세 정보 로드 실패:', detailData.message);
-        router.push('/404');
-        return;
-      }
-    } else {
-      console.error('상품을 찾을 수 없습니다:', requestedProductName);
-      router.push('/404');
-      return;
-    }
+    const id = route.params.id;
+    const res = await getFundDetail(id);
+    product.value = res.data ?? [];
   } catch (error) {
-    console.error('상품 데이터 로드 실패:', error);
-    router.push('/404');
-    return;
+    console.log(error);
   }
 };
 
@@ -315,8 +279,9 @@ const getLogoUrl = (fundManager) => {
 
 onMounted(async () => {
   console.log('상품 ID:', route.params.id);
-  await loadProductData();
+  await fetchFundDetail();
   await loadFinancialTerms();
+  isLoading.value = false;
 });
 </script>
 

@@ -33,7 +33,10 @@ export const getInstallmentList = (params = {}) => {
 
   return api
     .get('/v1/installment/list', { params: query })
-    .then((res) => res.data);
+    .then((res) => res.data)
+    .catch((err) => {
+      throw err;
+    });
 };
 
 /**
