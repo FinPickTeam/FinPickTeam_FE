@@ -26,17 +26,17 @@ export const getDepositList = (params = {}) => {
 };
 
 /**
- * 예금 추천 상세 조회
+ * 예금 상세 조회
  * @param {string|number} productId - 상품 ID (필수)
  * @returns {Promise<Object>} 예금 상세 정보 객체
  */
-export const getDepositRecommendDetail = (productId) => {
+export const getDepositDetail = (productId) => {
   if (!productId) {
     throw new Error('productId는 필수입니다.');
   }
 
   return api
-    .get('/v1/deposit/recommend', {
+    .get('/v1/deposit/depositDetail/', {
       params: { productId },
     })
     .then((res) => res.data)
@@ -59,7 +59,7 @@ export const getDepositRecommendList = (params, body) => {
   }
 
   return api
-    .post('/v1/deposit/recommend/list', body, { params })
+    .post('/v1/deposit/recommend', body, { params })
     .then((res) => res.data)
     .catch((err) => {
       throw err;

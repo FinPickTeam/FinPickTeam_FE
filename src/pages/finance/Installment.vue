@@ -129,10 +129,10 @@
 
       <!-- 전체 상품 리스트 -->
       <div
-        v-if="filteredAllProducts.length > 0"
+        v-if="allProducts && allProducts.length > 0"
         class="products-list-container"
       >
-        <ProductCardList :products="filteredAllProducts" />
+        <ProductCardList :products="allProducts" />
       </div>
       <div v-else class="no-results">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -147,8 +147,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductInputForm from '../../components/finance/installment/ProductInputForm_installment.vue';
 import ProductCardList from '../../components/finance/installment/ProductCardList_installment.vue';
-import recommendData from '../../components/finance/installment/installment_recommend.json';
-import allData from '../../components/finance/installment/installment_all.json';
+import { getInstallmentList } from '@/api';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
@@ -202,16 +201,43 @@ const interestTags = ref([
 ]);
 
 onMounted(() => {
-  // 추천 상품 데이터 로드
-  if (recommendData.status === 200 && recommendData.data) {
-    recommendProducts.value = recommendData.data;
-  }
-
-  // 전체 상품 데이터 로드
-  if (allData.status === 200 && allData.data) {
-    allProducts.value = allData.data;
-  }
+  fetchInstallmentList();
 });
+
+//적금 상품 목록 가져오기
+const fetchInstallmentList = async (params) => {
+  try {
+    const res = await getInstallmentList(params);
+    allProducts.value = res.data ?? [];
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+//적금 추천 목록 가져오기
+const fetchInstallmentRecommendation = async (receivedFormData) => {
+  try {
+    const params = {
+      amount: receivedFormData.amount,
+      period: toMonths(receivedFormData.period),
+    };
+    const body = {
+      autoTransfer: receivedFormData.filterObject.autoTransfer,
+      couponUsed: receivedFormData.filterObject.couponUsed,
+      openBanking: receivedFormData.filterObject.openBanking,
+      utilityPayment: receivedFormData.filterObject.utilityPayment,
+      marketingConsent: receivedFormData.filterObject.marketingConsent,
+      housingSubscription: receivedFormData.filterObject.housingSubscription,
+      greenMission: receivedFormData.filterObject.greenMission,
+      incomeTransfer: receivedFormData.filterObject.incomeTransfer,
+      newCustomer: receivedFormData.filterObject.newCustomer,
+    };
+    const res = await getInstallmentRecommendList(params, body);
+    recommendProducts.value = res?.data ?? [];
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 function goTo(path) {
   router.push(path);
@@ -283,47 +309,6 @@ function toggleInterestTag(tagValue) {
 function closeFilter() {
   showFilter.value = false;
 }
-
-// 전체보기 필터링된 데이터
-const filteredAllProducts = computed(() => {
-  let result = allProducts.value;
-
-  // 🔍 키워드 검색
-  if (searchKeyword.value) {
-    result = result.filter((product) => {
-      const productName = product.productName || '';
-      return productName
-        .toLowerCase()
-        .replace(/\s+/g, '')
-        .includes(searchKeyword.value.toLowerCase().replace(/\s+/g, ''));
-    });
-  }
-
-  // 🏦 은행 필터
-  if (selectedTargets.value.length > 0) {
-    result = result.filter((product) =>
-      selectedTargets.value.includes(product.bankName || '')
-    );
-  }
-
-  // 💰 금리 구간 필터
-  if (selectedInterests.value.length > 0) {
-    result = result.filter((product) => {
-      const rate = Number((product.interestRate || '0').replace('%', ''));
-      return selectedInterests.value.some((range) => {
-        if (range === '1% 미만') return rate < 1;
-        if (range === '1~2%') return rate >= 1 && rate < 2;
-        if (range === '2~3%') return rate >= 2 && rate < 3;
-        if (range === '3~4%') return rate >= 3 && rate < 4;
-        if (range === '4~5%') return rate >= 4 && rate < 5;
-        if (range === '5% 이상') return rate >= 5;
-        return false;
-      });
-    });
-  }
-
-  return result;
-});
 </script>
 
 <style scoped>

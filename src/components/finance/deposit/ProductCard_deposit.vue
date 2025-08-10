@@ -52,7 +52,7 @@ function toggleFavorite() {
 }
 
 function goToDetail() {
-  router.push(`/finance/deposit/${props.product.depositProductName}`);
+  router.push(`/finance/deposit/${props.product.id}`);
 }
 
 const bankLogoMap = {

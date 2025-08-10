@@ -1,1 +1,1 @@
-import api from './index';
+import api from '../index';
