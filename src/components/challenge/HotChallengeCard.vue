@@ -68,6 +68,7 @@ const formatDate = (dateString) => {
 
 // 카테고리 이름 반환 함수
 const getCategoryName = (categoryId) => {
+  if (props.challenge?.categoryName) return props.challenge.categoryName;
   const categories = {
     1: '전체 소비',
     2: '식비',

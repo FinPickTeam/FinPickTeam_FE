@@ -28,7 +28,7 @@
     <div class="scroll-area" v-if="activeSubtab === '추천'">
       <!-- 투자 성향에 맞는 상품 확인하기 버튼 -->
       <div class="button-container">
-        <button class="check-btn" @click="checkInvestmentProducts">
+        <button class="check-btn" @click="fetchFundRecommendedList">
           투자 성향에 맞는 상품 확인하기
         </button>
       </div>
@@ -56,7 +56,7 @@
             type="text"
             placeholder="펀드명을 검색해보세요"
           />
-          <button class="filter-btn" @click="showFilter = !showFilter">
+          <button class="filter-btn" @click="openFilter">
             <i class="fa-solid fa-filter"></i>
           </button>
         </div>
@@ -71,8 +71,8 @@
                 v-for="tag in fundTypeTags"
                 :key="tag.value"
                 class="filter-tag"
-                :class="{ active: selectedFundTypes.includes(tag.value) }"
-                @click="toggleFundTypeTag(tag.value)"
+                :class="{ active: draftFundTypes.includes(tag.value) }"
+                @click="toggleDraftFundType(tag.value)"
               >
                 {{ tag.label }}
               </button>
@@ -87,8 +87,8 @@
                 v-for="tag in riskTags"
                 :key="tag.value"
                 class="filter-tag"
-                :class="{ active: selectedRisks.includes(tag.value) }"
-                @click="toggleRiskTag(tag.value)"
+                :class="{ active: draftRisks.includes(tag.value) }"
+                @click="toggleDraftRisk(tag.value)"
               >
                 {{ tag.label }}
               </button>
@@ -103,7 +103,10 @@
       </div>
 
       <!-- 전체 상품 리스트 -->
-      <div v-if="filteredAllFunds.length > 0" class="products-list-container">
+      <div
+        v-if="filteredAllFunds && filteredAllFunds.length > 0"
+        class="products-list-container"
+      >
         <ProductCardList_fund :funds="filteredAllFunds" />
       </div>
       <div v-else class="no-results">
@@ -115,22 +118,42 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductCardList_fund from '@/components/finance/fund/ProductCardList_fund.vue';
-import fundAllData from '@/components/finance/fund/fund_all.json';
-import fundRecommendData from '@/components/finance/fund/fund_recommend.json';
+import { getFundList, getFundRecommendedList } from '@/api';
+import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const showProducts = ref(false);
+const fundAllData = ref([]);
+const fundRecommendData = ref([]);
+const fav = useFavoriteStore();
+
+// 확정된(실제로 목록을 거르는) 값
+const selectedFundTypes = ref([]);
+const selectedRisks = ref([]);
+
+// 드래프트(팝업에서만 바뀌는 임시 값)
+const draftFundTypes = ref([]);
+const draftRisks = ref([]);
+
+onMounted(() => {
+  fetchFundList();
+  fav.syncIdSet('FUND');
+});
+
+const fetchFundList = async () => {
+  try {
+    const res = await getFundList();
+    fundAllData.value = res.data ?? [];
+  } catch (error) {
+    console.log('펀드 전체 목록 조회 실패', error);
+  }
+};
 
 function goTo(path) {
   router.push(path);
-}
-
-function checkInvestmentProducts() {
-  console.log('투자 성향에 맞는 상품 확인하기 클릭됨');
-  showProducts.value = true;
 }
 
 const activeSubtab = ref('추천');
@@ -140,33 +163,18 @@ function changeSubtab(tabName) {
 }
 
 // 태그 토글 함수들
-function toggleFundTypeTag(tagValue) {
-  const index = selectedFundTypes.value.indexOf(tagValue);
-  if (index > -1) {
-    selectedFundTypes.value.splice(index, 1);
-  } else {
-    selectedFundTypes.value.push(tagValue);
-  }
+function toggleDraftFundType(tag) {
+  const i = draftFundTypes.value.indexOf(tag);
+  i > -1 ? draftFundTypes.value.splice(i, 1) : draftFundTypes.value.push(tag);
 }
-
-function toggleRiskTag(tagValue) {
-  const index = selectedRisks.value.indexOf(tagValue);
-  if (index > -1) {
-    selectedRisks.value.splice(index, 1);
-  } else {
-    selectedRisks.value.push(tagValue);
-  }
-}
-
-function closeFilter() {
-  showFilter.value = false;
+function toggleDraftRisk(tag) {
+  const i = draftRisks.value.indexOf(tag);
+  i > -1 ? draftRisks.value.splice(i, 1) : draftRisks.value.push(tag);
 }
 
 // 전체보기용 상태
 const searchKeyword = ref('');
 const showFilter = ref(false);
-const selectedFundTypes = ref([]);
-const selectedRisks = ref([]);
 
 // 태그 데이터
 const fundTypeTags = ref([
@@ -183,11 +191,10 @@ const riskTags = ref([
 
 // 전체보기 필터링된 데이터
 const filteredAllFunds = computed(() => {
-  let result = fundAllData.data;
-
+  let list = Array.isArray(fundAllData.value) ? fundAllData.value : [];
   // 🔍 키워드 검색
   if (searchKeyword.value) {
-    result = result.filter((fund) =>
+    list = list.filter((fund) =>
       fund.fundProductName
         ?.toLowerCase()
         .replace(/\s+/g, '')
@@ -197,20 +204,43 @@ const filteredAllFunds = computed(() => {
 
   // 🏦 펀드 타입 필터
   if (selectedFundTypes.value.length > 0) {
-    result = result.filter((fund) =>
+    list = list.filter((fund) =>
       selectedFundTypes.value.includes(fund.fundType || '')
     );
   }
 
   // ⚠️ 위험도 필터
   if (selectedRisks.value.length > 0) {
-    result = result.filter((fund) =>
+    list = list.filter((fund) =>
       selectedRisks.value.includes(fund.fundRiskLevel || '')
     );
   }
-
-  return result;
+  console.log('전체 데이터 확인', list);
+  return list;
 });
+
+function openFilter() {
+  draftFundTypes.value = [...selectedFundTypes.value];
+  draftRisks.value = [...selectedRisks.value];
+  showFilter.value = true;
+}
+
+function closeFilter() {
+  selectedFundTypes.value = [...draftFundTypes.value];
+  selectedRisks.value = [...draftRisks.value];
+  showFilter.value = false;
+}
+
+const fetchFundRecommendedList = async () => {
+  try {
+    console.log('투자 성향에 맞는 상품 확인하기 클릭됨');
+    const res = await getFundRecommendedList();
+    fundRecommendData.value = res.data ?? [];
+    showProducts.value = true;
+  } catch (error) {
+    console.log(error);
+  }
+};
 </script>
 
 <style scoped>

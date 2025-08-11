@@ -38,7 +38,6 @@ const goToDictionary = () => {
   transform: translateX(-50%);
   max-width: 390px;
   background: var(--color-bg);
-  padding: 5px 0;
   min-height: 80px;
   z-index: 100;
 }

@@ -5,104 +5,105 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
 import Chart from 'chart.js/auto';
 
 const props = defineProps({
   chartData: {
-    type: String,
-    default: '[]',
+    // 문자열 JSON 또는 객체 둘 다 허용
+    type: [String, Object],
+    default: () => ({}),
   },
-  isUp: {
-    type: Boolean,
-    default: false,
-  },
-  isDown: {
-    type: Boolean,
-    default: false,
-  },
+  isUp: { type: Boolean, default: false },
+  isDown: { type: Boolean, default: false },
 });
 
 const chartCanvas = ref(null);
 let chart = null;
 
-// 차트 데이터 파싱
-const parseChartData = (chartDataString) => {
-  try {
-    const data = JSON.parse(chartDataString);
+// 안전 파서: undefined/null/문자열/객체/구형 배열 모두 처리
+const parseChartData = (input) => {
+  if (input == null || input === '') return [];
+  let data = input;
 
-    // 새로운 데이터 형식: {"2025-07-03":4950,"2025-07-04":4825,...}
-    if (typeof data === 'object' && !Array.isArray(data)) {
-      // 객체를 배열로 변환하고 날짜순으로 정렬
-      const sortedEntries = Object.entries(data).sort(([dateA], [dateB]) => {
-        return new Date(dateA) - new Date(dateB);
-      });
-
-      return sortedEntries.map(([date, price]) => ({
-        date: date,
-        price: parseFloat(price),
-      }));
+  if (typeof data === 'string') {
+    try {
+      data = JSON.parse(data);
+    } catch (e) {
+      console.error('차트 데이터 파싱 오류:', e);
+      return [];
     }
-
-    // 기존 배열 형식도 지원 (하위 호환성)
-    if (Array.isArray(data)) {
-      return data
-        .map((item) => ({
-          date: item.dt,
-          price: parseFloat(item.cur_prc),
-        }))
-        .reverse();
-    }
-
-    return [];
-  } catch (error) {
-    console.error('차트 데이터 파싱 오류:', error);
-    return [];
   }
+
+  // { "YYYY-MM-DD": price, ... }
+  if (data && typeof data === 'object' && !Array.isArray(data)) {
+    return Object.entries(data)
+      .sort(([a], [b]) => new Date(a) - new Date(b))
+      .map(([date, price]) => ({ date, price: Number(price) }));
+  }
+
+  // [{ dt, cur_prc }, ...] 하위 호환
+  if (Array.isArray(data)) {
+    return data
+      .map((it) => ({ date: it.dt, price: Number(it.cur_prc) }))
+      .reverse();
+  }
+
+  return [];
 };
 
-// 차트 생성
 const createChart = () => {
   if (!chartCanvas.value) return;
 
-  const ctx = chartCanvas.value.getContext('2d');
-  const parsedData = parseChartData(props.chartData);
+  const rows = parseChartData(props.chartData);
+  if (rows.length === 0) return;
 
-  if (parsedData.length === 0) return;
+  const labels = rows.map((r) => r.date);
+  const prices = rows.map((r) => r.price);
 
-  const labels = parsedData.map((item) => item.date);
-  const prices = parsedData.map((item) => item.price);
+  // 기준가 대비 누적 수익률(%)로 변환해서 0을 기준으로 표시
+  const base = prices[0];
+  const cumPct = prices.map((p) => (p / base - 1) * 100);
 
-  // 상승/하락에 따른 색상 결정 (주식 카드와 동일한 색상)
-  const lineColor = props.isUp
-    ? '#e12343' // 상승: 빨간색
-    : props.isDown
-    ? '#3b63c4' // 하락: 파란색
-    : '#e11d48'; // 기본: 기존 색상
-  const fillColor = props.isUp
-    ? 'rgba(225, 35, 67, 0.1)' // 상승: 빨간 투명 배경
-    : props.isDown
-    ? 'rgba(59, 99, 196, 0.1)' // 하락: 파란 투명 배경
-    : 'rgba(225, 29, 72, 0.1)'; // 기본: 기존 투명 배경
+  // 색상: 기준가보다 높으면 빨강, 낮으면 파랑
+  const series = cumPct;
 
-  chart = new Chart(ctx, {
+  if (chart) chart.destroy();
+  chart = new Chart(chartCanvas.value, {
     type: 'line',
     data: {
-      labels: labels,
+      labels,
       datasets: [
         {
-          label: '주가',
-          data: prices,
-          borderColor: lineColor,
-          backgroundColor: fillColor,
-          borderWidth: 2,
-          fill: true,
-          tension: 0.4,
+          label: '누적 수익률',
+          data: series,
+          borderColor: (ctx) => {
+            const i = ctx.p1DataIndex;
+            // 현재 포인트가 기준가보다 높으면 빨간색, 낮으면 파란색
+            return series[i] >= 0 ? '#e12343' : '#3b63c4';
+          },
+          backgroundColor: (ctx) => {
+            const i = ctx.p1DataIndex;
+            return series[i] >= 0
+              ? 'rgba(225, 35, 67, 0.05)' // 빨간 투명 배경
+              : 'rgba(59, 99, 196, 0.05)'; // 파란 투명 배경
+          },
+          segment: {
+            borderColor: (ctx) => {
+              const i = ctx.p1DataIndex;
+              return series[i] >= 0 ? '#e12343' : '#3b63c4';
+            },
+            backgroundColor: (ctx) => {
+              const i = ctx.p1DataIndex;
+              return series[i] >= 0
+                ? 'rgba(225, 35, 67, 0.05)'
+                : 'rgba(59, 99, 196, 0.05)';
+            },
+          },
+          fill: 'origin',
+          tension: 0.3,
           pointRadius: 0,
-          pointHoverRadius: 4,
-          pointHoverBackgroundColor: lineColor,
-          pointHoverBorderColor: '#fff',
-          pointHoverBorderWidth: 2,
+          borderWidth: 1.5,
         },
       ],
     },
@@ -110,81 +111,72 @@ const createChart = () => {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
         tooltip: {
           mode: 'index',
           intersect: false,
-          backgroundColor: 'rgba(0, 0, 0, 0.8)',
-          titleColor: '#fff',
-          bodyColor: '#fff',
-          borderColor: lineColor, // 차트 선과 동일한 색상
-          borderWidth: 1,
           callbacks: {
-            label: function (context) {
-              return `가격: ${context.parsed.y.toLocaleString()}원`;
+            label: (ctx) => {
+              const y = ctx.parsed.y;
+              const price = Math.round(base * (1 + y / 100));
+              const sign = y >= 0 ? '+' : '';
+              return `가격: ${price.toLocaleString()}원 (누적 ${sign}${y.toFixed(
+                2
+              )}%)`;
+            },
+            labelColor: function (context) {
+              const value = context.raw;
+              // 기준가보다 높으면 빨간색, 낮으면 파란색
+              return {
+                borderColor: value >= 0 ? '#e12343' : '#3b63c4',
+                backgroundColor:
+                  value >= 0
+                    ? 'rgba(225, 35, 67, 0.05)'
+                    : 'rgba(59, 99, 196, 0.05)',
+              };
             },
           },
+          backgroundColor: 'rgba(0,0,0,0.8)',
+          titleColor: '#fff',
+          bodyColor: '#fff',
         },
       },
       scales: {
-        x: {
-          display: false,
-          grid: {
-            display: false,
-          },
-        },
-        y: {
-          display: false,
-          grid: {
-            display: false,
-          },
-        },
+        x: { display: false, grid: { display: false } },
+        y: { display: false, grid: { display: false } },
       },
-      interaction: {
-        intersect: false,
-        mode: 'index',
-      },
-      elements: {
-        point: {
-          radius: 0,
+      interaction: { mode: 'index', intersect: false },
+      elements: { point: { radius: 0 } },
+      layout: {
+        padding: {
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
         },
       },
     },
   });
 };
 
-// 차트 업데이트
-const updateChart = () => {
-  if (chart) {
-    chart.destroy();
-  }
+const updateChart = async () => {
+  await nextTick();
   createChart();
 };
 
-// 컴포넌트 마운트 시 차트 생성
-onMounted(() => {
-  createChart();
+onMounted(updateChart);
+onBeforeUnmount(() => {
+  if (chart) chart.destroy();
 });
-
-// props 변경 시 차트 업데이트
-watch(
-  () => [props.chartData, props.isUp, props.isDown],
-  () => {
-    updateChart();
-  },
-  { deep: true }
-);
+watch(() => props.chartData, updateChart, { deep: true });
 </script>
 
 <style scoped>
 .stock-chart-container {
-  width: 80px;
-  height: 60px;
+  width: 100%;
+  max-height: 160px; /* 필요하면 조절 */
   position: relative;
 }
-
 canvas {
   width: 100% !important;
   height: 100% !important;
