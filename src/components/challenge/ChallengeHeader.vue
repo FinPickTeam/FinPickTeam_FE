@@ -8,27 +8,60 @@
     </div>
 
     <div class="header-icons">
-      <button class="icon-btn" @click="goToCreate">
+      <button class="icon-btn" @click="handleCreateClick">
         <i class="fas fa-pen-to-square"></i>
       </button>
       <button class="icon-btn" @click="goToRanking">
         <i class="fas fa-landmark"></i>
       </button>
     </div>
+
+    <!-- 챌린지 참여 제한 모달 -->
+    <ChallengeParticipationLimitModal
+      :is-visible="showParticipationLimitModal"
+      :personal-count="personalChallengeCount"
+      :group-count="groupChallengeCount"
+      @close="closeParticipationLimitModal"
+    />
   </header>
 </template>
 
 <script setup>
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import ChallengeParticipationLimitModal from './ChallengeParticipationLimitModal.vue';
 
 const props = defineProps({
   title: {
     type: String,
     default: '',
   },
+  participatingChallenges: {
+    type: Array,
+    default: () => [],
+  },
 });
 
 const router = useRouter();
+const showParticipationLimitModal = ref(false);
+
+// 개인 챌린지와 소그룹 챌린지 개수 계산
+const personalChallengeCount = computed(() => {
+  return props.participatingChallenges.filter(
+    (challenge) => challenge.type === 'PERSONAL'
+  ).length;
+});
+
+const groupChallengeCount = computed(() => {
+  return props.participatingChallenges.filter(
+    (challenge) => challenge.type === 'GROUP'
+  ).length;
+});
+
+// 챌린지 생성 가능 여부 확인
+const canCreateChallenge = computed(() => {
+  return personalChallengeCount.value < 3 && groupChallengeCount.value < 3;
+});
 
 const goBack = () => {
   // 현재 라우트에 따라 다른 동작 수행
@@ -64,8 +97,22 @@ const goBack = () => {
     router.back();
   }
 };
-const goToCreate = () => router.push('/challenge/create'); // 원하는 경로로 수정
-const goToRanking = () => router.push('/challenge/ranking'); // 원하는 경로로 수정
+
+const handleCreateClick = () => {
+  if (canCreateChallenge.value) {
+    // 챌린지 생성 가능한 경우
+    router.push('/challenge/create');
+  } else {
+    // 챌린지 생성 불가능한 경우 모달 표시
+    showParticipationLimitModal.value = true;
+  }
+};
+
+const closeParticipationLimitModal = () => {
+  showParticipationLimitModal.value = false;
+};
+
+const goToRanking = () => router.push('/challenge/ranking');
 </script>
 
 <style scoped>
@@ -98,7 +145,7 @@ const goToRanking = () => router.push('/challenge/ranking'); // 원하는 경로
 .icon-btn {
   background: none;
   border: none;
-  font-size: 22px;
+  font-size: 24px;
   color: white;
   cursor: pointer;
   padding: 6px;
