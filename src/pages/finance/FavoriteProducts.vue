@@ -1,9 +1,8 @@
 <template>
   <div class="mypage-container">
     <header class="favorite-header">
-      <i class="fa-solid fa-angle-left back-icon" @click="goBack"></i>
+      <i class="fas fa-chevron-left back-icon" @click="goBack"></i>
       <h1>찜한 상품</h1>
-      <div class="header-divider"></div>
     </header>
 
     <main class="main-content">
@@ -44,40 +43,55 @@
         <p>찜한 상품이 없습니다.</p>
       </div>
     </main>
+    <Navbar />
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { useFavoriteStore } from '@/stores/favorite.js';
+import Navbar from '@/components/Navbar.vue';
+import { getWishlist } from '@/api'; // /v1/wishlist : { status, message, data: { depositList, fundList, ... } }
+
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
 import ProductCardList_stock from '@/components/finance/stock/ProductCardList_stock.vue';
 import ProductCardList_fund from '@/components/finance/fund/ProductCardList_fund.vue';
 import ProductCardList_installment from '@/components/finance/installment/ProductCardList_installment.vue';
 
 const router = useRouter();
-const favoriteStore = useFavoriteStore();
-
 function goBack() {
   router.back();
 }
 
-// 예금 상품과 주식 상품을 분리
-const depositFavorites = computed(() => {
-  return favoriteStore.favorites.filter((item) => item.depositProductName);
-});
+// ✅ 화면에 뿌릴 배열은 ref로 두고 API 응답으로 채움
+const depositFavorites = ref([]);
+const installmentFavorites = ref([]);
+const stockFavorites = ref([]);
+const fundFavorites = ref([]);
 
-const stockFavorites = computed(() => {
-  return favoriteStore.favorites.filter((item) => item.stockName);
-});
+onMounted(async () => {
+  // 너의 getWishlist가 axios에서 res.data를 반환한다면 아래 payload 계산이 안전함
+  const res = await getWishlist(); // 예: { status, message, data: { ... } }  또는 바로 { depositList, ... }
+  const payload = res?.data ?? res; // 두 경우 모두 커버
+  const lists = payload?.data ?? payload; // 중첩 대비
 
-const fundFavorites = computed(() => {
-  return favoriteStore.favorites.filter((item) => item.name && item.type);
-});
+  depositFavorites.value = lists?.depositList ?? [];
+  installmentFavorites.value =
+    lists?.installmentList ?? lists?.installList ?? [];
+  stockFavorites.value = lists?.stockList ?? [];
+  fundFavorites.value = lists?.fundList ?? [];
 
-const installmentFavorites = computed(() => {
-  return favoriteStore.favorites.filter((item) => item.installmentProductName);
+  // 디버그
+  console.log(
+    '[wishlist] deposit:',
+    depositFavorites.value.length,
+    'install:',
+    installmentFavorites.value.length,
+    'stock:',
+    stockFavorites.value.length,
+    'fund:',
+    fundFavorites.value.length
+  );
 });
 </script>
 
@@ -91,10 +105,11 @@ const installmentFavorites = computed(() => {
 }
 
 .favorite-header {
+  height: 80px;
   display: flex;
+  justify-content: center;
   flex-direction: column;
   align-items: flex-start;
-  padding: 18px 20px 10px 10px;
   background: var(--color-bg-light);
   position: relative;
 }
@@ -112,23 +127,15 @@ const installmentFavorites = computed(() => {
 .back-icon {
   position: absolute;
   left: 10px;
-  top: 18px;
-  font-size: 22px;
+  font-size: 24px;
   color: #333;
   cursor: pointer;
   z-index: 2;
 }
 
-.header-divider {
-  width: 100%;
-  height: 1px;
-  background: #f0f0f0;
-  margin: 12px 0 0 0;
-}
-
 .main-content {
   padding: 16px;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 130px);
   overflow-y: auto;
   background: var(--color-bg-light);
   /* 스크롤바 숨기기 */

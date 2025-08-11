@@ -2,6 +2,7 @@ import api from '../instance.js';
 
 /**
  * 예금 리스트 조회
+ * GET /v1/deposit/list
  * @param {Object} params
  * @param {string} [params.bankName]                - 은행명 (예: 'KB국민은행')
  * @param {number} [params.contractPeriodMonth]     - 계약 기간(월) (예: 12)
@@ -26,17 +27,18 @@ export const getDepositList = (params = {}) => {
 };
 
 /**
- * 예금 추천 상세 조회
+ * 예금 상세 조회
+ * GET /v1/deposit/depositDetail
  * @param {string|number} productId - 상품 ID (필수)
  * @returns {Promise<Object>} 예금 상세 정보 객체
  */
-export const getDepositRecommendDetail = (productId) => {
+export const getDepositDetail = (productId) => {
   if (!productId) {
     throw new Error('productId는 필수입니다.');
   }
 
   return api
-    .get('/v1/deposit/recommend', {
+    .get('/v1/deposit/depositDetail/', {
       params: { productId },
     })
     .then((res) => res.data)
@@ -47,6 +49,7 @@ export const getDepositRecommendDetail = (productId) => {
 
 /**
  * 예금 추천 목록 조회
+ * GET /v1/depoist/recommned
  * @param {Object} params - 쿼리 파라미터
  * @param {number} params.amount - 투자 금액
  * @param {number} params.period - 투자 기간(개월)
@@ -59,7 +62,7 @@ export const getDepositRecommendList = (params, body) => {
   }
 
   return api
-    .post('/v1/deposit/recommend/list', body, { params })
+    .post('/v1/deposit/recommend', body, { params })
     .then((res) => res.data)
     .catch((err) => {
       throw err;

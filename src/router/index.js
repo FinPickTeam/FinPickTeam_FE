@@ -48,6 +48,7 @@ import Installment from '../pages/finance/Installment.vue';
 import Fund from '../pages/finance/Fund.vue';
 import Stock from '../pages/finance/Stock.vue';
 import FavoriteProducts from '../pages/finance/FavoriteProducts.vue';
+import StockDetail from '@/pages/finance/StockDetail.vue';
 
 // 재테크 컴포넌트
 import ProductInputForm from '../components/finance/deposit/ProductInputForm_deposit.vue';
@@ -413,6 +414,11 @@ const router = createRouter({
           name: 'FundDetail',
           component: () => import('../pages/finance/FundDetail.vue'),
         },
+        {
+          path: 'stock/:id',
+          name: 'StockDetail',
+          component: () => import('../pages/finance/StockDetail.vue'),
+        },
         // ... 추가 재테크 탭들
       ],
     },
@@ -469,6 +475,39 @@ const router = createRouter({
       component: () => import('../pages/home/404/404.vue'),
     },
   ],
+});
+
+import { useAuthStore } from '@/stores/auth';
+
+router.beforeEach(async (to) => {
+  const publicPages = new Set([
+    'Login',
+    'Signup',
+    'SignupComplete',
+    'ProfileStep1',
+    'ProfileStep2',
+    'ProfileStep3',
+    'ProfileStep4',
+    'ProfileStep5',
+    'ProfileStep6',
+    'ProfileStep7',
+    'ProfileStep8',
+    'ProfileStep9',
+    'ARSAuth',
+    'ArsVerification',
+    'ArsComplete',
+    'ArsFail',
+  ]);
+
+  const auth = useAuthStore();
+
+  // 보호 라우트면 먼저 조용히 AT 복구 시도
+  if (!publicPages.has(to.name)) {
+    await auth.bootstrap();
+    if (!auth.isAuthenticated) {
+      return { name: 'Login', query: { redirect: to.fullPath } };
+    }
+  }
 });
 
 export default router;

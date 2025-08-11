@@ -197,7 +197,7 @@ function handleSubmit() {
 
   // 부모 컴포넌트에 검색 완료 이벤트와 폼 데이터 전달
   emit('search-completed', {
-    amountRaw: amountRaw.value,
+    amount: amountRaw.value,
     period: period.value,
     depositType: depositType.value,
     selectedPrefer: selectedPrefer.value,

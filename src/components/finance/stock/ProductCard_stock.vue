@@ -1,5 +1,5 @@
 <template>
-  <div class="stock-card">
+  <div class="stock-card" @click="goDetail()">
     <div class="stock-chart">
       <StockChart
         :chartData="product.stockReturnsData"
@@ -89,6 +89,13 @@ const displayRate = computed(() => {
     return '+' + rate + '%';
   }
 });
+
+function goDetail() {
+  const stockCode = props.product.stockCode;
+  if (id) {
+    router.push(`/finance/stock/${stockCode}`);
+  }
+}
 </script>
 
 <style scoped>
@@ -106,7 +113,7 @@ const displayRate = computed(() => {
 }
 .stock-chart {
   width: 80px;
-  height: 60px;
+  height: 80px;
   margin-right: 10px;
   display: flex;
   align-items: center;

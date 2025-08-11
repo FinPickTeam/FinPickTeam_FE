@@ -28,7 +28,7 @@
     <div class="scroll-area" v-if="activeSubtab === '추천'">
       <!-- 투자 성향에 맞는 상품 확인하기 버튼 -->
       <div class="button-container">
-        <button class="check-btn" @click="checkInvestmentProducts">
+        <button class="check-btn" @click="fetchStockRecommend">
           투자 성향에 맞는 상품 확인하기
         </button>
       </div>
@@ -128,7 +128,7 @@
 
       <!-- 전체 상품 리스트 -->
       <div
-        v-if="filteredAllProducts.length > 0"
+        v-if="filteredAllProducts && filteredAllProducts.length > 0"
         class="products-list-container"
       >
         <ProductCardList_stock :products="filteredAllProducts" />
@@ -142,22 +142,46 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductCardList_stock from '@/components/finance/stock/ProductCardList_stock.vue';
-import stockAllData from '@/components/finance/stock/stock_all.json';
-import stockRecommendData from '@/components/finance/stock/stock_recommend.json';
+import { getStockList, getStockRecommendedList } from '@/api';
+import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const showProducts = ref(false);
+const stockAllData = ref([]);
+const stockRecommendData = ref([]);
+const fav = useFavoriteStore();
+
+onMounted(async () => {
+  fetchStockList();
+  fav.syncIdSet('STOCK');
+});
+
+const fetchStockList = async () => {
+  try {
+    const res = await getStockList();
+    stockAllData.value = res.data ?? [];
+  } catch (error) {
+    console.log(error);
+    stockAllData.value = [];
+  }
+};
+
+const fetchStockRecommend = async () => {
+  try {
+    console.log('투자 성향에 맞는 상품 확인하기 클릭됨');
+    const res = await getStockRecommendedList(5);
+    stockRecommendData.value = res.data ?? [];
+    showProducts.value = true;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 function goTo(path) {
   router.push(path);
-}
-
-function checkInvestmentProducts() {
-  console.log('투자 성향에 맞는 상품 확인하기 클릭됨');
-  showProducts.value = true;
 }
 
 const activeSubtab = ref('추천');
@@ -232,13 +256,13 @@ const orderTypeTags = ref([
 
 // 전체보기 필터링된 데이터
 const filteredAllProducts = computed(() => {
-  let result = stockAllData.data;
+  let result = stockAllData.value;
 
   // 중복 제거 (stockCode 기준)
   const uniqueStocks = [];
   const seenCodes = new Set();
 
-  for (const stock of result) {
+  for (let stock of result) {
     if (!seenCodes.has(stock.stockCode)) {
       seenCodes.add(stock.stockCode);
       uniqueStocks.push(stock);
