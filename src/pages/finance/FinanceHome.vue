@@ -1,17 +1,35 @@
 <template>
   <div class="button-grid">
     <button class="grid-btn" @click="goDeposit">
-      <i class="fa-solid fa-piggy-bank"></i><span>예금</span>
+      <img
+        src="@/assets/icons/piggy-bank-solid-full.png"
+        alt="예금"
+        class="grid-icon"
+      />
+      <span>예금</span>
     </button>
     <button class="grid-btn" @click="goInstallment">
-      <i class="fa-solid fa-coins"></i><span>적금</span>
+      <img
+        src="@/assets/icons/coins-solid-full.png"
+        alt="적금"
+        class="grid-icon"
+      />
+      <span>적금</span>
     </button>
     <button class="grid-btn" @click="goFund">
-      <i class="fa-solid fa-hand-holding-dollar"></i>
+      <img
+        src="@/assets/icons/hand-holding-dollar-solid-full.png"
+        alt="펀드"
+        class="grid-icon"
+      />
       <span>펀드</span>
     </button>
     <button class="grid-btn" @click="goStock">
-      <i class="fa-solid fa-money-bill-trend-up"></i>
+      <img
+        src="@/assets/icons/money-bill-trend-up-solid-full.png"
+        alt="주식"
+        class="grid-icon"
+      />
       <span>주식</span>
     </button>
   </div>
@@ -94,10 +112,11 @@ function goStock() {
   transition: box-shadow 0.2s;
 }
 
-.grid-btn i {
-  font-size: 54px;
+.grid-icon {
+  width: 80px;
+  height: auto;
   margin-bottom: 10px;
-  color: var(--color-main);
+  object-fit: contain;
 }
 
 .grid-btn span {
