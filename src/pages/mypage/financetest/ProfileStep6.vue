@@ -1,12 +1,7 @@
 <template>
   <div class="profile-step-container">
     <!-- 상단 네비게이션 -->
-    <div class="nav-bar">
-      <span class="back-btn" @click="goBack">
-        <i class="fa-solid fa-angle-left"></i>
-      </span>
-      <span class="title">투자 성향 분석</span>
-    </div>
+    <ProfileStepHeader />
     <!-- 진행 바 -->
     <div class="progress-bar">
       <div
@@ -17,8 +12,8 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 6</div>
-      <div class="question-desc">연간 소득 현황</div>
+      <div class="question-title">[문항 6] 연간 소득 현황</div>
+      <!-- <div class="question-desc">연간 소득 현황</div> -->
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -40,6 +35,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
 const options = [
@@ -54,9 +50,6 @@ const selected = ref(null);
 // 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
 const totalSteps = ref(10);
 
-const goBack = () => {
-  router.back();
-};
 const goNext = () => {
   if (selected.value !== null) {
     router.push('/mypage/financetest/profile-step-7');
@@ -71,29 +64,7 @@ const goNext = () => {
   padding: 0 20px 32px 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-.nav-bar {
-  display: flex;
-  align-items: center;
-  height: 56px;
-  position: relative;
-  margin-bottom: 8px;
-}
-.back-btn {
-  font-size: 24px;
-  cursor: pointer;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #222;
-}
-.title {
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  font-weight: 600;
-  color: #222;
-}
+
 .progress-bar {
   display: flex;
   gap: 8px;
@@ -117,7 +88,7 @@ const goNext = () => {
 .question-title {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   color: #222;
 }
 .question-desc {
