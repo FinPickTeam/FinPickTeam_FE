@@ -153,7 +153,7 @@ const showResults = ref(false);
 const isSummaryMode = ref(false);
 const summaryText = ref('');
 const formData = ref({
-  amountRaw: 100000,
+  amountRaw: 1000000,
   period: '1년',
   selectedPrefer: [],
 });
