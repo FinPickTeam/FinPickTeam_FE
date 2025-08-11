@@ -126,6 +126,15 @@
       :isVisible="showSuccessModal"
       @close="closeSuccessModal"
     />
+
+    <!-- 포인트 부족 모달 -->
+    <ChallengeInsufficientPointsModal
+      :isVisible="showInsufficientPointsModal"
+      :currentPoints="userPoints"
+      :requiredPoints="requiredPoints"
+      @close="closeInsufficientPointsModal"
+      @charge="handleChargePoints"
+    />
   </div>
 </template>
 
@@ -133,6 +142,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ChallengeCreateSuccessModal from '@/components/challenge/ChallengeCreateSuccessModal.vue';
+import ChallengeInsufficientPointsModal from '@/components/challenge/ChallengeInsufficientPointsModal.vue';
 
 const router = useRouter();
 
@@ -149,6 +159,11 @@ const roomPassword = ref(''); // 비밀번호
 
 // 모달 상태
 const showSuccessModal = ref(false);
+const showInsufficientPointsModal = ref(false);
+
+// 포인트 관련
+const userPoints = ref(0); // 사용자 보유 포인트 (실제로는 API에서 가져와야 함)
+const requiredPoints = ref(100); // 챌린지 생성에 필요한 포인트
 
 const goBack = () => {
   router.back();
@@ -169,6 +184,12 @@ const handleAmountInput = (event) => {
 };
 
 const createChallenge = () => {
+  // 소그룹 챌린지일 경우에만 포인트 검증
+  if (type.value === 'GROUP' && userPoints.value < requiredPoints.value) {
+    showInsufficientPointsModal.value = true;
+    return;
+  }
+
   // 챌린지 생성 로직
   const challengeData = {
     title: title.value,
@@ -190,6 +211,17 @@ const createChallenge = () => {
 const closeSuccessModal = () => {
   showSuccessModal.value = false;
   router.back();
+};
+
+const closeInsufficientPointsModal = () => {
+  showInsufficientPointsModal.value = false;
+};
+
+const handleChargePoints = () => {
+  // 포인트 충전 페이지로 이동 (실제 구현 필요)
+  console.log('포인트 충전 페이지로 이동');
+  closeInsufficientPointsModal();
+  // router.push('/points/charge'); // 포인트 충전 페이지 경로
 };
 </script>
 
