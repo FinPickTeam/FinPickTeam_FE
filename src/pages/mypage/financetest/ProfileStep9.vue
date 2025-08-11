@@ -1,12 +1,7 @@
 <template>
   <div class="profile-step-container">
     <!-- 상단 네비게이션 -->
-    <div class="nav-bar">
-      <span class="back-btn" @click="goBack">
-        <i class="fa-solid fa-angle-left"></i>
-      </span>
-      <span class="title">투자 성향 분석</span>
-    </div>
+    <ProfileStepHeader />
     <!-- 진행 바 -->
     <div class="progress-bar">
       <div
@@ -17,8 +12,8 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 9</div>
-      <div class="question-desc">기대수익률 및 손실감내도</div>
+      <div class="question-title">[문항 9] 기대수익률 및 손실감내도</div>
+      <!-- <div class="question-desc">기대수익률 및 손실감내도</div> -->
 
       <div class="options">
         <div
@@ -39,27 +34,25 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
 const options = [
-  "제한된 손실을 감수하며 시중금리 수준의 수익을 기대",
-  "원금의 일부 손실을 감수하며 시중금리보다 다소 높은 수준의 수익을 기대",
-  "원금 손실을 감수하며 시장성과 비슷한 수준의 수익을 기대",
-  "초과 손실까지 감수하며 적극적인 투자를 통하여 시중수익률(예: 주가지수)을 초과하는 높은 수익 추구",
+  '제한된 손실을 감수하며 시중금리 수준의 수익을 기대',
+  '원금의 일부 손실을 감수하며 시중금리보다 다소 높은 수준의 수익을 기대',
+  '원금 손실을 감수하며 시장성과 비슷한 수준의 수익을 기대',
+  '초과 손실까지 감수하며 적극적인 투자를 통하여 시중수익률(예: 주가지수)을 초과하는 높은 수익 추구',
 ];
 const selected = ref(null);
 
-// 동적 progress-bar 설정 (투자성향 재검사는 항상 9단계)
-const totalSteps = ref(9);
+// 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
+const totalSteps = ref(10);
 
-const goBack = () => {
-  router.back();
-};
 const goNext = () => {
   if (selected.value !== null) {
-    router.push("/");
+    router.push('/mypage/financetest/profile-step-10?from=mypage');
   }
 };
 </script>
@@ -69,31 +62,9 @@ const goNext = () => {
   min-height: 100vh;
   background: #fff;
   padding: 0 20px 32px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-.nav-bar {
-  display: flex;
-  align-items: center;
-  height: 56px;
-  position: relative;
-  margin-bottom: 8px;
-}
-.back-btn {
-  font-size: 24px;
-  cursor: pointer;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #222;
-}
-.title {
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  font-weight: 600;
-  color: #222;
-}
+
 .progress-bar {
   display: flex;
   gap: 8px;
@@ -117,7 +88,7 @@ const goNext = () => {
 .question-title {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   color: #222;
 }
 .question-desc {

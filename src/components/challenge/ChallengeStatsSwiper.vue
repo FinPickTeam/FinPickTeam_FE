@@ -1,19 +1,19 @@
 <template>
   <Swiper
-      :modules="[Pagination, Autoplay]"
-      :slides-per-view="1"
-      :space-between="20"
-      :pagination="{ clickable: true }"
-      :loop="true"
-      :autoplay="{ delay: 3000, disableOnInteraction: false }"
-      class="stats-swiper"
+    :modules="[Pagination, Autoplay]"
+    :slides-per-view="1"
+    :space-between="20"
+    :pagination="{ clickable: true }"
+    :loop="false"
+    :autoplay="{ delay: 3000, disableOnInteraction: false }"
+    class="stats-swiper"
   >
     <SwiperSlide v-for="(item, index) in slides" :key="index">
       <div class="stats-container">
         <!-- 누적 포인트 슬라이드 -->
         <div v-if="item.kind === 'points'" class="points-container">
           <div class="points-number">{{ formatNumber(item.value) }}</div>
-          <div class="points-label">포인트</div>
+          <div class="points-label">월별 누적 포인트</div>
         </div>
 
         <!-- 요약 통계 슬라이드 -->
@@ -39,9 +39,9 @@
 </template>
 
 <script setup>
-import {computed} from 'vue';
-import {Swiper, SwiperSlide} from 'swiper/vue';
-import {Pagination, Autoplay} from 'swiper/modules';
+import { computed } from 'vue';
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import { Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
@@ -53,7 +53,11 @@ import 'swiper/css/pagination';
 const props = defineProps({
   summary: {
     type: Object,
-    default: () => ({totalChallenges: 0, successCount: 0, achievementRate: 0}),
+    default: () => ({
+      totalChallenges: 0,
+      successCount: 0,
+      achievementRate: 0,
+    }),
   },
   points: {
     type: [Number, null],
@@ -72,7 +76,7 @@ const slides = computed(() => {
   });
   // 2) 포인트 슬라이드 (API가 값 줄 때만 표시)
   if (props.points != null) {
-    arr.push({kind: 'points', value: Number(props.points) || 0});
+    arr.push({ kind: 'points', value: Number(props.points) || 0 });
   }
   return arr;
 });

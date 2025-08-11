@@ -25,25 +25,6 @@
       </div>
     </div>
 
-    <!-- 예금 유형 -->
-    <div class="section-label">예금 유형</div>
-    <div class="deposit-type-row">
-      <button
-        type="button"
-        :class="['deposit-type-btn', { active: depositType === '정기예금' }]"
-        @click="depositType = '정기예금'"
-      >
-        정기예금
-      </button>
-      <button
-        type="button"
-        :class="['deposit-type-btn', { active: depositType === '정기적금' }]"
-        @click="depositType = '정기적금'"
-      >
-        정기적금
-      </button>
-    </div>
-
     <!-- 우대항목 -->
     <div class="section-label">
       우대항목 <span class="prefer-desc">선택하지 않아도 검색 가능</span>
@@ -79,10 +60,6 @@
           <span class="summary-label">투자 기간:</span>
           <span class="summary-value">{{ period }}</span>
         </div>
-        <div class="summary-item">
-          <span class="summary-label">예금 유형:</span>
-          <span class="summary-value">{{ depositType }}</span>
-        </div>
         <div class="summary-item" v-if="selectedPrefer.length > 0">
           <span class="summary-label">우대항목:</span>
           <span class="summary-value">{{ selectedPrefer.join(', ') }}</span>
@@ -104,17 +81,15 @@ const props = defineProps({
   formData: {
     type: Object,
     default: () => ({
-      amountRaw: 100000,
+      amountRaw: 1000000,
       period: '1년',
-      depositType: '정기예금',
       selectedPrefer: [],
     }),
   },
 });
 
-const amountRaw = ref(props.formData.amountRaw);
+const amountRaw = ref(props.formData?.amountRaw ?? 1000000);
 const period = ref(props.formData.period);
-const depositType = ref(props.formData.depositType);
 const preferList = [
   '신규 고객',
   '급여 이체 실적 있음',
@@ -130,10 +105,10 @@ const selectedPrefer = ref([...props.formData.selectedPrefer]);
 watch(
   () => props.formData,
   (newFormData) => {
-    amountRaw.value = newFormData.amountRaw;
-    period.value = newFormData.period;
-    depositType.value = newFormData.depositType;
-    selectedPrefer.value = [...newFormData.selectedPrefer];
+    // 안전한 값 할당
+    amountRaw.value = newFormData?.amountRaw ?? 1000000;
+    period.value = newFormData?.period ?? '1년';
+    selectedPrefer.value = [...(newFormData?.selectedPrefer ?? [])];
   },
   { deep: true }
 );
@@ -141,6 +116,14 @@ watch(
 // 콤마가 포함된 포맷된 금액
 const formattedAmount = computed({
   get: () => {
+    // amountRaw.value가 유효한 숫자인지 확인
+    if (
+      amountRaw.value === undefined ||
+      amountRaw.value === null ||
+      isNaN(amountRaw.value)
+    ) {
+      return '';
+    }
     return amountRaw.value.toLocaleString();
   },
   set: (value) => {
@@ -171,14 +154,18 @@ function handleAmountInput(event) {
 
 // 요약 모드 토글
 function toggleSummaryMode() {
-  emit('toggle-summary-mode');
+  // 현재 입력된 값들을 부모 컴포넌트에 전달
+  emit('toggle-summary-mode', {
+    amountRaw: amountRaw.value,
+    period: period.value,
+    selectedPrefer: selectedPrefer.value,
+  });
 }
 
 // 폼 제출 시 입력값 콘솔 출력 및 부모에게 이벤트 전달
 function handleSubmit() {
   console.log('투자 금액:', formattedAmount.value);
   console.log('투자 기간:', period.value);
-  console.log('예금 유형:', depositType.value);
   console.log('우대항목:', selectedPrefer.value);
 
   // 필터링 객체 생성
@@ -199,7 +186,6 @@ function handleSubmit() {
   emit('search-completed', {
     amount: amountRaw.value,
     period: period.value,
-    depositType: depositType.value,
     selectedPrefer: selectedPrefer.value,
     filterObject: filterObject,
   });
@@ -364,29 +350,6 @@ const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
 
 .input-period.bold {
   font-weight: var(--font-weight-bold);
-}
-
-.deposit-type-row {
-  display: flex;
-  gap: 12px;
-}
-
-.deposit-type-btn {
-  flex: 1 1 0;
-  border: 1.5px solid var(--color-bg-border);
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
-  border-radius: 12px;
-  padding: 10px 0;
-  cursor: pointer;
-  transition: border 0.2s, color 0.2s;
-}
-
-.deposit-type-btn.active {
-  border: 1.5px solid var(--color-main);
-  color: var(--color-main);
 }
 
 .prefer-row {

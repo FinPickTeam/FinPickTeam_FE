@@ -7,14 +7,13 @@
       <div
         v-for="step in totalSteps"
         :key="step"
-        :class="['progress', { active: step === 3 }]"
+        :class="['progress', { active: step === 5 }]"
       ></div>
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">[문항 3] 투자수익 및 위험에 대한 태도</div>
-      <!-- <div class="question-desc">투자수익 및 위험에 대한 태도</div> -->
-
+      <div class="question-title">[문항 5] 예상 투자 금액</div>
+      <!-- <div class="question-desc">투자경험</div> -->
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -26,9 +25,9 @@
         </div>
       </div>
     </div>
-    <!-- 다음 버튼 -->
+    <!-- 완료 버튼 -->
     <button class="next-btn" :disabled="selected === null" @click="goNext">
-      다음
+      완료
     </button>
   </div>
 </template>
@@ -41,9 +40,13 @@ import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 const router = useRouter();
 const route = useRoute();
 const options = [
-  '투자 수익을 고려하나 원금 보존이 더 중요',
-  '원금 보존을 고려하나 투자 수익이 더 중요',
-  '손실 위험이 있더라도 투자 수익이 더 중요',
+  '5만 원 미만',
+  '5만 원 이상 ~ 10만 원 미만',
+  '10만 원 이상 ~ 20만 원 미만',
+  '20만 원 이상 ~ 50만 원 미만',
+  '50만 원 이상 ~ 100만 원 미만',
+  '100만 원 이상 ~ 200만 원 미만',
+  '100만 원 이상',
 ];
 const selected = ref(null);
 
@@ -61,9 +64,10 @@ const goNext = () => {
   if (selected.value !== null) {
     const from = route.query.from || 'signup';
     if (from === 'mypage') {
-      router.push(`/mypage/financetest/profile-step-4?from=mypage`);
+      router.push('/mypage/financetest/profile-step-6?from=mypage');
     } else {
-      router.push('/profile-step-4');
+      // 투자성향 분석 완료 후 ProfileComplete로 이동
+      router.push('/profile-complete');
     }
   }
 };

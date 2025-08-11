@@ -1,14 +1,17 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import {ref, computed, onMounted} from 'vue';
+import {useRouter} from 'vue-router';
 import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
 import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
 import ChallengeStatsSwiper from '@/components/challenge/ChallengeStatsSwiper.vue';
-import { getChallengeSummary, getChallengeList } from '@/api/challenge/challenge.js';
-import { getMonthlyPoints } from '@/api/coin/coin.js';
+import {
+  getChallengeSummary,
+  getChallengeList,
+} from '@/api/challenge/challenge.js';
+import {getMonthlyPoints} from '@/api/coin/coin.js';
 
-import { useUserStore } from '@/stores/user';
-import { useAuthStore } from '@/stores/auth';
+import {useUserStore} from '@/stores/user';
+import {useAuthStore} from '@/stores/auth';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -29,7 +32,11 @@ const error = ref({
 });
 
 // 데이터
-const summary = ref({ totalChallenges: 0, successCount: 0, achievementRate: 0 });
+const summary = ref({
+  totalChallenges: 0,
+  successCount: 0,
+  achievementRate: 0,
+});
 const participatingChallenges = ref([]);
 const hotChallenges = ref([]);
 const monthlyPoints = ref(null); // ★ 월별 누적 포인트
@@ -44,18 +51,30 @@ const displayName = computed(() => {
 const handleParticipate = (challenge) => {
   router.push({
     name: 'ChallengeCommonDetail',
-    params: { id: challenge.id },
-    state: { previousPage: '/challenge' },
+    params: {id: challenge.id},
+    state: {previousPage: '/challenge'},
   });
 };
 
 const goDetail = (challenge) => {
   if (challenge.type === 'COMMON') {
-    router.push({ name: 'ChallengeCommonDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+    router.push({
+      name: 'ChallengeCommonDetail',
+      params: {id: challenge.id},
+      state: {previousPage: '/challenge'},
+    });
   } else if (challenge.type === 'GROUP') {
-    router.push({ name: 'ChallengeGroupDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+    router.push({
+      name: 'ChallengeGroupDetail',
+      params: {id: challenge.id},
+      state: {previousPage: '/challenge'},
+    });
   } else if (challenge.type === 'PERSONAL') {
-    router.push({ name: 'ChallengePersonalDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+    router.push({
+      name: 'ChallengePersonalDetail',
+      params: {id: challenge.id},
+      state: {previousPage: '/challenge'},
+    });
   }
 };
 
@@ -66,54 +85,68 @@ const handleCardClick = (payload) => {
 
 // 초기 데이터 로드
 const fetchSummary = async () => {
-  loading.value.summary = true; error.value.summary = null;
+  loading.value.summary = true;
+  error.value.summary = null;
   try {
     const data = await getChallengeSummary();
-    summary.value = data || { totalChallenges: 0, successCount: 0, achievementRate: 0 };
+    summary.value = data || {
+      totalChallenges: 0,
+      successCount: 0,
+      achievementRate: 0,
+    };
   } catch (e) {
-    error.value.summary = e?.response?.data?.message || e.message || '요약 조회 실패';
+    error.value.summary =
+        e?.response?.data?.message || e.message || '요약 조회 실패';
   } finally {
     loading.value.summary = false;
   }
 };
 
 const fetchParticipating = async () => {
-  loading.value.participating = true; error.value.participating = null;
+  loading.value.participating = true;
+  error.value.participating = null;
   try {
-    const list = await getChallengeList({ participating: true });
+    const list = await getChallengeList({participating: true});
     participatingChallenges.value = Array.isArray(list) ? list : [];
   } catch (e) {
-    error.value.participating = e?.response?.data?.message || e.message || '참여중 목록 조회 실패';
+    error.value.participating =
+        e?.response?.data?.message || e.message || '참여중 목록 조회 실패';
   } finally {
     loading.value.participating = false;
   }
 };
 
 const fetchHot = async () => {
-  loading.value.hot = true; error.value.hot = null;
+  loading.value.hot = true;
+  error.value.hot = null;
   try {
-    const list = await getChallengeList({ status: 'RECRUITING', participating: false });
+    const list = await getChallengeList({
+      status: 'RECRUITING',
+      participating: false,
+    });
     hotChallenges.value = Array.isArray(list) ? list : [];
   } catch (e) {
-    error.value.hot = e?.response?.data?.message || e.message || 'HOT 목록 조회 실패';
+    error.value.hot =
+        e?.response?.data?.message || e.message || 'HOT 목록 조회 실패';
   } finally {
     loading.value.hot = false;
   }
 };
 
 const fetchMonthlyPoints = async () => {
-  loading.value.points = true; error.value.points = null;
+  loading.value.points = true;
+  error.value.points = null;
   try {
     const now = new Date();
     const y = now.getFullYear();
     const m = now.getMonth() + 1; // 1~12
-    const res = await getMonthlyPoints({ year: y, month: m });
-    // 백엔드 응답 키 이름에 맞춰서 사용
+    const res = await getMonthlyPoints({year: y, month: m});
     // 백엔드 응답: { month, amount, updatedAt }
-    monthlyPoints.value = (res?.amount ?? null); // 값 없으면 null로 → 슬라이드 숨김
+    monthlyPoints.value = (res?.amount ?? null); // 값 없으면 null → 슬라이드 숨김
   } catch (e) {
-    error.value.points = e?.response?.data?.message || e.message || '포인트 조회 실패';
-    monthlyPoints.value = null; // 슬라이드 숨김
+    error.value.points =
+        e?.response?.data?.message || e.message || '포인트 조회 실패';
+    monthlyPoints.value = null;
   } finally {
     loading.value.points = false;
   }
@@ -139,13 +172,16 @@ onMounted(async () => {
       </div>
 
       <!-- 스와이퍼 -->
-      <ChallengeStatsSwiper
-          :summary="summary"
-          :points="monthlyPoints"
-      />
-      <div v-if="loading.summary" style="color:#fff; margin:6px 20px 0;">요약 로딩중…</div>
-      <div v-else-if="error.summary" style="color:#fff; margin:6px 20px 0;">{{ error.summary }}</div>
-      <div v-if="error.points" style="color:#fff; margin:6px 20px 0;">{{ error.points }}</div>
+      <ChallengeStatsSwiper :summary="summary" :points="monthlyPoints"/>
+      <div v-if="loading.summary" style="color: #fff; margin: 6px 20px 0">
+        요약 로딩중…
+      </div>
+      <div v-else-if="error.summary" style="color: #fff; margin: 6px 20px 0">
+        {{ error.summary }}
+      </div>
+      <div v-if="error.points" style="color: #fff; margin: 6px 20px 0">
+        {{ error.points }}
+      </div>
     </div>
 
     <!-- 참여중인 챌린지 -->
@@ -158,7 +194,9 @@ onMounted(async () => {
       </div>
 
       <div v-if="loading.participating" class="challenges-scroll">로딩중…</div>
-      <div v-else-if="error.participating" class="challenges-scroll">{{ error.participating }}</div>
+      <div v-else-if="error.participating" class="challenges-scroll">
+        {{ error.participating }}
+      </div>
       <div v-else class="challenges-scroll">
         <ParticipatingChallengeCard
             v-for="c in participatingChallenges"
@@ -173,11 +211,13 @@ onMounted(async () => {
             participating: c.isParticipating,
             myProgressRate: c.myProgressRate ?? 0,
             participantsCount: c.participantsCount ?? 0,
-            isResultCheck: c.isResultCheck ?? false
+            isResultCheck: c.isResultCheck ?? false,
           }"
             @cardClick="handleCardClick"
         />
-        <div v-if="participatingChallenges.length === 0" style="color:#666;">참여중인 챌린지가 없어요.</div>
+        <div v-if="participatingChallenges.length === 0" class="empty-message">
+          참여중인 챌린지가 없어요.
+        </div>
       </div>
     </div>
 
@@ -207,17 +247,18 @@ onMounted(async () => {
             participating: c.isParticipating,
             myProgressRate: c.myProgressRate ?? null,
             participantsCount: c.participantsCount ?? 0,
-            isResultCheck: c.isResultCheck ?? false
+            isResultCheck: c.isResultCheck ?? false,
           }"
             @participate="handleParticipate"
             @click="handleCardClick"
         />
-        <div v-if="hotChallenges.length === 0" style="color:#666;">모집 중인 챌린지가 없어요.</div>
+        <div v-if="hotChallenges.length === 0" class="empty-message">
+          모집 중인 챌린지가 없어요.
+        </div>
       </div>
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .challenge-home {
@@ -233,14 +274,14 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   background: linear-gradient(
-    to right,
-    var(--color-main-light-2),
-    var(--color-main-dark)
+      to right,
+      var(--color-main-light-2),
+      var(--color-main-dark)
   );
   border-radius: 0;
-  padding: 16px 16px 0px 16px;
+  padding: 0px 16px 0px 16px;
   margin-bottom: 12px;
-  margin-top: -22px;
+
   margin-left: auto;
   margin-right: auto;
 }
@@ -277,7 +318,6 @@ onMounted(async () => {
 .greeting {
   color: #fff;
   font-size: var(--font-size-title-sub);
-  margin-top: 12px;
   margin-bottom: 12px;
   margin-left: 19px;
 }
@@ -388,12 +428,14 @@ onMounted(async () => {
 .participating-section {
   margin-bottom: 24px;
   padding: 0 16px;
+  min-height: 170px;
 }
 
 /* HOT 챌린지 */
 .hot-challenges-section {
   margin-bottom: 24px;
   padding: 0 16px;
+  min-height: 120px;
 }
 
 .challenges-scroll {
@@ -420,5 +462,14 @@ onMounted(async () => {
 
 .challenges-scroll::-webkit-scrollbar-thumb:hover {
   background: #5a3d9e;
+}
+
+/* 빈 상태 메시지 스타일 */
+.empty-message {
+  color: #666;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 14px;
+  width: 100%;
 }
 </style>

@@ -17,7 +17,7 @@
       @close="closeJoinConfirmModal"
       @confirm="confirmJoin"
     />
-    
+
     <!-- 로딩 상태 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -183,10 +183,10 @@ const handleJoin = () => {
 const confirmJoin = () => {
   // 실제로는 API 호출로 참여 처리
   challenge.value.isParticipating = true;
-  
+
   // 모달 닫기
   showJoinConfirmModal.value = false;
-  
+
   // 참여 중인 챌린지 상세 페이지로 이동 (공통 챌린지 상세)
   const challengeId = route.params.id;
   router.push(`/challenge/common-detail/${challengeId}`);
@@ -216,7 +216,7 @@ const handleRetry = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px); /* 헤더 높이를 제외한 전체 높이 */
+  min-height: calc(100vh - 80px); /* 헤더 높이를 제외한 전체 높이 */
 }
 
 /* 로딩 스타일 */
@@ -225,7 +225,7 @@ const handleRetry = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 80px);
   padding: 20px 16px;
 }
 
@@ -259,7 +259,7 @@ const handleRetry = () => {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 80px);
   padding: 20px 16px;
 }
 

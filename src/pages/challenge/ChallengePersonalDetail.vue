@@ -168,7 +168,7 @@ const getRemainingDays = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 80px);
   padding: 20px 16px;
 }
 
@@ -203,7 +203,7 @@ const getRemainingDays = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 80px);
   padding: 20px 16px;
 }
 
@@ -219,7 +219,7 @@ const getRemainingDays = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px); /* 헤더 높이를 제외한 전체 높이 */
+  min-height: calc(100vh - 80px); /* 헤더 높이를 제외한 전체 높이 */
 }
 
 .challenge-info {

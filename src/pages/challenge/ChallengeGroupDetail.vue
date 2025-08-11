@@ -207,10 +207,10 @@ const confirmJoin = () => {
   // 실제로는 API 호출로 참여 처리
   challenge.value.isParticipating = true;
   challenge.value.participantsCount += 1;
-  
+
   // 모달 닫기
   showJoinConfirmModal.value = false;
-  
+
   // 그룹 챌린지 상세 페이지로 이동 (참여 후)
   const challengeId = route.params.id;
   router.push(`/challenge/group-detail/${challengeId}`);
@@ -242,7 +242,7 @@ const getRemainingDays = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 80px);
   padding: 20px 16px;
 }
 
@@ -277,7 +277,7 @@ const getRemainingDays = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 80px);
   padding: 20px 16px;
 }
 
@@ -293,7 +293,7 @@ const getRemainingDays = () => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 60px); /* 헤더 높이를 제외한 전체 높이 */
+  min-height: calc(100vh - 80px); /* 헤더 높이를 제외한 전체 높이 */
 }
 
 .challenge-info {
