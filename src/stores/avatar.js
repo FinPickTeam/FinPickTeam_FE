@@ -3,6 +3,7 @@ import { defineStore } from "pinia";
 
 export const useAvatarStore = defineStore("avatar", () => {
   const coin = ref(61000);
+  const cumulativePoints = ref(0);
 
   // 아바타 아이템 상태 관리
   const avatarItems = ref({
@@ -220,8 +221,19 @@ export const useAvatarStore = defineStore("avatar", () => {
     }, 0);
   }
 
+  // 포인트 설정 함수 추가
+  function setCoin(amount) {
+    coin.value = amount;
+  }
+
+  // 누적 포인트 설정 함수
+  function setCumulativePoints(amount) {
+    cumulativePoints.value = amount;
+  }
+
   return {
     coin,
+    cumulativePoints,
     avatarItems,
     buyOrToggleItem,
     getWearingItem,
@@ -236,5 +248,7 @@ export const useAvatarStore = defineStore("avatar", () => {
     getTotalEarnedPoints,
     setAvatar,
     loadAvatar,
+    setCoin,
+    setCumulativePoints,
   };
 });

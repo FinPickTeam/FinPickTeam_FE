@@ -54,7 +54,10 @@
           >
         </div>
         <div class="coin-balance">
-          <span class="coin-icon">🪙</span> {{ avatarStore.coin }}
+          <span class="coin-icon">🪙</span>
+          <span v-if="loadingCoin" class="coin-value loading">...</span>
+          <span v-else-if="coinError" class="coin-value error">-</span>
+          <span v-else class="coin-value">{{ avatarStore.coin }}</span>
         </div>
       </div>
     </div>
@@ -402,6 +405,8 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useAvatarStore } from "../../../stores/avatar.js";
+import { getCurrentCoin, getCumulativeCoin } from "@/api/mypage/avatar";
+import { useAuthStore } from "@/stores/auth";
 import Navbar from "../../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -411,6 +416,7 @@ import {
   faCheckDouble,
 } from "@fortawesome/free-solid-svg-icons";
 import { ref, onMounted, computed } from "vue";
+import { storeToRefs } from "pinia";
 
 // 아바타 이미지 import
 import avatarBase from "./avatarimg/avatar-base.png";
@@ -439,7 +445,15 @@ library.add(faAngleLeft, faCheckCircle, faCheckDouble);
 
 const router = useRouter();
 const avatarStore = useAvatarStore();
+const authStore = useAuthStore();
+const { cumulativePoints } = storeToRefs(avatarStore);
 const showCoinError = ref(false);
+
+// 포인트 상태 관리
+const loadingCoin = ref(false);
+const coinError = ref(null);
+const loadingCumulative = ref(false);
+const cumulativeError = ref(null);
 const activeTab = ref("avatar");
 const selectedCategory = ref("coffee");
 const showSuccessModal = ref(false);
@@ -452,7 +466,7 @@ const tempWearingGlasses = ref([]);
 
 // computed 속성들
 const totalEarnedPoints = computed(() => {
-  return avatarStore.getTotalEarnedPoints();
+  return cumulativePoints.value;
 });
 
 const isItemActive = (requiredPoints) => {
@@ -631,6 +645,162 @@ function syncStoreState() {
   });
 }
 
+// 포인트 데이터 가져오기
+const fetchCurrentCoin = async () => {
+  try {
+    loadingCoin.value = true;
+    coinError.value = null;
+
+    // 인증 상태 확인
+    console.log("인증 상태 확인:", {
+      isAuthenticated: authStore.isAuthenticated,
+      user: authStore.user,
+      accessToken: authStore.accessToken ? "존재함" : "없음"
+    });
+
+    if (!authStore.isAuthenticated) {
+      console.warn("로그인이 필요합니다.");
+      return;
+    }
+
+    // 사용자 ID 가져오기
+    const userId = authStore.user?.id || authStore.user?.userId || 1;
+
+    console.log("AvatarShop 포인트 데이터 가져오기 시작, userId:", userId);
+    const response = await getCurrentCoin(userId);
+    console.log("받아온 포인트 데이터 (전체 응답):", response);
+    console.log("response.data:", response.data);
+    console.log("response.data.data:", response.data?.data);
+    console.log("response.status:", response.status);
+
+    if (response.status === 200 && response.data !== undefined) {
+      // 백엔드 응답 구조에 따라 coin 값 추출
+      let coinValue;
+      
+      // 구조 1: { status: 200, data: 1500 }
+      if (typeof response.data === 'number') {
+        coinValue = response.data;
+      }
+      // 구조 2: { status: 200, message: "...", data: 1500 }
+      else if (response.data.data !== undefined) {
+        coinValue = response.data.data;
+      }
+      // 구조 3: { data: 1500 }
+      else if (response.data !== undefined) {
+        coinValue = response.data;
+      }
+      
+      console.log("추출된 코인 값:", coinValue);
+      
+      if (coinValue !== undefined && typeof coinValue === 'number') {
+        avatarStore.setCoin(coinValue);
+        console.log("AvatarShop 포인트 업데이트 완료:", coinValue);
+        console.log("avatarStore.coin 값:", avatarStore.coin);
+      } else {
+        console.warn("유효한 코인 값을 찾을 수 없습니다:", response);
+        coinError.value = "포인트 데이터를 가져오는데 실패했습니다.";
+      }
+    } else {
+      console.warn("포인트 데이터 형식이 올바르지 않습니다:", response);
+      coinError.value = "포인트 데이터를 가져오는데 실패했습니다.";
+    }
+  } catch (err) {
+    console.error("AvatarShop 포인트 조회 에러:", err);
+    console.error("에러 상세 정보:", {
+      message: err.message,
+      status: err.response?.status,
+      data: err.response?.data,
+      config: err.config
+    });
+
+    let errorMessage = "포인트를 불러오는데 실패했습니다.";
+
+    if (err.response?.status === 401) {
+      errorMessage = "로그인이 필요합니다.";
+    } else if (err.response?.status === 404) {
+      errorMessage = "사용자 정보를 찾을 수 없습니다.";
+    } else if (err.response?.status === 500) {
+      errorMessage = "서버 오류가 발생했습니다.";
+    } else if (err.message) {
+      errorMessage = `연결 오류: ${err.message}`;
+    }
+
+    coinError.value = errorMessage;
+  } finally {
+    loadingCoin.value = false;
+  }
+};
+
+// 누적 포인트 데이터 가져오기
+const fetchCumulativePoints = async () => {
+  try {
+    loadingCumulative.value = true;
+    cumulativeError.value = null;
+
+    // 인증 상태 확인
+    if (!authStore.isAuthenticated) {
+      console.warn("로그인이 필요합니다.");
+      return;
+    }
+
+    // 사용자 ID 가져오기
+    const userId = authStore.user?.id || authStore.user?.userId || 1;
+
+    console.log("AvatarShop 누적 포인트 데이터 가져오기 시작, userId:", userId);
+    const response = await getCumulativeCoin(userId);
+    console.log("받아온 누적 포인트 데이터:", response);
+
+    if (response.status === 200 && response.data !== undefined) {
+      // 백엔드 응답 구조에 따라 누적 포인트 값 추출
+      let cumulativeValue;
+      
+      // 구조 1: { status: 200, data: 1500 }
+      if (typeof response.data === 'number') {
+        cumulativeValue = response.data;
+      }
+      // 구조 2: { status: 200, message: "...", data: 1500 }
+      else if (response.data.data !== undefined) {
+        cumulativeValue = response.data.data;
+      }
+      // 구조 3: { data: 1500 }
+      else if (response.data !== undefined) {
+        cumulativeValue = response.data;
+      }
+      
+      console.log("AvatarShop 추출된 누적 포인트 값:", cumulativeValue);
+      
+      if (cumulativeValue !== undefined && typeof cumulativeValue === 'number') {
+        avatarStore.setCumulativePoints(cumulativeValue);
+        console.log("AvatarShop 누적 포인트 업데이트 완료:", cumulativeValue);
+      } else {
+        console.warn("유효한 누적 포인트 값을 찾을 수 없습니다:", response);
+        cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
+      }
+    } else {
+      console.warn("누적 포인트 데이터 형식이 올바르지 않습니다:", response);
+      cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
+    }
+  } catch (err) {
+    console.error("AvatarShop 누적 포인트 조회 에러:", err);
+
+    let errorMessage = "누적 포인트를 불러오는데 실패했습니다.";
+
+    if (err.response?.status === 401) {
+      errorMessage = "로그인이 필요합니다.";
+    } else if (err.response?.status === 404) {
+      errorMessage = "사용자 정보를 찾을 수 없습니다.";
+    } else if (err.response?.status === 500) {
+      errorMessage = "서버 오류가 발생했습니다.";
+    } else if (err.message) {
+      errorMessage = `연결 오류: ${err.message}`;
+    }
+
+    cumulativeError.value = errorMessage;
+  } finally {
+    loadingCumulative.value = false;
+  }
+};
+
 // 컴포넌트 마운트 시 store 상태 동기화 및 저장된 아바타 정보 불러오기
 onMounted(() => {
   // 초기 상태로 설정 - 아무것도 구매하지 않은 상태
@@ -690,6 +860,10 @@ onMounted(() => {
   if (wearingGlasses.length > 0) {
     tempWearingGlasses.value = wearingGlasses.map((item) => item.id);
   }
+
+  // 포인트 데이터 가져오기
+  fetchCurrentCoin();
+  fetchCumulativePoints();
 });
 
 // 기프티콘 상품 데이터
@@ -1236,6 +1410,30 @@ function wearAvatar() {
 
 .coin-icon {
   font-size: 18px;
+}
+
+.coin-value {
+  font-weight: 600;
+  color: #222;
+}
+
+.coin-value.loading {
+  color: #666;
+  animation: pulse 1.5s infinite;
+}
+
+.coin-value.error {
+  color: #e74c3c;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .item-category {
