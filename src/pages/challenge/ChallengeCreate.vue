@@ -1,6 +1,21 @@
 <template>
   <div class="challenge-create">
     <div class="create-form">
+      <!-- 챌린지 카테고리 드롭다운 부분 -->
+      <div class="form-group">
+        <label for="challenge-category">챌린지 카테고리</label>
+        <select
+          id="challenge-category"
+          v-model="categoryId"
+          class="category-select"
+        >
+          <option :value="1">전체 소비 줄이기</option>
+          <option :value="2">식비 줄이기</option>
+          <option :value="3">카페·간식 줄이기</option>
+          <option :value="4">교통비 줄이기</option>
+          <option :value="5">미용·쇼핑 줄이기</option>
+        </select>
+      </div>
       <div class="form-group">
         <label for="challenge-title">챌린지 제목</label>
         <input
@@ -53,22 +68,6 @@
             +{{ unit.toLocaleString() }}
           </button>
         </div>
-      </div>
-
-      <!-- 챌린지 카테고리 드롭다운 부분 -->
-      <div class="form-group">
-        <label for="challenge-category">챌린지 카테고리</label>
-        <select
-          id="challenge-category"
-          v-model="categoryId"
-          class="category-select"
-        >
-          <option :value="1">전체 소비 줄이기</option>
-          <option :value="2">식비 줄이기</option>
-          <option :value="3">카페·간식 줄이기</option>
-          <option :value="4">교통비 줄이기</option>
-          <option :value="5">미용·쇼핑 줄이기</option>
-        </select>
       </div>
 
       <div class="form-group">
@@ -234,7 +233,7 @@ const handleChargePoints = () => {
   overflow-y: auto;
   overflow-x: hidden;
   padding-top: 10px;
-  padding-bottom: 150px;
+  padding-bottom: 160px;
   box-sizing: border-box;
 }
 
