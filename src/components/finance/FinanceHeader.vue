@@ -90,10 +90,9 @@ const toggleFavorite = () => {
   align-items: center;
   gap: 12px;
   margin-left: auto;
-  padding-right: 15px;
 }
 .heart-btn i {
   color: #e25a5a;
-  font-size: 20px;
+  font-size: 24px;
 }
 </style>
