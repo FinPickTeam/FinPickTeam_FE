@@ -5,7 +5,7 @@
       <button class="certificate-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="certificate-title">정보</span>
+      <span class="certificate-title">간편 비밀번호 정보</span>
       <div class="certificate-header-right"></div>
     </div>
 

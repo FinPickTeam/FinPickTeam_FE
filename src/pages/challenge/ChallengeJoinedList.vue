@@ -192,11 +192,15 @@ const showFailModalExample = () => {
   padding: 0;
   background: var(--color-bg-light);
   min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .content {
   padding-top: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 140px;
+  min-height: 100%;
 }
 
 .test-buttons {

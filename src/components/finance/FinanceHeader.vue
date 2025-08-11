@@ -1,8 +1,11 @@
 <template>
   <header class="finance-header">
-    <button class="icon-btn back-btn" @click="goBack">
-      <i class="fas fa-chevron-left"></i>
-    </button>
+    <div class="header-left">
+      <button class="icon-btn" @click="goBack">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+    </div>
+
     <div class="header-icons">
       <button class="icon-btn" @click="goToDictionary">
         <i class="fas fa-search"></i>
@@ -44,9 +47,13 @@ const toggleFavorite = () => {
 <style scoped>
 .finance-header {
   width: 100%;
+  max-width: 390px;
+  height: 60px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  background: var(--color-bg-light);
+  padding: 0 16px;
   position: fixed;
   top: 0;
   left: 50%;
@@ -87,6 +94,6 @@ const toggleFavorite = () => {
 }
 .heart-btn i {
   color: #e25a5a;
-  font-size: 24px;
+  font-size: 20px;
 }
 </style>

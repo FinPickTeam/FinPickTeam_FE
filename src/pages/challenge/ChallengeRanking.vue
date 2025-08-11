@@ -236,6 +236,12 @@ onMounted(() => {
   padding: 16px 16px 20px 16px;
   background: var(--color-bg-light);
   min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 20px;
+  padding-bottom: 140px;
+  box-sizing: border-box;
 }
 
 /* 헤더 스타일 */

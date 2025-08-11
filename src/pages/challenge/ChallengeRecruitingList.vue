@@ -84,10 +84,10 @@ const handleCardClick = (data) => {
   padding: 0;
   background: var(--color-bg-light);
   min-height: 100vh;
-}
-
-.content {
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding-top: 20px;
-  padding-bottom: 20px;
+  padding-bottom: 140px;
 }
 </style>

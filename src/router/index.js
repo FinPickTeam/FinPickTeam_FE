@@ -17,6 +17,7 @@ import ProfileStep1 from '../pages/auth/ProfileStep1.vue';
 import ProfileStep2 from '../pages/auth/ProfileStep2.vue';
 import ProfileStep3 from '../pages/auth/ProfileStep3.vue';
 import ProfileStep4 from '../pages/auth/ProfileStep4.vue';
+import ProfileComplete from '../pages/auth/ProfileComplete.vue';
 
 // mypage
 import Mypage from '../pages/mypage/Mypage.vue';
@@ -147,7 +148,7 @@ const router = createRouter({
       component: Signup,
     },
     {
-      path: '/auth/signupcomplete',
+      path: '/auth/signup-complete',
       name: 'SignupComplete',
       component: SignupComplete,
     },
@@ -171,6 +172,12 @@ const router = createRouter({
       name: 'ProfileStep4',
       component: ProfileStep4,
     },
+    {
+      path: '/profile-complete',
+      name: 'ProfileComplete',
+      component: ProfileComplete,
+    },
+
     {
       path: '/mypage/financetest/profile-step-5',
       name: 'ProfileStep5',

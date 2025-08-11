@@ -5,7 +5,7 @@
       <button class="confirm-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="confirm-title center-title">비밀번호 확인</span>
+      <span class="confirm-title center-title">간편 비밀번호 확인</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
@@ -31,7 +31,7 @@
       </div>
 
       <!-- 제목 -->
-      <h1 class="main-title">비밀번호 확인</h1>
+      <h1 class="main-title">간편 비밀번호 확인</h1>
 
       <!-- 설명 -->
       <div class="description-section">
