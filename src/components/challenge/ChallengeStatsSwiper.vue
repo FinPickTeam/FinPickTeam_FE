@@ -13,7 +13,7 @@
         <!-- 누적 포인트 슬라이드 -->
         <div v-if="item.kind === 'points'" class="points-container">
           <div class="points-number">{{ formatNumber(item.value) }}</div>
-          <div class="points-label">포인트</div>
+          <div class="points-label">월별 누적 포인트</div>
         </div>
 
         <!-- 요약 통계 슬라이드 -->
