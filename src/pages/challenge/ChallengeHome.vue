@@ -109,7 +109,8 @@ const fetchMonthlyPoints = async () => {
     const m = now.getMonth() + 1; // 1~12
     const res = await getMonthlyPoints({ year: y, month: m });
     // 백엔드 응답 키 이름에 맞춰서 사용
-    monthlyPoints.value = res?.monthlyCumulativeAmount ?? 0;
+    // 백엔드 응답: { month, amount, updatedAt }
+    monthlyPoints.value = (res?.amount ?? null); // 값 없으면 null로 → 슬라이드 숨김
   } catch (e) {
     error.value.points = e?.response?.data?.message || e.message || '포인트 조회 실패';
     monthlyPoints.value = null; // 슬라이드 숨김
