@@ -5,18 +5,18 @@
       <button class="back-btn" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="dictionary-header-title">인증서 관리</span>
+      <span class="dictionary-header-title">간편 비밀번호 관리</span>
     </div>
 
     <!-- 보안 배너 -->
     <div class="security-banner">
-      <span class="security-text">인증서가 안전하게 보호됩니다</span>
+      <span class="security-text">간편 비밀번호가 안전하게 보호됩니다</span>
     </div>
 
     <!-- 인증서 카드 -->
     <div class="certificate-card">
       <div class="certificate-header">
-        <span class="certificate-name">FinPick 인증서</span>
+        <span class="certificate-name">간편 비밀번호</span>
         <div class="user-icon">
           <font-awesome-icon :icon="['fas', 'user']" />
         </div>
@@ -33,7 +33,7 @@
     <!-- 메뉴 리스트 -->
     <div class="menu-list">
       <div class="menu-item" @click="goToCertificateInfo">
-        <span>인증서 정보</span>
+        <span>간편 비밀번호 정보</span>
         <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
       </div>
       <div class="menu-item" @click="goToPasswordChange">

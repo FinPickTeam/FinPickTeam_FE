@@ -35,7 +35,7 @@
 
       <!-- 설명 -->
       <div class="description-section">
-        <p class="description-text">현재 인증서 비밀번호를 입력해주세요.</p>
+        <p class="description-text">현재 간편 비밀번호를 입력해주세요.</p>
       </div>
 
       <!-- 비밀번호 입력 폼 -->

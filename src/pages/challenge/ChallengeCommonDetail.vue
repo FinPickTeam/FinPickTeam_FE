@@ -9,6 +9,15 @@
       @close="showFailModal = false"
       @retry="handleRetry"
     />
+
+    <!-- 챌린지 참여 확인 모달 -->
+    <ChallengeJoinConfirmModal
+      :isVisible="showJoinConfirmModal"
+      :challenge="challenge"
+      @close="closeJoinConfirmModal"
+      @confirm="confirmJoin"
+    />
+    
     <!-- 로딩 상태 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -93,6 +102,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import challengeCommonDetailData from './challenge_common_detail.json';
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
+import ChallengeJoinConfirmModal from '@/components/challenge/ChallengeJoinConfirmModal.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -101,6 +111,7 @@ const router = useRouter();
 const loading = ref(true);
 const challenge = ref(null);
 const showFailModal = ref(false);
+const showJoinConfirmModal = ref(false);
 
 // 챌린지 데이터 fetch 함수
 const fetchChallenge = async (challengeId) => {
@@ -159,16 +170,30 @@ const getRemainingDays = () => {
 // checkParticipationStatus 함수 제거 - challenge.isParticipating을 직접 사용
 
 const handleJoin = () => {
-  // 챌린지 참여 로직
+  // 이미 참여 중인지 확인
   if (challenge.value.isParticipating) {
     alert('이미 참여 중인 챌린지입니다.');
     return;
   }
 
+  // 참여 확인 모달 표시
+  showJoinConfirmModal.value = true;
+};
+
+const confirmJoin = () => {
   // 실제로는 API 호출로 참여 처리
   challenge.value.isParticipating = true;
+  
+  // 모달 닫기
+  showJoinConfirmModal.value = false;
+  
+  // 참여 중인 챌린지 상세 페이지로 이동 (공통 챌린지 상세)
+  const challengeId = route.params.id;
+  router.push(`/challenge/common-detail/${challengeId}`);
+};
 
-  alert('챌린지에 참여했습니다!');
+const closeJoinConfirmModal = () => {
+  showJoinConfirmModal.value = false;
 };
 
 const handleRetry = () => {

@@ -46,7 +46,7 @@
               </div>
               <div class="summary-item-box">
                 <span class="summary-item-value"
-                  >월 {{ formData.amountRaw.toLocaleString() }}원</span
+                  >월 {{ formData.amount.toLocaleString() }}원</span
                 >
               </div>
               <div class="summary-item-box">
@@ -129,8 +129,8 @@
       </div>
 
       <!-- 전체 상품 리스트 -->
-      <div v-if="filteredAllProducts.length > 0">
-        <ProductCardList_deposit :products="filteredAllProducts" />
+      <div v-if="filteredAllDeposit && filteredAllDeposit.length > 0">
+        <ProductCardList_deposit :products="filteredAllDeposit" />
       </div>
       <div v-else class="no-results">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -145,13 +145,13 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductInputForm from '@/components/finance/deposit/ProductInputForm_deposit.vue';
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
-import recommendData from '@/components/finance/deposit/deposit_recommend.json';
-import allData from '@/components/finance/deposit/deposit_all.json';
-import { getDepositList } from '@/api';
+import { getDepositList, getDepositRecommendList } from '@/api';
+import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
 const recommendProducts = ref([]);
+const isLoadingRecommend = ref(false);
 const allProducts = ref([]);
 const showResults = ref(false);
 const isSummaryMode = ref(false);
@@ -162,6 +162,7 @@ const formData = ref({
   depositType: '정기예금',
   selectedPrefer: [],
 });
+const fav = useFavoriteStore();
 
 // 태그 필터 관련 상태
 const searchKeyword = ref('');
@@ -201,16 +202,18 @@ const interestTags = ref([
 ]);
 
 onMounted(async () => {
+  fetchDepositList();
+  fav.syncIdSet('DEPOSIT');
+});
+
+const fetchDepositList = async (params) => {
   try {
-    allProducts.value = await getDepositList();
+    const res = await getDepositList();
+    allProducts.value = res.data ?? [];
   } catch (e) {
     console.error(e);
   }
-  // 추천 상품 데이터 로드
-  recommendProducts.value = recommendData;
-
-  // 전체 상품 데이터 로드
-});
+};
 
 function goTo(path) {
   router.push(path);
@@ -225,6 +228,7 @@ function showSearchResults(receivedFormData) {
 
   // 폼 데이터 저장
   formData.value = receivedFormData;
+  console.log('데이터: ', receivedFormData);
 
   // 요약 텍스트 생성
   const preferText =
@@ -243,9 +247,53 @@ function showSearchResults(receivedFormData) {
 
   summaryText.value = `${
     receivedFormData.period
-  } | 월 ${receivedFormData.amountRaw.toLocaleString()}원 | ${
+  } | 월 ${receivedFormData.amount.toLocaleString()}원 | ${
     receivedFormData.depositType
   }${preferText ? ' | ' + preferText : ''}`;
+
+  fetchDepositRecommendation(receivedFormData);
+}
+
+// 예금 추천 리스트 받기
+const fetchDepositRecommendation = async (receivedFormData) => {
+  try {
+    const params = {
+      amount: receivedFormData.amount,
+      period: toMonths(receivedFormData.period),
+    };
+    const body = {
+      newCustomer: receivedFormData.filterObject.newCustomer,
+      salaryTransfer: receivedFormData.filterObject.salaryTransfer,
+      cardUsage: receivedFormData.filterObject.cardUsage,
+      internetMobileBanking:
+        receivedFormData.filterObject.internetMobileBanking,
+      marketingConsent: receivedFormData.filterObject.marketingConsent,
+      housingSubscription: receivedFormData.filterObject.housingSubscription,
+      couponUsed: receivedFormData.filterObject.couponUsed,
+    };
+    const res = await getDepositRecommendList(params, body);
+    recommendProducts.value = res?.data ?? [];
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+// 전체보기 필터링된 데이터
+const filteredAllDeposit = computed(() => {
+  const list = Array.isArray(allProducts.value) ? allProducts.value : [];
+  const q = (searchKeyword.value ?? '').toLowerCase().replace(/\s+/g, '');
+  if (!q) return list;
+  return list.filter((d) =>
+    (d.depositProductName ?? '').toLowerCase().replace(/\s+/g, '').includes(q)
+  );
+});
+
+function toMonths(periodLabel) {
+  if (typeof periodLabel === 'number') return periodLabel;
+  const m = String(periodLabel).match(/(\d+)/);
+  if (!m) return 12;
+  const n = Number(m[1]);
+  return /년/.test(periodLabel) ? n * 12 : n;
 }
 
 function hideSearchResults() {
@@ -280,51 +328,13 @@ function toggleInterestTag(tagValue) {
 }
 
 function closeFilter() {
+  const params = {
+    bankName: selectedTargets.value,
+  };
+  console.log(params);
+  fetchDepositList(params);
   showFilter.value = false;
 }
-
-// 기존 필터 상태 (태그 필터로 대체될 예정)
-const selectedBank = ref('');
-const selectedPeriod = ref('');
-const sortOption = ref('rate');
-
-// 전체보기 필터링된 데이터
-const filteredAllProducts = computed(() => {
-  let result = allProducts.value;
-
-  // 🔍 키워드 검색
-  if (searchKeyword.value) {
-    result = result.filter((p) =>
-      p.depositProductName
-        ?.toLowerCase()
-        .replace(/\s+/g, '')
-        .includes(searchKeyword.value.toLowerCase().replace(/\s+/g, ''))
-    );
-  }
-
-  // 🏦 은행 필터
-  if (selectedBank.value) {
-    result = result.filter((p) => p.depositBankName === selectedBank.value);
-  }
-
-  // �� 기간 필터 (주의: 문자열 비교가 정확하지 않을 수 있음 → 단순 포함 포함으로 처리 가능)
-  if (selectedPeriod.value) {
-    result = result.filter((p) =>
-      p.depositContractPeriod?.includes(selectedPeriod.value)
-    );
-  }
-
-  // 📊 정렬
-  if (sortOption.value === 'rate') {
-    result = [...result].sort((a, b) => b.depositMaxRate - a.depositMaxRate);
-  } else if (sortOption.value === 'name') {
-    result = [...result].sort((a, b) =>
-      a.depositProductName.localeCompare(b.depositProductName)
-    );
-  }
-
-  return result;
-});
 </script>
 
 <style scoped>

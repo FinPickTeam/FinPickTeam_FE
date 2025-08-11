@@ -22,5 +22,7 @@ const props = defineProps({
   flex-direction: column;
   align-items: center;
   width: 100%;
+  gap: 10px;
 }
+
 </style>

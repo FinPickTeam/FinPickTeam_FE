@@ -50,9 +50,9 @@ const isFavorite = computed(() => favoriteStore.isFavorite(props.fund));
 
 function goToDetail() {
   // 상품명을 기반으로 상세 페이지로 이동
-  const productName = props.fund.fundProductName;
-  if (productName) {
-    router.push(`/finance/fund/${productName}`);
+  const productId = props.fund.id;
+  if (productId) {
+    router.push(`/finance/fund/${productId}`);
   }
 }
 

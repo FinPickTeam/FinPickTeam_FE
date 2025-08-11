@@ -120,6 +120,12 @@
         <button class="btn-create" @click="createChallenge">챌린지 생성</button>
       </div>
     </div>
+
+    <!-- 성공 모달 -->
+    <ChallengeCreateSuccessModal
+      :isVisible="showSuccessModal"
+      @close="closeSuccessModal"
+    />
   </div>
 </template>
 
@@ -127,8 +133,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
-// Pinia에서 토큰 가져오는 경우 (스토어 이름 맞춰 바꿔줘)
 import { useAuthStore } from '@/stores/auth';
+import ChallengeCreateSuccessModal from '@/components/challenge/ChallengeCreateSuccessModal.vue';
 
 const router = useRouter();
 const auth = useAuthStore();
@@ -145,7 +151,12 @@ const usePassword = ref(false);
 const roomPassword = ref('');
 const loading = ref(false);
 
-const goBack = () => router.back();
+// 모달 상태
+const showSuccessModal = ref(false);
+
+const goBack = () => {
+  router.back();
+};
 
 const addAmount = (amount) => { goalValue.value += amount; };
 const formatAmount = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
@@ -182,29 +193,25 @@ const createChallenge = async () => {
     startDate: startDate.value,     // yyyy-MM-dd
     endDate: endDate.value,
     goalValue: goalValue.value,
-    type: type.value,               // "PERSONAL" | "GROUP" | (COMMON은 화면 미사용)
+    type: type.value,               // "PERSONAL" | "GROUP"
     categoryId: Number(categoryId.value),
     usePassword: usePassword.value,
-    password: usePassword.value ? Number(roomPassword.value) : null, // ★ 중요: null 또는 숫자
+    password: usePassword.value ? Number(roomPassword.value) : null, // null 또는 숫자
   };
 
   try {
     loading.value = true;
-    const token = auth.accessToken; // 스토어에서 액세스 토큰 꺼내오기 (키 이름 맞춰줘)
+    const token = auth.accessToken; // 스토어에서 액세스 토큰
     const res = await axios.post(
         '/api/challenge/create',
         payload,
         { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    // 서버 공통 응답 형태 사용 예: { status, message, data }
-    alert(res.data?.message || '챌린지가 성공적으로 생성되었습니다!');
-    // 생성된 챌린지 상세로 이동 시:
-    // const challengeId = res?.data?.data?.challengeId;
-    // router.push(`/challenge/${challengeId}`);
-    router.back();
+    // 성공 시: 성공 모달 표시
+    // 필요하면 res.data.data.challengeId 활용해 모달 닫을 때 이동도 가능
+    showSuccessModal.value = true;
   } catch (e) {
-    // 서버에서 던진 예외 메시지 보여주기
     const msg =
         e?.response?.data?.message ||
         e?.message ||
@@ -214,13 +221,25 @@ const createChallenge = async () => {
     loading.value = false;
   }
 };
+
+const closeSuccessModal = () => {
+  showSuccessModal.value = false;
+  router.back();
+};
 </script>
+
 
 <style scoped>
 .challenge-create {
   padding: 10px 16px 20px 16px;
   background: var(--color-bg-light);
   min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 10px;
+  padding-bottom: 150px;
+  box-sizing: border-box;
 }
 
 .create-form {

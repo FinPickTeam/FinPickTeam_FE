@@ -2,7 +2,7 @@
   <div class="certificate-complete-container">
     <!-- 상단 헤더 -->
     <div class="complete-header">
-      <span class="complete-title center-title">인증서 생성 완료</span>
+      <span class="complete-title center-title">간편 비밀번호 생성 완료</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
@@ -13,18 +13,19 @@
       </div>
 
       <!-- 제목 -->
-      <h1 class="main-title">핀픽 인증서가 생성되었습니다</h1>
+      <h1 class="main-title">간편 비밀번호가 생성되었습니다</h1>
 
       <!-- 설명 -->
       <div class="description-section">
         <p class="description-text">
-          안전한 금융 서비스 이용을 위한 인증서가 성공적으로 생성되었습니다.
+          안전한 금융 서비스 이용을 위한 간편 비밀번호가 성공적으로
+          생성되었습니다.
         </p>
       </div>
 
       <!-- 인증서 정보 -->
       <div class="certificate-info">
-        <h3 class="info-title">인증서 정보</h3>
+        <h3 class="info-title">간편 비밀번호</h3>
         <div class="info-item">
           <span class="info-label">발급일</span>
           <span class="info-value">{{ currentDate }}</span>
@@ -33,19 +34,15 @@
           <span class="info-label">유효기간</span>
           <span class="info-value">{{ expiryDate }}</span>
         </div>
-        <div class="info-item">
-          <span class="info-label">인증서 종류</span>
-          <span class="info-value">핀픽 인증서</span>
-        </div>
       </div>
 
       <!-- 주의사항 -->
       <div class="notice-section">
         <h3 class="notice-title">주의사항</h3>
         <ul class="notice-list">
-          <li>인증서 비밀번호는 분실 시 복구가 불가능합니다.</li>
+          <li>비밀번호는 분실 시 복구가 불가능합니다.</li>
           <li>비밀번호를 타인에게 알려주지 마세요.</li>
-          <li>인증서는 1년간 유효합니다.</li>
+          <li>비밀번호는 1년간 유효합니다.</li>
         </ul>
       </div>
     </div>

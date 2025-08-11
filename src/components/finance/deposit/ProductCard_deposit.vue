@@ -52,7 +52,7 @@ function toggleFavorite() {
 }
 
 function goToDetail() {
-  router.push(`/finance/deposit/${props.product.depositProductName}`);
+  router.push(`/finance/deposit/${props.product.id}`);
 }
 
 const bankLogoMap = {
@@ -134,7 +134,7 @@ const getLogoUrl = (bankName) => {
 }
 .heart {
   color: var(--color-bg-accent);
-  font-size: 26px;
+  font-size: 32px;
   cursor: pointer;
   margin-left: 8px;
   user-select: none;
