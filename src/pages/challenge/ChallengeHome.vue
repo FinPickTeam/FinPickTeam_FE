@@ -134,7 +134,7 @@ onMounted(async () => {
     <div class="header-section">
       <div class="greeting-section">
         <div class="greeting">
-          안녕하세요, <span class="username">{{ displayName }}</span>!
+          안녕하세요, <span class="username">{{ displayName }}</span>님!
         </div>
       </div>
 

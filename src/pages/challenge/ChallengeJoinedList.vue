@@ -1,118 +1,81 @@
-<template>
-  <div class="challenge-joined-list">
-    <!-- 성공 모달 -->
-    <ChallengeSuccessModal
-      :isVisible="showSuccessModal"
-      :challenge="testChallenge"
-      :challengeResult="testChallengeResult"
-      @close="showSuccessModal = false"
-    />
-
-    <!-- 실패 모달 -->
-    <ChallengeFailModal
-      :isVisible="showFailModal"
-      :challengeResult="testFailChallengeResult"
-      @close="showFailModal = false"
-    />
-    <div class="content">
-      <!-- 공통 챌린지 섹션 -->
-      <ChallengeSection
-        title="공통 챌린지"
-        :challenges="commonChallenges"
-        type="common"
-        icon-class="fas fa-users"
-        @cardClick="handleCardClick"
-      />
-
-      <!-- 개인 챌린지 섹션 -->
-      <ChallengeSection
-        title="개인 챌린지"
-        :challenges="personalChallenges"
-        type="personal"
-        icon-class="fas fa-user"
-        :max-count="3"
-        :show-count="true"
-        @cardClick="handleCardClick"
-      />
-
-      <!-- 소그룹 챌린지 섹션 -->
-      <ChallengeSection
-        title="소그룹 챌린지"
-        :challenges="groupChallenges"
-        type="group"
-        icon-class="fas fa-user-friends"
-        :max-count="3"
-        :show-count="true"
-        @cardClick="handleCardClick"
-      />
-
-      <!-- 테스트용 모달 버튼들 -->
-      <div class="test-buttons">
-        <button class="test-success-btn" @click="showSuccessModalExample">
-          성공 모달 테스트
-        </button>
-        <button class="test-fail-btn" @click="showFailModalExample">
-          실패 모달 테스트
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { getChallengeList } from '@/api/challenge/challenge.js';
 import ChallengeSection from '@/components/challenge/ChallengeSection.vue';
 import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
-import challengeListData from './challenge_list.json';
-
-// 참여중인 챌린지 필터링 (participating: true)
-const joinedChallenges = computed(() => {
-  return challengeListData.data.filter((challenge) => challenge.participating);
-});
-
-// 공통 챌린지 필터링 (참여중이면서 COMMON 타입)
-const commonChallenges = computed(() => {
-  return joinedChallenges.value.filter(
-    (challenge) => challenge.type === 'COMMON'
-  );
-});
-
-// 개인 챌린지 필터링 (참여중이면서 PERSONAL 타입)
-const personalChallenges = computed(() => {
-  return joinedChallenges.value.filter(
-    (challenge) => challenge.type === 'PERSONAL'
-  );
-});
-
-// 소그룹 챌린지 필터링 (참여중이면서 GROUP 타입)
-const groupChallenges = computed(() => {
-  return joinedChallenges.value.filter(
-    (challenge) => challenge.type === 'GROUP'
-  );
-});
 
 const router = useRouter();
 
-// 모달 상태 관리
+const loading = ref(false);
+const error = ref('');
+const allJoined = ref([]);
+
+// API 호출
+onMounted(async () => {
+  loading.value = true;
+  error.value = '';
+  try {
+    const list = await getChallengeList({ participating: true }); // ✅ 상태 필터 제거
+    // 백엔드 JSON 키 보정: isParticipating → participating
+    const normalized = (list || []).map((c) => ({
+      ...c,
+      participating:
+          typeof c.participating === 'boolean'
+              ? c.participating
+              : !!c.isParticipating,
+      // participantsCount 기본값 케어
+      participantsCount: c.participantsCount ?? 0,
+    }));
+
+    // (선택) 결과확인 필요 항목 우선 정렬: COMPLETED && participating && !isResultCheck
+    normalized.sort((a, b) => {
+      const needA = a.participating && a.status === 'COMPLETED' && !a.isResultCheck;
+      const needB = b.participating && b.status === 'COMPLETED' && !b.isResultCheck;
+      return Number(needB) - Number(needA);
+    });
+
+    allJoined.value = normalized;
+  } catch (e) {
+    console.error(e);
+    error.value = '챌린지 목록을 불러오지 못했습니다.';
+  } finally {
+    loading.value = false;
+  }
+});
+
+// 타입별 필터
+const commonChallenges = computed(() => allJoined.value.filter((c) => c.type === 'COMMON'));
+const personalChallenges = computed(() => allJoined.value.filter((c) => c.type === 'PERSONAL'));
+const groupChallenges = computed(() => allJoined.value.filter((c) => c.type === 'GROUP'));
+
+// 라우팅
+const handleCardClick = ({ challenge }) => {
+  const routeMap = {
+    PERSONAL: 'ChallengePersonalDetail',
+    GROUP: 'ChallengeGroupDetail',
+    COMMON: 'ChallengeCommonDetail',
+  };
+  const name = routeMap[challenge.type] || 'ChallengeCommonDetail';
+  router.push({
+    name,
+    params: { id: challenge.id },
+    state: { previousPage: '/challenge/joined-list', challengeData: challenge },
+  });
+};
+
+// 테스트 모달 유지
 const showSuccessModal = ref(false);
 const showFailModal = ref(false);
-
-// 테스트용 데이터
 const testChallenge = ref({
   title: '커피값 줄이기 챌린지',
   description: '매일 커피값을 절약하여 한 달 동안 5만원 모으기',
   targetAmount: 50000,
   currentAmount: 50000,
   duration: 30,
-  reward: {
-    points: 1000,
-    badge: '절약 마스터',
-  },
+  reward: { points: 1000, badge: '절약 마스터' },
 });
-
-// 성공 모달용 테스트 데이터
 const testChallengeResult = ref({
   resultType: 'SUCCESS_WIN',
   actualRewardPoint: 110,
@@ -124,68 +87,76 @@ const testChallengeResult = ref({
     priceChange: 2500,
     priceChangeRate: 3.45,
     recommendationReason:
-      'AI 반도체 시장 성장과 함께 삼성전자의 기술 경쟁력이 향상되고 있어 투자 가치가 높습니다.',
+        'AI 반도체 시장 성장과 함께 삼성전자의 기술 경쟁력이 향상되고 있어 투자 가치가 높습니다.',
   },
 });
-
-// 실패 모달용 테스트 데이터
 const testFailChallengeResult = ref({
   resultType: 'FAIL',
   actualRewardPoint: 0,
   savedAmount: 30000,
   stockRecommendation: null,
 });
-
-const testGoalValue = ref(100000);
-
-const handleCardClick = (data) => {
-  const { challenge, type } = data;
-
-  // 챌린지 타입에 따른 라우팅
-  if (challenge.type === 'PERSONAL') {
-    // 개인 챌린지 상세 페이지로 이동 (ID 기반)
-    router.push({
-      name: 'ChallengePersonalDetail',
-      params: { id: challenge.id },
-      state: {
-        previousPage: '/challenge/joined-list',
-        challengeData: challenge,
-      },
-    });
-  } else if (challenge.type === 'GROUP') {
-    // 그룹 챌린지 상세 페이지로 이동 (ID 기반)
-    router.push({
-      name: 'ChallengeGroupDetail',
-      params: { id: challenge.id },
-      state: {
-        previousPage: '/challenge/joined-list',
-        challengeData: challenge,
-      },
-    });
-  } else if (challenge.type === 'COMMON') {
-    // 공통 챌린지 상세 페이지로 이동 (ID 기반)
-    router.push({
-      name: 'ChallengeCommonDetail',
-      params: { id: challenge.id },
-      state: {
-        previousPage: '/challenge/joined-list',
-        challengeData: challenge,
-      },
-    });
-  }
-};
-
-// 모달 핸들러 함수들
-
-// 테스트용 모달 표시 함수들
-const showSuccessModalExample = () => {
-  showSuccessModal.value = true;
-};
-
-const showFailModalExample = () => {
-  showFailModal.value = true;
-};
+const showSuccessModalExample = () => (showSuccessModal.value = true);
+const showFailModalExample = () => (showFailModal.value = true);
 </script>
+
+<template>
+  <div class="challenge-joined-list">
+    <ChallengeSuccessModal
+        :isVisible="showSuccessModal"
+        :challenge="testChallenge"
+        :challengeResult="testChallengeResult"
+        @close="showSuccessModal = false"
+    />
+    <ChallengeFailModal
+        :isVisible="showFailModal"
+        :challengeResult="testFailChallengeResult"
+        @close="showFailModal = false"
+    />
+
+    <div class="content">
+      <div v-if="loading" class="state">불러오는 중...</div>
+      <div v-else-if="error" class="state error">{{ error }}</div>
+      <template v-else>
+        <ChallengeSection
+            title="공통 챌린지"
+            :challenges="commonChallenges"
+            type="common"
+            icon-class="fas fa-users"
+            empty-message="현재 공통 챌린지에 참여하고 있지 않습니다."
+            @cardClick="handleCardClick"
+        />
+
+        <ChallengeSection
+            title="개인 챌린지"
+            :challenges="personalChallenges"
+            type="personal"
+            icon-class="fas fa-user"
+            :max-count="3"
+            :show-count="true"
+            empty-message="현재 참여중인 개인 챌린지가 없습니다."
+            @cardClick="handleCardClick"
+        />
+
+        <ChallengeSection
+            title="소그룹 챌린지"
+            :challenges="groupChallenges"
+            type="group"
+            icon-class="fas fa-user-friends"
+            :max-count="3"
+            :show-count="true"
+            empty-message="현재 참여중인 소그룹 챌린지가 없습니다."
+            @cardClick="handleCardClick"
+        />
+
+        <div class="test-buttons">
+          <button class="test-success-btn" @click="showSuccessModalExample">성공 모달 테스트</button>
+          <button class="test-fail-btn" @click="showFailModalExample">실패 모달 테스트</button>
+        </div>
+      </template>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .challenge-joined-list {
