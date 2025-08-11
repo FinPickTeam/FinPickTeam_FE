@@ -17,8 +17,8 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 4</div>
-      <div class="question-desc">투자경험</div>
+      <div class="question-title">[문항 4] 투자 형태 / 금융 자산</div>
+      <!-- <div class="question-desc">투자경험</div> -->
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -43,7 +43,13 @@ import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
-const options = ['1년 미만', '1년 이상 ~ 3년 미만', '3년 이상', '경험 없음'];
+const options = [
+  '경험없음',
+  '예금, CMA, MMF, RP, 국공채 등',
+  '채권형펀드, 원금보장형 ELS, 신용도가 A-이상인 채권 등',
+  '주식, 주식형펀드, 원금이 보장되지 않는 ELS, 신용도가 BBB- 이하인 채권 등',
+  '선물·옵션, 신용거래, ELW, 파생상품펀드 등',
+];
 const selected = ref(null);
 
 // 동적 progress-bar 설정
@@ -51,9 +57,9 @@ const totalSteps = ref(4); // 기본값
 
 // 라우터 쿼리에서 from 파라미터 확인하여 단계 수 결정
 if (route.query.from === 'mypage') {
-  totalSteps.value = 9; // 투자성향 재검사는 9단계
+  totalSteps.value = 10; // 투자성향 재검사는 9단계
 } else {
-  totalSteps.value = 4; // 회원가입은 4단계
+  totalSteps.value = 5; // 회원가입은 4단계
 }
 
 const goBack = () => {
@@ -61,8 +67,12 @@ const goBack = () => {
 };
 const goNext = () => {
   if (selected.value !== null) {
-    // 투자성향 분석 완료 후 ProfileComplete로 이동
-    router.push('/profile-complete');
+    const from = route.query.from || 'signup';
+    if (from === 'mypage') {
+      router.push(`/mypage/financetest/profile-step-5?from=mypage`);
+    } else {
+      router.push('/profile-step-5');
+    }
   }
 };
 </script>
@@ -120,7 +130,7 @@ const goNext = () => {
 .question-title {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   color: #222;
 }
 .question-desc {

@@ -41,22 +41,22 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const options = ["경험 없음", "1년 미만", "1년 이상 ~ 3년 미만", "3년 이상"];
+const options = ['경험 없음', '1년 미만', '1년 이상 ~ 3년 미만', '3년 이상'];
 const selected = ref(null);
 
-// 동적 progress-bar 설정 (투자성향 재검사는 항상 9단계)
-const totalSteps = ref(9);
+// 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
+const totalSteps = ref(10);
 
 const goBack = () => {
   router.back();
 };
 const goNext = () => {
   if (selected.value !== null) {
-    router.push("/mypage/financetest/profile-step-8");
+    router.push('/mypage/financetest/profile-step-8');
   }
 };
 </script>
@@ -66,7 +66,7 @@ const goNext = () => {
   min-height: 100vh;
   background: #fff;
   padding: 0 20px 32px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .nav-bar {
   display: flex;

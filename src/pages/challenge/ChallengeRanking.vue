@@ -239,7 +239,7 @@ onMounted(() => {
   height: 100vh;
   overflow-y: auto;
   overflow-x: hidden;
-  padding-top: 20px;
+  padding-top: 40px;
   padding-bottom: 140px;
   box-sizing: border-box;
 }

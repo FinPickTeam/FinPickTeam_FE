@@ -72,7 +72,7 @@ const goToRanking = () => router.push('/challenge/ranking'); // 원하는 경로
 .challenge-header {
   width: 100%;
   max-width: 390px;
-  height: 60px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: space-between;

@@ -12,12 +12,12 @@
       <div
         v-for="step in totalSteps"
         :key="step"
-        :class="['progress', { active: step === 5 }]"
+        :class="['progress', { active: step === 10 }]"
       ></div>
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 5</div>
+      <div class="question-title">문항 10</div>
       <div class="question-desc">총 자산 규모(순자산)</div>
       <div class="options">
         <div
@@ -30,36 +30,37 @@
         </div>
       </div>
     </div>
-    <!-- 다음 버튼 -->
+    <!-- 완료 버튼 -->
     <button class="next-btn" :disabled="selected === null" @click="goNext">
-      다음
+      완료
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const options = [
-  "1억원 미만",
-  "1억원 이상 ~ 5억원 미만",
-  "5억원 이상 ~ 10억원 미만",
-  "10억원 이상~ 20억원 미만",
-  "20억원 이상",
+  '1억원 미만',
+  '1억원 이상 ~ 5억원 미만',
+  '5억원 이상 ~ 10억원 미만',
+  '10억원 이상~ 20억원 미만',
+  '20억원 이상',
 ];
 const selected = ref(null);
 
-// 동적 progress-bar 설정 (투자성향 재검사는 항상 9단계)
-const totalSteps = ref(9);
+// 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
+const totalSteps = ref(10);
 
 const goBack = () => {
   router.back();
 };
 const goNext = () => {
   if (selected.value !== null) {
-    router.push("/mypage/financetest/profile-step-6");
+    // 투자성향 분석 완료 후 ProfileComplete로 이동
+    router.push('/profile-complete?from=mypage');
   }
 };
 </script>
@@ -69,7 +70,7 @@ const goNext = () => {
   min-height: 100vh;
   background: #fff;
   padding: 0 20px 32px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .nav-bar {
   display: flex;

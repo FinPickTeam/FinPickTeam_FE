@@ -39,27 +39,27 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const options = [
-  "제한된 손실을 감수하며 시중금리 수준의 수익을 기대",
-  "원금의 일부 손실을 감수하며 시중금리보다 다소 높은 수준의 수익을 기대",
-  "원금 손실을 감수하며 시장성과 비슷한 수준의 수익을 기대",
-  "초과 손실까지 감수하며 적극적인 투자를 통하여 시중수익률(예: 주가지수)을 초과하는 높은 수익 추구",
+  '제한된 손실을 감수하며 시중금리 수준의 수익을 기대',
+  '원금의 일부 손실을 감수하며 시중금리보다 다소 높은 수준의 수익을 기대',
+  '원금 손실을 감수하며 시장성과 비슷한 수준의 수익을 기대',
+  '초과 손실까지 감수하며 적극적인 투자를 통하여 시중수익률(예: 주가지수)을 초과하는 높은 수익 추구',
 ];
 const selected = ref(null);
 
-// 동적 progress-bar 설정 (투자성향 재검사는 항상 9단계)
-const totalSteps = ref(9);
+// 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
+const totalSteps = ref(10);
 
 const goBack = () => {
   router.back();
 };
 const goNext = () => {
   if (selected.value !== null) {
-    router.push("/");
+    router.push('/mypage/financetest/profile-step-10?from=mypage');
   }
 };
 </script>
@@ -69,7 +69,7 @@ const goNext = () => {
   min-height: 100vh;
   background: #fff;
   padding: 0 20px 32px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .nav-bar {
   display: flex;
