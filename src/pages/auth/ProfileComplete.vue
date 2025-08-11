@@ -104,7 +104,12 @@ onMounted(() => {
 
 // 홈으로 이동
 const goToHome = () => {
-  router.push('/');
+  const from = route.query.from || 'signup';
+  if (from === 'mypage') {
+    router.push('/mypage');
+  } else {
+    router.push('/');
+  }
 };
 </script>
 

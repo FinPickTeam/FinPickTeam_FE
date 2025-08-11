@@ -1,5 +1,7 @@
-import ProfileStep5 from '../pages/mypage/financetest/ProfileStep5.vue';
+// ProfileStep5 파일이 존재하지 않으므로 임포트 제거
+// import ProfileStep5 from '../pages/mypage/financetest/ProfileStep10.vue';
 import ProfileStep6 from '../pages/mypage/financetest/ProfileStep6.vue';
+import ProfileStep10 from '../pages/mypage/financetest/ProfileStep10.vue';
 import ProfileStep7 from '../pages/mypage/financetest/ProfileStep7.vue';
 import ProfileStep8 from '../pages/mypage/financetest/ProfileStep8.vue';
 import ProfileStep9 from '../pages/mypage/financetest/ProfileStep9.vue';
@@ -17,6 +19,7 @@ import ProfileStep1 from '../pages/auth/ProfileStep1.vue';
 import ProfileStep2 from '../pages/auth/ProfileStep2.vue';
 import ProfileStep3 from '../pages/auth/ProfileStep3.vue';
 import ProfileStep4 from '../pages/auth/ProfileStep4.vue';
+import ProfileStep5 from '../pages/auth/ProfileStep5.vue';
 import ProfileComplete from '../pages/auth/ProfileComplete.vue';
 
 // mypage
@@ -173,14 +176,40 @@ const router = createRouter({
       component: ProfileStep4,
     },
     {
+      path: '/profile-step-5',
+      name: 'ProfileStep5',
+      component: ProfileStep5,
+    },
+    {
       path: '/profile-complete',
       name: 'ProfileComplete',
       component: ProfileComplete,
     },
 
+    // 마이페이지용 ProfileStep1~5 (공통 컴포넌트 사용)
+    {
+      path: '/mypage/financetest/profile-step-1',
+      name: 'MypageProfileStep1',
+      component: ProfileStep1,
+    },
+    {
+      path: '/mypage/financetest/profile-step-2',
+      name: 'MypageProfileStep2',
+      component: ProfileStep2,
+    },
+    {
+      path: '/mypage/financetest/profile-step-3',
+      name: 'MypageProfileStep3',
+      component: ProfileStep3,
+    },
+    {
+      path: '/mypage/financetest/profile-step-4',
+      name: 'MypageProfileStep4',
+      component: ProfileStep4,
+    },
     {
       path: '/mypage/financetest/profile-step-5',
-      name: 'ProfileStep5',
+      name: 'MypageProfileStep5',
       component: ProfileStep5,
     },
     {
@@ -202,6 +231,11 @@ const router = createRouter({
       path: '/mypage/financetest/profile-step-9',
       name: 'ProfileStep9',
       component: ProfileStep9,
+    },
+    {
+      path: '/mypage/financetest/profile-step-10',
+      name: 'ProfileStep10',
+      component: ProfileStep10,
     },
     {
       path: '/certificate-password-change',
@@ -489,10 +523,16 @@ router.beforeEach(async (to) => {
     'ProfileStep3',
     'ProfileStep4',
     'ProfileStep5',
+    'MypageProfileStep1',
+    'MypageProfileStep2',
+    'MypageProfileStep3',
+    'MypageProfileStep4',
+    'MypageProfileStep5',
     'ProfileStep6',
     'ProfileStep7',
     'ProfileStep8',
     'ProfileStep9',
+    'ProfileStep10',
     'ARSAuth',
     'ArsVerification',
     'ArsComplete',

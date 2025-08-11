@@ -242,7 +242,7 @@ const handleSignup = async () => {
     if (response.status === 200) {
       await loginApi(form.email, form.password);
       router.push({
-        path: '/auth/signupcomplete',
+        path: '/auth/signup-complete',
         query: { userName: form.email.split('@')[0] },
       });
     } else {

@@ -17,8 +17,8 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 2</div>
-      <div class="question-desc">금융투자상품 취득 및 처분목적</div>
+      <div class="question-title">[문항 2] 금융투자상품 취득 및 처분목적</div>
+      <!-- <div class="question-desc">금융투자상품 취득 및 처분목적</div> -->
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -38,18 +38,18 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
 const route = useRoute();
 const options = [
-  "자산증식",
-  "주택마련",
-  "생활비",
-  "교육비",
-  "채무상환",
-  "결혼자금",
+  '자산증식',
+  '주택마련',
+  '생활비',
+  '교육비',
+  '채무상환',
+  '결혼자금',
 ];
 const selected = ref(null);
 
@@ -57,19 +57,24 @@ const selected = ref(null);
 const totalSteps = ref(4); // 기본값
 
 // 라우터 쿼리에서 from 파라미터 확인하여 단계 수 결정
-if (route.query.from === "mypage") {
-  totalSteps.value = 9; // 투자성향 재검사는 9단계
+if (route.query.from === 'mypage') {
+  totalSteps.value = 10; // 투자성향 재검사는 9단계
 } else {
-  totalSteps.value = 4; // 회원가입은 4단계
+  totalSteps.value = 5; // 회원가입은 4단계
 }
 
 const goBack = () => {
   router.back();
 };
 const goNext = () => {
-  // TODO: 다음 단계로 이동
-  const from = route.query.from || "mypage";
-  router.push(`/profile-step-3?from=${from}`);
+  if (selected.value !== null) {
+    const from = route.query.from || 'signup';
+    if (from === 'mypage') {
+      router.push(`/mypage/financetest/profile-step-3?from=mypage`);
+    } else {
+      router.push('/profile-step-3');
+    }
+  }
 };
 </script>
 
@@ -78,7 +83,7 @@ const goNext = () => {
   min-height: 100vh;
   background: #fff;
   padding: 0 20px 32px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 .nav-bar {
   display: flex;
@@ -126,7 +131,7 @@ const goNext = () => {
 .question-title {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   color: #222;
 }
 .question-desc {

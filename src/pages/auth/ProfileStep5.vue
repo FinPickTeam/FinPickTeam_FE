@@ -12,13 +12,13 @@
       <div
         v-for="step in totalSteps"
         :key="step"
-        :class="['progress', { active: step === 6 }]"
+        :class="['progress', { active: step === 5 }]"
       ></div>
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 6</div>
-      <div class="question-desc">연간 소득 현황</div>
+      <div class="question-title">[문항 5] 예상 투자 금액</div>
+      <!-- <div class="question-desc">투자경험</div> -->
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -30,36 +30,52 @@
         </div>
       </div>
     </div>
-    <!-- 다음 버튼 -->
+    <!-- 완료 버튼 -->
     <button class="next-btn" :disabled="selected === null" @click="goNext">
-      다음
+      완료
     </button>
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 const options = [
-  '2천만원 미만',
-  '2천만원 이상 ~ 5천만원 미만',
-  '5천만원 이상 ~ 7천만원 미만',
-  '7천만원 이상 ~ 1억원 미만',
-  '1억원 이상',
+  '5만 원 미만',
+  '5만 원 이상 ~ 10만 원 미만',
+  '10만 원 이상 ~ 20만 원 미만',
+  '20만 원 이상 ~ 50만 원 미만',
+  '50만 원 이상 ~ 100만 원 미만',
+  '100만 원 이상 ~ 200만 원 미만',
+  '100만 원 이상',
 ];
 const selected = ref(null);
 
-// 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
-const totalSteps = ref(10);
+// 동적 progress-bar 설정
+const totalSteps = ref(4); // 기본값
+
+// 라우터 쿼리에서 from 파라미터 확인하여 단계 수 결정
+if (route.query.from === 'mypage') {
+  totalSteps.value = 10; // 투자성향 재검사는 9단계
+} else {
+  totalSteps.value = 5; // 회원가입은 4단계
+}
 
 const goBack = () => {
   router.back();
 };
 const goNext = () => {
   if (selected.value !== null) {
-    router.push('/mypage/financetest/profile-step-7');
+    const from = route.query.from || 'signup';
+    if (from === 'mypage') {
+      router.push('/mypage/financetest/profile-step-6?from=mypage');
+    } else {
+      // 투자성향 분석 완료 후 ProfileComplete로 이동
+      router.push('/profile-complete');
+    }
   }
 };
 </script>
@@ -117,7 +133,7 @@ const goNext = () => {
 .question-title {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   color: #222;
 }
 .question-desc {
