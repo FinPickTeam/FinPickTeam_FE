@@ -50,7 +50,7 @@ const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
 function goToDetail() {
   // 상품id를 기반으로 상세 페이지로 이동
   const installmentProductId = props.product.id;
-  if (id) {
+  if (installmentProductId) {
     router.push(`/finance/installment/${installmentProductId}`);
   }
 }

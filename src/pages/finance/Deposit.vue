@@ -377,7 +377,7 @@ function closeFilter() {
 .tab.active {
   color: var(--color-main);
   font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-title-sub);
+  font-size: 20px;
 }
 
 .subtab-row {
