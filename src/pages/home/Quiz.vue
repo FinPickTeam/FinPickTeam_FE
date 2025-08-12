@@ -116,7 +116,7 @@
         </button>
       </div>
     </div>
-  </teleport>
+  </div>
 </template>
 
 <script setup>
@@ -355,17 +355,19 @@ onMounted(() => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .quiz-card {
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 24px;
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(255, 255, 255, 0.05);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 0 1px rgba(255, 255, 255, 0.05);
   padding: 32px 28px 28px 28px;
   max-width: 380px;
   width: 100%;
@@ -378,12 +380,12 @@ onMounted(() => {
 }
 
 @keyframes slideUp {
-  from { 
-    opacity: 0; 
+  from {
+    opacity: 0;
     transform: translateY(20px) scale(0.95);
   }
-  to { 
-    opacity: 1; 
+  to {
+    opacity: 1;
     transform: translateY(0) scale(1);
   }
 }
@@ -497,13 +499,17 @@ onMounted(() => {
 }
 
 .quiz-ox-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(67, 24, 209, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(67, 24, 209, 0.05) 0%,
+    rgba(99, 102, 241, 0.05) 100%
+  );
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -560,12 +566,12 @@ onMounted(() => {
 }
 
 @keyframes slideIn {
-  from { 
-    opacity: 0; 
+  from {
+    opacity: 0;
     transform: translateY(10px);
   }
-  to { 
-    opacity: 1; 
+  to {
+    opacity: 1;
     transform: translateY(0);
   }
 }
@@ -639,18 +645,18 @@ onMounted(() => {
 }
 
 @keyframes bounceIn {
-  0% { 
-    opacity: 0; 
+  0% {
+    opacity: 0;
     transform: scale(0.3);
   }
-  50% { 
+  50% {
     transform: scale(1.05);
   }
-  70% { 
+  70% {
     transform: scale(0.9);
   }
-  100% { 
-    opacity: 1; 
+  100% {
+    opacity: 1;
     transform: scale(1);
   }
 }

@@ -1,6 +1,5 @@
 <template>
-  <teleport to="body">
-    <div class="newsletter-modal-backdrop" @click.self="$emit('close')">
+  <div class="newsletter-modal-backdrop" @click.self="$emit('close')">
     <div class="newsletter-modal">
       <div class="newsletter-header">
         <span class="keyword-title">
@@ -68,9 +67,8 @@
           <p>현재 뉴스레터가 없습니다.</p>
         </div>
       </div>
-          </div>
     </div>
-  </teleport>
+  </div>
 </template>
 
 <script setup>
@@ -281,22 +279,15 @@ const goToLogin = () => {
 <style scoped>
 .newsletter-modal-backdrop {
   position: fixed;
-  top: 0;
+  z-index: 2000;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.28);
   display: flex;
-  justify-content: center;
   align-items: center;
-  z-index: 1000;
-  padding: 20px;
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  justify-content: center;
 }
 .newsletter-modal {
   background: #fff;
