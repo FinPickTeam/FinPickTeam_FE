@@ -482,7 +482,7 @@ onUnmounted(() => {
 }
 
 .obcal-list-amount.expense {
-  color: #e11d48;
+  color: #ef4444;
 }
 
 .obcal-list-name {

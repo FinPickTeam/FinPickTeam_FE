@@ -52,11 +52,9 @@ const formatAmount = (amount) => {
 
 <style scoped>
 .asset-summary-card {
-  background: #fff;
   margin: 16px;
   padding: 24px 20px;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
 }
 
 .asset-header {

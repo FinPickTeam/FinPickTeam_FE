@@ -1,20 +1,6 @@
 <!-- src/views/openbanking/AccountList.vue -->
 <template>
   <div class="page">
-    <BaseHeader>
-      <template #title>내 계좌</template>
-      <template #right>
-        <button
-          class="header-icon-btn"
-          @click="toggleMode"
-          aria-label="삭제 모드"
-          title="삭제 모드"
-        >
-          <font-awesome-icon :icon="['fas', 'trash']" />
-        </button>
-      </template>
-    </BaseHeader>
-
     <AssetSummaryCard
       title="총 자산"
       :amount="totalAssets"
@@ -206,7 +192,7 @@ onMounted(async () => {
 <style scoped>
 .page {
   height: calc(100dvh - 160px);
-  background: #f7f8fa;
+  background: var(--color-bg-light);
   padding: 16px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -221,7 +207,6 @@ onMounted(async () => {
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
-  transition: background 0.15s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -261,7 +246,7 @@ onMounted(async () => {
 .loading-spinner {
   width: 40px;
   height: 40px;
-  border: 4px solid #f3f3f3;
+  border: 3cm solid #f3f3f3;
   border-top: 4px solid #4318d1;
   border-radius: 50%;
   animation: spin 1s linear infinite;

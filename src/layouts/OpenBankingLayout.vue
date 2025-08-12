@@ -94,7 +94,8 @@ watch(
   (name) => {
     const whitePages = new Set([
       'OpenbankingCalendar',
-      'OpenbankingMonthlyReport',
+      'CalendarDetail',
+      'CalendarSelect',
     ]);
     document.body.classList.toggle(
       'ob-white-page',
@@ -165,7 +166,7 @@ const downloadPdf = () => {
   height: 100dvh;
   display: flex;
   flex-direction: column;
-  background: #f3f4f6;
+  background: var(--color-bg-light);
   font-family: 'Noto Sans KR', sans-serif;
   position: relative;
 }
@@ -200,9 +201,5 @@ const downloadPdf = () => {
   justify-content: center;
   width: 36px;
   height: 36px;
-}
-
-.obmyhome-icon-btn:hover {
-  background: #f3f3f3;
 }
 </style>

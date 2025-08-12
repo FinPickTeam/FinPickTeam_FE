@@ -409,7 +409,7 @@ const captureAndDownloadPDF = async () => {
 <style scoped>
 .monthly-report-container {
   padding: 16px;
-  background: #f7f8fa;
+  background: var(--color-bg-light);
   height: calc(
     100dvh - 160px
   ); /* 헤더(80px) + 네비게이션(80px) 높이만큼 빼기 */

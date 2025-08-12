@@ -52,7 +52,7 @@ defineProps({ title: { type: String, default: '' } });
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
-  transition: background 0.15s;
+
   min-width: 40px;
   min-height: 40px;
   display: flex;

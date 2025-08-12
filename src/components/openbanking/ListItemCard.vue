@@ -43,9 +43,7 @@ defineProps({
   background: #fff;
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
   transition: 0.15s;
-  border: 2px solid transparent;
   cursor: pointer;
 }
 .item.selected {

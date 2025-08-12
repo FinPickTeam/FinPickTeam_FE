@@ -1,15 +1,6 @@
 <!-- src/views/openbanking/CardList.vue -->
 <template>
   <div class="page">
-    <BaseHeader>
-      <template #title>내 카드</template>
-      <template #right>
-        <button class="header-icon-btn" @click="toggleMode">
-          <font-awesome-icon :icon="['fas', 'trash']" />
-        </button>
-      </template>
-    </BaseHeader>
-
     <AssetSummaryCard title="이번달 카드 사용 내역" :amount="cardTotalAmount" />
 
     <section class="group">
@@ -184,7 +175,7 @@ onMounted(() => {
   height: calc(
     100dvh - 160px
   ); /* 헤더(80px) + 네비게이션(80px) 높이만큼 빼기 */
-  background: #f7f8fa;
+  background: var(--color-bg-light);
   padding: 16px;
   display: flex;
   flex-direction: column;

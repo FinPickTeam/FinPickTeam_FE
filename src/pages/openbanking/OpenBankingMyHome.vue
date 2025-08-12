@@ -249,7 +249,6 @@ const onClickCard = (c) =>
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
-  border-bottom: 1px solid #ececec;
 }
 
 .obmyhome-report-buttons {
