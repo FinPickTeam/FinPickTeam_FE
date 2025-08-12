@@ -35,10 +35,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
+const route = useRoute();
 const options = [
   '경험없음',
   '예금, CMA, MMF, RP, 국공채 등',
@@ -53,7 +54,8 @@ const totalSteps = ref(10);
 
 const goNext = () => {
   if (selected.value !== null) {
-    router.push('/mypage/financetest/profile-step-9');
+    const from = route.query.from || 'mypage';
+    router.push(`/mypage/financetest/profile-step-9?from=${from}`);
   }
 };
 </script>

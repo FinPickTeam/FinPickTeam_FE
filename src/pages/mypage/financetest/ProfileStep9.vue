@@ -35,10 +35,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
+const route = useRoute();
 const options = [
   '제한된 손실을 감수하며 시중금리 수준의 수익을 기대',
   '원금의 일부 손실을 감수하며 시중금리보다 다소 높은 수준의 수익을 기대',
@@ -52,7 +53,8 @@ const totalSteps = ref(10);
 
 const goNext = () => {
   if (selected.value !== null) {
-    router.push('/mypage/financetest/profile-step-10?from=mypage');
+    const from = route.query.from || 'mypage';
+    router.push(`/mypage/financetest/profile-step-10?from=${from}`);
   }
 };
 </script>

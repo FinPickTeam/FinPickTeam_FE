@@ -13,7 +13,25 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 
 const goBack = () => {
-  router.back();
+  // 현재 경로에서 단계 번호 추출
+  const currentPath = router.currentRoute.value.path;
+  const stepMatch = currentPath.match(/profile-step-(\d+)/);
+
+  if (stepMatch) {
+    const currentStep = parseInt(stepMatch[1]);
+    const previousStep = currentStep - 1;
+
+    // ProfileStep1에서 뒤로가기하면 펀드 페이지로 이동
+    if (previousStep < 1) {
+      router.push('/finance/fund');
+    } else {
+      // 이전 단계로 이동
+      router.push(`/mypage/financetest/profile-step-${previousStep}`);
+    }
+  } else {
+    // 경로 매칭이 안되면 기본적으로 펀드 페이지로 이동
+    router.push('/finance/fund');
+  }
 };
 </script>
 

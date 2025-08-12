@@ -13,7 +13,6 @@
     <!-- 질문 -->
     <div class="question-section">
       <div class="question-title">[문항 1] 금융 지식 수준 / 이해도</div>
-      <!-- <div class="question-desc">금융 지식 수준 / 이해도</div> -->
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -33,35 +32,37 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
 const route = useRoute();
 const options = [
-  '해당 없음',
+  '금융투자상품에 투자해 본 경험이 없음',
   '널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 일정 부분 이해하고 있음',
   '널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 깊이 있게 이해하고 있음',
   '파생상품을 포함한 대부분의 금융투자상품의 구조 및 위험을 이해하고 있음',
 ];
 const selected = ref(null);
 
-// 동적 progress-bar 설정
-const totalSteps = ref(4); // 기본값
-
-// 라우터 쿼리에서 from 파라미터 확인하여 단계 수 결정
-if (route.query.from === 'mypage') {
-  totalSteps.value = 10; // 투자성향 재검사는 9단계
-} else {
-  totalSteps.value = 5; // 회원가입은 4단계
-}
+// 동적 progress-bar 설정 (computed로 변경)
+const totalSteps = computed(() => {
+  const from = route.query.from;
+  if (from === 'mypage' || from === 'fund') {
+    return 10; // 투자성향 재검사는 10단계
+  } else {
+    return 5; // 회원가입은 5단계
+  }
+});
 
 const goNext = () => {
   if (selected.value !== null) {
     const from = route.query.from || 'signup';
     if (from === 'mypage') {
-      router.push(`/mypage/financetest/profile-step-2?from=mypage`);
+      router.push(`/mypage/financetest/profile-step-2?from=${from}`);
+    } else if (from === 'fund') {
+      router.push(`/mypage/financetest/profile-step-6?from=${from}`);
     } else {
       router.push('/profile-step-2');
     }

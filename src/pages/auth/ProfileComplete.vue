@@ -178,6 +178,8 @@ const goToHome = () => {
   const from = route.query.from || 'signup';
   if (from === 'mypage') {
     router.push('/mypage');
+  } else if (from === 'fund') {
+    router.push('/finance/fund');
   } else {
     router.push('/');
   }
