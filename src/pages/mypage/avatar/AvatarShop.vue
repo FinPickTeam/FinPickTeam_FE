@@ -12,7 +12,13 @@
     <div class="avatar-section">
       <div class="avatar-container">
         <div class="avatar-pixel">
-          <img :src="avatarBase" class="avatar-img" alt="아바타" />
+          <img
+            :src="avatarBase"
+            class="avatar-img"
+            alt="아바타"
+            @error="handleImageError"
+            @load="handleImageLoad"
+          />
           <img
             v-if="tempWearingTitle"
             :src="
@@ -20,6 +26,7 @@
             "
             class="title-img"
             alt="칭호"
+            @error="handleImageError"
           />
           <img
             v-if="tempWearingShirt"
@@ -28,6 +35,7 @@
             "
             class="shirt-img"
             alt="상의"
+            @error="handleImageError"
           />
           <img
             v-if="tempWearingShoes"
@@ -36,6 +44,7 @@
             "
             class="shoes-img"
             alt="신발"
+            @error="handleImageError"
           />
           <!-- 여러 액세서리를 동시에 표시 -->
           <img
@@ -44,6 +53,7 @@
             :src="glassesItems.find((item) => item.id === glassesId)?.image"
             class="glasses-img"
             :alt="glassesItems.find((item) => item.id === glassesId)?.name"
+            @error="handleImageError"
           />
         </div>
       </div>
@@ -428,7 +438,12 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useAvatarStore } from "../../../stores/avatar.js";
-import { getCurrentCoin, getCumulativeCoin } from "@/api/mypage/avatar";
+import {
+  getCurrentCoin,
+  getCumulativeCoin,
+  getClothes,
+  insertClothe,
+} from "@/api/mypage/avatar";
 import { useAuthStore } from "@/stores/auth";
 import Navbar from "../../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -443,6 +458,10 @@ import { storeToRefs } from "pinia";
 
 // 아바타 이미지 import
 import avatarBase from "./avatarimg/avatar-base.png";
+
+// fallback 이미지 (기본 아바타가 로드되지 않을 경우)
+const fallbackAvatar =
+  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE2MCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNjAiIGhlaWdodD0iMjUwIiBmaWxsPSIjRkZGRkZGIi8+CjxjaXJjbGUgY3g9IjgwIiBjeT0iNjAiIHI9IjMwIiBmaWxsPSIjNjY2NjY2Ii8+CjxyZWN0IHg9IjUwIiB5PSI5MCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjNjY2NjY2Ii8+Cjwvc3ZnPgo=";
 import hatWizardhat from "./avatarimg/hat-3wizardhat.png";
 import hatSprout from "./avatarimg/hat-1sprout.png";
 import hatDosa from "./avatarimg/hat-4dosa.png";
@@ -522,110 +541,303 @@ const currentWearingTitle = computed(() => {
   return firstActiveTitle ? firstActiveTitle.id : null;
 });
 
-// 아바타 아이템 데이터
-const titleItems = ref([
-  {
-    id: "hat-1sprout",
-    name: "씨앗",
-    price: 50000,
-    image: hatSprout,
-    purchased: false,
-    wearing: false,
-    requiredPoints: 0,
-  },
-  {
-    id: "hat-2beginner",
-    name: "초보자 모자",
-    price: 25000,
-    image: hatBeginner,
-    purchased: false,
-    wearing: false,
-    requiredPoints: 20000,
-  },
-  {
-    id: "hat-3wizardhat",
-    name: "마법사 모자",
-    price: 100000,
-    image: hatWizardhat,
-    purchased: false,
-    wearing: false,
-    requiredPoints: 40000,
-  },
-  {
-    id: "hat-4dosa",
-    name: "도사 모자",
-    price: 75000,
-    image: hatDosa,
-    purchased: false,
-    wearing: false,
-    requiredPoints: 60000,
-  },
-]);
+// 아바타 아이템 데이터 (서버에서 가져온 데이터로 초기화)
+const titleItems = ref([]);
+const shirtItems = ref([]);
+const shoesItems = ref([]);
+const glassesItems = ref([]);
+const gifticonItems = ref([]);
 
-const shirtItems = ref([
-  {
-    id: "shirt-blue",
-    name: "파란 상의",
-    price: 50000,
-    image: shirtBlue,
-    purchased: false,
-    wearing: false,
-  },
-  {
-    id: "shirt-red",
-    name: "빨간 상의",
-    price: 50,
-    image: shirtRed,
-    purchased: false,
-    wearing: false,
-  },
-]);
+// 서버에서 의상 데이터 가져오기 (API 명세에 맞게 수정)
+const fetchUserClothes = async () => {
+  try {
+    const userId = authStore.user?.id || authStore.user?.userId || 1;
+    console.log("사용자 의상 조회 시작, userId:", userId);
 
-const shoesItems = ref([
-  {
-    id: "shoes-brown",
-    name: "갈색 신발",
-    price: 30,
-    image: shoesBrown,
-    purchased: false,
-    wearing: false,
-  },
-  {
-    id: "shoes",
-    name: "검은 신발",
-    price: 30,
-    image: shoes,
-    purchased: false,
-    wearing: false,
-  },
-]);
+    const response = await getClothes(userId);
+    console.log("사용자 의상 조회 결과:", response);
+    console.log("response.data:", response.data);
+    console.log("response.data.data:", response.data?.data);
 
-const glassesItems = ref([
-  {
-    id: "sport-glasses",
-    name: "스포츠 안경",
-    price: 40,
-    image: sportGlasses,
-    purchased: false,
-    wearing: false,
-  },
-  {
-    id: "etc-sunglasses",
-    name: "선글라스",
-    price: 40,
-    image: sunGlasses,
-    purchased: false,
-    wearing: false,
-  },
-  {
-    id: "etc-blush",
-    name: "블러시",
-    price: 30,
-    image: blush,
-    purchased: false,
-    wearing: false,
-  },
-]);
+    // API 명세에 따른 응답 구조 확인
+    // { "data": [...], "message": "string", "status": 0 }
+    if (response.data && response.data.status === 0 && response.data.data) {
+      const userClothes = response.data.data;
+      console.log("서버에서 받은 의상 데이터:", userClothes);
+      console.log("userClothes 타입:", typeof userClothes);
+      console.log(
+        "userClothes 길이:",
+        Array.isArray(userClothes) ? userClothes.length : "배열이 아님"
+      );
+
+      if (Array.isArray(userClothes) && userClothes.length > 0) {
+        console.log("첫 번째 아이템 예시:", userClothes[0]);
+        console.log(
+          "모든 아이템의 type:",
+          userClothes.map((item) => item.type)
+        );
+
+        // 타입별로 아이템 분류 (API 명세의 필드명 사용)
+        titleItems.value = userClothes
+          .filter((item) => item.type === "title")
+          .map((item) => ({
+            id: `hat-${item.itemId}sprout`, // 서버 itemId를 로컬 ID 형식으로 변환
+            name: item.name,
+            price: item.cost,
+            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
+            purchased: item.owned, // API 명세: owned
+            wearing: item.wearing, // API 명세: wearing
+            requiredPoints: getRequiredPoints(item.type, item.itemId),
+          }));
+
+        shirtItems.value = userClothes
+          .filter((item) => item.type === "shirt")
+          .map((item) => ({
+            id: `shirt-${item.itemId}`, // 서버 itemId를 로컬 ID 형식으로 변환
+            name: item.name,
+            price: item.cost,
+            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
+            purchased: item.owned, // API 명세: owned
+            wearing: item.wearing, // API 명세: wearing
+          }));
+
+        shoesItems.value = userClothes
+          .filter((item) => item.type === "shoes")
+          .map((item) => ({
+            id: `shoes-${item.itemId}`, // 서버 itemId를 로컬 ID 형식으로 변환
+            name: item.name,
+            price: item.cost,
+            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
+            purchased: item.owned, // API 명세: owned
+            wearing: item.wearing, // API 명세: wearing
+          }));
+
+        glassesItems.value = userClothes
+          .filter((item) => item.type === "glasses")
+          .map((item) => ({
+            id: `glasses-${item.itemId}`, // 서버 itemId를 로컬 ID 형식으로 변환
+            name: item.name,
+            price: item.cost,
+            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
+            purchased: item.owned, // API 명세: owned
+            wearing: item.wearing, // API 명세: wearing
+          }));
+
+        gifticonItems.value = userClothes
+          .filter((item) => item.type === "gifticon")
+          .map((item) => ({
+            id: `gifticon-${item.itemId}`, // 서버 itemId를 로컬 ID 형식으로 변환
+            name: item.name,
+            price: item.cost,
+            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
+            purchased: item.owned, // API 명세: owned
+            wearing: item.wearing, // API 명세: wearing
+          }));
+
+        console.log("아이템 데이터 변환 완료 (API 명세 준수):", {
+          titles: titleItems.value,
+          shirts: shirtItems.value,
+          shoes: shoesItems.value,
+          glasses: glassesItems.value,
+          gifticons: gifticonItems.value,
+        });
+
+        // 디버깅: 각 배열의 길이 확인
+        console.log("아이템 배열 길이:", {
+          titleItemsLength: titleItems.value.length,
+          shirtItemsLength: shirtItems.value.length,
+          shoesItemsLength: shoesItems.value.length,
+          glassesItemsLength: glassesItems.value.length,
+          gifticonItemsLength: gifticonItems.value.length,
+        });
+      } else {
+        console.log("서버 응답에 데이터가 없어서 기본 데이터 사용");
+        initializeDefaultItems();
+      }
+    } else {
+      console.log(
+        "API 응답 구조가 올바르지 않아서 기본 데이터 사용:",
+        response.data
+      );
+      initializeDefaultItems();
+    }
+  } catch (error) {
+    console.error("사용자 의상 조회 실패:", error);
+    console.log("에러로 인해 기본 데이터 사용");
+    // 에러 시 기본 데이터 사용
+    initializeDefaultItems();
+  }
+};
+
+// 아이템 이미지 매핑 함수
+const getItemImage = (type, itemId) => {
+  // 서버에서 받은 itemId에 따라 적절한 이미지 반환
+  const imageMap = {
+    title: {
+      1: "https://finpickbucket.s3.ap-northeast-2.amazonaws.com/level/SEEDLING/sprout.png", // 금융새싹
+      2: "https://finpickbucket.s3.ap-northeast-2.amazonaws.com/level/TRAINEE/beginner.png", // 금융견습
+      3: "https://finpickbucket.s3.ap-northeast-2.amazonaws.com/level/WIZARD/wizardhat.png", // 금융법사
+      4: "https://finpickbucket.s3.ap-northeast-2.amazonaws.com/level/MASTER/dosa.png", // 금융도사
+    },
+    shirt: {
+      1: shirtBlue,
+      2: shirtRed,
+    },
+    shoes: {
+      1: shoesBrown,
+      2: shoes,
+    },
+    glasses: {
+      1: sportGlasses,
+      2: sunGlasses,
+    },
+  };
+
+  const image = imageMap[type]?.[itemId] || avatarBase;
+  return image;
+};
+
+// 필요 포인트 매핑 함수
+const getRequiredPoints = (type, itemId) => {
+  const pointsMap = {
+    title: {
+      1: 0,
+      2: 20000,
+      3: 40000,
+      4: 60000,
+    },
+  };
+
+  return pointsMap[type]?.[itemId] || 0;
+};
+
+// 기본 아이템 데이터 초기화 함수에 추가
+const initializeDefaultItems = () => {
+  console.log("기본 아이템 데이터 초기화 시작");
+  console.log("초기화 전 아이템 배열 길이:", {
+    titleItemsLength: titleItems.value.length,
+    shirtItemsLength: shirtItems.value.length,
+    shoesItemsLength: shoesItems.value.length,
+    glassesItemsLength: glassesItems.value.length,
+  });
+  titleItems.value = [
+    {
+      id: "hat-1sprout",
+      name: "씨앗",
+      price: 50000,
+      image: hatSprout,
+      purchased: false,
+      wearing: false,
+      requiredPoints: 0,
+    },
+    {
+      id: "hat-2beginner",
+      name: "초보자 모자",
+      price: 25000,
+      image: hatBeginner,
+      purchased: false,
+      wearing: false,
+      requiredPoints: 20000,
+    },
+    {
+      id: "hat-3wizardhat",
+      name: "마법사 모자",
+      price: 100000,
+      image: hatWizardhat,
+      purchased: false,
+      wearing: false,
+      requiredPoints: 40000,
+    },
+    {
+      id: "hat-4dosa",
+      name: "도사 모자",
+      price: 75000,
+      image: hatDosa,
+      purchased: false,
+      wearing: false,
+      requiredPoints: 60000,
+    },
+  ];
+
+  shirtItems.value = [
+    {
+      id: "shirt-blue",
+      name: "파란 상의",
+      price: 50000,
+      image: shirtBlue,
+      purchased: false,
+      wearing: false,
+    },
+    {
+      id: "shirt-red",
+      name: "빨간 상의",
+      price: 50,
+      image: shirtRed,
+      purchased: false,
+      wearing: false,
+    },
+  ];
+
+  shoesItems.value = [
+    {
+      id: "shoes-brown",
+      name: "갈색 신발",
+      price: 30,
+      image: shoesBrown,
+      purchased: false,
+      wearing: false,
+    },
+    {
+      id: "shoes",
+      name: "검은 신발",
+      price: 30,
+      image: shoes,
+      purchased: false,
+      wearing: false,
+    },
+  ];
+
+  glassesItems.value = [
+    {
+      id: "sport-glasses",
+      name: "스포츠 안경",
+      price: 40,
+      image: sportGlasses,
+      purchased: false,
+      wearing: false,
+    },
+    {
+      id: "etc-sunglasses",
+      name: "선글라스",
+      price: 40,
+      image: sunGlasses,
+      purchased: false,
+      wearing: false,
+    },
+    {
+      id: "etc-blush",
+      name: "블러시",
+      price: 30,
+      image: blush,
+      purchased: false,
+      wearing: false,
+    },
+  ];
+  console.log("기본 아이템 데이터 초기화 완료:", {
+    titles: titleItems.value,
+    shirts: shirtItems.value,
+    shoes: shoesItems.value,
+    glasses: glassesItems.value,
+  });
+
+  // 디버깅: 기본 아이템 배열 길이 확인
+  console.log("기본 아이템 배열 길이:", {
+    titleItemsLength: titleItems.value.length,
+    shirtItemsLength: shirtItems.value.length,
+    shoesItemsLength: shoesItems.value.length,
+    glassesItemsLength: glassesItems.value.length,
+  });
+};
 
 // store 상태를 로컬 상태에 동기화하는 함수
 function syncStoreState() {
@@ -693,9 +905,9 @@ const fetchCurrentCoin = async () => {
     // 사용자 ID 가져오기
     const userId = authStore.user?.id || authStore.user?.userId || 1;
 
-    console.log("AvatarShop 포인트 데이터 가져오기 시작, userId:", userId);
+    console.log("AvatarShop 현재 포인트 데이터 가져오기 시작, userId:", userId);
     const response = await getCurrentCoin(userId);
-    console.log("받아온 포인트 데이터 (전체 응답):", response);
+    console.log("받아온 현재 포인트 데이터 (전체 응답):", response);
     console.log("response.data:", response.data);
     console.log("response.data.data:", response.data?.data);
     console.log("response.status:", response.status);
@@ -717,22 +929,22 @@ const fetchCurrentCoin = async () => {
         coinValue = response.data;
       }
 
-      console.log("추출된 코인 값:", coinValue);
+      console.log("추출된 현재 포인트 값:", coinValue);
 
       if (coinValue !== undefined && typeof coinValue === "number") {
         avatarStore.setCoin(coinValue);
-        console.log("AvatarShop 포인트 업데이트 완료:", coinValue);
+        console.log("AvatarShop 현재 포인트 업데이트 완료:", coinValue);
         console.log("avatarStore.coin 값:", avatarStore.coin);
       } else {
-        console.warn("유효한 코인 값을 찾을 수 없습니다:", response);
-        coinError.value = "포인트 데이터를 가져오는데 실패했습니다.";
+        console.warn("유효한 현재 포인트 값을 찾을 수 없습니다:", response);
+        coinError.value = "현재 포인트 데이터를 가져오는데 실패했습니다.";
       }
     } else {
-      console.warn("포인트 데이터 형식이 올바르지 않습니다:", response);
-      coinError.value = "포인트 데이터를 가져오는데 실패했습니다.";
+      console.warn("현재 포인트 데이터 형식이 올바르지 않습니다:", response);
+      coinError.value = "현재 포인트 데이터를 가져오는데 실패했습니다.";
     }
   } catch (err) {
-    console.error("AvatarShop 포인트 조회 에러:", err);
+    console.error("AvatarShop 현재 포인트 조회 에러:", err);
     console.error("에러 상세 정보:", {
       message: err.message,
       status: err.response?.status,
@@ -740,7 +952,68 @@ const fetchCurrentCoin = async () => {
       config: err.config,
     });
 
-    let errorMessage = "포인트를 불러오는데 실패했습니다.";
+    let errorMessage = "현재 포인트를 불러오는데 실패했습니다.";
+
+    if (err.response?.status === 401) {
+      errorMessage = "로그인이 필요합니다.";
+    } else if (err.response?.status === 404) {
+      errorMessage = "사용자 정보를 찾을 수 없습니다.";
+    } else if (err.response?.status === 500) {
+      errorMessage = "서버 오류가 발생했습니다.";
+    } else if (err.message) {
+      errorMessage = `연결 오류: ${err.message}`;
+    }
+
+    coinError.value = errorMessage;
+  } finally {
+    loadingCoin.value = false;
+  }
+};
+
+// 코인 상태 조회 (getCurCoin API 사용 - API 명세에 맞게 수정)
+const fetchCoinStatus = async () => {
+  try {
+    loadingCoin.value = true;
+    coinError.value = null;
+
+    // 인증 상태 확인
+    if (!authStore.isAuthenticated) {
+      console.warn("로그인이 필요합니다.");
+      return;
+    }
+
+    // 사용자 ID 가져오기
+    const userId = authStore.user?.id || authStore.user?.userId || 1;
+
+    console.log("코인 상태 조회 시작, userId:", userId);
+    const response = await getCurrentCoin(userId);
+    console.log("코인 상태 조회 결과:", response);
+
+    // API 명세에 따른 응답 구조 확인
+    // { "data": 0, "message": "string", "status": 0 }
+    if (
+      response.data &&
+      response.data.status === 0 &&
+      response.data.data !== undefined
+    ) {
+      const coinValue = response.data.data;
+      console.log("추출된 코인 값:", coinValue);
+
+      if (typeof coinValue === "number") {
+        avatarStore.setCoin(coinValue);
+        console.log("코인 상태 업데이트 완료:", coinValue);
+      } else {
+        console.warn("유효한 코인 데이터를 찾을 수 없습니다:", response);
+        coinError.value = "코인 상태를 가져오는데 실패했습니다.";
+      }
+    } else {
+      console.warn("API 응답 구조가 올바르지 않습니다:", response.data);
+      coinError.value = "코인 상태를 가져오는데 실패했습니다.";
+    }
+  } catch (err) {
+    console.error("코인 상태 조회 에러:", err);
+
+    let errorMessage = "코인 상태를 불러오는데 실패했습니다.";
 
     if (err.response?.status === 401) {
       errorMessage = "로그인이 필요합니다.";
@@ -831,35 +1104,36 @@ const fetchCumulativePoints = async () => {
   }
 };
 
-// 컴포넌트 마운트 시 store 상태 동기화 및 저장된 아바타 정보 불러오기
-onMounted(() => {
-  // 초기 상태로 설정 - 아무것도 구매하지 않은 상태
-  localStorage.removeItem("currentAvatar");
+// 이미지 에러 핸들링 함수
+const handleImageError = (event) => {
+  console.error("이미지 로드 실패:", event.target.src);
+  // fallback 이미지로 대체
+  if (event.target.src !== fallbackAvatar) {
+    event.target.src = fallbackAvatar;
+  }
+};
 
-  // 아바타 아이템 상태만 초기화 (코인은 유지)
-  avatarStore.avatarItems.value = {
-    titles: {
-      "hat-3wizardhat": { purchased: false, wearing: false },
-      "hat-1sprout": { purchased: false, wearing: false },
-      "hat-4dosa": { purchased: false, wearing: false },
-      "hat-2beginner": { purchased: false, wearing: false },
-    },
-    shirts: {
-      "shirt-blue": { purchased: false, wearing: false },
-      "shirt-red": { purchased: false, wearing: false },
-    },
-    shoes: {
-      "shoes-brown": { purchased: false, wearing: false },
-      shoes: { purchased: false, wearing: false },
-    },
-    glasses: {
-      "sport-glasses": { purchased: false, wearing: false },
-      "etc-sunglasses": { purchased: false, wearing: false },
-      "etc-blush": { purchased: false, wearing: false },
-    },
-  };
+const handleImageLoad = (event) => {
+  console.log("이미지 로드 성공:", event.target.src);
+};
 
-  avatarStore.loadAvatar();
+// 컴포넌트 마운트 시 서버에서 데이터 가져오기 및 초기화
+onMounted(async () => {
+  console.log("AvatarShop 컴포넌트 마운트 시작");
+
+  // 서버에서 사용자 의상 데이터 가져오기
+  await fetchUserClothes();
+  console.log("의상 데이터 로드 후 아이템 상태:", {
+    titleItems: titleItems.value.length,
+    shirtItems: shirtItems.value.length,
+    shoesItems: shoesItems.value.length,
+    glassesItems: glassesItems.value.length,
+  });
+
+  // 포인트 데이터 가져오기
+  fetchCoinStatus();
+
+  // 아바타 상태 동기화
   syncStoreState();
 
   // 기존 착용 상태를 임시 착용 상태로 복사
@@ -890,41 +1164,33 @@ onMounted(() => {
   if (wearingGlasses.length > 0) {
     tempWearingGlasses.value = wearingGlasses.map((item) => item.id);
   }
-
-  // 포인트 데이터 가져오기
-  fetchCurrentCoin();
-  // fetchCumulativePoints(); // 임시로 비활성화 - 백엔드 API 확인 필요
 });
 
-// 기프티콘 상품 데이터
+// 기프티콘 상품 데이터 (구매 상태 없음, 포인트 차감만)
 const coffeeItems = ref([
   {
     id: 1,
     name: "투썸플레이스 콜드브루 R",
     price: 8100,
     image: twosomeColdBrew,
-    purchased: false,
   },
   {
     id: 2,
     name: "투썸플레이스 카페라떼 R",
     price: 8,
     image: twosomeCafeLatte,
-    purchased: false,
   },
   {
     id: 3,
     name: "투썸플레이스 HOT 카페라떼 R",
     price: 80,
     image: twosomeHotLatte,
-    purchased: false,
   },
   {
     id: 4,
     name: "투썸플레이스 아메리카노 L",
     price: 80,
     image: twosomeAmericano,
-    purchased: false,
   },
 ]);
 
@@ -934,7 +1200,6 @@ const megaboxItems = ref([
     name: "메가박스 2인 패키지 (2D 일반관람권2+팝콘(L)+음료(R)2)",
     price: 54,
     image: megaboxPopcorn,
-    purchased: false,
   },
 ]);
 
@@ -944,7 +1209,6 @@ const artboxItems = ref([
     name: "CGV 영화관람권 1인인",
     price: 8,
     image: cgvTicket,
-    purchased: false,
   },
 ]);
 
@@ -954,14 +1218,12 @@ const lotteItems = ref([
     name: "롯데시네마 스위트콤보",
     price: 20000,
     image: lotteCombo,
-    purchased: false,
   },
   {
     id: 8,
     name: "롯데시네마 2D 1인 영화관람권",
     price: 20,
     image: cgvTicket,
-    purchased: false,
   },
 ]);
 
@@ -1034,7 +1296,7 @@ function actuallyBuyTitle(item) {
   // 대신 handleTitleItemClick 함수를 사용
   handleTitleItemClick(item);
 }
-function actuallyBuyShirt(item) {
+async function actuallyBuyShirt(item) {
   if (!item.purchased && avatarStore.coin < item.price) {
     showCoinError.value = true;
     setTimeout(() => {
@@ -1043,18 +1305,73 @@ function actuallyBuyShirt(item) {
     return;
   }
   if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-    avatarStore.setItemState("shirts", item.id, true, false); // 구매만 하고 착용은 안함
+    try {
+      const userId = authStore.user?.id || authStore.user?.userId || 1;
 
-    // 구매 후 자동으로 착용
-    handleBuyOrToggleShirt(item, true);
+      // itemId 처리: 디버깅 및 안전한 파싱
+      console.log("구매 시도 아이템 정보:", item);
+      console.log("item.id 타입:", typeof item.id, "값:", item.id);
+
+      let itemId;
+      if (typeof item.id === "string" && item.id.includes("-")) {
+        const parts = item.id.split("-");
+        console.log("split 결과:", parts);
+        itemId = parseInt(parts[1]); // shirt-1 -> 1
+      } else if (typeof item.id === "number") {
+        itemId = item.id; // 이미 숫자인 경우
+      } else {
+        itemId = parseInt(item.id); // 문자열을 숫자로 변환
+      }
+
+      console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
+
+      // itemId가 유효한 숫자인지 확인
+      if (isNaN(itemId)) {
+        console.error(
+          "유효하지 않은 itemId:",
+          itemId,
+          "원본 item.id:",
+          item.id
+        );
+        throw new Error("유효하지 않은 아이템 ID입니다.");
+      }
+
+      // 서버에 의상 구매 요청 (API 명세에 따른 필수 파라미터만)
+      const purchaseData = {
+        userId: userId,
+        itemId: itemId,
+      };
+
+      const response = await insertClothe(purchaseData);
+
+      // API 명세에 따른 응답 확인: { "data": "string", "message": "string", "status": 0 }
+      if (response.data && response.data.status === 0) {
+        // 구매 성공 시 로컬 상태 업데이트
+        item.purchased = true;
+        avatarStore.setItemState("shirts", item.id, true, false);
+
+        // 구매 후 자동으로 착용
+        handleBuyOrToggleShirt(item, true);
+
+        // 서버에서 업데이트된 포인트 가져오기
+        await fetchCoinStatus();
+
+        console.log("상의 구매 완료, 차감된 포인트:", item.price);
+      }
+    } catch (error) {
+      console.error("상의 구매 실패:", error);
+      // 구매 실패 시 에러 처리
+      showCoinError.value = true;
+      setTimeout(() => {
+        showCoinError.value = false;
+      }, 2000);
+    }
   } else {
     // 착용/해제 토글 기존 로직
     handleBuyOrToggleShirt(item, true);
   }
 }
-function actuallyBuyShoes(item) {
+async function actuallyBuyShoes(item) {
   if (!item.purchased && avatarStore.coin < item.price) {
     showCoinError.value = true;
     setTimeout(() => {
@@ -1063,17 +1380,72 @@ function actuallyBuyShoes(item) {
     return;
   }
   if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-    avatarStore.setItemState("shoes", item.id, true, false); // 구매만 하고 착용은 안함
+    try {
+      const userId = authStore.user?.id || authStore.user?.userId || 1;
 
-    // 구매 후 자동으로 착용
-    handleBuyOrToggleShoes(item, true);
+      // itemId 처리: 디버깅 및 안전한 파싱
+      console.log("구매 시도 아이템 정보:", item);
+      console.log("item.id 타입:", typeof item.id, "값:", item.id);
+
+      let itemId;
+      if (typeof item.id === "string" && item.id.includes("-")) {
+        const parts = item.id.split("-");
+        console.log("split 결과:", parts);
+        itemId = parseInt(parts[1]); // shoes-1 -> 1
+      } else if (typeof item.id === "number") {
+        itemId = item.id; // 이미 숫자인 경우
+      } else {
+        itemId = parseInt(item.id); // 문자열을 숫자로 변환
+      }
+
+      console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
+
+      // itemId가 유효한 숫자인지 확인
+      if (isNaN(itemId)) {
+        console.error(
+          "유효하지 않은 itemId:",
+          itemId,
+          "원본 item.id:",
+          item.id
+        );
+        throw new Error("유효하지 않은 아이템 ID입니다.");
+      }
+
+      // 서버에 의상 구매 요청 (API 명세에 따른 필수 파라미터만)
+      const purchaseData = {
+        userId: userId,
+        itemId: itemId,
+      };
+
+      const response = await insertClothe(purchaseData);
+
+      // API 명세에 따른 응답 확인: { "data": "string", "message": "string", "status": 0 }
+      if (response.data && response.data.status === 0) {
+        // 구매 성공 시 로컬 상태 업데이트
+        item.purchased = true;
+        avatarStore.setItemState("shoes", item.id, true, false);
+
+        // 구매 후 자동으로 착용
+        handleBuyOrToggleShoes(item, true);
+
+        // 서버에서 업데이트된 포인트 가져오기
+        await fetchCoinStatus();
+
+        console.log("신발 구매 완료, 차감된 포인트:", item.price);
+      }
+    } catch (error) {
+      console.error("신발 구매 실패:", error);
+      // 구매 실패 시 에러 처리
+      showCoinError.value = true;
+      setTimeout(() => {
+        showCoinError.value = false;
+      }, 2000);
+    }
   } else {
     handleBuyOrToggleShoes(item, true);
   }
 }
-function actuallyBuyGlasses(item) {
+async function actuallyBuyGlasses(item) {
   if (!item.purchased && avatarStore.coin < item.price) {
     showCoinError.value = true;
     setTimeout(() => {
@@ -1082,17 +1454,72 @@ function actuallyBuyGlasses(item) {
     return;
   }
   if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-    avatarStore.setItemState("glasses", item.id, true, false); // 구매만 하고 착용은 안함
+    try {
+      const userId = authStore.user?.id || authStore.user?.userId || 1;
 
-    // 구매 후 자동으로 착용
-    handleBuyOrToggleGlasses(item, true);
+      // itemId 처리: 디버깅 및 안전한 파싱
+      console.log("구매 시도 아이템 정보:", item);
+      console.log("item.id 타입:", typeof item.id, "값:", item.id);
+
+      let itemId;
+      if (typeof item.id === "string" && item.id.includes("-")) {
+        const parts = item.id.split("-");
+        console.log("split 결과:", parts);
+        itemId = parseInt(parts[1]); // glasses-1 -> 1
+      } else if (typeof item.id === "number") {
+        itemId = item.id; // 이미 숫자인 경우
+      } else {
+        itemId = parseInt(item.id); // 문자열을 숫자로 변환
+      }
+
+      console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
+
+      // itemId가 유효한 숫자인지 확인
+      if (isNaN(itemId)) {
+        console.error(
+          "유효하지 않은 itemId:",
+          itemId,
+          "원본 item.id:",
+          item.id
+        );
+        throw new Error("유효하지 않은 아이템 ID입니다.");
+      }
+
+      // 서버에 의상 구매 요청 (API 명세에 따른 필수 파라미터만)
+      const purchaseData = {
+        userId: userId,
+        itemId: itemId,
+      };
+
+      const response = await insertClothe(purchaseData);
+
+      // API 명세에 따른 응답 확인: { "data": "string", "message": "string", "status": 0 }
+      if (response.data && response.data.status === 0) {
+        // 구매 성공 시 로컬 상태 업데이트
+        item.purchased = true;
+        avatarStore.setItemState("glasses", item.id, true, false);
+
+        // 구매 후 자동으로 착용
+        handleBuyOrToggleGlasses(item, true);
+
+        // 서버에서 업데이트된 포인트 가져오기
+        await fetchCoinStatus();
+
+        console.log("액세서리 구매 완료, 차감된 포인트:", item.price);
+      }
+    } catch (error) {
+      console.error("액세서리 구매 실패:", error);
+      // 구매 실패 시 에러 처리
+      showCoinError.value = true;
+      setTimeout(() => {
+        showCoinError.value = false;
+      }, 2000);
+    }
   } else {
     handleBuyOrToggleGlasses(item, true);
   }
 }
-function actuallyBuyGifticon(item) {
+async function actuallyBuyGifticon(item) {
   if (avatarStore.coin < item.price) {
     showCoinError.value = true;
     setTimeout(() => {
@@ -1100,15 +1527,63 @@ function actuallyBuyGifticon(item) {
     }, 2000);
     return;
   }
-  avatarStore.coin -= item.price;
-  item.purchased = true;
+
+  try {
+    const userId = authStore.user?.id || authStore.user?.userId || 1;
+
+    // itemId 처리: 디버깅 및 안전한 파싱
+    console.log("구매 시도 아이템 정보:", item);
+    console.log("item.id 타입:", typeof item.id, "값:", item.id);
+
+    let itemId;
+    if (typeof item.id === "string" && item.id.includes("-")) {
+      const parts = item.id.split("-");
+      console.log("split 결과:", parts);
+      itemId = parseInt(parts[1]); // gifticon-1 -> 1
+    } else if (typeof item.id === "number") {
+      itemId = item.id; // 이미 숫자인 경우
+    } else {
+      itemId = parseInt(item.id); // 문자열을 숫자로 변환
+    }
+
+    console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
+
+    // itemId가 유효한 숫자인지 확인
+    if (isNaN(itemId)) {
+      console.error("유효하지 않은 itemId:", itemId, "원본 item.id:", item.id);
+      throw new Error("유효하지 않은 아이템 ID입니다.");
+    }
+
+    // 서버에 기프티콘 구매 요청 (API 명세에 따른 필수 파라미터만)
+    const purchaseData = {
+      userId: userId,
+      itemId: itemId,
+    };
+
+    const response = await insertClothe(purchaseData);
+
+    // API 명세에 따른 응답 확인: { "data": "string", "message": "string", "status": 0 }
+    if (response.data && response.data.status === 0) {
+      // 구매 성공 시 서버에서 업데이트된 포인트 가져오기
+      await fetchCoinStatus();
+
+      console.log("기프티콘 구매 완료, 차감된 포인트:", item.price);
+    }
+  } catch (error) {
+    console.error("기프티콘 구매 실패:", error);
+    // 구매 실패 시 에러 처리
+    showCoinError.value = true;
+    setTimeout(() => {
+      showCoinError.value = false;
+    }, 2000);
+  }
 }
 
 function goBack() {
   router.back();
 }
 
-function handleBuyOrToggleShirt(item, skipModal = false) {
+async function handleBuyOrToggleShirt(item, skipModal = false) {
   if (!item.purchased && !skipModal) {
     openPurchaseModal(item, "shirt");
     return;
@@ -1121,9 +1596,67 @@ function handleBuyOrToggleShirt(item, skipModal = false) {
     return;
   }
   if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-    avatarStore.setItemState("shirts", item.id, true, false); // 구매 상태만 설정
+    try {
+      const userId = authStore.user?.id || authStore.user?.userId || 1;
+
+      // itemId 처리: 디버깅 및 안전한 파싱
+      console.log("구매 시도 아이템 정보:", item);
+      console.log("item.id 타입:", typeof item.id, "값:", item.id);
+
+      let itemId;
+      if (typeof item.id === "string" && item.id.includes("-")) {
+        const parts = item.id.split("-");
+        console.log("split 결과:", parts);
+        itemId = parseInt(parts[1]); // shirt-1 -> 1
+      } else if (typeof item.id === "number") {
+        itemId = item.id; // 이미 숫자인 경우
+      } else {
+        itemId = parseInt(item.id); // 문자열을 숫자로 변환
+      }
+
+      console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
+
+      // itemId가 유효한 숫자인지 확인
+      if (isNaN(itemId)) {
+        console.error(
+          "유효하지 않은 itemId:",
+          itemId,
+          "원본 item.id:",
+          item.id
+        );
+        throw new Error("유효하지 않은 아이템 ID입니다.");
+      }
+
+      // 서버에 의상 구매 요청 (API 명세에 따른 필수 파라미터만)
+      const purchaseData = {
+        userId: userId,
+        itemId: itemId,
+      };
+
+      const response = await insertClothe(purchaseData);
+
+      // API 명세에 따른 응답 확인: { "data": "string", "message": "string", "status": 0 }
+      if (response.data && response.data.status === 0) {
+        // 구매 성공 시 로컬 상태 업데이트
+        item.purchased = true;
+        avatarStore.setItemState("shirts", item.id, true, false);
+
+        // 서버에서 업데이트된 포인트 가져오기
+        await fetchCoinStatus();
+
+        console.log(
+          "상의 구매 완료 (handleBuyOrToggle), 차감된 포인트:",
+          item.price
+        );
+      }
+    } catch (error) {
+      console.error("상의 구매 실패 (handleBuyOrToggle):", error);
+      showCoinError.value = true;
+      setTimeout(() => {
+        showCoinError.value = false;
+      }, 2000);
+      return;
+    }
   }
 
   // 임시 착용 상태 토글
@@ -1136,7 +1669,7 @@ function handleBuyOrToggleShirt(item, skipModal = false) {
   }
 }
 
-function handleBuyOrToggleShoes(item, skipModal = false) {
+async function handleBuyOrToggleShoes(item, skipModal = false) {
   if (!item.purchased && !skipModal) {
     openPurchaseModal(item, "shoes");
     return;
@@ -1149,9 +1682,67 @@ function handleBuyOrToggleShoes(item, skipModal = false) {
     return;
   }
   if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-    avatarStore.setItemState("shoes", item.id, true, false); // 구매 상태만 설정
+    try {
+      const userId = authStore.user?.id || authStore.user?.userId || 1;
+
+      // itemId 처리: 디버깅 및 안전한 파싱
+      console.log("구매 시도 아이템 정보:", item);
+      console.log("item.id 타입:", typeof item.id, "값:", item.id);
+
+      let itemId;
+      if (typeof item.id === "string" && item.id.includes("-")) {
+        const parts = item.id.split("-");
+        console.log("split 결과:", parts);
+        itemId = parseInt(parts[1]); // shoes-1 -> 1
+      } else if (typeof item.id === "number") {
+        itemId = item.id; // 이미 숫자인 경우
+      } else {
+        itemId = parseInt(item.id); // 문자열을 숫자로 변환
+      }
+
+      console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
+
+      // itemId가 유효한 숫자인지 확인
+      if (isNaN(itemId)) {
+        console.error(
+          "유효하지 않은 itemId:",
+          itemId,
+          "원본 item.id:",
+          item.id
+        );
+        throw new Error("유효하지 않은 아이템 ID입니다.");
+      }
+
+      // 서버에 의상 구매 요청 (API 명세에 따른 필수 파라미터만)
+      const purchaseData = {
+        userId: userId,
+        itemId: itemId,
+      };
+
+      const response = await insertClothe(purchaseData);
+
+      // API 명세에 따른 응답 확인: { "data": "string", "message": "string", "status": 0 }
+      if (response.data && response.data.status === 0) {
+        // 구매 성공 시 로컬 상태 업데이트
+        item.purchased = true;
+        avatarStore.setItemState("shoes", item.id, true, false);
+
+        // 서버에서 업데이트된 포인트 가져오기
+        await fetchCoinStatus();
+
+        console.log(
+          "신발 구매 완료 (handleBuyOrToggle), 차감된 포인트:",
+          item.price
+        );
+      }
+    } catch (error) {
+      console.error("신발 구매 실패 (handleBuyOrToggle):", error);
+      showCoinError.value = true;
+      setTimeout(() => {
+        showCoinError.value = false;
+      }, 2000);
+      return;
+    }
   }
 
   // 임시 착용 상태 토글
@@ -1164,7 +1755,7 @@ function handleBuyOrToggleShoes(item, skipModal = false) {
   }
 }
 
-function handleBuyOrToggleGlasses(item, skipModal = false) {
+async function handleBuyOrToggleGlasses(item, skipModal = false) {
   if (!item.purchased && !skipModal) {
     openPurchaseModal(item, "glasses");
     return;
@@ -1177,9 +1768,67 @@ function handleBuyOrToggleGlasses(item, skipModal = false) {
     return;
   }
   if (!item.purchased) {
-    avatarStore.coin -= item.price;
-    item.purchased = true;
-    avatarStore.setItemState("glasses", item.id, true, false); // 구매 상태만 설정
+    try {
+      const userId = authStore.user?.id || authStore.user?.userId || 1;
+
+      // itemId 처리: 디버깅 및 안전한 파싱
+      console.log("구매 시도 아이템 정보:", item);
+      console.log("item.id 타입:", typeof item.id, "값:", item.id);
+
+      let itemId;
+      if (typeof item.id === "string" && item.id.includes("-")) {
+        const parts = item.id.split("-");
+        console.log("split 결과:", parts);
+        itemId = parseInt(parts[1]); // glasses-1 -> 1
+      } else if (typeof item.id === "number") {
+        itemId = item.id; // 이미 숫자인 경우
+      } else {
+        itemId = parseInt(item.id); // 문자열을 숫자로 변환
+      }
+
+      console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
+
+      // itemId가 유효한 숫자인지 확인
+      if (isNaN(itemId)) {
+        console.error(
+          "유효하지 않은 itemId:",
+          itemId,
+          "원본 item.id:",
+          item.id
+        );
+        throw new Error("유효하지 않은 아이템 ID입니다.");
+      }
+
+      // 서버에 의상 구매 요청 (API 명세에 따른 필수 파라미터만)
+      const purchaseData = {
+        userId: userId,
+        itemId: itemId,
+      };
+
+      const response = await insertClothe(purchaseData);
+
+      // API 명세에 따른 응답 확인: { "data": "string", "message": "string", "status": 0 }
+      if (response.data && response.data.status === 0) {
+        // 구매 성공 시 로컬 상태 업데이트
+        item.purchased = true;
+        avatarStore.setItemState("glasses", item.id, true, false);
+
+        // 서버에서 업데이트된 포인트 가져오기
+        await fetchCoinStatus();
+
+        console.log(
+          "액세서리 구매 완료 (handleBuyOrToggle), 차감된 포인트:",
+          item.price
+        );
+      }
+    } catch (error) {
+      console.error("액세서리 구매 실패 (handleBuyOrToggle):", error);
+      showCoinError.value = true;
+      setTimeout(() => {
+        showCoinError.value = false;
+      }, 2000);
+      return;
+    }
   }
 
   // 임시 착용 상태 토글 (다른 아이템에 영향 없음)
@@ -1193,8 +1842,8 @@ function handleBuyOrToggleGlasses(item, skipModal = false) {
   }
 }
 
-function handleBuyGifticon(item, skipModal = false) {
-  if (!item.purchased && !skipModal) {
+async function handleBuyGifticon(item, skipModal = false) {
+  if (!skipModal) {
     openPurchaseModal(item, "gifticon");
     return;
   }
@@ -1205,8 +1854,58 @@ function handleBuyGifticon(item, skipModal = false) {
     }, 2000);
     return;
   }
-  avatarStore.coin -= item.price;
-  item.purchased = true;
+
+  try {
+    const userId = authStore.user?.id || authStore.user?.userId || 1;
+
+    // itemId 처리: 디버깅 및 안전한 파싱
+    console.log("구매 시도 아이템 정보:", item);
+    console.log("item.id 타입:", typeof item.id, "값:", item.id);
+
+    let itemId;
+    if (typeof item.id === "string" && item.id.includes("-")) {
+      const parts = item.id.split("-");
+      console.log("split 결과:", parts);
+      itemId = parseInt(parts[1]); // gifticon-1 -> 1
+    } else if (typeof item.id === "number") {
+      itemId = item.id; // 이미 숫자인 경우
+    } else {
+      itemId = parseInt(item.id); // 문자열을 숫자로 변환
+    }
+
+    console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
+
+    // itemId가 유효한 숫자인지 확인
+    if (isNaN(itemId)) {
+      console.error("유효하지 않은 itemId:", itemId, "원본 item.id:", item.id);
+      throw new Error("유효하지 않은 아이템 ID입니다.");
+    }
+
+    // 서버에 기프티콘 구매 요청 (API 명세에 따른 필수 파라미터만)
+    const purchaseData = {
+      userId: userId,
+      itemId: itemId,
+    };
+
+    const response = await insertClothe(purchaseData);
+
+    // API 명세에 따른 응답 확인: { "data": "string", "message": "string", "status": 0 }
+    if (response.data && response.data.status === 0) {
+      // 구매 성공 시 새로운 코인 상태 API로 업데이트된 포인트 가져오기
+      await fetchCoinStatus();
+
+      console.log(
+        "기프티콘 구매 완료 (handleBuyGifticon), 차감된 포인트:",
+        item.price
+      );
+    }
+  } catch (error) {
+    console.error("기프티콘 구매 실패 (handleBuyGifticon):", error);
+    showCoinError.value = true;
+    setTimeout(() => {
+      showCoinError.value = false;
+    }, 2000);
+  }
 }
 
 function handleTitleItemClick(item) {
@@ -1222,7 +1921,7 @@ function handleTitleItemClick(item) {
   tempWearingTitle.value = item.id;
 }
 
-function wearAvatar() {
+async function wearAvatar() {
   // 임시 착용 상태를 실제로 적용
   if (
     !tempWearingTitle.value &&
@@ -1244,82 +1943,91 @@ function wearAvatar() {
     }
   }
 
-  // 기존 착용 상태 초기화
-  titleItems.value.forEach((item) => {
-    item.wearing = false;
-    avatarStore.setItemState("titles", item.id, true, false);
-  });
-  shirtItems.value.forEach((item) => {
-    item.wearing = false;
-    avatarStore.setItemState("shirts", item.id, item.purchased, false);
-  });
-  shoesItems.value.forEach((item) => {
-    item.wearing = false;
-    avatarStore.setItemState("shoes", item.id, item.purchased, false);
-  });
-  glassesItems.value.forEach((item) => {
-    item.wearing = false;
-    avatarStore.setItemState("glasses", item.id, item.purchased, false);
-  });
+  try {
+    // 서버 API 호출 없이 로컬 상태만 업데이트 (임시 해결책)
+    console.log("아바타 착용 - 로컬 상태 업데이트");
 
-  // 임시 착용 상태를 실제로 적용
-  if (tempWearingTitle.value) {
-    const titleItem = titleItems.value.find(
-      (item) => item.id === tempWearingTitle.value
-    );
-    if (titleItem) {
-      titleItem.wearing = true;
-      avatarStore.setItemState("titles", titleItem.id, true, true);
-    }
-  }
+    // 기존 착용 상태 초기화
+    titleItems.value.forEach((item) => {
+      item.wearing = false;
+      avatarStore.setItemState("titles", item.id, true, false);
+    });
+    shirtItems.value.forEach((item) => {
+      item.wearing = false;
+      avatarStore.setItemState("shirts", item.id, item.purchased, false);
+    });
+    shoesItems.value.forEach((item) => {
+      item.wearing = false;
+      avatarStore.setItemState("shoes", item.id, item.purchased, false);
+    });
+    glassesItems.value.forEach((item) => {
+      item.wearing = false;
+      avatarStore.setItemState("glasses", item.id, item.purchased, false);
+    });
 
-  if (tempWearingShirt.value) {
-    const shirtItem = shirtItems.value.find(
-      (item) => item.id === tempWearingShirt.value
-    );
-    if (shirtItem) {
-      shirtItem.wearing = true;
-      avatarStore.setItemState(
-        "shirts",
-        shirtItem.id,
-        shirtItem.purchased,
-        true
+    // 임시 착용 상태를 실제로 적용
+    if (tempWearingTitle.value) {
+      const titleItem = titleItems.value.find(
+        (item) => item.id === tempWearingTitle.value
       );
+      if (titleItem) {
+        titleItem.wearing = true;
+        avatarStore.setItemState("titles", titleItem.id, true, true);
+      }
     }
-  }
 
-  if (tempWearingShoes.value) {
-    const shoesItem = shoesItems.value.find(
-      (item) => item.id === tempWearingShoes.value
-    );
-    if (shoesItem) {
-      shoesItem.wearing = true;
-      avatarStore.setItemState(
-        "shoes",
-        shoesItem.id,
-        shoesItem.purchased,
-        true
+    if (tempWearingShirt.value) {
+      const shirtItem = shirtItems.value.find(
+        (item) => item.id === tempWearingShirt.value
       );
+      if (shirtItem) {
+        shirtItem.wearing = true;
+        avatarStore.setItemState(
+          "shirts",
+          shirtItem.id,
+          shirtItem.purchased,
+          true
+        );
+      }
     }
-  }
 
-  tempWearingGlasses.value.forEach((glassesId) => {
-    const glassesItem = glassesItems.value.find(
-      (item) => item.id === glassesId
-    );
-    if (glassesItem) {
-      glassesItem.wearing = true;
-      avatarStore.setItemState(
-        "glasses",
-        glassesItem.id,
-        glassesItem.purchased,
-        true
+    if (tempWearingShoes.value) {
+      const shoesItem = shoesItems.value.find(
+        (item) => item.id === tempWearingShoes.value
       );
+      if (shoesItem) {
+        shoesItem.wearing = true;
+        avatarStore.setItemState(
+          "shoes",
+          shoesItem.id,
+          shoesItem.purchased,
+          true
+        );
+      }
     }
-  });
 
-  // 성공 모달 표시
-  showSuccessModal.value = true;
+    tempWearingGlasses.value.forEach((glassesId) => {
+      const glassesItem = glassesItems.value.find(
+        (item) => item.id === glassesId
+      );
+      if (glassesItem) {
+        glassesItem.wearing = true;
+        avatarStore.setItemState(
+          "glasses",
+          glassesItem.id,
+          glassesItem.purchased,
+          true
+        );
+      }
+    });
+
+    // 성공 모달 표시
+    showSuccessModal.value = true;
+    console.log("아바타 착용 완료 - 로컬 상태 업데이트됨");
+  } catch (error) {
+    console.error("아바타 업데이트 실패:", error);
+    alert("아바타 업데이트에 실패했습니다. 다시 시도해주세요.");
+  }
 }
 </script>
 
@@ -1408,6 +2116,9 @@ function wearAvatar() {
   width: 160px;
   height: 250px;
   z-index: 1;
+  object-fit: contain;
+  background: transparent;
+  display: block;
 }
 
 .title-img {
@@ -1513,9 +2224,9 @@ function wearAvatar() {
   display: flex;
   gap: 6px;
   margin: 0 0 12px 24px;
-  justify-content: center;
+  justify-content: flex-start;
   max-width: 390px;
-  margin-left: auto;
+  margin-left: 24px;
   margin-right: auto;
 }
 

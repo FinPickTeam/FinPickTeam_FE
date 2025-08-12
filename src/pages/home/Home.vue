@@ -2,7 +2,16 @@
   <div class="home-container">
     <main class="main-content">
       <!-- 캐릭터 말풍선 -->
-      <div class="quiz-bubble">오늘은 퀴즈 풀어</div>
+      <div class="quiz-bubble">
+        <img :src="textballonImage" class="textballon-img" alt="말풍선" />
+        <div class="quiz-text">
+          <span v-if="loadingBubble" class="loading-text">로딩 중...</span>
+          <span v-else-if="bubbleError" class="error-text"
+            >오늘은 퀴즈 풀어</span
+          >
+          <span v-else>{{ bubbleText }}</span>
+        </div>
+      </div>
 
       <!-- 아바타 섹션 -->
       <div class="avatar-section">
@@ -45,18 +54,78 @@
             <span class="level-title">{{ getCurrentLevelTitle }}</span>
           </div>
           <div class="next-level-info">
-            {{ getNextLevelTitle }}까지 {{ getProgressPercentage }}%
+            <span v-if="loadingCumulative" class="loading-text"
+              >로딩 중...</span
+            >
+            <span v-else-if="cumulativeError" class="error-text">-</span>
+            <span v-else
+              >{{ getNextLevelTitle }}까지 {{ getProgressPercentage }}%</span
+            >
           </div>
         </div>
         <div class="progress-bar-container">
           <span class="progress-bracket">[</span>
           <div class="progress-bar">
+            <div v-if="loadingCumulative" class="progress-fill loading"></div>
             <div
+              v-else-if="cumulativeError"
+              class="progress-fill error"
+              :style="{ width: '0%' }"
+            ></div>
+            <div
+              v-else
               class="progress-fill"
               :style="{ width: getProgressPercentage + '%' }"
             ></div>
+
+            <!-- 포인트 정보를 경험치 바 안에 표시 -->
+            <div class="points-display-inside">
+              <span v-if="loadingCumulative" class="loading-text"
+                >로딩 중...</span
+              >
+              <span v-else-if="cumulativeError" class="error-text">-</span>
+              <span v-else>
+                <span class="current-points">{{
+                  formatNumber(totalEarnedPoints)
+                }}</span>
+                <span class="separator">/</span>
+                <span class="target-points">{{
+                  formatNumber(getTargetPoints)
+                }}</span>
+              </span>
+            </div>
           </div>
           <span class="progress-bracket">]</span>
+        </div>
+
+        <!-- 포인트 정보 표시 (기존 위치는 숨김) -->
+        <div class="points-info" style="display: none">
+          <div class="points-display">
+            <span v-if="loadingCumulative" class="loading-text"
+              >로딩 중...</span
+            >
+            <span v-else-if="cumulativeError" class="error-text">-</span>
+            <span v-else>
+              <span class="current-points">{{
+                formatNumber(totalEarnedPoints)
+              }}</span>
+              <span class="separator">/</span>
+              <span class="target-points">{{
+                formatNumber(getTargetPoints)
+              }}</span>
+            </span>
+          </div>
+          <div class="points-status">
+            <span v-if="loadingCumulative" class="loading-text"
+              >포인트 정보 로딩 중...</span
+            >
+            <span v-else-if="cumulativeError" class="error-text"
+              >포인트 정보를 불러올 수 없습니다</span
+            >
+            <span v-else-if="getCurrentLevel >= 4" class="status-complete"
+              >🎉 모든 레벨 달성!</span
+            >
+          </div>
         </div>
       </div>
 
@@ -84,7 +153,8 @@ import Quiz from "./Quiz.vue";
 import Newsletter from "./Newsletter.vue";
 import { ref, computed } from "vue";
 import { useAvatarStore } from "../../stores/avatar.js";
-import { getCumulativeCoin } from "@/api/mypage/avatar";
+import { getCumulativeCoin, getMyCoinStatus } from "@/api/mypage/avatar";
+import { getBubbleText } from "@/api/home/bubbleApi";
 import { useAuthStore } from "@/stores/auth";
 import baseAvatar from "../mypage/avatar/avatarimg/avatar-base.png";
 import hatWizardhat from "../mypage/avatar/avatarimg/hat-3wizardhat.png";
@@ -98,6 +168,7 @@ import shoes from "../mypage/avatar/avatarimg/shoese.png";
 import sportGlasses from "../mypage/avatar/avatarimg/sporglasses.png";
 import sunGlasses from "../mypage/avatar/avatarimg/etc-sunglasses.png";
 import blush from "../mypage/avatar/avatarimg/etc-blush.png";
+import textballonImage from "./homeimg/textballon.png";
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 import { onMounted } from "vue";
@@ -110,6 +181,11 @@ const showNewsletter = ref(false);
 // 누적 포인트 API 상태 관리
 const loadingCumulative = ref(false);
 const cumulativeError = ref(null);
+
+// 말풍선 텍스트 상태 관리
+const bubbleText = ref("오늘은 퀴즈 풀어");
+const loadingBubble = ref(false);
+const bubbleError = ref(null);
 
 function openQuiz() {
   showQuiz.value = true;
@@ -189,10 +265,17 @@ const getGlassesImages = computed(() => {
 
 // 누적 포인트 관련 computed 속성들
 const totalEarnedPoints = computed(() => {
-  return avatarStore.cumulativePoints || 0;
+  const points = avatarStore.cumulativePoints || 0;
+  console.log(
+    "totalEarnedPoints 계산:",
+    points,
+    "avatarStore.cumulativePoints:",
+    avatarStore.cumulativePoints
+  );
+  return points;
 });
 
-// 누적 포인트 데이터 가져오기
+// 누적 포인트 데이터 가져오기 (새로운 코인 상태 API 사용)
 const fetchCumulativePoints = async () => {
   try {
     loadingCumulative.value = true;
@@ -204,55 +287,33 @@ const fetchCumulativePoints = async () => {
       return;
     }
 
-    // 사용자 ID 가져오기
-    const userId = authStore.user?.id || authStore.user?.userId || 1;
+    console.log("Home 누적 포인트 데이터 가져오기 시작 (새로운 API 사용)");
+    console.log("인증 상태:", authStore.isAuthenticated);
+    console.log("사용자 정보:", authStore.user);
 
-    console.log("Home 누적 포인트 데이터 가져오기 시작, userId:", userId);
+    const response = await getMyCoinStatus();
+    console.log("받아온 코인 상태 데이터:", response);
 
-    // 임시로 기본값 사용 (API 문제 해결 전까지)
-    const defaultCumulativePoints = 15000; // 기본 누적 포인트
-    avatarStore.setCumulativePoints(defaultCumulativePoints);
-    console.log("Home 누적 포인트 기본값 설정:", defaultCumulativePoints);
-
-    // API 호출은 주석 처리 (백엔드 문제 해결 후 활성화)
-    /*
-    const response = await getCumulativeCoin(userId);
-    console.log("받아온 누적 포인트 데이터:", response);
-
-    if (response.status === 200 && response.data !== undefined) {
-      // 백엔드 응답 구조에 따라 누적 포인트 값 추출
-      let cumulativeValue;
-
-      // 구조 1: { status: 200, data: 1500 }
-      if (typeof response.data === "number") {
-        cumulativeValue = response.data;
-      }
-      // 구조 2: { status: 200, message: "...", data: 1500 }
-      else if (response.data.data !== undefined) {
-        cumulativeValue = response.data.data;
-      }
-      // 구조 3: { data: 1500 }
-      else if (response.data !== undefined) {
-        cumulativeValue = response.data;
-      }
-
-      console.log("Home 추출된 누적 포인트 값:", cumulativeValue);
-
-      if (
-        cumulativeValue !== undefined &&
-        typeof cumulativeValue === "number"
-      ) {
-        avatarStore.setCumulativePoints(cumulativeValue);
-        console.log("Home 누적 포인트 업데이트 완료:", cumulativeValue);
+    if (
+      response.status === 200 &&
+      response.data &&
+      response.data.status === 200
+    ) {
+      const coinData = response.data.data;
+      if (coinData && typeof coinData.cumulativeAmount === "number") {
+        avatarStore.setCumulativePoints(coinData.cumulativeAmount);
+        console.log(
+          "Home 누적 포인트 업데이트 완료:",
+          coinData.cumulativeAmount
+        );
       } else {
         console.warn("유효한 누적 포인트 값을 찾을 수 없습니다:", response);
         cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
       }
     } else {
-      console.warn("누적 포인트 데이터 형식이 올바르지 않습니다:", response);
+      console.warn("코인 상태 데이터 형식이 올바르지 않습니다:", response);
       cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
     }
-    */
   } catch (err) {
     console.error("Home 누적 포인트 조회 에러:", err);
 
@@ -271,6 +332,77 @@ const fetchCumulativePoints = async () => {
     cumulativeError.value = errorMessage;
   } finally {
     loadingCumulative.value = false;
+  }
+};
+
+// 말풍선 텍스트 가져오기
+const fetchBubbleText = async () => {
+  try {
+    loadingBubble.value = true;
+    bubbleError.value = null;
+
+    console.log("말풍선 텍스트 가져오기 시작");
+    const response = await getBubbleText();
+    console.log("받아온 말풍선 텍스트:", response);
+
+    if (response.data !== undefined) {
+      // API 응답 구조에 따라 텍스트 추출
+      let textValue;
+
+      // 구조 1: { data: "텍스트" }
+      if (typeof response.data === "string") {
+        textValue = response.data;
+        console.log("구조 1 적용 - 문자열 데이터:", textValue);
+      }
+      // 구조 2: { data: { text: "텍스트" } }
+      else if (response.data && typeof response.data === "object") {
+        if (response.data.text !== undefined) {
+          textValue = response.data.text;
+          console.log("구조 2 적용 - data.text:", textValue);
+        } else if (response.data.message !== undefined) {
+          textValue = response.data.message;
+          console.log("구조 2 적용 - data.message:", textValue);
+        } else if (response.data.content !== undefined) {
+          textValue = response.data.content;
+          console.log("구조 2 적용 - data.content:", textValue);
+        }
+      }
+
+      if (textValue && typeof textValue === "string") {
+        bubbleText.value = textValue;
+        console.log("말풍선 텍스트 업데이트 완료:", textValue);
+      } else {
+        console.warn(
+          "유효한 말풍선 텍스트를 찾을 수 없습니다. 기본 메시지 표시:",
+          response
+        );
+        bubbleText.value = "오늘의 퀴즈를 풀어보세요.";
+      }
+    } else {
+      console.warn(
+        "말풍선 텍스트 데이터가 없습니다. 기본 메시지 표시:",
+        response
+      );
+      bubbleText.value = "오늘의 퀴즈를 풀어보세요.";
+    }
+  } catch (err) {
+    console.error("말풍선 텍스트 조회 에러:", err);
+
+    let errorMessage = "말풍선 텍스트를 불러오는데 실패했습니다.";
+
+    if (err.response?.status === 401) {
+      errorMessage = "로그인이 필요합니다.";
+    } else if (err.response?.status === 404) {
+      errorMessage = "말풍선 텍스트를 찾을 수 없습니다.";
+    } else if (err.response?.status === 500) {
+      errorMessage = "서버 오류가 발생했습니다.";
+    } else if (err.message) {
+      errorMessage = `연결 오류: ${err.message}`;
+    }
+
+    bubbleError.value = errorMessage;
+  } finally {
+    loadingBubble.value = false;
   }
 };
 
@@ -294,7 +426,22 @@ const nextTargetPoints = computed(() => {
 onMounted(() => {
   avatarStore.loadAvatar();
   fetchCumulativePoints(); // 컴포넌트 마운트 시 누적 포인트 데이터 가져오기
+  fetchBubbleText(); // 컴포넌트 마운트 시 말풍선 텍스트 가져오기
 });
+
+// 목표 포인트 계산
+const getTargetPoints = computed(() => {
+  const current = totalEarnedPoints.value;
+  if (current >= 60000) return 60000;
+  if (current >= 40000) return 60000;
+  if (current >= 20000) return 40000;
+  return 20000;
+});
+
+// 숫자 포맷팅 함수
+function formatNumber(num) {
+  return num.toLocaleString();
+}
 
 // 진행 상태 메시지 함수
 function getProgressMessage() {
@@ -335,17 +482,40 @@ const getNextLevelTitle = computed(() => {
 // 진행률 계산 (현재 레벨 내에서의 진행률)
 const getProgressPercentage = computed(() => {
   const current = totalEarnedPoints.value;
-  if (current >= 60000) return 100;
+  console.log("진행률 계산 - 현재 포인트:", current);
+
+  if (current >= 60000) {
+    console.log("진행률: 100% (최고 레벨)");
+    return 100;
+  }
   if (current >= 40000) {
     // 40000-59999 구간에서 0-100%
-    return Math.min(100, Math.floor(((current - 40000) / 20000) * 100));
+    const percentage = Math.min(
+      100,
+      Math.round(((current - 40000) / 20000) * 100)
+    );
+    console.log("진행률 계산 (40000-59999):", percentage + "%");
+    return percentage;
   }
   if (current >= 20000) {
     // 20000-39999 구간에서 0-100%
-    return Math.min(100, Math.floor(((current - 20000) / 20000) * 100));
+    const percentage = Math.min(
+      100,
+      Math.round(((current - 20000) / 20000) * 100)
+    );
+    console.log("진행률 계산 (20000-39999):", percentage + "%");
+    return percentage;
   }
   // 0-19999 구간에서 0-100%
-  return Math.min(100, Math.floor((current / 20000) * 100));
+  const percentage = Math.min(100, Math.round((current / 20000) * 100));
+  console.log("진행률 계산 (0-19999):", percentage + "%");
+  console.log("상세 계산:", {
+    current: current,
+    division: current / 20000,
+    percentage: (current / 20000) * 100,
+    rounded: Math.round((current / 20000) * 100),
+  });
+  return percentage;
 });
 </script>
 
@@ -387,29 +557,31 @@ const getProgressPercentage = computed(() => {
   overflow: hidden;
 }
 .quiz-bubble {
+  position: relative;
   display: inline-block;
-  background: #fff;
+  margin: 0 auto 10px auto;
+  text-align: center;
+}
+
+.textballon-img {
+  width: 330px;
+  height: calc(100% - 30px);
+  display: block;
+}
+
+.quiz-text {
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   color: #000000;
   font-size: 16px;
   font-weight: 600;
-  border-radius: 20px;
-  padding: 14px 28px;
-  margin: 0 auto 20px auto;
-  box-shadow: 0 2px 12px 0 #0001;
-  position: relative;
   text-align: center;
-}
-.quiz-bubble::after {
-  content: "";
-  position: absolute;
-  left: 32px;
-  bottom: -14px;
-  width: 18px;
-  height: 18px;
-  background: #fff;
-  border-radius: 0 0 18px 18px;
-  box-shadow: 0 2px 12px 0 #0001;
-  transform: rotate(45deg);
+  white-space: nowrap;
+  width: 100%;
+  padding: 0 20px;
+  box-sizing: border-box;
 }
 .main-card {
   width: 260px;
@@ -433,15 +605,15 @@ const getProgressPercentage = computed(() => {
 
 .avatar-pixel {
   position: relative;
-  width: 270px;
-  height: 422px;
+  width: 230px;
+  height: 359px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 .avatar-img {
-  width: 270px;
-  height: 422px;
+  width: 230px;
+  height: 359px;
   z-index: 1;
 }
 .title-img,
@@ -451,8 +623,8 @@ const getProgressPercentage = computed(() => {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 270px;
-  height: 422px;
+  width: 230px;
+  height: 359px;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -496,12 +668,12 @@ const getProgressPercentage = computed(() => {
   background: #6c4cf1;
 }
 .points-progress {
-  width: 280px;
-  background: #ffffff;
-  border-radius: 12px;
+  width: 340px;
+  background: transparent;
+  /* border-radius: 12px; */
   margin-top: 16px;
-  padding: 20px;
-  border: 1px solid #e2e8f0;
+  padding: 16px;
+  /* border: 1px solid #e2e8f0; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -513,7 +685,7 @@ const getProgressPercentage = computed(() => {
   justify-content: space-between;
   align-items: center;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .level-display {
@@ -544,11 +716,11 @@ const getProgressPercentage = computed(() => {
   width: 100%;
   display: flex;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 6px;
 }
 
 .progress-bracket {
-  font-size: 16px;
+  font-size: 28px;
   color: #1e293b;
   font-weight: 600;
   margin: 0 8px;
@@ -556,10 +728,11 @@ const getProgressPercentage = computed(() => {
 
 .progress-bar {
   flex: 1;
-  height: 12px;
+  height: 24px;
   background: #f1f5f9;
   border-radius: 6px;
   overflow: hidden;
+  position: relative;
 }
 
 .progress-fill {
@@ -569,24 +742,105 @@ const getProgressPercentage = computed(() => {
   transition: width 0.3s ease;
 }
 
+.progress-fill.loading {
+  background: linear-gradient(90deg, #4318d1 0%, #6366f1 50%, #4318d1 100%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+.progress-fill.error {
+  background: #ef4444;
+}
+
+.loading-text {
+  color: #6366f1;
+  font-weight: 600;
+}
+
+.error-text {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.points-info {
+  width: 100%;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
 .points-display {
   display: flex;
   align-items: baseline;
-  font-size: 18px;
+  justify-content: center;
+  font-size: 16px;
   font-weight: 700;
   color: #1e293b;
-  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.points-display-inside {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: #ffffff;
+  z-index: 10;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .current-points {
-  margin-right: 6px;
   color: #4318d1;
+  font-size: 28px;
+}
+
+.points-display-inside .current-points {
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.separator {
+  margin: 0 8px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.points-display-inside .separator {
+  margin: 0 2px;
+  color: #ffffff;
+  font-weight: 800;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 
 .target-points {
-  font-size: 14px;
-  color: #64748b;
-  font-weight: 500;
+  color: #1f5fb9;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.points-display-inside .target-points {
+  color: #303030;
+  font-size: 10px;
+  font-weight: 800;
+  /* text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9); */
 }
 
 .points-status {
