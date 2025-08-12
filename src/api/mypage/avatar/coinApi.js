@@ -4,7 +4,11 @@ import instance from "../../instance.js";
 export const getCurrentCoin = async (userId) => {
   try {
     console.log("현재 포인트 조회 시작, userId:", userId);
-    const response = await instance.get(`/avatar/getCurCoin/userId=${userId}`);
+    const response = await instance.get(`/avatar/getCurCoin`, {
+      params: {
+        userId: userId,
+      },
+    });
     console.log("현재 포인트 조회 결과:", response);
     return response;
   } catch (error) {
@@ -188,14 +192,18 @@ export const updateAvatar = async (avatarData) => {
   try {
     console.log("아바타 수정 시작, 데이터:", avatarData);
 
-    // API 명세에 따라 userId와 items를 query parameter로 전송
-    // items 배열을 쉼표로 구분된 문자열로 변환하여 전송
+    // 서버 에러 메시지에 따르면 사용 가능한 파라미터: [itemId, isWearing, param3, userId, param1, param2]
+    // items 배열의 각 아이템을 개별 파라미터로 전송
     const itemsArray = avatarData.items || [];
-    const itemsString = itemsArray.join(",");
 
+    // 첫 번째 아이템을 itemId로, 나머지는 param1, param2, param3로 전송
     const params = {
       userId: avatarData.userId,
-      items: itemsString,
+      itemId: itemsArray[0] || null,
+      param1: itemsArray[1] || null,
+      param2: itemsArray[2] || null,
+      param3: itemsArray[3] || null,
+      isWearing: true,
     };
 
     console.log("전송할 파라미터:", params);

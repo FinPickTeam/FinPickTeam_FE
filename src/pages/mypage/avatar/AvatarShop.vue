@@ -443,6 +443,7 @@ import {
   getCumulativeCoin,
   getClothes,
   insertClothe,
+  getMyCoinStatus,
 } from "@/api/mypage/avatar";
 import { useAuthStore } from "@/stores/auth";
 import Navbar from "../../../components/Navbar.vue";
@@ -970,7 +971,7 @@ const fetchCurrentCoin = async () => {
   }
 };
 
-// 코인 상태 조회 (getCurCoin API 사용 - API 명세에 맞게 수정)
+// 코인 상태 조회 (getMyCoinStatus API 사용 - API 명세에 맞게 수정)
 const fetchCoinStatus = async () => {
   try {
     loadingCoin.value = true;
@@ -982,21 +983,19 @@ const fetchCoinStatus = async () => {
       return;
     }
 
-    // 사용자 ID 가져오기
-    const userId = authStore.user?.id || authStore.user?.userId || 1;
-
-    console.log("코인 상태 조회 시작, userId:", userId);
-    const response = await getCurrentCoin(userId);
+    console.log("코인 상태 조회 시작 (getMyCoinStatus API 사용)");
+    const response = await getMyCoinStatus();
     console.log("코인 상태 조회 결과:", response);
 
     // API 명세에 따른 응답 구조 확인
-    // { "data": 0, "message": "string", "status": 0 }
+    // { "data": { "amount": 0, "cumulativeAmount": 0, ... }, "message": "string", "status": 200 }
     if (
       response.data &&
-      response.data.status === 0 &&
-      response.data.data !== undefined
+      response.data.status === 200 &&
+      response.data.data &&
+      response.data.data.amount !== undefined
     ) {
-      const coinValue = response.data.data;
+      const coinValue = response.data.data.amount;
       console.log("추출된 코인 값:", coinValue);
 
       if (typeof coinValue === "number") {
@@ -1319,8 +1318,19 @@ async function actuallyBuyShirt(item) {
         itemId = parseInt(parts[1]); // shirt-1 -> 1
       } else if (typeof item.id === "number") {
         itemId = item.id; // 이미 숫자인 경우
+      } else if (typeof item.id === "string") {
+        // 단순 문자열인 경우 (예: "shoes", "glasses" 등)
+        // 서버에서 사용하는 실제 itemId를 매핑
+        const itemIdMap = {
+          shoes: 1,
+          glasses: 1,
+          shirt: 1,
+          title: 1,
+        };
+        itemId = itemIdMap[item.id] || 1; // 기본값 1
+        console.log("매핑된 itemId:", itemId, "원본:", item.id);
       } else {
-        itemId = parseInt(item.id); // 문자열을 숫자로 변환
+        itemId = parseInt(item.id); // 기타 경우
       }
 
       console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
@@ -1394,8 +1404,19 @@ async function actuallyBuyShoes(item) {
         itemId = parseInt(parts[1]); // shoes-1 -> 1
       } else if (typeof item.id === "number") {
         itemId = item.id; // 이미 숫자인 경우
+      } else if (typeof item.id === "string") {
+        // 단순 문자열인 경우 (예: "shoes", "glasses" 등)
+        // 서버에서 사용하는 실제 itemId를 매핑
+        const itemIdMap = {
+          shoes: 1,
+          glasses: 1,
+          shirt: 1,
+          title: 1,
+        };
+        itemId = itemIdMap[item.id] || 1; // 기본값 1
+        console.log("매핑된 itemId:", itemId, "원본:", item.id);
       } else {
-        itemId = parseInt(item.id); // 문자열을 숫자로 변환
+        itemId = parseInt(item.id); // 기타 경우
       }
 
       console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
@@ -1468,8 +1489,19 @@ async function actuallyBuyGlasses(item) {
         itemId = parseInt(parts[1]); // glasses-1 -> 1
       } else if (typeof item.id === "number") {
         itemId = item.id; // 이미 숫자인 경우
+      } else if (typeof item.id === "string") {
+        // 단순 문자열인 경우 (예: "shoes", "glasses" 등)
+        // 서버에서 사용하는 실제 itemId를 매핑
+        const itemIdMap = {
+          shoes: 1,
+          glasses: 1,
+          shirt: 1,
+          title: 1,
+        };
+        itemId = itemIdMap[item.id] || 1; // 기본값 1
+        console.log("매핑된 itemId:", itemId, "원본:", item.id);
       } else {
-        itemId = parseInt(item.id); // 문자열을 숫자로 변환
+        itemId = parseInt(item.id); // 기타 경우
       }
 
       console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
@@ -1542,8 +1574,19 @@ async function actuallyBuyGifticon(item) {
       itemId = parseInt(parts[1]); // gifticon-1 -> 1
     } else if (typeof item.id === "number") {
       itemId = item.id; // 이미 숫자인 경우
+    } else if (typeof item.id === "string") {
+      // 단순 문자열인 경우 (예: "shoes", "glasses" 등)
+      // 서버에서 사용하는 실제 itemId를 매핑
+      const itemIdMap = {
+        shoes: 1,
+        glasses: 1,
+        shirt: 1,
+        title: 1,
+      };
+      itemId = itemIdMap[item.id] || 1; // 기본값 1
+      console.log("매핑된 itemId:", itemId, "원본:", item.id);
     } else {
-      itemId = parseInt(item.id); // 문자열을 숫자로 변환
+      itemId = parseInt(item.id); // 기타 경우
     }
 
     console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
