@@ -7,6 +7,8 @@
           v-if="showFilterButton"
           class="obmyhome-icon-btn"
           @click="openFilter"
+          aria-label="필터"
+          title="필터"
         >
           <font-awesome-icon :icon="['fas', 'sliders']" />
         </button>
@@ -56,6 +58,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import BaseHeader from '@/components/openbanking/BaseHeader.vue';
 import Navbar from '@/components/Navbar.vue';
+import { watch, onMounted, onUnmounted } from 'vue';
 
 // FontAwesome 아이콘 등록
 import { library } from '@fortawesome/fontawesome-svg-core';
@@ -65,18 +68,14 @@ const route = useRoute();
 const router = useRouter();
 
 // 헤더를 숨길 라우트들
-const hideHeaderRoutes = [
-  'OpenbankingDailyReport',
-  'DailyReportSelect',
-  'DailyReportDetail',
-];
+const hideHeaderRoutes = [];
 
 // 네비게이션을 숨길 라우트들
 const hideNavbarRoutes = [
-  'OpenbankingDailyReport',
+  'OpenbankingCalendar',
+  'CalendarSelect',
+  'CalendarDetail',
   'OpenbankingMonthlyReport',
-  'DailyReportSelect',
-  'DailyReportDetail',
   'AccountDetail',
   'CardDetail',
   'AccountAgreement',
@@ -84,11 +83,27 @@ const hideNavbarRoutes = [
   'ObAgreement',
   'OpenBankingAgreement',
   'ObArsAgreement',
-  'CertificateCreate',
-  'CertificateSetPassword',
-  'CertificateConfirmPass',
+  'CreateCertificate',
+  'SetCertificatePassword',
+  'ConfirmCertificatePassword',
   'CertificateComplete',
 ];
+
+watch(
+  () => route.name,
+  (name) => {
+    const whitePages = new Set([
+      'OpenbankingCalendar',
+      'OpenbankingMonthlyReport',
+    ]);
+    document.body.classList.toggle(
+      'ob-white-page',
+      whitePages.has(String(name))
+    );
+  },
+  { immediate: true }
+);
+onUnmounted(() => document.body.classList.remove('ob-white-page'));
 
 // 헤더 표시 여부
 const showHeader = computed(() => {

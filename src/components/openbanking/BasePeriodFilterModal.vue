@@ -71,6 +71,7 @@
 </template>
 
 <script setup>
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { computed } from 'vue';
 const props = defineProps({
   modelValue: Boolean,

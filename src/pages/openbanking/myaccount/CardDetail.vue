@@ -40,7 +40,7 @@ import { useRoute } from 'vue-router';
 import BasePeriodFilterModal from '@/components/openbanking/BasePeriodFilterModal.vue';
 import TransactionList from '@/components/openbanking/TransactionList.vue';
 import { usePeriodFilter } from '@/components/openbanking/usePeriodFilter';
-import { getLedger } from '@/api/openbanking/transactionApi';
+import { getLedger } from '@/api/openbanking/ledgerApi';
 
 const route = useRoute();
 const cardId = route.params.cardId;

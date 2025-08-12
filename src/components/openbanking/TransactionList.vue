@@ -4,17 +4,21 @@
       <p>해당 기간에 거래 내역이 없습니다.</p>
     </div>
     <div v-else class="rows">
-      <div class="row" v-for="(t, i) in sortedItems" :key="i">
+      <div
+        class="row"
+        v-for="(t, i) in sortedItems"
+        :key="t.id ?? getDate(t) + '-' + i"
+      >
         <div class="info">
           <div class="title">{{ getTitle(t) }}</div>
           <div class="sub">{{ formatDate(getDate(t)) }}</div>
         </div>
         <div
           class="amount"
-          :class="getType(t) === '입금' ? 'income' : 'expense'"
+          :class="normalizeType(t) === '입금' ? 'income' : 'expense'"
         >
-          {{ getType(t) === '입금' ? '+' : '-'
-          }}{{ getAmount(t).toLocaleString() }}원
+          {{ normalizeType(t) === '입금' ? '+' : '-' }}
+          {{ Math.abs(Number(getAmount(t) ?? 0)).toLocaleString() }}원
         </div>
       </div>
     </div>
@@ -23,28 +27,36 @@
 
 <script setup>
 import { computed } from 'vue';
+import { parseLocalDate } from '@/utils/dateUtils.js';
 
 const props = defineProps({
   items: { type: Array, default: () => [] },
   // 데이터 키가 달라도 매핑할 수 있게 getter 전달
   getters: {
-    type: Function,
-    amount: Function,
-    date: Function,
-    title: Function,
+    type: Object,
+    default: () => ({}),
+    validator: (g) =>
+      g && Object.values(g).every((v) => typeof v === 'function'),
   },
 });
 const getType = (t) => props.getters?.type?.(t) ?? t.type;
+const normalizeType = (t) => {
+  const v = String(getType(t) ?? '').toUpperCase();
+  return v === 'INCOME' || v === '입금' ? '입금' : '출금';
+};
+
 const getAmount = (t) => props.getters?.amount?.(t) ?? t.amount;
 const getDate = (t) => props.getters?.date?.(t) ?? t.date;
 const getTitle = (t) => props.getters?.title?.(t) ?? t.description;
 
 const sortedItems = computed(() =>
-  [...props.items].sort((a, b) => new Date(getDate(b)) - new Date(getDate(a)))
+  [...props.items].sort(
+    (a, b) => parseLocalDate(getDate(b)) - parseLocalDate(getDate(a))
+  )
 );
 
 const formatDate = (d) => {
-  const dt = new Date(d);
+  const dt = parseLocalDate(d);
   return `${dt.getMonth() + 1}.${dt.getDate()}`;
 };
 </script>

@@ -154,6 +154,8 @@ const props = defineProps({
   dailyExpenses: { type: Object, default: () => ({}) }, // { 'YYYY-MM-DD': number }
   scrollRowIdPrefix: { type: String, default: 'tx-' },
   autoScrollOnSelect: { type: Boolean, default: true },
+  scrollContainerSelector: { type: String, default: '.monthly-transactions' },
+  scrollOffset: { type: Number, default: 8 },
 });
 
 const emit = defineEmits([
@@ -221,11 +223,10 @@ const scrollToDateKey = async (key) => {
   await nextTick();
   const id = `${props.scrollRowIdPrefix}${key}`;
   const el = document.getElementById(id);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    return true;
+  const container = document.querySelector(props.scrollContainerSelector);
+  if (el && container) {
+    container.scrollTop = el.offsetTop - (props.scrollOffset || 0);
   }
-  return false;
 };
 
 /* weekly */

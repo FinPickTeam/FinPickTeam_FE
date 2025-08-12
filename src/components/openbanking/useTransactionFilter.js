@@ -1,6 +1,6 @@
 // useTransactionFilter.js (교체본)
 import { computed, ref, watch, onMounted } from 'vue';
-import { getLedger } from '@/api/openbanking/transactionApi';
+import { getLedger } from '@/api/openbanking/ledgerApi.js';
 
 export function useTransactionFilter() {
   // 기준 날짜

@@ -1,16 +1,33 @@
 <!-- src/components/common/BaseHeader.vue -->
 <template>
   <header class="header">
-    <button class="back" @click="$router.back()">
+    <button
+      class="back"
+      @click="$router.back()"
+      aria-label="뒤로가기"
+      title="뒤로가기"
+    >
       <i class="fas fa-chevron-left"></i>
     </button>
+    <h1 class="title">
+      <slot name="title">{{ title }}</slot>
+    </h1>
     <div class="right"><slot name="right"></slot></div>
   </header>
 </template>
 
-<script setup></script>
+<script setup>
+defineProps({ title: { type: String, default: '' } });
+</script>
 
 <style scoped>
+.title {
+  flex: 1;
+  text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+}
+
 .header {
   position: fixed;
   top: 0;

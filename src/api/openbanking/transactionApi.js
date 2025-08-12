@@ -1,38 +1,6 @@
 import instance from '../instance';
 
 // ───────────────────────────────────────────────────────────────
-// 통합 거래내역 조회 (카테고리/기간/페이징)
-// GET /ledger?categoryId=&from=yyyy-MM-dd&to=yyyy-MM-dd&page=&size=
-// ───────────────────────────────────────────────────────────────
-export const getLedger = ({ category, from, to } = {}) => {
-  const params = {};
-  if (category) params.category = category;
-  if (from) params.from = from;
-  if (to) params.to = to;
-
-  console.log('GET /ledger 요청:', params);
-
-  return instance
-    .get('/ledger', { params })
-    .then((response) => {
-      console.log('GET /ledger 응답:', {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data, // Array
-      });
-      return response;
-    })
-    .catch((error) => {
-      console.log('GET /ledger 에러:', {
-        status: error.response?.data?.status,
-        message: error.response?.data?.message,
-        data: error.response?.data?.data,
-      });
-      throw error;
-    });
-};
-
-// ───────────────────────────────────────────────────────────────
 // 거래 상세 조회
 // GET /ledger/{ledgerId}
 // ───────────────────────────────────────────────────────────────

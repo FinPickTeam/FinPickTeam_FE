@@ -4,7 +4,12 @@
     <BaseHeader>
       <template #title>내 계좌</template>
       <template #right>
-        <button class="header-icon-btn" @click="toggleMode">
+        <button
+          class="header-icon-btn"
+          @click="toggleMode"
+          aria-label="삭제 모드"
+          title="삭제 모드"
+        >
           <font-awesome-icon :icon="['fas', 'trash']" />
         </button>
       </template>
@@ -36,7 +41,7 @@
             :isNegative="a.balance < 0"
             :name="a.name"
             :sub="a.accountNumber"
-            :selected="selected.includes(a)"
+            :selected="isSelected(a)"
             :disabled="a.type === '투자' && !isDeleteMode"
             @click="onClick(a)"
           />
@@ -50,12 +55,12 @@
       @close="closeConfirm"
       @confirm="confirmDelete"
     >
-      {{ selected.length }}개의 계좌를 삭제하시겠습니까?
+      {{ selectedCount }}개의 계좌를 삭제하시겠습니까?
     </ConfirmModal>
 
     <DeleteModeFooter
       :is-delete-mode="isDeleteMode"
-      :selected-count="selected.length"
+      :selected-count="selectedCount"
       item-type="계좌"
       @delete="openConfirm"
     />
@@ -75,84 +80,67 @@ import ConfirmModal from '@/components/openbanking/ConfirmModal.vue';
 import DeleteModeFooter from '@/components/openbanking/DeleteModeFooter.vue';
 import AssetSummaryCard from '@/components/openbanking/AssetSummaryCard.vue';
 import Navbar from '@/components/Navbar.vue';
-import { useSelectDelete } from '@/components/openbanking/useSelectDelete.js';
 import { useLogos } from '@/components/openbanking/useLogos.js';
 import {
   getAccountsWithTotal,
   deleteAccount,
 } from '@/api/openbanking/accountsApi';
-import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 
-// FontAwesome 아이콘 등록
 library.add(faTrash);
 
 const router = useRouter();
-const auth = useAuthStore();
 const accounts = ref([]);
 const loading = ref(false);
 const { bankLogo } = useLogos();
-const {
-  isDeleteMode,
-  selected,
-  showModal,
-  toggleMode,
-  toggleSelect,
-  openConfirm,
-  closeConfirm,
-} = useSelectDelete();
 
+// 삭제 모드/선택 상태 (Set 기반)
+const isDeleteMode = ref(false);
+const selectedIds = ref(new Set());
+
+// 모달 상태
+const showModal = ref(false);
+const openConfirm = () => {
+  if (selectedIds.value.size === 0) return;
+  showModal.value = true;
+};
+const closeConfirm = () => {
+  showModal.value = false;
+};
+
+const toggleMode = () => {
+  isDeleteMode.value = !isDeleteMode.value;
+  selectedIds.value = new Set();
+};
+const toggleSelect = (item) => {
+  const id = item.id;
+  if (selectedIds.value.has(id)) selectedIds.value.delete(id);
+  else selectedIds.value.add(id);
+};
+const isSelected = (item) => selectedIds.value.has(item.id);
+const selectedCount = computed(() => selectedIds.value.size);
+
+// 합계
 const totalAssets = computed(() => {
-  if (!accounts.value || accounts.value.length === 0) {
-    return 0;
-  }
+  if (!accounts.value || accounts.value.length === 0) return 0;
   return accounts.value.reduce((t, a) => t + (a.balance || 0), 0);
 });
+
+// 섹션 분리
 const sections = computed(() => {
-  if (!accounts.value || accounts.value.length === 0) {
-    console.log('계좌 데이터가 없음');
-    return [];
-  }
+  if (!accounts.value || accounts.value.length === 0) return [];
+  const depositAccounts = accounts.value.filter((a) => a.type === '입출금');
+  const savingsAccounts = accounts.value.filter((a) => a.type === '저축');
+  const investAccounts = accounts.value.filter((a) => a.type === '투자');
 
-  const depositAccounts =
-    accounts.value.filter((a) => a.type === '입출금') || [];
-  const savingsAccounts = accounts.value.filter((a) => a.type === '저축') || [];
-  const investAccounts = accounts.value.filter((a) => a.type === '투자') || [];
-
-  console.log('필터링된 계좌:', {
-    deposit: depositAccounts,
-    savings: savingsAccounts,
-    invest: investAccounts,
-  });
-
-  const sections = [];
-
-  if (depositAccounts.length > 0) {
-    sections.push({
-      key: 'deposit',
-      title: '입출금 계좌',
-      items: depositAccounts,
-    });
-  }
-
-  if (savingsAccounts.length > 0) {
-    sections.push({
-      key: 'savings',
-      title: '저축 계좌',
-      items: savingsAccounts,
-    });
-  }
-
-  if (investAccounts.length > 0) {
-    sections.push({
-      key: 'invest',
-      title: '투자 계좌',
-      items: investAccounts,
-    });
-  }
-
-  console.log('생성된 sections:', sections);
-  return sections;
+  const out = [];
+  if (depositAccounts.length)
+    out.push({ key: 'deposit', title: '입출금 계좌', items: depositAccounts });
+  if (savingsAccounts.length)
+    out.push({ key: 'savings', title: '저축 계좌', items: savingsAccounts });
+  if (investAccounts.length)
+    out.push({ key: 'invest', title: '투자 계좌', items: investAccounts });
+  return out;
 });
 
 const badgeClass = (t) =>
@@ -164,42 +152,41 @@ const onClick = (a) => {
 };
 
 const confirmDelete = async () => {
-  for (const a of selected.value) await deleteAccount(a.id);
-  accounts.value = accounts.value.filter((a) => !selected.value.includes(a));
-  closeConfirm();
+  const ids = [...selectedIds.value];
+  const res = await Promise.allSettled(ids.map((id) => deleteAccount(id)));
+  const okIds = ids.filter((_, i) => res[i].status === 'fulfilled');
+  accounts.value = accounts.value.filter((a) => !okIds.includes(a.id));
+  selectedIds.value.clear();
   isDeleteMode.value = false;
-  selected.value = [];
+  closeConfirm();
 };
 
 onMounted(async () => {
   try {
     loading.value = true;
     const res = await getAccountsWithTotal();
-    console.log('계좌 데이터:', res.data);
-
     if (res.data.status === 200) {
-      // API 응답 구조: data.accounts 형태
       const apiData = res.data.data;
       const apiAccounts = apiData?.accounts || [];
-      console.log('계좌 배열:', apiAccounts);
-
-      // API 응답 구조에 맞게 데이터 변환
       accounts.value = apiAccounts.map((account) => ({
         id: account.id,
         bank: account.productName?.split(' ')[0] || '은행',
-        type: account.accountType === 'DEPOSIT' ? '입출금' : '저축',
+        type:
+          account.accountType === 'DEPOSIT'
+            ? '입출금'
+            : account.accountType === 'SAVINGS'
+            ? '저축'
+            : '투자',
         name: account.productName || '계좌',
         balance: account.balance || 0,
         accountNumber: account.accountNumber || '****',
       }));
-
-      console.log('변환된 계좌 데이터:', accounts.value);
     } else {
       console.error('계좌 데이터 로드 실패:', res.data.message);
     }
   } catch (error) {
     console.error('계좌 API 호출 에러:', error);
-    // 에러 시 더미 데이터로 폴백
+    // 폴백 더미
     accounts.value = [
       {
         id: 1,
@@ -218,7 +205,7 @@ onMounted(async () => {
 
 <style scoped>
 .page {
-  height: calc(100dvh - 160px); /* 헤더(80px) + 네비게이션(80px) 높이만큼 빼기 */
+  height: calc(100dvh - 160px);
   background: #f7f8fa;
   padding: 16px;
   overflow-y: auto;
@@ -226,7 +213,6 @@ onMounted(async () => {
   padding-bottom: max(16px, env(safe-area-inset-bottom));
   min-height: 0;
 }
-
 .header-icon-btn {
   background: none;
   border: none;
@@ -242,48 +228,13 @@ onMounted(async () => {
   width: 36px;
   height: 36px;
 }
-
 .header-icon-btn:hover {
   background: #f3f3f3;
-}
-
-.summary {
-  background: #fff;
-  margin: 16px;
-  padding: 24px 20px;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
-}
-
-.label {
-  color: #888;
-}
-
-.amount {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #4318d1;
-}
-
-.amount.negative {
-  color: #e11d48;
-}
-
-.amount span {
-  font-size: 1.1rem;
-  color: #888;
-  margin-left: 4px;
-}
-
-.sub {
-  color: #666;
-  margin-top: 6px;
 }
 
 .group {
   margin: 0 16px 24px;
 }
-
 .group-title {
   font-weight: 600;
   margin: 16px 0;
@@ -292,33 +243,11 @@ onMounted(async () => {
 .bg-deposit {
   background: #4318d1;
 }
-
 .bg-savings {
   background: #059669;
 }
-
 .bg-invest {
   background: #dc2626;
-}
-
-.fixed-delete {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 390px;
-  width: 100%;
-  padding: 0 16px;
-}
-
-.del {
-  width: 100%;
-  background: #dc2626;
-  color: #fff;
-  border: 0;
-  border-radius: 12px;
-  padding: 16px;
-  font-weight: 600;
 }
 
 .loading {
@@ -329,7 +258,6 @@ onMounted(async () => {
   padding: 40px 20px;
   color: #666;
 }
-
 .loading-spinner {
   width: 40px;
   height: 40px;
@@ -339,7 +267,6 @@ onMounted(async () => {
   animation: spin 1s linear infinite;
   margin-bottom: 16px;
 }
-
 @keyframes spin {
   0% {
     transform: rotate(0deg);

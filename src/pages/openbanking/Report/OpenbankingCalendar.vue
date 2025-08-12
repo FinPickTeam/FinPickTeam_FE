@@ -23,9 +23,6 @@
       <div v-if="!isExpanded" class="transaction-section">
         <div class="obcal-list-title">
           {{ formatDay(selectedDate) }}
-          <button class="obcal-arrow-btn" @click="goToTransactionDetail">
-            ›
-          </button>
         </div>
         <div class="obcal-list-container">
           <div
@@ -36,7 +33,7 @@
           >
             <div class="obcal-bank-logo">
               <img
-                :src="getTransactionLogo(transaction)"
+                :src="getBankLogoBySource(transaction)"
                 :alt="transaction.sourceName + ' 로고'"
               />
             </div>
@@ -75,7 +72,7 @@
           class="transaction-section"
         >
           <div class="obcal-list-title">
-            {{ formatDay(new Date(dateKey)) }}
+            {{ formatDay(dateKey) }}
           </div>
           <div class="obcal-list-container">
             <div
@@ -86,7 +83,7 @@
             >
               <div class="obcal-bank-logo">
                 <img
-                  :src="getTransactionLogo(transaction)"
+                  :src="getBankLogoBySource(transaction)"
                   :alt="transaction.sourceName + ' 로고'"
                 />
               </div>
@@ -121,33 +118,19 @@ import CalendarComponent from '@/components/openbanking/CalendarComponent.vue';
 import { getLedger } from '@/api/openbanking/ledgerApi.js';
 import { getAssetSummaryCompare } from '@/api/openbanking/assetSummaryApi.js';
 import { formatDay, formatDateKey } from '@/utils/dateUtils.js';
-import { useTransactionFilter } from '@/components/openbanking/useTransactionFilter.js';
-
-// 은행 로고 이미지들을 동적으로 import하기 위한 함수
-const getBankLogo = (logoFileName) => {
-  try {
-    return new URL(`/src/assets/bank_logo/${logoFileName}`, import.meta.url)
-      .href;
-  } catch (error) {
-    // 로고 파일을 찾을 수 없는 경우 기본 로고 반환
-    return new URL('/src/assets/bank_logo/카카오뱅크.png', import.meta.url)
-      .href;
-  }
-};
-
-// 거래 로고 결정 함수
-const getTransactionLogo = (transaction) => {
-  // sourceType에 따라 로고 결정
-  const logoMap = {
-    BANK: `${transaction.sourceName}.png`,
-    CARD: `${transaction.sourceName}.png`,
-  };
-
-  const logoFileName = logoMap[transaction.sourceType] || '카카오뱅크.png';
-  return getBankLogo(logoFileName);
-};
-
+import { useLogos } from '@/components/openbanking/useLogos.js';
+const { bankLogo } = useLogos();
 const router = useRouter();
+
+const getBankLogoBySource = (transaction) => {
+  const map = {
+    ACCOUNT: 'KB국민은행.png',
+    CARD: '국민카드.png',
+    NH: 'NH농협은행.png',
+  };
+  const name = map[transaction.sourceType] || 'KB국민은행.png';
+  return bankLogo(name.replace('.png', ''));
+};
 
 // 상태 관리
 const isExpanded = ref(false);
@@ -244,34 +227,6 @@ function sumExpense(list) {
     .reduce((a, b) => a + Number(b.amount || 0), 0);
 }
 
-// 서버 거래 훅 사용
-const hook = useTransactionFilter();
-console.log('[useTransactionFilter keys]', Object.keys(hook));
-console.log('[useTransactionFilter values]', {
-  selectedDateTransactions: hook.selectedDateTransactions,
-  currentMonthConsumption: hook.currentMonthConsumption,
-  monthlyDiffText: hook.monthlyDiffText,
-});
-
-const {
-  selectedDate: hookSelectedDate,
-  currentYear: hookYear,
-  currentMonth: hookMonth,
-  selectedDateTransactions,
-  currentMonthConsumption,
-  prevMonthConsumption,
-  monthlyDiffText,
-  transactionDates,
-  selectDate: hookSelectDate,
-  changeMonth: hookChangeMonth,
-} = hook;
-
-// 초기 동기화
-if (hookYear?.value != null) currentYear.value = hookYear.value;
-if (hookMonth?.value != null) currentMonth.value = hookMonth.value;
-if (hookSelectedDate?.value != null)
-  selectedDate.value = hookSelectedDate.value;
-
 // 현재 월 문자열
 const currentMonthStr = computed(() => {
   return `${currentYear.value}-${String(currentMonth.value).padStart(2, '0')}`;
@@ -286,7 +241,7 @@ const dailyExpensesObject = computed(() => {
   const o = {};
   (monthTx.value || []).forEach((t) => {
     if (t.type !== 'EXPENSE') return;
-    const k = formatDateKey(new Date(t.date));
+    const k = formatDateKey(t.date); // 유틸이 문자열 안전 파싱
     o[k] = (o[k] || 0) + Number(t.amount || 0);
   });
   return o;
@@ -295,19 +250,17 @@ const dailyExpensesObject = computed(() => {
 const monthlyTransactionGroups = computed(() => {
   const g = {};
   (monthTx.value || []).forEach((t) => {
-    const k = formatDateKey(new Date(t.date));
+    const k = formatDateKey(t.date); // 안전 파싱 유틸 사용
     (g[k] ||= []).push(t);
   });
   return Object.fromEntries(
-    Object.entries(g).sort((a, b) => new Date(b[0]) - new Date(a[0]))
+    Object.entries(g).sort((a, b) => b[0].localeCompare(a[0])) // 'YYYY-MM-DD' 문자열 비교
   );
 });
 
 const selectedDateOnly = computed(() => {
   const key = formatDateKey(selectedDate.value);
-  return (monthTx.value || []).filter(
-    (t) => formatDateKey(new Date(t.date)) === key
-  );
+  return (monthTx.value || []).filter((t) => formatDateKey(t.date) === key);
 });
 
 // 월간 리스트 ref
@@ -337,13 +290,10 @@ const onScrollToDate = ({ key, date }) => {
 
 // 날짜 선택 시: 주간/월간에 따라 동작 분기
 const onDateSelected = (date) => {
-  hookSelectDate(date);
   selectedDate.value = new Date(date);
 };
 
-// 월 변경 핸들러
 const onMonthChanged = ({ year, month }) => {
-  hookChangeMonth(year, month); // 내부에서 loadMonth 실행
   currentYear.value = year;
   currentMonth.value = month;
 };
@@ -375,7 +325,7 @@ const goToAccountLinkSelect = () => {
 
 // 거래 상세로 이동
 const goToTransactionDetail = (transactionId) => {
-  router.push(`/openbanking/daily-report-detail/${transactionId}`);
+  router.push({ name: 'CalendarDetail', params: { id: transactionId } });
 };
 
 // 페이지를 벗어날 때 sessionStorage 정리
@@ -388,15 +338,9 @@ const cleanupSessionStorage = () => {
   });
 };
 
-// 페이지 마운트 시 헤더 흰색 강조 클래스 추가
-onMounted(() => {
-  document.body.classList.add('ob-white-page');
-});
-
-// 페이지 언마운트 시 정리
+onMounted(() => {});
 onUnmounted(() => {
   cleanupSessionStorage();
-  document.body.classList.remove('ob-white-page');
 });
 </script>
 
