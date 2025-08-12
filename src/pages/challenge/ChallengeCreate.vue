@@ -73,21 +73,28 @@
       <div class="form-group">
         <label>챌린지 유형</label>
         <div class="challenge-type-options">
-          <label
-              class="challenge-type-option"
-              :class="{ active: type === 'PERSONAL' }"
-          >
+          <label class="challenge-type-option" :class="{ active: type === 'PERSONAL' }">
             <input type="radio" v-model="type" value="PERSONAL" />
             <span>개인 챌린지</span>
           </label>
-          <label
-              class="challenge-type-option"
-              :class="{ active: type === 'GROUP' }"
-          >
+          <label class="challenge-type-option" :class="{ active: type === 'GROUP' }">
             <input type="radio" v-model="type" value="GROUP" />
             <span>소그룹 챌린지</span>
           </label>
         </div>
+
+        <!-- 타입 풀일 때 즉시 안내 -->
+        <p v-if="isSelectedTypeFull" style="margin-top:8px;color:#d32f2f;font-weight:600;">
+          {{ warningTextForType }}
+        </p>
+
+        <!-- 그룹 선택 시 필요한 포인트 안내 -->
+        <p v-if="type === 'GROUP'" style="margin-top:8px;color:#555;">
+          생성 필요 포인트: {{ requiredPoints.toLocaleString() }}P / 보유: {{ userPoints.toLocaleString() }}P
+          <span v-if="userPoints < requiredPoints" style="color:#d32f2f;font-weight:600;">
+            ({{ lackAmount.toLocaleString() }}P 부족)
+          </span>
+        </p>
       </div>
 
       <div class="form-group" v-if="type === 'GROUP'">
@@ -115,7 +122,7 @@
       </div>
 
       <div class="form-actions">
-        <button class="btn-cancel" @click="goBack">취소</button>
+        <button class="btn-cancel" @click="routerBack">취소</button>
         <button class="btn-create" @click="createChallenge">챌린지 생성</button>
       </div>
     </div>
@@ -138,15 +145,17 @@
 </template>
 
 <script setup>
-import {ref} from 'vue';
-import {useRouter} from 'vue-router';
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import axios from 'axios';
-import {useAuthStore} from '@/stores/auth';
+import { useAuthStore } from '@/stores/auth';
+import { useChallengeStore } from '@/stores/challenge';
 import ChallengeCreateSuccessModal from '@/components/challenge/ChallengeCreateSuccessModal.vue';
 import ChallengeInsufficientPointsModal from '@/components/challenge/ChallengeInsufficientPointsModal.vue';
 
 const router = useRouter();
 const auth = useAuthStore();
+const challengeStore = useChallengeStore();
 
 // 폼 데이터
 const title = ref('');
@@ -164,18 +173,31 @@ const loading = ref(false);
 const showSuccessModal = ref(false);
 const showInsufficientPointsModal = ref(false);
 
-// 포인트 관련 (TODO: 실제 API 연동)
-const userPoints = ref(0);
-const requiredPoints = ref(100);
+// 포인트/제한 관련 (Pinia)
+const userPoints = computed(() => challengeStore.points.userPoints);
+const requiredPoints = computed(() => challengeStore.points.required[type.value] ?? 0);
+const isSelectedTypeFull = computed(() => challengeStore.isTypeFull(type.value));
+const canCreateSelectedType = computed(() => challengeStore.canCreateByType(type.value));
+const lackAmount = computed(() => challengeStore.lackPointsAmountForType(type.value));
 
-const goBack = () => {
-  router.back();
-};
+const warningTextForType = computed(() => {
+  if (!isSelectedTypeFull.value) return '';
+  if (type.value === 'GROUP') return '소그룹 챌린지는 최대 3개까지 참여할 수 있어요.';
+  if (type.value === 'PERSONAL') return '개인 챌린지는 최대 3개까지 참여할 수 있어요.';
+  return '';
+});
 
-const addAmount = (amount) => {
-  goalValue.value += amount;
-};
-const formatAmount = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+// ✅ 직진입 대비: 정책 포인트 세팅 + 코인 스냅샷 보장
+onMounted(async () => {
+  challengeStore.setRequiredPoints({ GROUP: 100, PERSONAL: 0, COMMON: 0 });
+  if (!challengeStore.points.updatedAt) {
+    await challengeStore.fetchCoinStatus();
+  }
+});
+
+const routerBack = () => router.back();
+const addAmount = (amount) => (goalValue.value += amount);
+const formatAmount = (v) => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 const handleAmountInput = (e) => {
   const numericValue = e.target.value.replace(/,/g, '');
   goalValue.value = parseInt(numericValue) || 0;
@@ -193,19 +215,24 @@ const validateClient = () => {
   if (startDiff > 7) return '시작일은 7일 이내여야 해요.';
   if (goalValue.value < 1000) return '목표금액은 1,000원 이상이어야 해요.';
   if (goalValue.value > 10000000) return '목표금액은 10,000,000원 이하여야 해요.';
-  if (type.value === 'GROUP' && usePassword.value) {
-    if (!/^\d{4}$/.test(roomPassword.value)) return '비밀번호는 숫자 4자리여야 해요.';
-  }
+  if (type.value === 'GROUP' && usePassword.value && !/^\d{4}$/.test(roomPassword.value))
+    return '비밀번호는 숫자 4자리여야 해요.';
   return null;
 };
 
 const createChallenge = async () => {
+  // 0) 선택 타입 제한
+  if (!canCreateSelectedType.value) {
+    alert(warningTextForType.value || '해당 유형은 현재 생성할 수 없습니다.');
+    return;
+  }
+
   // 1) 폼 유효성
   const err = validateClient();
   if (err) return alert(err);
 
-  // 2) 소그룹 포인트 확인
-  if (type.value === 'GROUP' && userPoints.value < requiredPoints.value) {
+  // 2) 포인트 확인
+  if (requiredPoints.value > 0 && userPoints.value < requiredPoints.value) {
     showInsufficientPointsModal.value = true;
     return;
   }
@@ -214,29 +241,22 @@ const createChallenge = async () => {
   const payload = {
     title: title.value,
     description: description.value,
-    startDate: startDate.value, // yyyy-MM-dd
+    startDate: startDate.value,
     endDate: endDate.value,
     goalValue: goalValue.value,
-    type: type.value,           // "PERSONAL" | "GROUP"
+    type: type.value,
     categoryId: Number(categoryId.value),
     usePassword: usePassword.value,
-    password: usePassword.value ? Number(roomPassword.value) : null, // 서버 규격에 맞춰 숫자 유지
+    password: usePassword.value ? Number(roomPassword.value) : null,
   };
 
   try {
     loading.value = true;
     const token = auth.accessToken;
-    await axios.post(
-        '/api/challenge/create',
-        payload,
-        {headers: {Authorization: `Bearer ${token}`}}
-    );
+    await axios.post('/api/challenge/create', payload, { headers: { Authorization: `Bearer ${token}` } });
     showSuccessModal.value = true;
   } catch (e) {
-    const msg =
-        e?.response?.data?.message ||
-        e?.message ||
-        '챌린지 생성 중 오류가 발생했어요.';
+    const msg = e?.response?.data?.message || e?.message || '챌린지 생성 중 오류가 발생했어요.';
     alert(msg);
   } finally {
     loading.value = false;
@@ -247,13 +267,8 @@ const closeSuccessModal = () => {
   showSuccessModal.value = false;
   router.back();
 };
-
-const closeInsufficientPointsModal = () => {
-  showInsufficientPointsModal.value = false;
-};
-
+const closeInsufficientPointsModal = () => (showInsufficientPointsModal.value = false);
 const handleChargePoints = () => {
-  // 포인트 충전 페이지로 이동 (실제 구현 필요)
   console.log('포인트 충전 페이지로 이동');
   closeInsufficientPointsModal();
   // router.push('/points/charge');

@@ -1,3 +1,4 @@
+// src/api/coin/coin.js
 import api from '../instance';
 
 /**
@@ -8,8 +9,19 @@ import api from '../instance';
 export const getMonthlyPoints = ({ year, month }) =>
     api
         .get('/coin/monthly', { params: { year, month } })
-        // res.data => CommonResponseDTO
-        // res.data.data => { month, amount, updatedAt }
+        .then((res) => res?.data?.data)
+        .catch((err) => {
+            throw err;
+        });
+
+/**
+ * 코인 스냅샷(잔액/일반누적/월누적/업데이트시각)
+ * 백엔드: GET /api/coin/status
+ * 응답: CommonResponseDTO<{ amount, cumulativeAmount, monthlyCumulativeAmount, updatedAt }>
+ */
+export const getCoinStatus = () =>
+    api
+        .get('/coin/status')
         .then((res) => res?.data?.data)
         .catch((err) => {
             throw err;

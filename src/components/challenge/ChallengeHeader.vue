@@ -1,119 +1,65 @@
-<template>
-  <header class="challenge-header">
-    <div class="header-left">
-      <button class="icon-btn" @click="goBack">
-        <i class="fas fa-chevron-left"></i>
-      </button>
-      <h1 v-if="title" class="header-title">{{ title }}</h1>
-    </div>
-
-    <div class="header-icons">
-      <button class="icon-btn" @click="handleCreateClick">
-        <i class="fas fa-pen-to-square"></i>
-      </button>
-      <button class="icon-btn" @click="goToRanking">
-        <i class="fas fa-landmark"></i>
-      </button>
-    </div>
-
-    <!-- 챌린지 참여 제한 모달 -->
-    <ChallengeParticipationLimitModal
-      :is-visible="showParticipationLimitModal"
-      :personal-count="personalChallengeCount"
-      :group-count="groupChallengeCount"
-      @close="closeParticipationLimitModal"
-    />
-  </header>
-</template>
-
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ChallengeParticipationLimitModal from './ChallengeParticipationLimitModal.vue';
+import { useChallengeStore } from '@/stores/challenge';
 
 const props = defineProps({
-  title: {
-    type: String,
-    default: '',
-  },
-  participatingChallenges: {
-    type: Array,
-    default: () => [],
-  },
+  title: { type: String, default: '' }
 });
 
 const router = useRouter();
 const showParticipationLimitModal = ref(false);
+const challengeStore = useChallengeStore();
 
-// 개인 챌린지와 소그룹 챌린지 개수 계산
-const personalChallengeCount = computed(() => {
-  return props.participatingChallenges.filter(
-    (challenge) => challenge.type === 'PERSONAL'
-  ).length;
-});
+const personalChallengeCount = computed(() => challengeStore.counts.PERSONAL);
+const groupChallengeCount    = computed(() => challengeStore.counts.GROUP);
 
-const groupChallengeCount = computed(() => {
-  return props.participatingChallenges.filter(
-    (challenge) => challenge.type === 'GROUP'
-  ).length;
-});
-
-// 챌린지 생성 가능 여부 확인
-const canCreateChallenge = computed(() => {
-  return personalChallengeCount.value < 3 && groupChallengeCount.value < 3;
-});
-
-const goBack = () => {
-  // 현재 라우트에 따라 다른 동작 수행
-  const currentRoute = router.currentRoute.value.name;
-
-  if (
-    currentRoute === 'ChallengeCreate' ||
-    currentRoute === 'ChallengeRanking'
-  ) {
-    // 챌린지 생성 페이지나 랭킹 페이지에서는 ChallengeHome으로 이동
-    router.push('/challenge');
-  } else if (currentRoute === 'ChallengeHome') {
-    // 챌린지 홈 페이지에서는 메인 홈페이지로 이동
-    router.push('/');
-  } else if (
-    currentRoute === 'ChallengePersonalDetail' ||
-    currentRoute === 'ChallengeGroupDetail' ||
-    currentRoute === 'ChallengeCommonDetail'
-  ) {
-    // 챌린지 상세 페이지에서는 이전 페이지로 이동
-    // 라우터 state에서 이전 페이지 정보를 확인
-    const previousPage = router.currentRoute.value.state?.previousPage;
-
-    if (previousPage) {
-      // 이전 페이지 정보가 있으면 해당 페이지로 이동
-      router.push(previousPage);
-    } else {
-      // 이전 페이지 정보가 없으면 브라우저 히스토리 사용
-      router.back();
-    }
-  } else {
-    // 다른 페이지에서는 이전 페이지로 이동
-    router.back();
-  }
-};
+// 전역 가드: 둘 다 3개 이상이면 진입 차단
+const isAllFull = computed(() => challengeStore.isAllFull);
 
 const handleCreateClick = () => {
-  if (canCreateChallenge.value) {
-    // 챌린지 생성 가능한 경우
-    router.push('/challenge/create');
+  if (isAllFull.value) {
+    showParticipationLimitModal.value = true; // 두 타입 모두 불가일 때만 모달
   } else {
-    // 챌린지 생성 불가능한 경우 모달 표시
-    showParticipationLimitModal.value = true;
+    router.push('/challenge/create'); // 생성 페이지로 진입 → 거기서 '선택 타입' 기준으로 제한
   }
 };
 
-const closeParticipationLimitModal = () => {
-  showParticipationLimitModal.value = false;
+const goBack = () => {
+  const current = router.currentRoute.value.name;
+  if (current === 'ChallengeCreate' || current === 'ChallengeRanking') router.push('/challenge');
+  else if (current === 'ChallengeHome') router.push('/');
+  else {
+    const prev = router.currentRoute.value.state?.previousPage;
+    prev ? router.push(prev) : router.back();
+  }
 };
-
+const closeParticipationLimitModal = () => { showParticipationLimitModal.value = false; };
 const goToRanking = () => router.push('/challenge/ranking');
 </script>
+
+<template>
+  <header class="challenge-header">
+    <div class="header-left">
+      <button class="icon-btn" @click="goBack"><i class="fas fa-chevron-left"></i></button>
+      <h1 v-if="title" class="header-title">{{ title }}</h1>
+    </div>
+
+    <div class="header-icons">
+      <button class="icon-btn" @click="handleCreateClick"><i class="fas fa-pen-to-square"></i></button>
+      <button class="icon-btn" @click="goToRanking"><i class="fas fa-landmark"></i></button>
+    </div>
+
+    <ChallengeParticipationLimitModal
+        :is-visible="showParticipationLimitModal"
+        :personal-count="personalChallengeCount"
+        :group-count="groupChallengeCount"
+        @close="closeParticipationLimitModal"
+    />
+  </header>
+</template>
+
 
 <style scoped>
 .challenge-header {
