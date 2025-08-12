@@ -25,25 +25,6 @@
       </div>
     </div>
 
-    <!-- 예금 유형 -->
-    <div class="section-label">예금 유형</div>
-    <div class="deposit-type-row">
-      <button
-        type="button"
-        :class="['deposit-type-btn', { active: depositType === '정기예금' }]"
-        @click="depositType = '정기예금'"
-      >
-        정기예금
-      </button>
-      <button
-        type="button"
-        :class="['deposit-type-btn', { active: depositType === '정기적금' }]"
-        @click="depositType = '정기적금'"
-      >
-        정기적금
-      </button>
-    </div>
-
     <!-- 우대항목 -->
     <div class="section-label">
       우대항목 <span class="prefer-desc">선택하지 않아도 검색 가능</span>
@@ -79,10 +60,6 @@
           <span class="summary-label">투자 기간:</span>
           <span class="summary-value">{{ period }}</span>
         </div>
-        <div class="summary-item">
-          <span class="summary-label">예금 유형:</span>
-          <span class="summary-value">{{ depositType }}</span>
-        </div>
         <div class="summary-item" v-if="selectedPrefer.length > 0">
           <span class="summary-label">우대항목:</span>
           <span class="summary-value">{{ selectedPrefer.join(', ') }}</span>
@@ -93,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 
 // Props 정의
 const props = defineProps({
@@ -104,17 +81,15 @@ const props = defineProps({
   formData: {
     type: Object,
     default: () => ({
-      amountRaw: 100000,
+      amountRaw: 1000000,
       period: '1년',
-      depositType: '정기예금',
       selectedPrefer: [],
     }),
   },
 });
 
-const amountRaw = ref(props.formData.amountRaw);
+const amountRaw = ref(props.formData?.amountRaw ?? 1000000);
 const period = ref(props.formData.period);
-const depositType = ref(props.formData.depositType);
 const preferList = [
   '신규 고객',
   '급여 이체 실적 있음',
@@ -130,10 +105,10 @@ const selectedPrefer = ref([...props.formData.selectedPrefer]);
 watch(
   () => props.formData,
   (newFormData) => {
-    amountRaw.value = newFormData.amountRaw;
-    period.value = newFormData.period;
-    depositType.value = newFormData.depositType;
-    selectedPrefer.value = [...newFormData.selectedPrefer];
+    // 안전한 값 할당
+    amountRaw.value = newFormData?.amountRaw ?? 1000000;
+    period.value = newFormData?.period ?? '1년';
+    selectedPrefer.value = [...(newFormData?.selectedPrefer ?? [])];
   },
   { deep: true }
 );
@@ -141,6 +116,14 @@ watch(
 // 콤마가 포함된 포맷된 금액
 const formattedAmount = computed({
   get: () => {
+    // amountRaw.value가 유효한 숫자인지 확인
+    if (
+      amountRaw.value === undefined ||
+      amountRaw.value === null ||
+      isNaN(amountRaw.value)
+    ) {
+      return '';
+    }
     return amountRaw.value.toLocaleString();
   },
   set: (value) => {
@@ -167,18 +150,51 @@ function handleAmountInput(event) {
     input.value = '';
     amountRaw.value = 0;
   }
+  
+  // 입력값 길이에 따라 너비 조정
+  adjustInputWidth(input);
+}
+
+// 입력 필드 너비 조정 함수
+function adjustInputWidth(input) {
+  // 임시 span 요소 생성하여 텍스트 너비 측정
+  const span = document.createElement('span');
+  span.style.visibility = 'hidden';
+  span.style.position = 'absolute';
+  span.style.whiteSpace = 'pre';
+  span.style.font = window.getComputedStyle(input).font;
+  span.textContent = input.value || '0';
+  
+  document.body.appendChild(span);
+  const textWidth = span.offsetWidth;
+  document.body.removeChild(span);
+  
+  // 패딩과 여백을 고려한 최종 너비 계산
+  const padding = 24; // 좌우 패딩 (12px * 2)
+  const margin = 4; // 좌우 마진 (2px * 2)
+  const minWidth = 120;
+  const maxWidth = 200;
+  
+  let newWidth = Math.max(minWidth, textWidth + padding + margin);
+  newWidth = Math.min(maxWidth, newWidth);
+  
+  input.style.width = newWidth + 'px';
 }
 
 // 요약 모드 토글
 function toggleSummaryMode() {
-  emit('toggle-summary-mode');
+  // 현재 입력된 값들을 부모 컴포넌트에 전달
+  emit('toggle-summary-mode', {
+    amountRaw: amountRaw.value,
+    period: period.value,
+    selectedPrefer: selectedPrefer.value,
+  });
 }
 
 // 폼 제출 시 입력값 콘솔 출력 및 부모에게 이벤트 전달
 function handleSubmit() {
   console.log('투자 금액:', formattedAmount.value);
   console.log('투자 기간:', period.value);
-  console.log('예금 유형:', depositType.value);
   console.log('우대항목:', selectedPrefer.value);
 
   // 필터링 객체 생성
@@ -199,7 +215,6 @@ function handleSubmit() {
   emit('search-completed', {
     amount: amountRaw.value,
     period: period.value,
-    depositType: depositType.value,
     selectedPrefer: selectedPrefer.value,
     filterObject: filterObject,
   });
@@ -207,6 +222,26 @@ function handleSubmit() {
 
 // 이벤트 정의
 const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
+
+// 컴포넌트 마운트 시 초기 너비 설정
+onMounted(() => {
+  nextTick(() => {
+    const input = document.querySelector('.amount-input');
+    if (input) {
+      adjustInputWidth(input);
+    }
+  });
+});
+
+// formattedAmount가 변경될 때마다 너비 조정
+watch(formattedAmount, () => {
+  nextTick(() => {
+    const input = document.querySelector('.amount-input');
+    if (input) {
+      adjustInputWidth(input);
+    }
+  });
+});
 </script>
 
 <style scoped>
@@ -249,6 +284,7 @@ const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
   font-weight: 600;
   outline: none;
   cursor: pointer;
+
 }
 
 .period-label {
@@ -267,7 +303,9 @@ const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
   border: none;
   border-bottom: 1.5px solid var(--color-main);
   border-radius: 0;
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
+  width: 120px; /* 기본 너비 */
   font-size: var(--font-size-title-sub);
   color: var(--color-main);
   font-weight: 600;
@@ -275,6 +313,8 @@ const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
   margin: 0 2px;
   outline: none;
   background: none;
+  padding: 16px 12px 4px 12px;
+  transition: width 0.3s ease;
 }
 
 .input-summary {
@@ -364,29 +404,6 @@ const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
 
 .input-period.bold {
   font-weight: var(--font-weight-bold);
-}
-
-.deposit-type-row {
-  display: flex;
-  gap: 12px;
-}
-
-.deposit-type-btn {
-  flex: 1 1 0;
-  border: 1.5px solid var(--color-bg-border);
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-medium);
-  border-radius: 12px;
-  padding: 10px 0;
-  cursor: pointer;
-  transition: border 0.2s, color 0.2s;
-}
-
-.deposit-type-btn.active {
-  border: 1.5px solid var(--color-main);
-  color: var(--color-main);
 }
 
 .prefer-row {
