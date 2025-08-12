@@ -33,8 +33,16 @@
         </button>
       </div>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingRecommend">
+        <LoadingSpinner message="추천 상품을 불러오는 중..." />
+      </div>
+
       <!-- 펀드 상품 리스트 -->
-      <div v-if="showProducts" class="products-container">
+      <div
+        v-if="showProducts && !isLoadingRecommend"
+        class="products-container"
+      >
         <ProductCardList_fund :funds="fundRecommendData.data" />
       </div>
 
@@ -102,9 +110,14 @@
         </div>
       </div>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingAll">
+        <LoadingSpinner message="상품 목록을 불러오는 중..." />
+      </div>
+
       <!-- 전체 상품 리스트 -->
       <div
-        v-if="filteredAllFunds && filteredAllFunds.length > 0"
+        v-else-if="filteredAllFunds && filteredAllFunds.length > 0"
         class="products-list-container"
       >
         <ProductCardList_fund :funds="filteredAllFunds" />
@@ -121,11 +134,14 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductCardList_fund from '@/components/finance/fund/ProductCardList_fund.vue';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { getFundList, getFundRecommendedList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const showProducts = ref(false);
+const isLoadingRecommend = ref(false);
+const isLoadingAll = ref(false);
 const fundAllData = ref([]);
 const fundRecommendData = ref([]);
 const fav = useFavoriteStore();
@@ -144,11 +160,14 @@ onMounted(() => {
 });
 
 const fetchFundList = async () => {
+  isLoadingAll.value = true;
   try {
     const res = await getFundList();
     fundAllData.value = res.data ?? [];
   } catch (error) {
     console.log('펀드 전체 목록 조회 실패', error);
+  } finally {
+    isLoadingAll.value = false;
   }
 };
 
@@ -232,6 +251,7 @@ function closeFilter() {
 }
 
 const fetchFundRecommendedList = async () => {
+  isLoadingRecommend.value = true;
   try {
     console.log('투자 성향에 맞는 상품 확인하기 클릭됨');
     const res = await getFundRecommendedList();
@@ -239,6 +259,8 @@ const fetchFundRecommendedList = async () => {
     showProducts.value = true;
   } catch (error) {
     console.log(error);
+  } finally {
+    isLoadingRecommend.value = false;
   }
 };
 </script>
