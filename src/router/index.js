@@ -1,15 +1,11 @@
-// ProfileStep5 파일이 존재하지 않으므로 임포트 제거
-// import ProfileStep5 from '../pages/mypage/financetest/ProfileStep10.vue';
-import ProfileStep6 from '../pages/mypage/financetest/ProfileStep6.vue';
-import ProfileStep10 from '../pages/mypage/financetest/ProfileStep10.vue';
-import ProfileStep7 from '../pages/mypage/financetest/ProfileStep7.vue';
-import ProfileStep8 from '../pages/mypage/financetest/ProfileStep8.vue';
-import ProfileStep9 from '../pages/mypage/financetest/ProfileStep9.vue';
+// src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router';
-import ArsAuth from '../pages/ars/ArsAuth.vue';
-import ArsVerification from '../pages/ars/ArsVerification.vue';
-import ArsComplete from '../pages/ars/ArsComplete.vue';
-import ArsFail from '../pages/ars/ArsFail.vue';
+
+// layouts
+import MainLayout from '../layouts/MainLayout.vue';
+import FinanceLayout from '@/layouts/FinanceLayout.vue';
+import ChallengeLayout from '../layouts/ChallengeLayout.vue';
+import OpenBankingLayout from '../layouts/OpenBankingLayout.vue';
 
 // auth
 import Login from '../pages/auth/Login.vue';
@@ -22,38 +18,28 @@ import ProfileStep4 from '../pages/auth/ProfileStep4.vue';
 import ProfileStep5 from '../pages/auth/ProfileStep5.vue';
 import ProfileComplete from '../pages/auth/ProfileComplete.vue';
 
-// mypage
-import Mypage from '../pages/mypage/Mypage.vue';
-import Withdraw from '../pages/mypage/Withdraw.vue';
-import WithdrawSuccess from '../pages/mypage/WithdrawSuccess.vue';
-import Profile from '../pages/mypage/Profile.vue';
-import MyHistory from '../pages/mypage/MyHistory.vue';
-import MyCertificates from '../pages/mypage/MyCertificate/MyCertificates.vue';
-import CertificateDetail from '../pages/mypage/MyCertificate/CertificateDetail.vue';
+// mypage (공통 컴포넌트 재사용)
+import ProfileStep6 from '../pages/mypage/financetest/ProfileStep6.vue';
+import ProfileStep7 from '../pages/mypage/financetest/ProfileStep7.vue';
+import ProfileStep8 from '../pages/mypage/financetest/ProfileStep8.vue';
+import ProfileStep9 from '../pages/mypage/financetest/ProfileStep9.vue';
+import ProfileStep10 from '../pages/mypage/financetest/ProfileStep10.vue';
 
-import CertificatePasswordChange from '../pages/mypage/MyCertificate/CertificatePasswordChange.vue';
-import CertificatePasswordChangeNew from '../pages/mypage/MyCertificate/CertificatePassword-Change-New.vue';
-import CertificatePasswordChangeConfirm from '../pages/mypage/MyCertificate/CertificatePassword-Change-Confirm.vue';
-import CustomerSupport from '../pages/mypage/CustomerSupport.vue';
-import Dictionary from '../pages/home/Dictionary.vue';
-import AvatarShop from '../pages/mypage/avatar/AvatarShop.vue';
+// ARS
+import ArsAuth from '../pages/ars/ArsAuth.vue';
+import ArsVerification from '../pages/ars/ArsVerification.vue';
+import ArsComplete from '../pages/ars/ArsComplete.vue';
+import ArsFail from '../pages/ars/ArsFail.vue';
 
-// home
-import Home from '../pages/home/Home.vue';
-import Notification from '../pages/home/Notification.vue';
-import Quiz from '../pages/home/Quiz.vue';
-
-// finance
-import FinanceLayout from '@/layouts/FinanceLayout.vue';
+// finance pages
 import FinanceHome from '../pages/finance/FinanceHome.vue';
 import Deposit from '../pages/finance/Deposit.vue';
 import Installment from '../pages/finance/Installment.vue';
 import Fund from '../pages/finance/Fund.vue';
 import Stock from '../pages/finance/Stock.vue';
 import FavoriteProducts from '../pages/finance/FavoriteProducts.vue';
-import StockDetail from '@/pages/finance/StockDetail.vue';
 
-// 재테크 컴포넌트
+// finance components (test routes)
 import ProductInputForm from '../components/finance/deposit/ProductInputForm_deposit.vue';
 import ProductInputForm_installment from '../components/finance/installment/ProductInputForm_installment.vue';
 import ProductCard from '../components/finance/deposit/ProductCard_deposit.vue';
@@ -64,35 +50,52 @@ import ProductCard_fund from '../components/finance/fund/ProductCard_fund.vue';
 import ProductCardList_fund from '../components/finance/fund/ProductCardList_fund.vue';
 import ProductCard_installment from '../components/finance/installment/ProductCard_installment.vue';
 
+// home/misc
+import Home from '../pages/home/Home.vue';
+import Notification from '../pages/home/Notification.vue';
+import Quiz from '../pages/home/Quiz.vue';
+import Dictionary from '../pages/home/Dictionary.vue';
+import Mypage from '../pages/mypage/Mypage.vue';
+import Withdraw from '../pages/mypage/Withdraw.vue';
+import WithdrawSuccess from '../pages/mypage/WithdrawSuccess.vue';
+import Profile from '../pages/mypage/Profile.vue';
+import MyHistory from '../pages/mypage/MyHistory.vue';
+import MyCertificates from '../pages/mypage/MyCertificate/MyCertificates.vue';
+import CertificateDetail from '../pages/mypage/MyCertificate/CertificateDetail.vue';
+import CertificatePasswordChange from '../pages/mypage/MyCertificate/CertificatePasswordChange.vue';
+import CertificatePasswordChangeNew from '../pages/mypage/MyCertificate/CertificatePassword-Change-New.vue';
+import CertificatePasswordChangeConfirm from '../pages/mypage/MyCertificate/CertificatePassword-Change-Confirm.vue';
+import CustomerSupport from '../pages/mypage/CustomerSupport.vue';
+import AvatarShop from '../pages/mypage/avatar/AvatarShop.vue';
+
+// openbanking
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 import AccountLinkSelect from '../pages/openbanking/openAuth/AccountLinkSelect.vue';
 import AccountAgreement from '../pages/openbanking/openAuth/AccountAgreement.vue';
-import ObAgreement from '../pages/openbanking/openAuth/ObAgreement.vue';
-
-// 핀픽 인증서 관련 컴포넌트들
 import CreateCertificate from '../pages/openbanking/openAuth/CertificateCreate.vue';
 import SetCertificatePassword from '../pages/openbanking/openAuth/CertificateSetPassword.vue';
-import ConfirmCertificatePassword from '../pages/openbanking/openAuth/CrrtificateConfirmPass.vue';
+import ConfirmCertificatePassword from '../pages/openbanking/openAuth/CertificateConfirmPass.vue'; // ✅ 오탈자 수정
 import CertificateComplete from '../pages/openbanking/openAuth/CertificateComplete.vue';
 
 import AccountList from '../pages/openbanking/myaccount/AccountList.vue';
 import AccountDetail from '../pages/openbanking/myaccount/AccountDetail.vue';
 import CardList from '../pages/openbanking/myaccount/CardList.vue';
-import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
-import OpenbankingDailyReport from '../pages/openbanking/Report/OpenbankingDailyReport.vue';
-import OpenbankingMonthlyReport from '../pages/openbanking/Report/OpenbankingMonthlyReport.vue';
-import DailyReportSelect from '../pages/openbanking/Report/DailyReportSelect.vue';
-import DailyReportDetail from '../pages/openbanking/Report/DailyReportDetail.vue';
+import CardDetail from '../pages/openbanking/myaccount/CardDetail.vue';
 
-// 공통 레이아웃
-import MainLayout from '../layouts/MainLayout.vue';
-import ChallengeLayout from '../layouts/ChallengeLayout.vue';
+// 보고서/캘린더
+import OpenbankingMonthlyReport from '../pages/openbanking/Report/OpenbankingMonthlyReport.vue';
+import OpenbankingCalendar from '../pages/openbanking/Report/OpenbankingCalendar.vue';
+import CalendarSelect from '../pages/openbanking/Report/CalendarSelect.vue';
+import CalendarDetail from '../pages/openbanking/Report/CalendarDetail.vue';
+
+//챌린지
+import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // 재테크 컴포넌트 테스트
     {
-      // 재테크 컴포넌트 테스트
       path: '/finance/product-input-form',
       name: 'ProductInputForm',
       component: ProductInputForm,
@@ -132,167 +135,64 @@ const router = createRouter({
       name: 'ProductInputFormInstallment',
       component: ProductInputForm_installment,
     },
-
     {
       path: '/finance/product-card-installment',
       name: 'ProductCardInstallment',
       component: ProductCard_installment,
     },
 
-    // 로그인, 회원가입, ARS 등은 레이아웃 없이 단독 페이지로 유지
-    {
-      path: '/login',
-      name: 'Login',
-      component: Login,
-    },
-    {
-      path: '/signup',
-      name: 'Signup',
-      component: Signup,
-    },
+    // 로그인/회원가입/ARS (레이아웃 없이)
+    { path: '/login', name: 'Login', component: Login },
+    { path: '/signup', name: 'Signup', component: Signup },
     {
       path: '/auth/signup-complete',
       name: 'SignupComplete',
       component: SignupComplete,
     },
-    {
-      path: '/profile-step-1',
-      name: 'ProfileStep1',
-      component: ProfileStep1,
-    },
-    {
-      path: '/profile-step-2',
-      name: 'ProfileStep2',
-      component: ProfileStep2,
-    },
-    {
-      path: '/profile-step-3',
-      name: 'ProfileStep3',
-      component: ProfileStep3,
-    },
-    {
-      path: '/profile-step-4',
-      name: 'ProfileStep4',
-      component: ProfileStep4,
-    },
-    {
-      path: '/profile-step-5',
-      name: 'ProfileStep5',
-      component: ProfileStep5,
-    },
+    { path: '/profile-step-1', name: 'ProfileStep1', component: ProfileStep1 },
+    { path: '/profile-step-2', name: 'ProfileStep2', component: ProfileStep2 },
+    { path: '/profile-step-3', name: 'ProfileStep3', component: ProfileStep3 },
+    { path: '/profile-step-4', name: 'ProfileStep4', component: ProfileStep4 },
+    { path: '/profile-step-5', name: 'ProfileStep5', component: ProfileStep5 },
     {
       path: '/profile-complete',
       name: 'ProfileComplete',
       component: ProfileComplete,
     },
 
-    // 마이페이지용 ProfileStep1~5 (공통 컴포넌트 사용)
-    {
-      path: '/mypage/financetest/profile-step-1',
-      name: 'MypageProfileStep1',
-      component: ProfileStep1,
-    },
-    {
-      path: '/mypage/financetest/profile-step-2',
-      name: 'MypageProfileStep2',
-      component: ProfileStep2,
-    },
-    {
-      path: '/mypage/financetest/profile-step-3',
-      name: 'MypageProfileStep3',
-      component: ProfileStep3,
-    },
-    {
-      path: '/mypage/financetest/profile-step-4',
-      name: 'MypageProfileStep4',
-      component: ProfileStep4,
-    },
-    {
-      path: '/mypage/financetest/profile-step-5',
-      name: 'MypageProfileStep5',
-      component: ProfileStep5,
-    },
-    {
-      path: '/mypage/financetest/profile-step-6',
-      name: 'ProfileStep6',
-      component: ProfileStep6,
-    },
-    {
-      path: '/mypage/financetest/profile-step-7',
-      name: 'ProfileStep7',
-      component: ProfileStep7,
-    },
-    {
-      path: '/mypage/financetest/profile-step-8',
-      name: 'ProfileStep8',
-      component: ProfileStep8,
-    },
-    {
-      path: '/mypage/financetest/profile-step-9',
-      name: 'ProfileStep9',
-      component: ProfileStep9,
-    },
-    {
-      path: '/mypage/financetest/profile-step-10',
-      name: 'ProfileStep10',
-      component: ProfileStep10,
-    },
-    {
-      path: '/certificate-password-change',
-      name: 'certificate-password-change',
-      component: CertificatePasswordChange,
-    },
-    {
-      path: '/certificate-password-change-new',
-      name: 'certificate-password-change-new',
-      component: CertificatePasswordChangeNew,
-    },
-    {
-      path: '/certificate-password-change-confirm',
-      name: 'certificate-password-change-confirm',
-      component: CertificatePasswordChangeConfirm,
-    },
-    {
-      path: '/ars-auth',
-      name: 'ARSAuth',
-      component: ArsAuth,
-    },
+    { path: '/ars-auth', name: 'ARSAuth', component: ArsAuth },
     {
       path: '/ars/verification',
       name: 'ArsVerification',
       component: ArsVerification,
     },
+    { path: '/ars/complete', name: 'ArsComplete', component: ArsComplete },
+    { path: '/ars/fail', name: 'ArsFail', component: ArsFail },
+
+    // 오픈뱅킹 인증 (레이아웃 없이)
     {
-      path: '/ars/complete',
-      name: 'ArsComplete',
-      component: ArsComplete,
+      path: '/openbanking/ars-agreement',
+      name: 'ObArsAgreement',
+      component: () =>
+        import('../pages/openbanking/openAuth/ObArsAgreement.vue'),
     },
     {
-      path: '/ars/fail',
-      name: 'ArsFail',
-      component: ArsFail,
+      path: '/openbanking/agreement',
+      name: 'OpenBankingAgreement',
+      component: () => import('../pages/openbanking/openAuth/ObAgreement.vue'),
     },
     {
-      path: '/ars/link-banking',
-      name: 'ArsLinkBanking',
-      component: () => import('../pages/ars/ArsLinkBanking.vue'),
+      path: '/openbanking/account-link-select',
+      name: 'AccountLinkSelect',
+      component: AccountLinkSelect,
     },
     {
-      path: '/finance/favorite-products',
-      name: 'FavoriteProducts',
-      component: FavoriteProducts,
+      path: '/openbanking/account-agreement',
+      name: 'AccountAgreement',
+      component: AccountAgreement,
     },
-    {
-      path: '/withdraw',
-      name: 'withdraw',
-      component: Withdraw,
-    },
-    {
-      path: '/withdraw-success',
-      name: 'withdraw-success',
-      component: WithdrawSuccess,
-    },
-    // 핀픽 인증서 (상단/하단 레이아웃 없음)
+
+    // 인증서(레이아웃 없이)
     {
       path: '/openbanking/create-certificate',
       name: 'CreateCertificate',
@@ -314,7 +214,7 @@ const router = createRouter({
       component: CertificateComplete,
     },
 
-    // 공통 레이아웃 적용 구간
+    // 메인 레이아웃
     {
       path: '/',
       component: MainLayout,
@@ -323,86 +223,16 @@ const router = createRouter({
         { path: 'dictionary', name: 'dictionary', component: Dictionary },
         { path: 'notification', name: 'Notification', component: Notification },
         { path: 'quiz', name: 'Quiz', component: Quiz },
-        // 재테크
         { path: 'finance', name: 'FinanceHome', component: FinanceHome },
-        // 내 자산
+
+        // 오픈뱅킹 (MainLayout 하위)
         {
           path: 'openbanking',
           name: 'OpenBankingHome',
           component: OpenBankingHome,
         },
-        {
-          path: 'openbanking/myhome',
-          name: 'OpenBankingMyHome',
-          component: () => import('../pages/openbanking/OpenBankingMyHome.vue'),
-        },
 
-        {
-          path: 'openbanking/daily-report',
-          name: 'OpenbankingDailyReport',
-          component: OpenbankingDailyReport,
-        },
-        {
-          path: 'openbanking/monthly-report',
-          name: 'OpenbankingMonthlyReport',
-          component: OpenbankingMonthlyReport,
-        },
-        {
-          path: 'openbanking/daily-report-select',
-          name: 'DailyReportSelect',
-          component: DailyReportSelect,
-        },
-        {
-          path: 'openbanking/daily-report-detail/:id',
-          name: 'DailyReportDetail',
-          component: DailyReportDetail,
-        },
-
-        {
-          path: 'openbanking/ars-agreement',
-          name: 'ObArsAgreement',
-          component: () =>
-            import('../pages/openbanking/openAuth/ObArsAgreement.vue'),
-        },
-        {
-          path: 'openbanking/agreement',
-          name: 'OpenBankingAgreement',
-          component: () =>
-            import('../pages/openbanking/openAuth/ObAgreement.vue'),
-        },
-        {
-          path: 'openbanking/account-link-select',
-          name: 'AccountLinkSelect',
-          component: AccountLinkSelect,
-        },
-        {
-          path: 'openbanking/account-agreement',
-          name: 'AccountAgreement',
-          component: AccountAgreement,
-        },
-
-        {
-          path: 'openbanking/account-list',
-          name: 'AccountList',
-          component: AccountList,
-        },
-        {
-          path: 'openbanking/account-detail/:accountId',
-          name: 'AccountDetail',
-          component: AccountDetail,
-        },
-        {
-          path: 'openbanking/card-list',
-          name: 'CardList',
-          component: CardList,
-        },
-        {
-          path: 'openbanking/card-detail/:cardId',
-          name: 'CardDetail',
-          component: () =>
-            import('../pages/openbanking/myaccount/CardDetail.vue'),
-        },
-
+        // 마이페이지
         { path: 'mypage', name: 'mypage', component: Mypage },
         { path: 'profile', name: 'profile', component: Profile },
         { path: 'my-history', name: 'my-history', component: MyHistory },
@@ -421,10 +251,11 @@ const router = createRouter({
           name: 'customer-support',
           component: CustomerSupport,
         },
-
         { path: 'avatar-shop', name: 'avatar-shop', component: AvatarShop },
       ],
     },
+
+    // 파이낸스 레이아웃
     {
       path: '/finance',
       component: FinanceLayout,
@@ -453,9 +284,10 @@ const router = createRouter({
           name: 'StockDetail',
           component: () => import('../pages/finance/StockDetail.vue'),
         },
-        // ... 추가 재테크 탭들
       ],
     },
+
+    // 챌린지 레이아웃
     {
       path: '/challenge',
       component: ChallengeLayout,
@@ -502,7 +334,64 @@ const router = createRouter({
         },
       ],
     },
-    // 404 Not Found catch-all
+
+    // 오픈뱅킹 레이아웃
+    {
+      path: '/openbanking',
+      component: OpenBankingLayout,
+      children: [
+        {
+          path: 'myhome',
+          name: 'OpenBankingMyHome',
+          component: () => import('../pages/openbanking/OpenBankingMyHome.vue'),
+        },
+        {
+          path: 'account-list',
+          name: 'AccountList',
+          component: AccountList,
+        },
+        {
+          path: 'account-detail/:accountId',
+          name: 'AccountDetail',
+          component: AccountDetail,
+          props: true,
+        },
+        {
+          path: 'card-list',
+          name: 'CardList',
+          component: CardList,
+        },
+        {
+          path: 'card-detail/:cardId',
+          name: 'CardDetail',
+          component: CardDetail,
+          props: true,
+        },
+        {
+          path: 'calendar',
+          name: 'OpenbankingCalendar',
+          component: OpenbankingCalendar,
+        },
+        {
+          path: 'calendar/select',
+          name: 'CalendarSelect',
+          component: CalendarSelect,
+        },
+        {
+          path: 'calendar/detail/:id',
+          name: 'CalendarDetail',
+          component: CalendarDetail,
+          props: true,
+        },
+        {
+          path: 'monthly-report',
+          name: 'OpenbankingMonthlyReport',
+          component: OpenbankingMonthlyReport,
+        },
+      ],
+    },
+
+    // 404
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
@@ -540,9 +429,8 @@ router.beforeEach(async (to) => {
   ]);
 
   const auth = useAuthStore();
-
-  // 보호 라우트면 먼저 조용히 AT 복구 시도
-  if (!publicPages.has(to.name)) {
+  const isPublic = to.name && publicPages.has(String(to.name));
+  if (!isPublic) {
     await auth.bootstrap();
     if (!auth.isAuthenticated) {
       return { name: 'Login', query: { redirect: to.fullPath } };

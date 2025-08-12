@@ -34,12 +34,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
-import transactionData from "../Transaction_dummy.json";
+import { ref, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import { patchLedgerCategory } from '@/api/openbanking/transactionApi';
 
 library.add(faAngleLeft);
 
@@ -49,52 +49,52 @@ const route = useRoute();
 // 카테고리 데이터
 const categories = [
   {
-    name: "식비",
-    logo: "식비.png",
+    name: '식비',
+    logo: '식비.png',
   },
   {
-    name: "교통, 자동차",
-    logo: "교통, 자동차.png",
+    name: '교통, 자동차',
+    logo: '교통, 자동차.png',
   },
   {
-    name: "쇼핑, 미용",
-    logo: "쇼핑, 미용.png",
+    name: '쇼핑, 미용',
+    logo: '쇼핑, 미용.png',
   },
   {
-    name: "카페, 간식",
-    logo: "카페, 간식.png",
+    name: '카페, 간식',
+    logo: '카페, 간식.png',
   },
   {
-    name: "편의점, 마트, 잡화",
-    logo: "편의점, 마트, 잡화.png",
+    name: '편의점, 마트, 잡화',
+    logo: '편의점, 마트, 잡화.png',
   },
   {
-    name: "주거, 통신",
-    logo: "주거, 통신.png",
+    name: '주거, 통신',
+    logo: '주거, 통신.png',
   },
   {
-    name: "취미, 여가",
-    logo: "취미, 여가.png",
+    name: '취미, 여가',
+    logo: '취미, 여가.png',
   },
   {
-    name: "보험, 기타 금융",
-    logo: "보험, 기타 금융.png",
+    name: '보험, 기타 금융',
+    logo: '보험, 기타 금융.png',
   },
   {
-    name: "구독",
-    logo: "구독.png",
+    name: '구독',
+    logo: '구독.png',
   },
   {
-    name: "이체",
-    logo: "이체.png",
+    name: '이체',
+    logo: '이체.png',
   },
   {
-    name: "기타",
-    logo: "기타.png",
+    name: '기타',
+    logo: '기타.png',
   },
   {
-    name: "카테고리 없음",
-    logo: "카테고리 없음.png",
+    name: '카테고리 없음',
+    logo: '카테고리 없음.png',
   },
 ];
 
@@ -117,56 +117,34 @@ const goBack = () => {
   router.back();
 };
 
-// Transaction_dummy.json 파일을 수정하는 함수
-const updateTransactionFile = async (transactionId, newCategory) => {
-  try {
-    // 현재 파일 내용을 읽기
-    const response = await fetch(
-      "/src/pages/openbanking/Transaction_dummy.json"
-    );
-    const data = await response.json();
-
-    // 해당 거래의 description을 업데이트 (은행 로고는 유지)
-    if (data.transactions[transactionId]) {
-      data.transactions[transactionId].description = newCategory;
-      // 은행 로고 정보는 그대로 유지
-      console.log("은행 로고 유지:", data.transactions[transactionId].logo);
-
-      // localStorage에 업데이트된 데이터 저장 (더 영구적)
-      localStorage.setItem("transaction_data_updated", JSON.stringify(data));
-      localStorage.setItem(
-        `transaction_${transactionId}_category`,
-        newCategory
-      );
-
-      // sessionStorage에도 저장 (기존 호환성을 위해)
-      sessionStorage.setItem(
-        `transaction_${transactionId}_category`,
-        newCategory
-      );
-      sessionStorage.setItem("transaction_data_updated", JSON.stringify(data));
-
-      console.log(
-        `거래 ${transactionId}의 카테고리가 "${newCategory}"로 변경되었습니다.`
-      );
-      console.log("업데이트된 데이터가 localStorage에 저장되었습니다.");
-    }
-  } catch (error) {
-    console.error("거래 데이터 업데이트 실패:", error);
-  }
+// 카테고리 이름 → 서버 카테고리 코드/ID 매핑 (백엔드 정의에 맞게 수정 가능)
+const categoryMap = {
+  식비: 'FOOD',
+  '교통, 자동차': 'TRANSPORT',
+  '쇼핑, 미용': 'SHOPPING',
+  '카페, 간식': 'CAFE',
+  '편의점, 마트, 잡화': 'MART',
+  '주거, 통신': 'HOUSING',
+  '취미, 여가': 'LEISURE',
+  '보험, 기타 금융': 'INSURANCE',
+  구독: 'SUBSCRIPTION',
+  이체: 'TRANSFER',
+  기타: 'ETC',
+  '카테고리 없음': 'UNCATEGORIZED',
 };
 
 // 카테고리 선택 함수
 const selectCategory = async (category) => {
-  console.log("선택된 카테고리:", category);
+  console.log('선택된 카테고리:', category);
   const transactionId = route.query.transactionId;
 
   if (transactionId) {
-    // Transaction_dummy.json 파일 업데이트
-    await updateTransactionFile(parseInt(transactionId), category.name);
-
-    // sessionStorage에도 저장 (기존 호환성을 위해)
-    sessionStorage.setItem(`selectedCategory_${transactionId}`, category.name);
+    try {
+      const mapped = categoryMap[category.name] || category.name;
+      await patchLedgerCategory(transactionId, mapped);
+    } catch (e) {
+      console.error('카테고리 수정 실패:', e);
+    }
   }
 
   router.back();

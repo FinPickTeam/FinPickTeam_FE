@@ -1,33 +1,10 @@
 <template>
   <div class="monthly-report-container" ref="reportContainer">
-    <!-- 상단 헤더 -->
-    <div class="obmyhome-header">
-      <button class="obmyhome-back" @click="goBack">
-        <font-awesome-icon :icon="['fas', 'angle-left']" />
-      </button>
-      <div class="obmyhome-header-icons">
-        <button class="obmyhome-icon-btn" @click="goToDictionary">
-          <font-awesome-icon :icon="['fas', 'search']" />
-        </button>
-        <button
-          class="obmyhome-icon-btn"
-          @click="captureAndDownloadPDF"
-          title="월보고서 PDF 다운로드"
-        >
-          <font-awesome-icon :icon="['fas', 'download']" />
-        </button>
-      </div>
-    </div>
-
     <!-- 월 선택 네비게이션 -->
     <div class="report-header">
-      <button class="nav-arrow" @click="goPrevMonth">
-        <i class="fas fa-chevron-left"></i>
-      </button>
+      <button class="nav-arrow" @click="goPrevMonth">◀</button>
       <span class="report-title">{{ currentYear }}년 {{ currentMonth }}월</span>
-      <button class="nav-arrow" @click="goNextMonth">
-        <i class="fas fa-chevron-right"></i>
-      </button>
+      <button class="nav-arrow" @click="goNextMonth">▶</button>
     </div>
 
     <!-- 총 소비 -->
@@ -115,19 +92,19 @@
       <div class="category-legend">
         <span
           ><span class="dot food"></span>식비
-          {{ (categoryPercents?.["식비"] ?? 0).toFixed(1) }}%</span
+          {{ (categoryPercents?.['식비'] ?? 0).toFixed(1) }}%</span
         >
         <span
           ><span class="dot cafe"></span>카페/간식
-          {{ (categoryPercents?.["카페/간식"] ?? 0).toFixed(1) }}%</span
+          {{ (categoryPercents?.['카페/간식'] ?? 0).toFixed(1) }}%</span
         >
         <span
           ><span class="dot online"></span>온라인쇼핑
-          {{ (categoryPercents?.["온라인쇼핑"] ?? 0).toFixed(1) }}%</span
+          {{ (categoryPercents?.['온라인쇼핑'] ?? 0).toFixed(1) }}%</span
         >
         <span
           ><span class="dot etc"></span>그 외
-          {{ (categoryPercents?.["그 외"] ?? 0).toFixed(1) }}%</span
+          {{ (categoryPercents?.['그 외'] ?? 0).toFixed(1) }}%</span
         >
       </div>
     </section>
@@ -162,7 +139,7 @@
     <!-- 소비 성향 -->
     <section class="report-section tendency-section">
       <div class="tendency-row">
-        <i class="fas fa-search tendency-icon"></i>
+        <span class="tendency-icon">🔍</span>
         <span
           >나의 소비 성향은
           <span class="accent-blue">감정적 소비형 + 외식 과다형</span
@@ -197,37 +174,38 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
+import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 import {
-  faAngleLeft,
-  faSearch,
-  faPlus,
-  faDownload,
-} from "@fortawesome/free-solid-svg-icons";
-import html2canvas from "html2canvas";
-import jsPDF from "jspdf";
-library.add(faAngleLeft, faSearch, faPlus, faDownload);
-
-import transactionData from "../Transaction_dummy.json";
+  getMonthReport,
+  createMonthReport,
+  initMonthReport,
+  exportMonthReportPdf,
+} from '@/api/openbanking/monthReportApi';
 
 const reportContainer = ref(null);
 
 const router = useRouter();
 
-const goToDictionary = () => {
-  router.push("/dictionary");
-};
-
-const goBack = () => {
-  router.push("/openbanking/myhome");
-};
-
 const goToChallengeCreate = () => {
-  router.push("/challenge/create");
+  router.push('/challenge/create');
 };
+
+// PDF 다운로드 이벤트 리스너
+const handleDownloadPdf = () => {
+  captureAndDownloadPDF();
+};
+
+onMounted(() => {
+  fetchReport();
+  window.addEventListener('download-monthly-pdf', handleDownloadPdf);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('download-monthly-pdf', handleDownloadPdf);
+});
 
 // 월 상태 - 현재 날짜로 초기화
 const currentYear = ref(new Date().getFullYear());
@@ -251,75 +229,42 @@ const goNextMonth = () => {
   }
 };
 
-// 현재 월의 데이터 필터
+// YYYY-MM
 const monthStr = computed(
-  () => `${currentYear.value}-${String(currentMonth.value).padStart(2, "0")}`
-);
-const transactions = computed(() =>
-  Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions.filter((t) => {
-        const d = new Date(t.date);
-        return (
-          d.getFullYear() === currentYear.value &&
-          d.getMonth() + 1 === currentMonth.value
-        );
-      })
-    : []
+  () => `${currentYear.value}-${String(currentMonth.value).padStart(2, '0')}`
 );
 
-// 총 소비 (출금 합계) - computed로 변경하여 동적 계산
-const totalConsumption = computed(() => {
-  return Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (
-            tDate.getFullYear() === currentYear.value &&
-            tDate.getMonth() + 1 === currentMonth.value &&
-            (t.type || "").trim() === "출금"
-          );
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-});
+// 서버 월간 리포트 데이터 상태
+const serverReport = ref(null);
+const loading = ref(false);
+const error = ref(null);
 
-// 이전달 데이터 가져오기 - 그래프 방식과 동일하게 직접 순회
-const getPrevMonthData = () => {
-  const prevYear =
-    currentMonth.value === 1 ? currentYear.value - 1 : currentYear.value;
-  const prevMonth = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
-
-  return Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions.filter((t) => {
-        const tDate = new Date(t.date);
-        return (
-          tDate.getFullYear() === prevYear &&
-          tDate.getMonth() + 1 === prevMonth &&
-          (t.type || "").trim() === "출금"
-        );
-      })
-    : [];
+const fetchReport = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
+    const { data } = await getMonthReport(monthStr.value);
+    if (data.status === 200) {
+      serverReport.value = data.data || null;
+    } else {
+      error.value = data.message || '리포트 조회 실패';
+    }
+  } catch (e) {
+    error.value = e?.response?.data?.message || e.message;
+  } finally {
+    loading.value = false;
+  }
 };
 
-// 이전달 총 소비 - computed로 변경하여 동적 계산
-const prevMonthConsumption = computed(() => {
-  const prevYear =
-    currentMonth.value === 1 ? currentYear.value - 1 : currentYear.value;
-  const prevMonth = currentMonth.value === 1 ? 12 : currentMonth.value - 1;
+// 총 소비: 서버 리포트 기반
+const totalConsumption = computed(() =>
+  Number(serverReport.value?.totalConsumption ?? 0)
+);
 
-  return Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions
-        .filter((t) => {
-          const tDate = new Date(t.date);
-          return (
-            tDate.getFullYear() === prevYear &&
-            tDate.getMonth() + 1 === prevMonth &&
-            (t.type || "").trim() === "출금"
-          );
-        })
-        .reduce((sum, t) => sum + Number(t.amount || 0), 0)
-    : 0;
-});
+// 이전달 총 소비 (서버 제공 값 활용 예상; 없으면 0)
+const prevMonthConsumption = computed(() =>
+  Number(serverReport.value?.prevMonthConsumption ?? 0)
+);
 
 // 지난달 대비 증감 - computed로 변경하여 동적 계산
 const lastMonthDiff = computed(() => {
@@ -331,45 +276,21 @@ const lastMonthLess = computed(() => {
   return lastMonthDiff.value < 0 ? Math.abs(lastMonthDiff.value) : 0;
 });
 
-// 카테고리별 집계
-const categoryMap = {
-  식비: ["식비", "마트"],
-  "카페/간식": ["카페", "간식"],
-  온라인쇼핑: ["쇼핑"],
-};
-const categorySums = computed(() => {
-  const sums = { 식비: 0, "카페/간식": 0, 온라인쇼핑: 0, "그 외": 0 };
-
-  // 그래프 방식과 동일하게 직접 transactionData에서 필터링
-  const currentMonthTransactions = Array.isArray(transactionData?.transactions)
-    ? transactionData.transactions.filter((t) => {
-        const tDate = new Date(t.date);
-        return (
-          tDate.getFullYear() === currentYear.value &&
-          tDate.getMonth() + 1 === currentMonth.value &&
-          (t.type || "").trim() === "출금"
-        );
-      })
-    : [];
-
-  currentMonthTransactions.forEach((t) => {
-    let found = false;
-    for (const [cat, keywords] of Object.entries(categoryMap)) {
-      if (keywords.some((k) => (t.description || "").includes(k))) {
-        sums[cat] += Number(t.amount ?? 0);
-        found = true;
-        break;
-      }
+// 카테고리 집계(서버 값을 그대로 사용하도록 설계)
+const categorySums = computed(
+  () =>
+    serverReport.value?.categorySums ?? {
+      식비: 0,
+      '카페/간식': 0,
+      온라인쇼핑: 0,
+      '그 외': 0,
     }
-    if (!found) sums["그 외"] += Number(t.amount ?? 0);
-  });
-  return sums;
-});
+);
 const totalOut = computed(() =>
   Object.values(categorySums.value).reduce((a, b) => a + b, 0)
 );
 const categoryPercents = computed(() => {
-  const total = totalOut.value;
+  const total = totalOut.value || 0;
   return Object.fromEntries(
     Object.entries(categorySums.value).map(([k, v]) => [
       k,
@@ -390,48 +311,24 @@ const top3 = computed(() => {
     }));
 });
 
-// 월별 소비 막대그래프 (7개월 - 현재 월이 가운데)
+// 월별 소비 막대그래프: 서버에서 last7Months 같은 배열을 준다고 가정
+// [{ ym: '2025-03', sum: 123000 }, ... 7개]
 const monthBarHeights = computed(() => {
-  // 현재 월을 가운데로 하여 앞뒤 3개월씩 포함 (총 7개월)
-  const bars = [];
-  const now = new Date(currentYear.value, currentMonth.value - 1, 1);
-
-  // 앞 3개월 + 현재 월 + 뒤 3개월
-  for (let i = -3; i <= 3; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() + i, 1);
-    const year = d.getFullYear();
-    const month = d.getMonth() + 1;
-
-    // 해당 월의 출금 데이터 합계 계산
-    const sum = Array.isArray(transactionData?.transactions)
-      ? transactionData.transactions
-          .filter((t) => {
-            const tDate = new Date(t.date);
-            return (
-              tDate.getFullYear() === year &&
-              tDate.getMonth() + 1 === month &&
-              (t.type || "").trim() === "출금"
-            );
-          })
-          .reduce((a, b) => a + Number(b.amount ?? 0), 0)
-      : 0;
-
-    bars.push({ ym: `${year}-${String(month).padStart(2, "0")}`, sum });
-  }
-
+  const bars = Array.isArray(serverReport.value?.last7Months)
+    ? serverReport.value.last7Months
+    : [];
+  if (bars.length === 0) return [];
   const max = Math.max(...bars.map((b) => b.sum), 1);
-
-  // 색상 클래스 지정
-  return bars.map((b, idx) => {
-    let colorClass = "bar-purple";
-    if (b.sum > 1000000) colorClass = "bar-red";
-    else if (b.sum < 500000) colorClass = "bar-green";
-    return {
-      height: Math.round((b.sum / max) * 100),
-      colorClass,
-      isCurrent: idx === 3, // 가운데(인덱스 3)가 현재 월
-    };
-  });
+  return bars.map((b, idx) => ({
+    height: Math.round((Number(b.sum || 0) / max) * 100),
+    colorClass:
+      Number(b.sum || 0) > 1000000
+        ? 'bar-red'
+        : Number(b.sum || 0) < 500000
+        ? 'bar-green'
+        : 'bar-purple',
+    isCurrent: idx === Math.floor(bars.length / 2),
+  }));
 });
 
 // 월 라벨 생성 함수
@@ -444,20 +341,20 @@ const getMonthLabel = (idx) => {
 // spending_logo 매핑 함수
 const getSpendingLogo = (label) => {
   const logoMap = {
-    식비: "식비.png",
-    "카페/간식": "카페, 간식.png",
-    온라인쇼핑: "쇼핑, 미용.png",
-    "그 외": "기타.png",
+    식비: '식비.png',
+    '카페/간식': '카페, 간식.png',
+    온라인쇼핑: '쇼핑, 미용.png',
+    '그 외': '기타.png',
   };
 
-  const logoFileName = logoMap[label] || "기타.png";
+  const logoFileName = logoMap[label] || '기타.png';
 
   try {
     return new URL(`/src/assets/spending_logo/${logoFileName}`, import.meta.url)
       .href;
   } catch (error) {
     // 로고 파일을 찾을 수 없는 경우 기본 로고 반환
-    return new URL("/src/assets/spending_logo/기타.png", import.meta.url).href;
+    return new URL('/src/assets/spending_logo/기타.png', import.meta.url).href;
   }
 };
 
@@ -467,19 +364,19 @@ const captureAndDownloadPDF = async () => {
 
   try {
     // 로딩 상태 표시 (선택사항)
-    console.log("PDF 생성 중...");
+    console.log('PDF 생성 중...');
 
     const canvas = await html2canvas(reportContainer.value, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: "#ffffff",
+      backgroundColor: '#ffffff',
       logging: false,
       width: reportContainer.value.scrollWidth,
       height: reportContainer.value.scrollHeight,
     });
 
-    const imgData = canvas.toDataURL("image/png", 1.0);
+    const imgData = canvas.toDataURL('image/png', 1.0);
 
     // 이미지 크기에 맞춰 PDF 크기 계산
     const imgWidth = canvas.width;
@@ -490,135 +387,81 @@ const captureAndDownloadPDF = async () => {
     const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
 
     // PDF 생성 (크기를 이미지에 맞춤)
-    const pdf = new jsPDF("p", "mm", [pdfWidth, pdfHeight]);
+    const pdf = new jsPDF('p', 'mm', [pdfWidth, pdfHeight]);
 
     // 이미지를 PDF에 맞춰 추가 (한 페이지에 전체 내용)
-    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
     // 파일명 생성
     const fileName = `${currentYear.value}-${String(
       currentMonth.value
-    ).padStart(2, "0")}-월보고서.pdf`;
+    ).padStart(2, '0')}-월보고서.pdf`;
     pdf.save(fileName);
 
-    console.log("PDF 다운로드 완료:", fileName);
+    console.log('PDF 다운로드 완료:', fileName);
   } catch (error) {
-    console.error("PDF 생성 중 오류 발생:", error);
-    alert("PDF 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
+    console.error('PDF 생성 중 오류 발생:', error);
+    alert('PDF 생성 중 오류가 발생했습니다. 다시 시도해주세요.');
   }
 };
 </script>
 
 <style scoped>
 .monthly-report-container {
-  background: #f3f4f6;
-  min-height: 100vh;
-  padding-top: 56px; /* 상단 헤더 높이만큼 패딩 추가 */
-  padding-bottom: 60px; /* 하단 NAVBAR 높이만큼 패딩 추가 (20px + 30px) */
+  padding: 16px;
+  background: #f7f8fa;
+  height: calc(
+    100dvh - 160px
+  ); /* 헤더(80px) + 네비게이션(80px) 높이만큼 빼기 */
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  height: 100vh; /* 명시적 높이 설정 */
-  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  min-height: 0;
 }
 
-/* Webkit 브라우저(Chrome, Safari, Edge)에서 스크롤바 숨기기 */
-.monthly-report-container::-webkit-scrollbar {
-  display: none;
-}
-
-/* 상단 헤더 스타일 */
-.obmyhome-header {
-  width: 100%;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #f3f4f6;
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 390px;
-  z-index: 100;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
-.obmyhome-back {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #222;
-  cursor: pointer;
-  padding: 4px 8px 4px 0;
-  border-radius: 8px;
-  transition: background 0.15s;
-}
-.obmyhome-back:hover {
-  background: #f3f3f3;
-}
-.obmyhome-header-icons {
-  display: flex;
-  gap: 12px;
-}
-.obmyhome-icon-btn {
-  background: none;
-  border: none;
-  font-size: 22px;
-  color: #4318d1;
-  cursor: pointer;
-  padding: 4px 4px;
-  border-radius: 8px;
-  transition: background 0.15s;
-  position: relative;
-}
-/* .obmyhome-icon-btn:hover {
-  background: #f3f3f3;
-} */
-
-.obmyhome-icon-btn::after {
-  position: absolute;
-  bottom: -30px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 12px;
-  white-space: nowrap;
-  z-index: 1000;
-}
+/* 월 선택 네비게이션 */
 .report-header {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16px;
   padding: 16px 0 8px 0;
+  margin-bottom: 16px;
 }
+
 .report-title {
-  font-size: var(--font-size-title-main);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
 }
+
 .nav-arrow {
   background: none;
   border: none;
-  color: var(--color-main);
+  color: #4318d1;
   font-size: 22px;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.nav-arrow:hover {
+  background: #f3f3f3;
 }
 
 .report-section {
   background: #fff;
   border-radius: 18px;
-  margin: 0 16px 18px 16px;
+  margin: 0 0 16px 0;
   padding: 18px 18px 16px 18px;
+  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
 }
+
 .section-title {
-  font-size: var(--font-size-title-sub);
-  font-weight: var(--font-weight-medium);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
   margin-bottom: 8px;
 }
 
@@ -627,38 +470,47 @@ const captureAndDownloadPDF = async () => {
   margin-top: 0;
   margin-bottom: 14px;
 }
+
 .consumption-amount {
   font-size: 24px;
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
+  color: #222;
   margin-bottom: 4px;
 }
+
 .consumption-diff {
-  color: var(--color-accent);
+  color: #666;
   font-size: 14px;
 }
+
 .accent {
-  color: var(--color-accent);
-  font-weight: var(--font-weight-bold);
+  color: #4318d1;
+  font-weight: 700;
 }
 
 /* 지난달보다 덜 썼어요 */
 .compare-title {
   font-size: 18px;
-  font-weight: var(--font-weight-medium);
+  font-weight: 600;
+  color: #222;
   margin-bottom: 12px;
 }
+
 .accent-blue {
-  color: var(--color-main);
-  font-weight: var(--font-weight-bold);
+  color: #4318d1;
+  font-weight: 700;
 }
+
 .accent-red {
   color: #e74c3c;
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
 }
+
 .accent-gray {
-  color: var(--color-text-light);
-  font-weight: var(--font-weight-bold);
+  color: #666;
+  font-weight: 700;
 }
+
 .compare-bar-graph {
   display: flex;
   align-items: flex-end;
@@ -667,21 +519,26 @@ const captureAndDownloadPDF = async () => {
   margin-bottom: 2px;
   justify-content: center;
 }
+
 .bar {
   width: 28px;
-  background: var(--color-main-light-2);
+  background: #e0e7ff;
   border-radius: 8px 8px 0 0;
   transition: height 0.3s, background 0.3s;
 }
+
 .bar-accent {
-  background: var(--color-main);
+  background: #4318d1;
 }
+
 .bar-red {
   background: #e74c3c !important;
 }
+
 .bar-green {
   background: #27ae60 !important;
 }
+
 .bar-purple {
   background: #8e44ad !important;
 }
@@ -694,62 +551,73 @@ const captureAndDownloadPDF = async () => {
   gap: 12px;
   margin-top: 8px;
 }
+
 .month-label {
   width: 28px;
   height: 20px;
   text-align: center;
   font-size: 12px;
-  color: var(--color-text-light);
-  font-weight: var(--font-weight-medium);
+  color: #666;
+  font-weight: 500;
   border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
 }
+
 .month-label-current {
-  background: var(--color-main);
+  background: #4318d1;
   color: white;
-  font-weight: var(--font-weight-bold);
+  font-weight: 700;
 }
 
 /* 카테고리 바 */
 .category-title {
   font-size: 16px;
-  font-weight: var(--font-weight-medium);
+  font-weight: 600;
+  color: #222;
   margin-bottom: 10px;
 }
+
 .category-bar {
   display: flex;
   height: 16px;
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 8px;
-  background: var(--color-bg-accent);
+  background: #f3f4f6;
 }
+
 .category-bar-item {
   height: 100%;
 }
+
 .category-bar-item.food {
-  background: var(--color-main);
+  background: #4318d1;
 }
+
 .category-bar-item.online {
-  background: var(--color-main-light);
+  background: #6366f1;
 }
+
 .category-bar-item.cafe {
   background: #e6c1b6;
 }
+
 .category-bar-item.etc {
   background: #e5e7eb;
 }
+
 .category-legend {
   display: flex;
   flex-wrap: wrap;
   gap: 12px 18px;
   font-size: 13px;
   margin-top: 4px;
-  color: var(--color-text-light);
+  color: #666;
 }
+
 .dot {
   display: inline-block;
   width: 10px;
@@ -757,15 +625,19 @@ const captureAndDownloadPDF = async () => {
   border-radius: 50%;
   margin-right: 4px;
 }
+
 .dot.food {
-  background: var(--color-main);
+  background: #4318d1;
 }
+
 .dot.online {
-  background: var(--color-main-light);
+  background: #6366f1;
 }
+
 .dot.cafe {
   background: #e6c1b6;
 }
+
 .dot.etc {
   background: #e5e7eb;
 }
@@ -774,11 +646,13 @@ const captureAndDownloadPDF = async () => {
 .top3-section {
   margin-bottom: 18px;
 }
+
 .top3-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
+
 .top3-item {
   display: flex;
   align-items: center;
@@ -786,9 +660,11 @@ const captureAndDownloadPDF = async () => {
   padding: 12px 0;
   border-bottom: 1px solid #f3f4f6;
 }
+
 .top3-item:last-child {
   border-bottom: none;
 }
+
 .top3-icon {
   width: 36px;
   height: 36px;
@@ -806,41 +682,50 @@ const captureAndDownloadPDF = async () => {
   object-fit: contain;
   border-radius: 50%;
 }
+
 .top3-info {
   flex: 1;
 }
+
 .top3-label {
   font-size: 15px;
-  font-weight: var(--font-weight-medium);
+  font-weight: 600;
+  color: #222;
 }
+
 .top3-percent {
   font-size: 12px;
-  color: var(--color-text-light);
+  color: #666;
 }
+
 .top3-amount {
   font-size: 16px;
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text);
+  font-weight: 700;
+  color: #222;
 }
 
 /* 소비 성향 */
 .tendency-section {
   margin-bottom: 18px;
 }
+
 .tendency-row {
   display: flex;
   align-items: center;
   gap: 8px;
   font-size: 15px;
   margin-bottom: 4px;
+  color: #222;
 }
+
 .tendency-icon {
-  color: var(--color-main);
+  color: #4318d1;
   font-size: 18px;
 }
+
 .tendency-desc {
   font-size: 13px;
-  color: var(--color-text-light);
+  color: #666;
 }
 
 /* 챌린지 */

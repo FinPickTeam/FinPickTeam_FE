@@ -1,18 +1,5 @@
 <template>
   <div class="card-detail-container">
-    <BaseHeader>
-      <template #title>{{ cardInfo.name || '카드 상세' }}</template>
-      <template #right>
-        <button
-          class="icon-btn"
-          @click="showFilter = true"
-          aria-label="필터 열기"
-        >
-          <font-awesome-icon :icon="['fas', 'sliders']" />
-        </button>
-      </template>
-    </BaseHeader>
-
     <!-- 카드 정보 섹션은 기존 코드 유지 -->
 
     <div class="card-transaction-section">
@@ -20,15 +7,19 @@
         <div class="card-transaction-title">
           카드 사용 내역 ({{ getPeriodLabel() }})
         </div>
-        <div class="transaction-count">{{ filtered.length }}건</div>
+        <div class="transaction-count">{{ items.length }}건</div>
       </div>
 
+      <!-- 로딩/에러/리스트 -->
+      <div v-if="loading" class="tx-loading">불러오는 중...</div>
+      <div v-else-if="error" class="tx-error">{{ error }}</div>
       <TransactionList
-        :items="filtered"
+        v-else
+        :items="items"
         :getters="{
-          title: (t) => t.description ?? t.merchant ?? '거래',
-          type: (t) => t.type,
-          date: (t) => t.date,
+          title: (t) => t.merchantName || '거래',
+          type: (t) => (t.isCancelled ? 'CANCELLED' : 'EXPENSE'),
+          date: (t) => t.approvedAt,
           amount: (t) => t.amount,
         }"
       />
@@ -40,50 +31,134 @@
       v-model:start="start"
       v-model:end="end"
     />
-    <Navbar />
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
-import BaseHeader from '@/components/openbanking/BaseHeader.vue';
 import BasePeriodFilterModal from '@/components/openbanking/BasePeriodFilterModal.vue';
 import TransactionList from '@/components/openbanking/TransactionList.vue';
-import Navbar from '@/components/Navbar.vue';
 import { usePeriodFilter } from '@/components/openbanking/usePeriodFilter';
-
-// FontAwesome 아이콘 (슬라이더 버튼용)
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faSliders } from '@fortawesome/free-solid-svg-icons';
-library.add(faSliders);
-
-import data from '../Transaction_dummy.json';
+import { getLedger } from '@/api/openbanking/transactionApi';
 
 const route = useRoute();
-/**
- * 라우트에서 카드 식별 정보 가져오기
- * 예: /card-detail/:cardId? -> "은행-체크카드" 형식
- */
 const cardId = route.params.cardId;
 
-const cardInfo = ref({ name: '', bank: '', type: '' });
-
-const period = ref('all');
-const start = ref('');
-const end = ref('');
+const period = ref('thisMonth');
+const start = ref(''); // yyyy-MM-dd
+const end = ref(''); // yyyy-MM-dd
 const showFilter = ref(false);
 
-const { filterByRange, getPeriodLabel } = usePeriodFilter(period, start, end);
+const { getPeriodLabel } = usePeriodFilter(period, start, end);
 
-// ✅ 카드에 맞는 거래 선별 (프로젝트 데이터 키에 맞춰 조정)
-const cardTransactions = computed(() => {
-  const txs = data?.transactions ?? [];
-  if (!cardId) return txs;
-  // 예시: 트랜잭션에 bank/account(카드명)이 있을 때 "은행-계정명"으로 매칭
-  return txs.filter((t) => `${t.bank}-${t.account}` === String(cardId));
+// 서버 데이터
+const items = ref([]);
+const loading = ref(false);
+const error = ref('');
+
+// 필터 모달 열기 이벤트 리스너
+const handleOpenFilter = () => {
+  showFilter.value = true;
+};
+
+// 카드 승인내역 조회
+const fetchTransactions = async () => {
+  if (!cardId) return;
+  loading.value = true;
+  error.value = '';
+  try {
+    const from = start.value || undefined;
+    const to = end.value || undefined;
+    const res = await getLedger({ from, to });
+    // API 응답 구조: { status, message, data }
+    const allTransactions = res?.data?.data ?? [];
+    // 카드 거래만 필터링 (sourceType이 CARD이고 cardId가 일치하는 것)
+    items.value = allTransactions.filter(
+      (t) => t.sourceType === 'CARD' && t.cardId === parseInt(cardId)
+    );
+  } catch (e) {
+    error.value =
+      e?.response?.data?.message ||
+      e?.message ||
+      '카드 승인내역 조회에 실패했습니다.';
+    items.value = [];
+  } finally {
+    loading.value = false;
+  }
+};
+
+// 최초 로드
+onMounted(() => {
+  fetchTransactions();
+  // 필터 모달 열기 이벤트 리스너 등록
+  window.addEventListener('open-filter-modal', handleOpenFilter);
 });
 
-const filtered = computed(() => filterByRange(cardTransactions.value));
+onUnmounted(() => {
+  // 이벤트 리스너 제거
+  window.removeEventListener('open-filter-modal', handleOpenFilter);
+});
+
+// 기간 변경 시 재조회 (period 변경으로 start/end가 바뀜)
+watch([period, start, end], fetchTransactions);
+
+// 라우트가 바뀌는 경우 대비
+watch(
+  () => route.params.cardId,
+  () => {
+    // cardId가 바뀌면 목록 재조회
+    fetchTransactions();
+  }
+);
 </script>
+
+<style scoped>
+.card-detail-container {
+  padding: 16px;
+  background: #f7f8fa;
+  height: calc(
+    100dvh - 160px
+  ); /* 헤더(80px) + 네비게이션(80px) 높이만큼 빼기 */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  min-height: 0;
+}
+
+.card-transaction-section {
+  background: #fff;
+  border-radius: 18px;
+  padding: 20px;
+  margin-top: 16px;
+}
+
+.card-transaction-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.card-transaction-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.transaction-count {
+  font-size: 0.9rem;
+  color: #888;
+  font-weight: 500;
+}
+
+.tx-loading {
+  padding: 12px 0;
+  color: #666;
+}
+
+.tx-error {
+  padding: 12px 0;
+  color: #d33;
+}
+</style>
