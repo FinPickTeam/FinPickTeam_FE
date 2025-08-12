@@ -55,33 +55,56 @@
 
     <!-- 금융 퀴즈 탭 내용 -->
     <div v-if="activeTab === 'quiz'" class="tab-content">
-      <div class="quiz-history-card">
-        <div class="quiz-list">
-          <div class="quiz-list-header">
-            <span class="quiz-list-header-question">문제</span>
-            <span class="quiz-list-header-answer">정답여부</span>
+      <div class="history-content">
+        <div class="history-section">
+          <h3>퀴즈 히스토리</h3>
+
+          <!-- 로딩 상태 -->
+          <div v-if="loading" class="loading-state">
+            <div class="loading-spinner"></div>
+            <div>퀴즈 히스토리를 불러오는 중...</div>
           </div>
-          <div
-            v-for="(quiz, index) in quizHistory"
-            :key="index"
-            class="quiz-item"
-            @click="showQuizDetail(quiz)"
-          >
-            <div class="question-text">{{ quiz.question }}</div>
-            <span
-              class="answer-result"
-              :class="{ correct: quiz.isCorrect, incorrect: !quiz.isCorrect }"
+
+          <!-- 에러 상태 -->
+          <div v-else-if="error" class="error-state">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <div>{{ error }}</div>
+            <button class="retry-btn" @click="fetchQuizHistory">
+              다시 시도
+            </button>
+          </div>
+
+          <!-- 퀴즈 히스토리 목록 -->
+          <div v-else-if="quizHistory.length > 0" class="quiz-list">
+            <div
+              v-for="(quiz, index) in quizHistory"
+              :key="index"
+              class="quiz-item"
+              @click="selectQuiz(quiz)"
             >
-              {{ quiz.isCorrect ? "정답" : "오답" }}
-            </span>
+              <div class="question-text">{{ quiz.question }}</div>
+              <div
+                class="quiz-result"
+                :class="{ correct: quiz.isCorrect, wrong: !quiz.isCorrect }"
+              >
+                {{ quiz.isCorrect ? "정답" : "오답" }}
+              </div>
+            </div>
+          </div>
+
+          <!-- 빈 상태 -->
+          <div v-else class="empty-state">
+            <i class="fa-solid fa-inbox"></i>
+            <div>아직 퀴즈 히스토리가 없습니다.</div>
+            <div>퀴즈를 풀어보세요!</div>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Quiz Detail Modal -->
-    <div v-if="selectedQuiz" class="quiz-modal-backdrop" @click="closeModal">
-      <div class="quiz-card">
+    <div v-if="showModal" class="quiz-modal-backdrop" @click="closeModal">
+      <div class="quiz-card" @click.stop>
         <button class="quiz-close-btn" @click="closeModal">
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -151,8 +174,10 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { getQuizHistoryList, getQuizHistoryDetail } from "@/api/home";
+import { useAuthStore } from "@/stores/auth";
 import Navbar from "../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -178,10 +203,17 @@ library.add(
 );
 
 const router = useRouter();
-const selectedQuiz = ref(null);
-const activeTab = ref("challenge"); // 기본값은 챌린지 탭
+const authStore = useAuthStore();
 
-// 샘플 챌린지 히스토리 데이터
+// 상태 관리
+const quizHistory = ref([]);
+const selectedQuiz = ref(null);
+const showModal = ref(false);
+const loading = ref(false);
+const error = ref(null);
+const activeTab = ref("quiz"); // 기본값은 퀴즈 탭
+
+// 샘플 챌린지 히스토리 데이터 (임시)
 const challengeHistory = ref([
   {
     title: "한 달 저축 챌린지",
@@ -209,93 +241,94 @@ const challengeHistory = ref([
   },
 ]);
 
-// 샘플 퀴즈 히스토리 데이터
-const quizHistory = ref([
-  {
-    question: "펀드 상품은 원금이 보장된다.",
-    isCorrect: false,
-    userAnswer: "O",
-    correctAnswer: "X",
-    feedback: "틀렸습니다! 펀드 상품은 원금이 보장되지 않는 투자상품입니다.",
-    explanation:
-      "펀드와 주식은 환금을 모두 일할 수 있는 상품입니다. 투자상품의 특성상 시장 상황에 따라 손실이 발생할 수 있으며, 원금보장이 되지 않습니다.",
-  },
-  {
-    question: "주식매매간 생긴 수수료 상당 부분은 증권사에 지급된다.",
-    isCorrect: true,
-    userAnswer: "O",
-    correctAnswer: "O",
-    feedback: "맞습니다! 주식매매 수수료는 증권사에 지급됩니다.",
-    explanation:
-      "주식 거래 시 발생하는 수수료는 주로 증권사에 지급되며, 이는 증권사의 주요 수익원 중 하나입니다.",
-  },
-  {
-    question: "ETF는 원금이 보장되는 투자상품이다.",
-    isCorrect: false,
-    userAnswer: "O",
-    correctAnswer: "X",
-    feedback: "틀렸습니다! ETF는 원금이 보장되지 않는 투자상품입니다.",
-    explanation:
-      "ETF는 주식형 펀드의 일종으로 원금보장이 되지 않으며, 시장 상황에 따라 손실이 발생할 수 있습니다.",
-  },
-  {
-    question: "예금자보호제도는 1인당 5천만원까지 보호한다.",
-    isCorrect: true,
-    userAnswer: "O",
-    correctAnswer: "O",
-    feedback: "맞습니다! 예금자보호제도는 1인당 5천만원까지 보호합니다.",
-    explanation:
-      "예금자보호제도는 은행이 파산할 경우 예금자 1인당 원금과 이자를 합하여 5천만원까지 보호하는 제도입니다.",
-  },
-  {
-    question: "신용카드 연체 시 신용등급이 하락할 수 있다.",
-    isCorrect: true,
-    userAnswer: "X",
-    correctAnswer: "O",
-    feedback: "틀렸습니다! 신용카드 연체 시 신용등급이 하락할 수 있습니다.",
-    explanation:
-      "신용카드 결제일을 지키지 못하면 연체가 발생하고, 이는 신용정보에 부정적으로 기록되어 신용등급 하락의 원인이 됩니다.",
-  },
-  {
-    question: "적금은 만기 전에 중도해지할 수 없다.",
-    isCorrect: false,
-    userAnswer: "X",
-    correctAnswer: "X",
-    feedback: "맞습니다! 적금은 만기 전에 중도해지할 수 있습니다.",
-    explanation:
-      "적금은 만기 전에도 중도해지가 가능하며, 다만 중도해지 시 이자율이 낮아지거나 수수료가 발생할 수 있습니다.",
-  },
-  {
-    question: "주식투자는 원금손실 위험이 없다.",
-    isCorrect: false,
-    userAnswer: "X",
-    correctAnswer: "X",
-    feedback: "맞습니다! 주식투자는 원금손실 위험이 있습니다.",
-    explanation:
-      "주식투자는 시장 상황에 따라 원금손실이 발생할 수 있는 고위험 투자상품입니다. 투자 시 신중한 판단이 필요합니다.",
-  },
-  {
-    question: "예금은 원금이 보장되는 상품이다.",
-    isCorrect: true,
-    userAnswer: "X",
-    correctAnswer: "O",
-    feedback: "틀렸습니다! 예금은 원금이 보장되는 상품입니다.",
-    explanation:
-      "예금은 원금이 보장되는 안전한 금융상품으로, 은행이 파산하지 않는 한 원금과 약정이자를 받을 수 있습니다.",
-  },
-]);
+// 퀴즈 히스토리 데이터 가져오기
+const fetchQuizHistory = async () => {
+  try {
+    loading.value = true;
+    error.value = null;
 
-const showQuizDetail = (quiz) => {
-  selectedQuiz.value = quiz;
+    // 인증 상태 확인
+    if (!authStore.isAuthenticated) {
+      console.warn("퀴즈 히스토리를 보려면 로그인이 필요합니다.");
+      error.value = "퀴즈 히스토리를 보려면 로그인이 필요합니다.";
+      loading.value = false;
+      return;
+    }
+
+    console.log("퀴즈 히스토리 데이터 가져오기 시작");
+    const response = await getQuizHistoryList();
+    console.log("받아온 퀴즈 히스토리 데이터:", response);
+
+    if (response.status === 0 && response.data) {
+      quizHistory.value = response.data;
+      console.log("퀴즈 히스토리 데이터 설정 완료:", quizHistory.value);
+    } else {
+      console.warn("퀴즈 히스토리 데이터 형식이 올바르지 않습니다:", response);
+      error.value = "퀴즈 히스토리 데이터를 가져오는데 실패했습니다.";
+    }
+  } catch (err) {
+    console.error("퀴즈 히스토리 조회 에러:", err);
+
+    let errorMessage = "퀴즈 히스토리를 불러오는데 실패했습니다.";
+
+    if (err.response?.status === 401) {
+      errorMessage = "로그인이 필요합니다.";
+    } else if (err.response?.status === 404) {
+      errorMessage = "퀴즈 히스토리를 찾을 수 없습니다.";
+    } else if (err.response?.status === 500) {
+      errorMessage = "서버 오류가 발생했습니다.";
+    } else if (err.message) {
+      errorMessage = `연결 오류: ${err.message}`;
+    }
+
+    error.value = errorMessage;
+  } finally {
+    loading.value = false;
+  }
 };
 
+// 퀴즈 상세 정보 가져오기
+const fetchQuizDetail = async (quizId) => {
+  try {
+    console.log("퀴즈 상세 정보 가져오기 시작, quizId:", quizId);
+    const response = await getQuizHistoryDetail(quizId);
+    console.log("받아온 퀴즈 상세 데이터:", response);
+
+    if (response.status === 0 && response.data) {
+      selectedQuiz.value = response.data;
+      console.log("퀴즈 상세 데이터 설정 완료:", selectedQuiz.value);
+      showModal.value = true;
+    } else {
+      console.warn("퀴즈 상세 데이터 형식이 올바르지 않습니다:", response);
+      error.value = "퀴즈 상세 정보를 가져오는데 실패했습니다.";
+    }
+  } catch (err) {
+    console.error("퀴즈 상세 조회 에러:", err);
+    error.value = "퀴즈 상세 정보를 불러오는데 실패했습니다.";
+  }
+};
+
+// 퀴즈 선택 시 상세 정보 가져오기
+const selectQuiz = (quiz) => {
+  console.log("퀴즈 선택:", quiz);
+  fetchQuizDetail(quiz.id);
+};
+
+// 모달 닫기
 const closeModal = () => {
+  showModal.value = false;
   selectedQuiz.value = null;
 };
 
+// 뒤로가기
 const goBack = () => {
   router.go(-1);
 };
+
+// 컴포넌트 마운트 시 퀴즈 히스토리 데이터 가져오기
+onMounted(() => {
+  fetchQuizHistory();
+});
 </script>
 
 <style scoped>
@@ -765,5 +798,148 @@ const goBack = () => {
 
 .quiz-ox-btn.wrong {
   border: 2.5px solid #ef4444;
+}
+
+/* 로딩 상태 스타일 */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 15px;
+}
+
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #f3f4f6;
+  border-top: 3px solid #4318d1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 에러 상태 스타일 */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 20px;
+  color: #ef4444;
+  font-size: 15px;
+  text-align: center;
+}
+
+.error-state i {
+  font-size: 32px;
+  color: #ef4444;
+}
+
+.retry-btn {
+  background: #4318d1;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.retry-btn:hover {
+  background: #3730a3;
+}
+
+/* 빈 상태 스타일 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 15px;
+  text-align: center;
+}
+
+.empty-state i {
+  font-size: 48px;
+  color: #d1d5db;
+}
+
+/* 퀴즈 히스토리 스타일 */
+.history-content {
+  padding: 20px;
+}
+
+.history-section h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 20px;
+}
+
+.quiz-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.quiz-item {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.quiz-item:hover {
+  border-color: #4318d1;
+  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.1);
+}
+
+.question-text {
+  font-size: 15px;
+  color: #222;
+  font-weight: 500;
+  flex: 1;
+  margin-right: 16px;
+}
+
+.quiz-result {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  min-width: 60px;
+}
+
+.quiz-result.correct {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.quiz-result.wrong {
+  background: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fecaca;
 }
 </style>

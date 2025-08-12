@@ -3,31 +3,44 @@
     <header class="favorite-header">
       <i class="fas fa-chevron-left back-icon" @click="goBack"></i>
       <h1>찜한 상품</h1>
+      <i class="fas fa-chevron-left ghost"></i>
     </header>
 
     <main class="main-content">
       <!-- 예금 상품 -->
       <div v-if="depositFavorites.length > 0">
         <div class="group-title">예금 상품</div>
-        <ProductCardList_deposit :products="depositFavorites" />
+        <ProductCardList_deposit
+          :products="depositFavorites"
+          @favorite-removed="handleDepositFavoriteRemoved"
+        />
       </div>
 
       <!-- 적금 상품 -->
       <div v-if="installmentFavorites.length > 0">
         <div class="group-title">적금 상품</div>
-        <ProductCardList_installment :products="installmentFavorites" />
+        <ProductCardList_installment
+          :products="installmentFavorites"
+          @favorite-removed="handleInstallmentFavoriteRemoved"
+        />
       </div>
 
       <!-- 주식 상품 -->
       <div v-if="stockFavorites.length > 0">
         <div class="group-title">주식 상품</div>
-        <ProductCardList_stock :products="stockFavorites" />
+        <ProductCardList_stock
+          :products="stockFavorites"
+          @favorite-removed="handleStockFavoriteRemoved"
+        />
       </div>
 
       <!-- 펀드 상품 -->
       <div v-if="fundFavorites.length > 0">
         <div class="group-title">펀드 상품</div>
-        <ProductCardList_fund :funds="fundFavorites" />
+        <ProductCardList_fund
+          :funds="fundFavorites"
+          @favorite-removed="handleFundFavoriteRemoved"
+        />
       </div>
 
       <!-- 찜한 상품이 없을 때 -->
@@ -50,8 +63,10 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { getActivePinia } from 'pinia';
 import Navbar from '@/components/Navbar.vue';
 import { getWishlist } from '@/api'; // /v1/wishlist : { status, message, data: { depositList, fundList, ... } }
+import { useFavoriteStore } from '@/stores/favorite.js';
 
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
 import ProductCardList_stock from '@/components/finance/stock/ProductCardList_stock.vue';
@@ -59,6 +74,8 @@ import ProductCardList_fund from '@/components/finance/fund/ProductCardList_fund
 import ProductCardList_installment from '@/components/finance/installment/ProductCardList_installment.vue';
 
 const router = useRouter();
+const favoriteStore = useFavoriteStore();
+
 function goBack() {
   router.back();
 }
@@ -69,29 +86,69 @@ const installmentFavorites = ref([]);
 const stockFavorites = ref([]);
 const fundFavorites = ref([]);
 
-onMounted(async () => {
-  // 너의 getWishlist가 axios에서 res.data를 반환한다면 아래 payload 계산이 안전함
-  const res = await getWishlist(); // 예: { status, message, data: { ... } }  또는 바로 { depositList, ... }
-  const payload = res?.data ?? res; // 두 경우 모두 커버
-  const lists = payload?.data ?? payload; // 중첩 대비
-
-  depositFavorites.value = lists?.depositList ?? [];
-  installmentFavorites.value =
-    lists?.installmentList ?? lists?.installList ?? [];
-  stockFavorites.value = lists?.stockList ?? [];
-  fundFavorites.value = lists?.fundList ?? [];
-
-  // 디버그
-  console.log(
-    '[wishlist] deposit:',
-    depositFavorites.value.length,
-    'install:',
-    installmentFavorites.value.length,
-    'stock:',
-    stockFavorites.value.length,
-    'fund:',
-    fundFavorites.value.length
+// 찜 해제 시 리스트에서 제거하는 함수들
+const handleDepositFavoriteRemoved = (product) => {
+  const productId = product.id || product.depositProductId;
+  const index = depositFavorites.value.findIndex(
+    (item) => item.id === productId || item.depositProductId === productId
   );
+  if (index > -1) {
+    depositFavorites.value.splice(index, 1);
+  }
+};
+
+const handleInstallmentFavoriteRemoved = (product) => {
+  const productId = product.id || product.installmentProductId;
+  const index = installmentFavorites.value.findIndex(
+    (item) => item.id === productId || item.installmentProductId === productId
+  );
+  if (index > -1) {
+    installmentFavorites.value.splice(index, 1);
+  }
+};
+
+const handleStockFavoriteRemoved = (product) => {
+  const productId = product.stockCode || product.stockName;
+  const index = stockFavorites.value.findIndex(
+    (item) => item.stockCode === productId || item.stockName === productId
+  );
+  if (index > -1) {
+    stockFavorites.value.splice(index, 1);
+  }
+};
+
+const handleFundFavoriteRemoved = (product) => {
+  const productId = product.id || product.fundId;
+  const index = fundFavorites.value.findIndex(
+    (item) => item.id === productId || item.fundId === productId
+  );
+  if (index > -1) {
+    fundFavorites.value.splice(index, 1);
+  }
+};
+
+onMounted(async () => {
+  try {
+    await Promise.all([favoriteStore.syncAllIdSets(), null]); // 두 번째는 placeholder
+
+    const wishlistRes = await getWishlist(); // 분리 호출해도 OK
+
+    // 어떤 래핑이든 한 번에 풀기
+    const lists =
+      wishlistRes?.data?.data ?? wishlistRes?.data ?? wishlistRes ?? {};
+
+    depositFavorites.value = lists.depositList ?? [];
+    installmentFavorites.value =
+      lists.installmentList ?? lists.installList ?? [];
+    stockFavorites.value = lists.stockList ?? [];
+    fundFavorites.value = lists.fundList ?? [];
+  } catch (err) {
+    console.error('Favorite init error:', err);
+    depositFavorites.value = [];
+    installmentFavorites.value = [];
+    stockFavorites.value = [];
+    fundFavorites.value = [];
+  }
 });
 </script>
 
@@ -107,11 +164,12 @@ onMounted(async () => {
 .favorite-header {
   height: 80px;
   display: flex;
+  flex-direction: row;
+  align-items: center;
   justify-content: center;
-  flex-direction: column;
-  align-items: flex-start;
   background: var(--color-bg-light);
   position: relative;
+  padding: 0 15px;
 }
 
 .favorite-header h1 {
@@ -121,18 +179,32 @@ onMounted(async () => {
   font-weight: 700;
   margin: 0;
   color: #222;
-  position: relative;
+  position: flex;
 }
 
 .back-icon {
-  position: absolute;
-  left: 10px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #222;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+}
+.back-icon,
+.ghost {
+  width: 32px; /* 실제 아이콘 너비에 맞춰 조정 */
   font-size: 24px;
   color: #333;
-  cursor: pointer;
-  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+.ghost {
+  visibility: hidden;
+}
 .main-content {
   padding: 16px;
   height: calc(100vh - 130px);

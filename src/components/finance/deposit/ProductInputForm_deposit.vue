@@ -70,7 +70,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, onMounted, nextTick } from 'vue';
 
 // Props 정의
 const props = defineProps({
@@ -150,6 +150,35 @@ function handleAmountInput(event) {
     input.value = '';
     amountRaw.value = 0;
   }
+  
+  // 입력값 길이에 따라 너비 조정
+  adjustInputWidth(input);
+}
+
+// 입력 필드 너비 조정 함수
+function adjustInputWidth(input) {
+  // 임시 span 요소 생성하여 텍스트 너비 측정
+  const span = document.createElement('span');
+  span.style.visibility = 'hidden';
+  span.style.position = 'absolute';
+  span.style.whiteSpace = 'pre';
+  span.style.font = window.getComputedStyle(input).font;
+  span.textContent = input.value || '0';
+  
+  document.body.appendChild(span);
+  const textWidth = span.offsetWidth;
+  document.body.removeChild(span);
+  
+  // 패딩과 여백을 고려한 최종 너비 계산
+  const padding = 24; // 좌우 패딩 (12px * 2)
+  const margin = 4; // 좌우 마진 (2px * 2)
+  const minWidth = 120;
+  const maxWidth = 200;
+  
+  let newWidth = Math.max(minWidth, textWidth + padding + margin);
+  newWidth = Math.min(maxWidth, newWidth);
+  
+  input.style.width = newWidth + 'px';
 }
 
 // 요약 모드 토글
@@ -193,6 +222,26 @@ function handleSubmit() {
 
 // 이벤트 정의
 const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
+
+// 컴포넌트 마운트 시 초기 너비 설정
+onMounted(() => {
+  nextTick(() => {
+    const input = document.querySelector('.amount-input');
+    if (input) {
+      adjustInputWidth(input);
+    }
+  });
+});
+
+// formattedAmount가 변경될 때마다 너비 조정
+watch(formattedAmount, () => {
+  nextTick(() => {
+    const input = document.querySelector('.amount-input');
+    if (input) {
+      adjustInputWidth(input);
+    }
+  });
+});
 </script>
 
 <style scoped>
@@ -235,6 +284,7 @@ const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
   font-weight: 600;
   outline: none;
   cursor: pointer;
+
 }
 
 .period-label {
@@ -253,7 +303,9 @@ const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
   border: none;
   border-bottom: 1.5px solid var(--color-main);
   border-radius: 0;
-  width: 120px;
+  min-width: 120px;
+  max-width: 200px;
+  width: 120px; /* 기본 너비 */
   font-size: var(--font-size-title-sub);
   color: var(--color-main);
   font-weight: 600;
@@ -261,6 +313,8 @@ const emit = defineEmits(['search-completed', 'toggle-summary-mode']);
   margin: 0 2px;
   outline: none;
   background: none;
+  padding: 16px 12px 4px 12px;
+  transition: width 0.3s ease;
 }
 
 .input-summary {

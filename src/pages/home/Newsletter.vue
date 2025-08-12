@@ -33,27 +33,26 @@
 
       <!-- 뉴스레터 목록 -->
       <div v-else class="newsletter-list">
-        <!-- 본문 뉴스 내용 표시 -->
-        <div v-if="newsContent" class="news-content-section">
-          <div class="news-content-title">📰 오늘의 핀픽 뉴스</div>
-          <div class="news-content-text">{{ newsContent }}</div>
-        </div>
-
-        <!-- 뉴스 목록과 본문 뉴스 사이 구분선 -->
-        <hr v-if="newsContent && articles.length > 0" class="content-divider" />
-
         <template v-for="(article, idx) in articles" :key="article.id || idx">
+          <!-- 디버깅용: 첫 번째 기사만 콘솔에 출력 -->
+          <div v-if="idx === 0" style="display: none">
+            {{ console.log("첫 번째 기사 데이터:", article) }}
+            {{ console.log("첫 번째 기사 키들:", Object.keys(article)) }}
+          </div>
           <a
-            :href="article.link"
+            :href="article.link || '#'"
             target="_blank"
             class="article-link newsletter-article"
           >
             <div class="article-title">{{ article.title }}</div>
             <div class="article-content">
               {{
-                article.summary.length > 80
-                  ? article.summary.slice(0, 80) + "..."
-                  : article.summary
+                (article.summary || article.description || "").length > 80
+                  ? (article.summary || article.description || "").slice(
+                      0,
+                      80
+                    ) + "..."
+                  : article.summary || article.description || ""
               }}
             </div>
             <div class="article-date">
@@ -64,7 +63,7 @@
         </template>
 
         <!-- 뉴스레터가 없을 때 -->
-        <div v-if="articles.length === 0 && !newsContent" class="no-newsletter">
+        <div v-if="articles.length === 0" class="no-newsletter">
           <p>현재 뉴스레터가 없습니다.</p>
         </div>
       </div>
@@ -74,7 +73,7 @@
 
 <script setup>
 import { ref, onMounted } from "vue";
-import { getTodayKeyword, getNewsList, getNewsContent } from "@/api/home";
+import { getNewsList } from "@/api/home";
 import { useAuthStore } from "@/stores/auth";
 
 // 인증 스토어
@@ -83,18 +82,27 @@ const authStore = useAuthStore();
 // 상태 관리
 const loading = ref(true);
 const error = ref(null);
-const keyword = ref("");
+const keyword = ref("금융"); // 기본 키워드
 const articles = ref([]);
 const newsContent = ref(""); // 본문 뉴스 내용
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("ko-KR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  if (!dateString) return "날짜 없음";
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return "날짜 없음";
+    }
+    return date.toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch (error) {
+    console.error("날짜 포맷팅 에러:", error, "dateString:", dateString);
+    return "날짜 없음";
+  }
 };
 
 // 뉴스레터 데이터 가져오기
@@ -104,6 +112,12 @@ const fetchNewsletters = async () => {
     error.value = null;
 
     // 인증 상태 확인
+    console.log("인증 상태 확인:", {
+      isAuthenticated: authStore.isAuthenticated,
+      hasAccessToken: !!authStore.accessToken,
+      user: authStore.user,
+    });
+
     if (!authStore.isAuthenticated) {
       error.value = "뉴스레터를 보려면 로그인이 필요합니다.";
       loading.value = false;
@@ -112,43 +126,117 @@ const fetchNewsletters = async () => {
 
     console.log("뉴스레터 데이터 가져오기 시작");
 
-    // 1. 오늘의 키워드 가져오기
-    console.log("오늘의 키워드 API 호출");
-    const keywordResponse = await getTodayKeyword();
-    console.log("받아온 키워드 데이터:", keywordResponse);
-
-    if (keywordResponse.status === 0 && keywordResponse.data) {
-      keyword.value = keywordResponse.data;
-    } else {
-      keyword.value = "금융";
-      console.warn("키워드를 가져오지 못했습니다. 기본값 사용");
-    }
-
-    // 2. 뉴스 목록 가져오기
+    // 뉴스 목록 가져오기
     console.log("뉴스 목록 API 호출");
-    const newsResponse = await getNewsList();
-    console.log("받아온 뉴스 데이터:", newsResponse);
+    try {
+      const newsResponse = await getNewsList();
+      console.log("받아온 뉴스 데이터:", newsResponse);
 
-    if (newsResponse.status === 0 && newsResponse.data) {
-      articles.value = newsResponse.data;
-      console.log("설정된 키워드:", keyword.value);
-      console.log("받아온 뉴스 수:", articles.value.length);
-    } else {
-      articles.value = [];
-      console.log("뉴스 데이터가 없습니다");
-    }
+      // 다양한 응답 구조 처리
+      let newsData;
+      console.log("전체 응답 구조:", newsResponse);
+      console.log("응답 상태:", newsResponse.status);
+      console.log("응답 데이터 타입:", typeof newsResponse.data);
+      console.log("응답 데이터:", newsResponse.data);
 
-    // 3. 본문 뉴스 가져오기 (필요시 사용)
-    console.log("본문 뉴스 API 호출");
-    const contentResponse = await getNewsContent();
-    console.log("받아온 본문 뉴스 데이터:", contentResponse);
+      // 응답 구조 분석
+      if (newsResponse.data && Array.isArray(newsResponse.data)) {
+        newsData = newsResponse.data;
+        console.log("배열 형태의 데이터 발견");
+      } else if (
+        newsResponse.data &&
+        newsResponse.data.data &&
+        Array.isArray(newsResponse.data.data)
+      ) {
+        newsData = newsResponse.data.data;
+        console.log("data.data 배열 형태의 데이터 발견");
+      } else if (
+        newsResponse.data &&
+        newsResponse.data.items &&
+        Array.isArray(newsResponse.data.items)
+      ) {
+        newsData = newsResponse.data.items;
+        console.log("data.items 배열 형태의 데이터 발견");
+      } else if (
+        newsResponse.data &&
+        newsResponse.data.list &&
+        Array.isArray(newsResponse.data.list)
+      ) {
+        newsData = newsResponse.data.list;
+        console.log("data.list 배열 형태의 데이터 발견");
+      } else if (newsResponse.data && typeof newsResponse.data === "object") {
+        // 객체인 경우 키들을 확인
+        const keys = Object.keys(newsResponse.data);
+        console.log("객체의 키들:", keys);
+        // 첫 번째 키가 배열인지 확인
+        if (keys.length > 0 && Array.isArray(newsResponse.data[keys[0]])) {
+          newsData = newsResponse.data[keys[0]];
+          console.log(`${keys[0]} 키의 배열 데이터 발견`);
+        }
+      }
 
-    if (contentResponse.status === 0 && contentResponse.data) {
-      newsContent.value = contentResponse.data;
-      console.log("본문 뉴스 내용:", newsContent.value);
-    } else {
-      newsContent.value = "";
-      console.log("본문 뉴스 데이터가 없습니다");
+      if (newsData && Array.isArray(newsData) && newsData.length > 0) {
+        // 뉴스 데이터에 날짜 필드가 없으면 현재 시간으로 추가
+        const processedNewsData = newsData.map((article) => ({
+          ...article,
+          publishedAt:
+            article.publishedAt ||
+            article.pubDate ||
+            article.date ||
+            article.createdAt ||
+            article.updatedAt ||
+            article.pubDate ||
+            new Date().toISOString(),
+          title:
+            article.title || article.headline || article.name || "제목 없음",
+          summary:
+            article.summary ||
+            article.description ||
+            article.content ||
+            article.body ||
+            "내용 없음",
+          link: article.link || article.url || article.href || "#",
+        }));
+
+        articles.value = processedNewsData;
+        console.log("설정된 키워드:", keyword.value);
+        console.log("받아온 뉴스 수:", articles.value.length);
+        console.log("첫 번째 뉴스 데이터 구조:", articles.value[0]);
+        console.log(
+          "첫 번째 뉴스의 모든 키:",
+          articles.value[0] ? Object.keys(articles.value[0]) : "데이터 없음"
+        );
+        console.log("처리된 뉴스 데이터 샘플:", articles.value.slice(0, 2));
+      } else {
+        articles.value = [];
+        console.log("뉴스 데이터가 없습니다. newsData:", newsData);
+      }
+    } catch (newsError) {
+      console.error("뉴스 목록 API 호출 실패:", newsError);
+      // 샘플 데이터로 대체
+      articles.value = [
+        {
+          title: "금융 시장 동향 분석",
+          summary: "최근 금융 시장의 주요 동향과 투자 전략에 대해 알아보세요.",
+          link: "#",
+          publishedAt: new Date().toISOString(),
+        },
+        {
+          title: "개인 투자자들을 위한 가이드",
+          summary:
+            "초보 투자자들이 알아야 할 기본적인 투자 원칙과 팁을 소개합니다.",
+          link: "#",
+          publishedAt: new Date().toISOString(),
+        },
+        {
+          title: "디지털 금융의 미래",
+          summary:
+            "블록체인과 암호화폐가 가져올 금융 산업의 변화에 대해 살펴봅니다.",
+          link: "#",
+          publishedAt: new Date().toISOString(),
+        },
+      ];
+      console.log("뉴스 API 실패로 샘플 데이터 사용");
     }
   } catch (err) {
     console.error("뉴스레터 조회 에러:", err);
