@@ -1,81 +1,47 @@
 <script setup>
-import {ref, computed, onMounted} from 'vue';
-import {useRouter} from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
 import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
 import ChallengeStatsSwiper from '@/components/challenge/ChallengeStatsSwiper.vue';
-import {
-  getChallengeSummary,
-  getChallengeList,
-} from '@/api/challenge/challenge.js';
-import {getMonthlyPoints} from '@/api/coin/coin.js';
+import { getChallengeSummary, getChallengeList } from '@/api/challenge/challenge.js';
+import { getMonthlyPoints } from '@/api/coin/coin.js';
 
-import {useUserStore} from '@/stores/user';
-import {useAuthStore} from '@/stores/auth';
+import { useAuthStore } from '@/stores/auth';
+import { useChallengeStore } from '@/stores/challenge';
 
 const router = useRouter();
-const userStore = useUserStore();
 const auth = useAuthStore();
+const challengeStore = useChallengeStore();
 
-// 로딩/에러 상태
-const loading = ref({
-  summary: false,
-  participating: false,
-  hot: false,
-  points: false,
-});
-const error = ref({
-  summary: null,
-  participating: null,
-  hot: null,
-  points: null,
-});
+const loading = ref({ summary: false, participating: false, hot: false, points: false });
+const error = ref({ summary: null, participating: null, hot: null, points: null });
 
-// 데이터
-const summary = ref({
-  totalChallenges: 0,
-  successCount: 0,
-  achievementRate: 0,
-});
+const summary = ref({ totalChallenges: 0, successCount: 0, achievementRate: 0 });
 const participatingChallenges = ref([]);
 const hotChallenges = ref([]);
-const monthlyPoints = ref(null); // ★ 월별 누적 포인트
+const monthlyPoints = ref(null); // StatsSwiper용(월누적)
 
-// 닉네임 우선 표시(백엔드 키 NickName/nickname 모두 대응), 없으면 userName → '사용자'
 const displayName = computed(() => {
   const u = auth.user || {};
   return u.nickname || u.NickName || u.userName || '사용자';
 });
 
-// 이동 핸들러
 const handleParticipate = (challenge) => {
   router.push({
     name: 'ChallengeCommonDetail',
-    params: {id: challenge.id},
-    state: {previousPage: '/challenge'},
+    params: { id: challenge.id },
+    state: { previousPage: '/challenge' },
   });
 };
 
 const goDetail = (challenge) => {
-  if (challenge.type === 'COMMON') {
-    router.push({
-      name: 'ChallengeCommonDetail',
-      params: {id: challenge.id},
-      state: {previousPage: '/challenge'},
-    });
-  } else if (challenge.type === 'GROUP') {
-    router.push({
-      name: 'ChallengeGroupDetail',
-      params: {id: challenge.id},
-      state: {previousPage: '/challenge'},
-    });
-  } else if (challenge.type === 'PERSONAL') {
-    router.push({
-      name: 'ChallengePersonalDetail',
-      params: {id: challenge.id},
-      state: {previousPage: '/challenge'},
-    });
-  }
+  if (challenge.type === 'COMMON')
+    router.push({ name: 'ChallengeCommonDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+  else if (challenge.type === 'GROUP')
+    router.push({ name: 'ChallengeGroupDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+  else if (challenge.type === 'PERSONAL')
+    router.push({ name: 'ChallengePersonalDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
 };
 
 const handleCardClick = (payload) => {
@@ -83,20 +49,14 @@ const handleCardClick = (payload) => {
   goDetail(challenge);
 };
 
-// 초기 데이터 로드
 const fetchSummary = async () => {
   loading.value.summary = true;
   error.value.summary = null;
   try {
     const data = await getChallengeSummary();
-    summary.value = data || {
-      totalChallenges: 0,
-      successCount: 0,
-      achievementRate: 0,
-    };
+    summary.value = data || summary.value;
   } catch (e) {
-    error.value.summary =
-        e?.response?.data?.message || e.message || '요약 조회 실패';
+    error.value.summary = e?.response?.data?.message || e.message || '요약 조회 실패';
   } finally {
     loading.value.summary = false;
   }
@@ -106,11 +66,14 @@ const fetchParticipating = async () => {
   loading.value.participating = true;
   error.value.participating = null;
   try {
-    const list = await getChallengeList({participating: true});
+    const list = await getChallengeList({ participating: true });
     participatingChallenges.value = Array.isArray(list) ? list : [];
+    // 진행중 개수 갱신
+    challengeStore.updateCountsFromList(participatingChallenges.value);
   } catch (e) {
-    error.value.participating =
-        e?.response?.data?.message || e.message || '참여중 목록 조회 실패';
+    error.value.participating = e?.response?.data?.message || e.message || '참여중 목록 조회 실패';
+    participatingChallenges.value = [];
+    challengeStore.resetCounts();
   } finally {
     loading.value.participating = false;
   }
@@ -120,14 +83,10 @@ const fetchHot = async () => {
   loading.value.hot = true;
   error.value.hot = null;
   try {
-    const list = await getChallengeList({
-      status: 'RECRUITING',
-      participating: false,
-    });
+    const list = await getChallengeList({ status: 'RECRUITING', participating: false });
     hotChallenges.value = Array.isArray(list) ? list : [];
   } catch (e) {
-    error.value.hot =
-        e?.response?.data?.message || e.message || 'HOT 목록 조회 실패';
+    error.value.hot = e?.response?.data?.message || e.message || 'HOT 목록 조회 실패';
   } finally {
     loading.value.hot = false;
   }
@@ -139,13 +98,11 @@ const fetchMonthlyPoints = async () => {
   try {
     const now = new Date();
     const y = now.getFullYear();
-    const m = now.getMonth() + 1; // 1~12
-    const res = await getMonthlyPoints({year: y, month: m});
-    // 백엔드 응답: { month, amount, updatedAt }
-    monthlyPoints.value = (res?.amount ?? null); // 값 없으면 null → 슬라이드 숨김
+    const m = now.getMonth() + 1;
+    const res = await getMonthlyPoints({ year: y, month: m });
+    monthlyPoints.value = res?.amount ?? null; // ← 이건 월누적 카드용만 사용
   } catch (e) {
-    error.value.points =
-        e?.response?.data?.message || e.message || '포인트 조회 실패';
+    error.value.points = e?.response?.data?.message || e.message || '포인트 조회 실패';
     monthlyPoints.value = null;
   } finally {
     loading.value.points = false;
@@ -157,8 +114,15 @@ onMounted(async () => {
     fetchSummary(),
     fetchParticipating(),
     fetchHot(),
-    fetchMonthlyPoints(), // ★ 포인트도 병렬로 불러오기
+    fetchMonthlyPoints(),
+    // ✅ 잔액/누적/월누적 스냅샷은 Pinia에 적재
+    challengeStore.fetchCoinStatus(),
   ]);
+});
+
+// 참여중 목록 바뀌면 개수 재계산
+watch(participatingChallenges, (list) => {
+  challengeStore.updateCountsFromList(list || []);
 });
 </script>
 
@@ -171,17 +135,10 @@ onMounted(async () => {
         </div>
       </div>
 
-      <!-- 스와이퍼 -->
-      <ChallengeStatsSwiper :summary="summary" :points="monthlyPoints"/>
-      <div v-if="loading.summary" style="color: #fff; margin: 6px 20px 0">
-        요약 로딩중…
-      </div>
-      <div v-else-if="error.summary" style="color: #fff; margin: 6px 20px 0">
-        {{ error.summary }}
-      </div>
-      <div v-if="error.points" style="color: #fff; margin: 6px 20px 0">
-        {{ error.points }}
-      </div>
+      <ChallengeStatsSwiper :summary="summary" :points="monthlyPoints" />
+      <div v-if="loading.summary" style="color: #fff; margin: 6px 20px 0">요약 로딩중…</div>
+      <div v-else-if="error.summary" style="color: #fff; margin: 6px 20px 0">{{ error.summary }}</div>
+      <div v-if="error.points" style="color: #fff; margin: 6px 20px 0">{{ error.points }}</div>
     </div>
 
     <!-- 참여중인 챌린지 -->
@@ -194,9 +151,7 @@ onMounted(async () => {
       </div>
 
       <div v-if="loading.participating" class="challenges-scroll">로딩중…</div>
-      <div v-else-if="error.participating" class="challenges-scroll">
-        {{ error.participating }}
-      </div>
+      <div v-else-if="error.participating" class="challenges-scroll">{{ error.participating }}</div>
       <div v-else class="challenges-scroll">
         <ParticipatingChallengeCard
             v-for="c in participatingChallenges"
@@ -211,13 +166,11 @@ onMounted(async () => {
             participating: c.isParticipating,
             myProgressRate: c.myProgressRate ?? 0,
             participantsCount: c.participantsCount ?? 0,
-            isResultCheck: c.isResultCheck ?? false,
+            isResultCheck: c.isResultCheck ?? false
           }"
             @cardClick="handleCardClick"
         />
-        <div v-if="participatingChallenges.length === 0" class="empty-message">
-          참여중인 챌린지가 없어요.
-        </div>
+        <div v-if="participatingChallenges.length === 0" class="empty-message">참여중인 챌린지가 없어요.</div>
       </div>
     </div>
 
@@ -247,14 +200,12 @@ onMounted(async () => {
             participating: c.isParticipating,
             myProgressRate: c.myProgressRate ?? null,
             participantsCount: c.participantsCount ?? 0,
-            isResultCheck: c.isResultCheck ?? false,
+            isResultCheck: c.isResultCheck ?? false
           }"
             @participate="handleParticipate"
             @click="handleCardClick"
         />
-        <div v-if="hotChallenges.length === 0" class="empty-message">
-          모집 중인 챌린지가 없어요.
-        </div>
+        <div v-if="hotChallenges.length === 0" class="empty-message">모집 중인 챌린지가 없어요.</div>
       </div>
     </div>
   </div>
