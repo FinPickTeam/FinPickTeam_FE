@@ -1,6 +1,21 @@
 <template>
   <div class="challenge-create">
     <div class="create-form">
+      <!-- 챌린지 카테고리 드롭다운 부분 -->
+      <div class="form-group">
+        <label for="challenge-category">챌린지 카테고리</label>
+        <select
+          id="challenge-category"
+          v-model="categoryId"
+          class="category-select"
+        >
+          <option :value="1">전체 소비 줄이기</option>
+          <option :value="2">식비 줄이기</option>
+          <option :value="3">카페·간식 줄이기</option>
+          <option :value="4">교통비 줄이기</option>
+          <option :value="5">미용·쇼핑 줄이기</option>
+        </select>
+      </div>
       <div class="form-group">
         <label for="challenge-title">챌린지 제목</label>
         <input
@@ -53,22 +68,6 @@
             +{{ unit.toLocaleString() }}
           </button>
         </div>
-      </div>
-
-      <!-- 챌린지 카테고리 드롭다운 부분 -->
-      <div class="form-group">
-        <label for="challenge-category">챌린지 카테고리</label>
-        <select
-          id="challenge-category"
-          v-model="categoryId"
-          class="category-select"
-        >
-          <option :value="1">전체 소비 줄이기</option>
-          <option :value="2">식비 줄이기</option>
-          <option :value="3">카페·간식 줄이기</option>
-          <option :value="4">교통비 줄이기</option>
-          <option :value="5">미용·쇼핑 줄이기</option>
-        </select>
       </div>
 
       <div class="form-group">
@@ -126,6 +125,15 @@
       :isVisible="showSuccessModal"
       @close="closeSuccessModal"
     />
+
+    <!-- 포인트 부족 모달 -->
+    <ChallengeInsufficientPointsModal
+      :isVisible="showInsufficientPointsModal"
+      :currentPoints="userPoints"
+      :requiredPoints="requiredPoints"
+      @close="closeInsufficientPointsModal"
+      @charge="handleChargePoints"
+    />
   </div>
 </template>
 
@@ -133,6 +141,7 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import ChallengeCreateSuccessModal from '@/components/challenge/ChallengeCreateSuccessModal.vue';
+import ChallengeInsufficientPointsModal from '@/components/challenge/ChallengeInsufficientPointsModal.vue';
 
 const router = useRouter();
 
@@ -149,6 +158,11 @@ const roomPassword = ref(''); // 비밀번호
 
 // 모달 상태
 const showSuccessModal = ref(false);
+const showInsufficientPointsModal = ref(false);
+
+// 포인트 관련
+const userPoints = ref(0); // 사용자 보유 포인트 (실제로는 API에서 가져와야 함)
+const requiredPoints = ref(100); // 챌린지 생성에 필요한 포인트
 
 const goBack = () => {
   router.back();
@@ -169,6 +183,12 @@ const handleAmountInput = (event) => {
 };
 
 const createChallenge = () => {
+  // 소그룹 챌린지일 경우에만 포인트 검증
+  if (type.value === 'GROUP' && userPoints.value < requiredPoints.value) {
+    showInsufficientPointsModal.value = true;
+    return;
+  }
+
   // 챌린지 생성 로직
   const challengeData = {
     title: title.value,
@@ -191,6 +211,17 @@ const closeSuccessModal = () => {
   showSuccessModal.value = false;
   router.back();
 };
+
+const closeInsufficientPointsModal = () => {
+  showInsufficientPointsModal.value = false;
+};
+
+const handleChargePoints = () => {
+  // 포인트 충전 페이지로 이동 (실제 구현 필요)
+  console.log('포인트 충전 페이지로 이동');
+  closeInsufficientPointsModal();
+  // router.push('/points/charge'); // 포인트 충전 페이지 경로
+};
 </script>
 
 <style scoped>
@@ -202,7 +233,7 @@ const closeSuccessModal = () => {
   overflow-y: auto;
   overflow-x: hidden;
   padding-top: 10px;
-  padding-bottom: 150px;
+  padding-bottom: 160px;
   box-sizing: border-box;
 }
 

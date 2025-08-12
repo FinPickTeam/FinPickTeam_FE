@@ -48,7 +48,9 @@ export const getStockList = () => {
  */
 export const getStockDetail = (stockCode) => {
   return api
-    .get(`/v1/stock/stocks/${encodeURIComponent(String(stockCode))}`)
+    .get(`/v1/stock/stockDetail/`, {
+      params: { stockCode },
+    })
     .then((res) => res.data)
     .catch((err) => {
       throw err;

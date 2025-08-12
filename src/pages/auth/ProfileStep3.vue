@@ -1,12 +1,7 @@
 <template>
   <div class="profile-step-container">
     <!-- 상단 네비게이션 -->
-    <div class="nav-bar">
-      <span class="back-btn" @click="goBack">
-        <i class="fa-solid fa-angle-left"></i>
-      </span>
-      <span class="title">투자 성향 분석</span>
-    </div>
+    <ProfileStepHeader />
     <!-- 진행 바 -->
     <div class="progress-bar">
       <div
@@ -41,6 +36,7 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -61,9 +57,6 @@ if (route.query.from === 'mypage') {
   totalSteps.value = 5; // 회원가입은 4단계
 }
 
-const goBack = () => {
-  router.back();
-};
 const goNext = () => {
   if (selected.value !== null) {
     const from = route.query.from || 'signup';
@@ -83,29 +76,7 @@ const goNext = () => {
   padding: 0 20px 32px 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-.nav-bar {
-  display: flex;
-  align-items: center;
-  height: 56px;
-  position: relative;
-  margin-bottom: 8px;
-}
-.back-btn {
-  font-size: 24px;
-  cursor: pointer;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #222;
-}
-.title {
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  font-weight: 600;
-  color: #222;
-}
+
 .progress-bar {
   display: flex;
   gap: 8px;

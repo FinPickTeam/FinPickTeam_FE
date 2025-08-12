@@ -49,11 +49,7 @@
                   >월 {{ formData.amount.toLocaleString() }}원</span
                 >
               </div>
-              <div class="summary-item-box">
-                <span class="summary-item-value">{{
-                  formData.depositType
-                }}</span>
-              </div>
+
               <div
                 v-if="formData.selectedPrefer.length > 0"
                 class="summary-item-box"
@@ -157,9 +153,8 @@ const showResults = ref(false);
 const isSummaryMode = ref(false);
 const summaryText = ref('');
 const formData = ref({
-  amountRaw: 100000,
+  amountRaw: 1000000,
   period: '1년',
-  depositType: '정기예금',
   selectedPrefer: [],
 });
 const fav = useFavoriteStore();
@@ -247,9 +242,9 @@ function showSearchResults(receivedFormData) {
 
   summaryText.value = `${
     receivedFormData.period
-  } | 월 ${receivedFormData.amount.toLocaleString()}원 | ${
-    receivedFormData.depositType
-  }${preferText ? ' | ' + preferText : ''}`;
+  } | 월 ${receivedFormData.amount.toLocaleString()}원${
+    preferText ? ' | ' + preferText : ''
+  }`;
 
   fetchDepositRecommendation(receivedFormData);
 }
@@ -377,7 +372,7 @@ function closeFilter() {
 .tab.active {
   color: var(--color-main);
   font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-title-sub);
+  font-size: 20px;
 }
 
 .subtab-row {

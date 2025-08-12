@@ -375,7 +375,30 @@
     <Navbar />
     <div v-if="showPurchaseModal" class="purchase-modal-overlay">
       <div class="purchase-modal">
-        <div class="purchase-modal-message">정말 구매하시겠습니까?</div>
+        <div
+          v-if="pendingPurchaseType === 'gifticon'"
+          class="purchase-modal-message"
+        >
+          기프티콘을 전송받을 번호를 입력해주세요.
+        </div>
+        <div v-else class="purchase-modal-message">정말 구매하시겠습니까?</div>
+
+        <div
+          v-if="pendingPurchaseType === 'gifticon'"
+          class="phone-input-section"
+        >
+          <input
+            v-model="phoneNumber"
+            type="tel"
+            class="phone-input"
+            placeholder="번호를 입력해주세요(010-1234-5678)"
+            @input="formatPhoneNumber"
+          />
+          <div v-if="phoneNumberError" class="phone-error-message">
+            {{ phoneNumberError }}
+          </div>
+        </div>
+
         <div class="purchase-modal-actions">
           <button class="modal-cancel-btn" @click="closePurchaseModal">
             취소
@@ -457,6 +480,10 @@ const cumulativeError = ref(null);
 const activeTab = ref("avatar");
 const selectedCategory = ref("coffee");
 const showSuccessModal = ref(false);
+
+// 전화번호 입력 관련
+const phoneNumber = ref("");
+const phoneNumberError = ref("");
 
 // 임시 착용 상태를 저장하는 변수들
 const tempWearingTitle = ref(null);
@@ -655,7 +682,7 @@ const fetchCurrentCoin = async () => {
     console.log("인증 상태 확인:", {
       isAuthenticated: authStore.isAuthenticated,
       user: authStore.user,
-      accessToken: authStore.accessToken ? "존재함" : "없음"
+      accessToken: authStore.accessToken ? "존재함" : "없음",
     });
 
     if (!authStore.isAuthenticated) {
@@ -676,9 +703,9 @@ const fetchCurrentCoin = async () => {
     if (response.status === 200 && response.data !== undefined) {
       // 백엔드 응답 구조에 따라 coin 값 추출
       let coinValue;
-      
+
       // 구조 1: { status: 200, data: 1500 }
-      if (typeof response.data === 'number') {
+      if (typeof response.data === "number") {
         coinValue = response.data;
       }
       // 구조 2: { status: 200, message: "...", data: 1500 }
@@ -689,10 +716,10 @@ const fetchCurrentCoin = async () => {
       else if (response.data !== undefined) {
         coinValue = response.data;
       }
-      
+
       console.log("추출된 코인 값:", coinValue);
-      
-      if (coinValue !== undefined && typeof coinValue === 'number') {
+
+      if (coinValue !== undefined && typeof coinValue === "number") {
         avatarStore.setCoin(coinValue);
         console.log("AvatarShop 포인트 업데이트 완료:", coinValue);
         console.log("avatarStore.coin 값:", avatarStore.coin);
@@ -710,7 +737,7 @@ const fetchCurrentCoin = async () => {
       message: err.message,
       status: err.response?.status,
       data: err.response?.data,
-      config: err.config
+      config: err.config,
     });
 
     let errorMessage = "포인트를 불러오는데 실패했습니다.";
@@ -753,9 +780,9 @@ const fetchCumulativePoints = async () => {
     if (response.status === 200 && response.data !== undefined) {
       // 백엔드 응답 구조에 따라 누적 포인트 값 추출
       let cumulativeValue;
-      
+
       // 구조 1: { status: 200, data: 1500 }
-      if (typeof response.data === 'number') {
+      if (typeof response.data === "number") {
         cumulativeValue = response.data;
       }
       // 구조 2: { status: 200, message: "...", data: 1500 }
@@ -766,10 +793,13 @@ const fetchCumulativePoints = async () => {
       else if (response.data !== undefined) {
         cumulativeValue = response.data;
       }
-      
+
       console.log("AvatarShop 추출된 누적 포인트 값:", cumulativeValue);
-      
-      if (cumulativeValue !== undefined && typeof cumulativeValue === 'number') {
+
+      if (
+        cumulativeValue !== undefined &&
+        typeof cumulativeValue === "number"
+      ) {
         avatarStore.setCumulativePoints(cumulativeValue);
         console.log("AvatarShop 누적 포인트 업데이트 완료:", cumulativeValue);
       } else {
@@ -863,7 +893,7 @@ onMounted(() => {
 
   // 포인트 데이터 가져오기
   fetchCurrentCoin();
-  fetchCumulativePoints();
+  // fetchCumulativePoints(); // 임시로 비활성화 - 백엔드 API 확인 필요
 });
 
 // 기프티콘 상품 데이터
@@ -948,6 +978,22 @@ function closePurchaseModal() {
   showPurchaseModal.value = false;
   pendingPurchase.value = null;
   pendingPurchaseType.value = "";
+  phoneNumber.value = ""; // 전화번호 초기화
+  phoneNumberError.value = ""; // 전화번호 에러 메시지 초기화
+}
+
+// 전화번호 자동 하이픈 포맷팅
+function formatPhoneNumber(event) {
+  let value = event.target.value.replace(/[^0-9]/g, "");
+
+  if (value.length <= 3) {
+    phoneNumber.value = value;
+  } else if (value.length <= 7) {
+    phoneNumber.value = value.slice(0, 3) + "-" + value.slice(3);
+  } else {
+    phoneNumber.value =
+      value.slice(0, 3) + "-" + value.slice(3, 7) + "-" + value.slice(7, 11);
+  }
 }
 
 function closeSuccessModal() {
@@ -956,6 +1002,19 @@ function closeSuccessModal() {
 
 function confirmPurchase() {
   if (!pendingPurchase.value) return;
+
+  // 기프티콘 구매 시 전화번호 검증
+  if (pendingPurchaseType.value === "gifticon") {
+    const phoneDigits = phoneNumber.value.replace(/[^0-9]/g, "");
+    if (phoneDigits.length < 10 || phoneDigits.length > 11) {
+      phoneNumberError.value = "올바른 전화번호를 입력해주세요.";
+      setTimeout(() => {
+        phoneNumberError.value = "";
+      }, 5000);
+      return;
+    }
+  }
+
   if (pendingPurchaseType.value === "title") {
     actuallyBuyTitle(pendingPurchase.value);
   } else if (pendingPurchaseType.value === "shirt") {
@@ -1889,6 +1948,36 @@ function wearAvatar() {
   margin-bottom: 24px;
   color: #222;
   text-align: center;
+}
+
+.phone-input-section {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.phone-input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.phone-input:focus {
+  border-color: #4318d1;
+}
+
+.phone-input::placeholder {
+  color: #999;
+}
+
+.phone-error-message {
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 8px;
+  text-align: left;
 }
 .purchase-modal-actions {
   display: flex;

@@ -58,6 +58,7 @@
 
 <script>
 import { useAuthStore } from '@/stores/auth';
+import { issueUserStockToken } from '@/api';
 
 export default {
   name: 'Login',
@@ -84,10 +85,17 @@ export default {
       });
       if (ok) {
         // 로그인 성공 → 원하는 경로로
+        await issueToken();
         this.$router.push('/');
       }
     },
   },
+};
+
+const issueToken = async () => {
+  const userId = useAuthStore().getId;
+  await issueUserStockToken(userId);
+  console.log('토큰 발급 성공');
 };
 </script>
 

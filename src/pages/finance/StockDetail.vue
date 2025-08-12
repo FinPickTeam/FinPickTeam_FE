@@ -29,141 +29,178 @@
         </label>
       </div>
     </div>
-
-    <!-- 수익률 차트 섹션 -->
-    <div
-      class="chart-section"
-      v-if="unref(product).stockChartData && !isLoading"
-    >
-      <div class="chart-card">
-        <h3 class="chart-title">주가 상승률</h3>
-        <StockChart :chart-data="unref(product).stockChartData" />
+    <div class="content-scroll">
+      <!-- 수익률 차트 섹션 -->
+      <div
+        class="chart-section"
+        v-if="unref(product).stockChartData && !isLoading"
+      >
+        <div class="chart-card">
+          <h3 class="chart-title">주가 상승률</h3>
+          <StockChart :chart-data="unref(product).stockChartData" />
+        </div>
       </div>
-    </div>
 
-    <!-- 상세 정보 섹션 -->
-    <div class="detail-section" v-if="product.stockName">
-      <div class="detail-card">
-        <div class="detail-item">
-          <span class="detail-label">
-            <FinancialTermSystem
-              text="주가"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
+      <!-- 투자 시뮬레이션 섹션 -->
+      <div class="stock-simulation">
+        <div class="simulation-container">
+          <div class="simulation-title">
+            <span class="s-title">투자 시뮬레이션 </span>
+            <!-- 시작/로딩 아이콘 버튼 -->
+            <img
+              :src="currentIcon"
+              :class="['start-icon', { spinning: isLoading }]"
+              alt="시작"
+              role="button"
+              tabindex="0"
+              @click="runSimulation"
+              @keydown.enter.space.prevent="runSimulation"
             />
-          </span>
-          <span class="detail-value">
-            <FinancialTermSystem
-              :text="product.stockPrice + '원'"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-            /
-            <span
-              :class="
-                product.stockChangeRate.startsWith('-')
-                  ? 'negative'
-                  : 'positive'
-              "
+          </div>
+          <div class="select-date-panel">
+            <div class="select-date">
+              <input type="date" v-model="startDate" />
+            </div>
+            <div class="select-date">~</div>
+            <div class="select-date">
+              <input type="date" v-model="endDate" />
+            </div>
+          </div>
+          <div class="result-content">
+            <span class="reuslt-text"
+              >시작·종료 날짜를 입력 후 검색 아이콘을 누르면 <br />투자 결과를
+              볼 수 있습니다.</span
             >
-              {{ product.stockPredictedPrice }}원
+          </div>
+        </div>
+      </div>
+
+      <!-- 상세 정보 섹션 -->
+      <div class="detail-section" v-if="product.stockName">
+        <div class="detail-card">
+          <div class="detail-item">
+            <span class="detail-label">
+              <FinancialTermSystem
+                text="주가"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
             </span>
-            /
-            <span
-              :class="
-                product.stockChangeRate.startsWith('-')
-                  ? 'negative'
-                  : 'positive'
-              "
-            >
-              {{ product.stockChangeRate }}%
+            <span class="detail-value">
+              <FinancialTermSystem
+                :text="product.stockPrice + '원'"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+              /
+              <span
+                :class="
+                  product.stockChangeRate.startsWith('-')
+                    ? 'negative'
+                    : 'positive'
+                "
+              >
+                {{ product.stockPredictedPrice }}원
+              </span>
+              /
+              <span
+                :class="
+                  product.stockChangeRate.startsWith('-')
+                    ? 'negative'
+                    : 'positive'
+                "
+              >
+                {{ product.stockChangeRate }}%
+              </span>
             </span>
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">
-            <FinancialTermSystem
-              text="연중 H/L"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-          <span class="detail-value">
-            <FinancialTermSystem
-              :text="`${String(product.stockYearHigh).replace(
-                /^[-+]/,
-                ''
-              )}원 / ${String(product.stockYearLow).replace(/^[-+]/, '')}원`"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">
-            <FinancialTermSystem
-              text="액면가"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-          <span class="detail-value">
-            <FinancialTermSystem
-              :text="product.stockFaceValue + '원'"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">
-            <FinancialTermSystem
-              text="시가총액"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-          <span class="detail-value">
-            <FinancialTermSystem
-              :text="`${Number(product.stockMarketCap).toLocaleString()}억 원`"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">
-            <FinancialTermSystem
-              text="당기순이익"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-          <span class="detail-value">
-            <FinancialTermSystem
-              :text="`${Number(
-                product.stockSalesAmount
-              ).toLocaleString()}억 원`"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">
-            <FinancialTermSystem
-              text="PER"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
-          <span class="detail-value">
-            <FinancialTermSystem
-              :text="product.stockPer"
-              :financial-terms="financialTerms"
-              :is-enabled="isHighlightEnabled"
-            />
-          </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">
+              <FinancialTermSystem
+                text="연중 H/L"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+            <span class="detail-value">
+              <FinancialTermSystem
+                :text="`${String(product.stockYearHigh).replace(
+                  /^[-+]/,
+                  ''
+                )}원 / ${String(product.stockYearLow).replace(/^[-+]/, '')}원`"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">
+              <FinancialTermSystem
+                text="액면가"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+            <span class="detail-value">
+              <FinancialTermSystem
+                :text="product.stockFaceValue + '원'"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">
+              <FinancialTermSystem
+                text="시가총액"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+            <span class="detail-value">
+              <FinancialTermSystem
+                :text="`${Number(
+                  product.stockMarketCap
+                ).toLocaleString()}억 원`"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">
+              <FinancialTermSystem
+                text="당기순이익"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+            <span class="detail-value">
+              <FinancialTermSystem
+                :text="`${Number(
+                  product.stockSalesAmount
+                ).toLocaleString()}억 원`"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">
+              <FinancialTermSystem
+                text="PER"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+            <span class="detail-value">
+              <FinancialTermSystem
+                :text="product.stockPer"
+                :financial-terms="financialTerms"
+                :is-enabled="isHighlightEnabled"
+              />
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -177,6 +214,8 @@ import { useFavoriteStore } from '@/stores/favorite';
 import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
 import { getStockDetail } from '@/api';
 import StockChart from '@/components/finance/stock/StockChart.vue';
+import loadingImg from '@/assets/stock_logo/loading.png';
+import startImg from '@/assets/stock_logo/start.png';
 
 const route = useRoute();
 const router = useRouter();
@@ -189,6 +228,15 @@ const isLoading = ref(true);
 // 용어 하이라이팅 관련 상태
 const isHighlightEnabled = ref(false);
 const financialTerms = ref([]);
+
+// 투자 시뮬레이션
+const startDate = ref('');
+const endDate = ref('');
+const simulationLoading = ref(false);
+
+const currentIcon = computed(() =>
+  simulationLoading.value ? loadingImg : startImg
+);
 
 onMounted(async () => {
   console.log('상품 ID:', route.params.id);
@@ -240,21 +288,6 @@ const isFavorite = computed(() => {
   return favoriteStore.isFavorite(product.value);
 });
 
-// 수익률 표시 함수
-function getReturnValue(returnValue) {
-  if (returnValue === null || returnValue === undefined || returnValue === '') {
-    return 'N/A';
-  }
-
-  // 숫자인 경우 퍼센트로 표시
-  if (typeof returnValue === 'number') {
-    return `${returnValue > 0 ? '+' : ''}${returnValue.toFixed(2)}%`;
-  }
-
-  // 문자열인 경우 그대로 표시
-  return returnValue;
-}
-
 function toggleFavorite() {
   if (isFavorite.value) {
     favoriteStore.removeFavorite(product.value);
@@ -266,12 +299,14 @@ function toggleFavorite() {
 
 <style scoped>
 .detail-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 140px);
   max-width: 390px;
   margin: 0 auto;
   padding: 16px;
   font-family: var(--font-main);
   background: var(--color-bg-light);
-  min-height: 100vh;
 }
 
 .title-section {
@@ -303,7 +338,7 @@ function toggleFavorite() {
 }
 
 .heart-icon {
-  font-size: 16px;
+  font-size: 19px;
   color: #ff4757;
   cursor: pointer;
 }
@@ -420,6 +455,20 @@ function toggleFavorite() {
 :deep(.highlighted-term:hover) {
   background-color: #ffeaa7;
 }
+.content-scroll {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.content-scroll::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
 
 .detail-section {
   margin-bottom: 20px;
@@ -475,6 +524,80 @@ function toggleFavorite() {
   color: #333;
   margin: 0 0 16px 0;
   text-align: center;
+}
+.start-icon {
+  width: 28px;
+  height: 28px;
+  margin-left: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.spinning {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.stock-simulation {
+  width: 100%;
+  background-color: white;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  padding: 16px;
+}
+.simulation-title {
+  display: flex;
+  height: 30px;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+.simulation-title img {
+  width: 20px;
+  height: auto;
+}
+.s-title {
+  font-size: 16px;
+  font-weight: 600;
+}
+.select-date-panel {
+  display: flex;
+  justify-content: space-between;
+}
+.select-date {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  margin-top: 20px;
+}
+.select-date input {
+  width: 144px;
+  height: 43px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: var(--font-main);
+  background: #f8f9fa;
+}
+.date span {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: var(--font-main);
+}
+.result-content {
+  display: flex;
+  margin-top: 16px;
+  text-align: center;
+  justify-content: center;
+  font-size: 14px;
 }
 
 .action-section {
