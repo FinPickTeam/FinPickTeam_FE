@@ -30,6 +30,20 @@ export const useFavoriteStore = defineStore('favorite', () => {
     [TYPE.FUND]: new Set(),
   });
 
+  // idSets가 손상되었을 때 복구하는 함수
+  function ensureIdSetsIntegrity() {
+    if (!idSets.value || typeof idSets.value !== 'object') {
+      idSets.value = {
+        [TYPE.DEPOSIT]: new Set(),
+        [TYPE.INSTALLMENT]: new Set(),
+        [TYPE.STOCK]: new Set(),
+        [TYPE.FUND]: new Set(),
+      };
+      return true; // 복구됨
+    }
+    return false; // 정상
+  }
+
   // 중복 클릭 방지
   const busy = ref(new Set());
 
@@ -55,7 +69,17 @@ export const useFavoriteStore = defineStore('favorite', () => {
 
     // 주식  (stockCode 또는 stockName)
     if (product.stockCode || product.stockName) {
-      const productId = String(product.stockCode ?? product.stockName);
+      let productId;
+      if (product.stockCode) {
+        // stockCode를 6자리 종목코드로 변환 (앞에 0 추가)
+        const stockCodeStr = String(product.stockCode);
+        if (stockCodeStr.length < 6) {
+          // 6자리 미만이면 앞에 0을 추가
+          productId = stockCodeStr.padStart(6, '0');
+        } else {
+          productId = stockCodeStr;
+        }
+      }
       return { productType: TYPE.STOCK, productId, userId };
     }
 
@@ -73,29 +97,76 @@ export const useFavoriteStore = defineStore('favorite', () => {
 
   // --- 서버에서 타입별 ID 세트 동기화 ---
   async function syncIdSet(productType) {
-    const type = toUpperType(productType);
-    // API 응답 정규화: 배열 or {data: [...]} 모두 지원
-    const res = await getWishlistProductId(type);
-    const list = Array.isArray(res) ? res : res?.data ?? [];
-    idSets.value[type] = new Set(list.map((v) => String(v)));
+    try {
+      const type = toUpperType(productType);
+
+      // API 응답 정규화: 배열 or {data: [...]} 모두 지원
+      const res = await getWishlistProductId(type);
+
+      const list = Array.isArray(res) ? res : res?.data ?? [];
+
+      // 주식인 경우 6자리 종목코드로 변환
+      let processedList;
+      if (type === TYPE.STOCK) {
+        processedList = list.map((v) => {
+          const stockCodeStr = String(v);
+          if (stockCodeStr.length < 6) {
+            return stockCodeStr.padStart(6, '0');
+          }
+          return stockCodeStr;
+        });
+      } else {
+        processedList = list.map((v) => String(v));
+      }
+      idSets.value[type] = new Set(processedList);
+    } catch (error) {
+      console.error(`Failed to sync ${productType} ID set:`, error);
+      console.error(`Error details:`, {
+        message: error.message,
+        stack: error.stack,
+        response: error.response,
+      });
+      // 에러 발생 시 빈 Set으로 초기화
+      idSets.value[toUpperType(productType)] = new Set();
+    }
   }
 
   // --- 전 타입 동기화 (페이지/앱 진입 시 1회 호출 추천) ---
   async function syncAllIdSets() {
-    await Promise.all([
-      syncIdSet(TYPE.DEPOSIT),
-      syncIdSet(TYPE.INSTALLMENT),
-      syncIdSet(TYPE.STOCK),
-      syncIdSet(TYPE.FUND),
-    ]);
+    // idSets 무결성 확인 및 복구
+    ensureIdSetsIntegrity();
+
+    try {
+      await Promise.all([
+        syncIdSet(TYPE.DEPOSIT),
+        syncIdSet(TYPE.INSTALLMENT),
+        syncIdSet(TYPE.STOCK),
+        syncIdSet(TYPE.FUND),
+      ]);
+    } catch (error) {
+      console.error('syncAllIdSets failed:', error);
+      console.log('idSets.value after error:', idSets.value);
+
+      // 에러 발생 시에도 무결성 확인
+      ensureIdSetsIntegrity();
+    }
   }
 
   // --- 즐겨찾기 여부 ---
   function isFavorite(product) {
     const dto = toDto(product, undefined);
     if (!dto) return false;
+
     const set = idSets.value[dto.productType];
-    return set?.has(String(dto.productId)) ?? false;
+    if (!set) return false;
+
+    let key = String(dto.productId).trim();
+    if (dto.productType === TYPE.STOCK) {
+      // 숫자만 남기고 6자리 패딩으로 고정
+      key = key.replace(/\D/g, '').padStart(6, '0');
+    }
+    const hit = set.has(key);
+    return hit;
   }
 
   // --- 추가: 즉시 반영 + 실패 롤백 ---
@@ -160,5 +231,9 @@ export const useFavoriteStore = defineStore('favorite', () => {
     isFavorite,
     addFavorite,
     removeFavorite,
+
+    // utility functions
+    toDto,
+    ensureIdSetsIntegrity,
   };
 });
