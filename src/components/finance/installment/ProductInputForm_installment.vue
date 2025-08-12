@@ -2,7 +2,7 @@
   <!-- 입력 폼 모드 -->
   <form v-if="!isSummaryMode" class="input-form" @submit.prevent="handleSubmit">
     <!-- 기간/금액 -->
-    <div class="section-label">기간/금액</div>
+    <div class="section-label">투자 금액/기간</div>
     <div class="period-amount-card">
       <div class="period-select-row">
         <select v-model="period" class="period-select">
@@ -171,7 +171,7 @@ function handleAmountInput(event) {
     input.value = '';
     amount.value = 0;
   }
-  
+
   // 입력값 길이에 따라 너비 조정
   adjustInputWidth(input);
 }
@@ -185,20 +185,20 @@ function adjustInputWidth(input) {
   span.style.whiteSpace = 'pre';
   span.style.font = window.getComputedStyle(input).font;
   span.textContent = input.value || '0';
-  
+
   document.body.appendChild(span);
   const textWidth = span.offsetWidth;
   document.body.removeChild(span);
-  
+
   // 패딩과 여백을 고려한 최종 너비 계산
   const padding = 24; // 좌우 패딩 (12px * 2)
   const margin = 4; // 좌우 마진 (2px * 2)
   const minWidth = 120;
   const maxWidth = 200;
-  
+
   let newWidth = Math.max(minWidth, textWidth + padding + margin);
   newWidth = Math.min(maxWidth, newWidth);
-  
+
   input.style.width = newWidth + 'px';
 }
 

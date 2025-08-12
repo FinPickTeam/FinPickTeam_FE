@@ -1,6 +1,11 @@
 <template>
   <div class="fund-list">
-    <ProductCard v-for="(item, index) in funds" :key="index" :fund="item" />
+    <ProductCard
+      v-for="(item, index) in funds"
+      :key="index"
+      :fund="item"
+      @favorite-removed="handleFavoriteRemoved"
+    />
   </div>
 </template>
 
@@ -13,6 +18,12 @@ const props = defineProps({
     required: true,
   },
 });
+
+const emit = defineEmits(['favorite-removed']);
+
+const handleFavoriteRemoved = (product) => {
+  emit('favorite-removed', product);
+};
 </script>
 
 <style scoped>
@@ -24,5 +35,4 @@ const props = defineProps({
   width: 100%;
   gap: 10px;
 }
-
 </style>
