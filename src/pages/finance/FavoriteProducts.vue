@@ -129,29 +129,25 @@ const handleFundFavoriteRemoved = (product) => {
 
 onMounted(async () => {
   try {
-    // 1) 즐겨찾기 ID세트 동기화 + 목록 로딩을 병렬 처리
-    const [_, wishlistRes] = await Promise.all([
-      favoriteStore.syncAllIdSets(), // 내부에서 무결성 보장
-      getWishlist(),
-    ]);
+    await Promise.all([favoriteStore.syncAllIdSets(), null]); // 두 번째는 placeholder
 
-    // 2) 응답 파싱 (중복 제거)
-    const payload = Array.isArray(wishlistRes)
-      ? wishlistRes
-      : wishlistRes?.data ?? wishlistRes;
-    const lists = payload; // 한 번만 풀기
+    const wishlistRes = await getWishlist(); // 분리 호출해도 OK
 
-    depositFavorites.value = lists?.depositList ?? [];
+    // 어떤 래핑이든 한 번에 풀기
+    const lists =
+      wishlistRes?.data?.data ?? wishlistRes?.data ?? wishlistRes ?? {};
+
+    depositFavorites.value = lists.depositList ?? [];
     installmentFavorites.value =
-      lists?.installmentList ?? lists?.installList ?? [];
-    stockFavorites.value = lists?.stockList ?? [];
-    fundFavorites.value = lists?.fundList ?? [];
-
-    if (stockFavorites.value.length > 0) {
-      const s0 = stockFavorites.value[0];
-    }
+      lists.installmentList ?? lists.installList ?? [];
+    stockFavorites.value = lists.stockList ?? [];
+    fundFavorites.value = lists.fundList ?? [];
   } catch (err) {
     console.error('Favorite init error:', err);
+    depositFavorites.value = [];
+    installmentFavorites.value = [];
+    stockFavorites.value = [];
+    fundFavorites.value = [];
   }
 });
 </script>
