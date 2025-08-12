@@ -31,13 +31,15 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite.js';
 
 const props = defineProps({
   product: Object,
 });
+
+const emit = defineEmits(['favorite-removed']);
 
 const router = useRouter();
 const favoriteStore = useFavoriteStore();
@@ -46,6 +48,8 @@ const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
 function toggleFavorite() {
   if (isFavorite.value) {
     favoriteStore.removeFavorite(props.product);
+    // 부모 컴포넌트로 찜 해제 이벤트 전달
+    emit('favorite-removed', props.product);
   } else {
     favoriteStore.addFavorite(props.product);
   }
