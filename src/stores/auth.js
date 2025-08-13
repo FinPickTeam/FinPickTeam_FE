@@ -7,7 +7,7 @@ import api from '@/api/instance';
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken: null, // AT는 메모리만 (새로고침 시 사라짐)
-    user: null,        // 닉네임 포함한 사용자 정보 -> localStorage에 영구 저장
+    user: null, // 닉네임 포함한 사용자 정보 -> localStorage에 영구 저장
     loading: false,
     error: null,
     _bootstrapped: false, // 새로고침 직후 1회만 조용히 리프레시 시도
@@ -36,13 +36,15 @@ export const useAuthStore = defineStore('auth', {
         // ★ 사용자 정보(닉네임 포함) localStorage에 보존됨(아래 persist 설정)
         this.user = {
           ...(payload?.user ?? {}),
-          nickname: payload?.nickname ?? payload?.nickName ?? payload?.NickName ?? null,
+          nickname:
+            payload?.nickname ?? payload?.nickName ?? payload?.NickName ?? null,
         };
 
         // AT 저장은 axios 응답 인터셉터(src/api/instance.js)가 처리
         return true;
       } catch (err) {
-        this.error = err?.response?.data?.message || err?.message || '로그인 실패';
+        this.error =
+          err?.response?.data?.message || err?.message || '로그인 실패';
         return false;
       } finally {
         this.loading = false;
@@ -90,10 +92,12 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
-    logout() {
+    logout(redirect = true) {
       this.clearTokens();
       this.user = null; // localStorage의 user도 제거됨(플러그인이 반영)
-      router.push('/login');
+      if (redirect) {
+        router.push('/login');
+      }
     },
   },
 

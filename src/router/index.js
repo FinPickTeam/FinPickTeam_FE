@@ -79,6 +79,13 @@ import AccountList from '../pages/openbanking/myaccount/AccountList.vue';
 import AccountDetail from '../pages/openbanking/myaccount/AccountDetail.vue';
 import CardList from '../pages/openbanking/myaccount/CardList.vue';
 import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
+import ChallengeJoinedList from '../pages/challenge/ChallengeJoinedList.vue';
+import ChallengeRecruitingList from '../pages/challenge/ChallengeRecruitingList.vue';
+import ChallengeCreate from '../pages/challenge/ChallengeCreate.vue';
+import ChallengeRanking from '../pages/challenge/ChallengeRanking.vue';
+import ChallengeCommonDetail from '../pages/challenge/ChallengeCommonDetail.vue';
+import ChallengeGroupDetail from '../pages/challenge/ChallengeGroupDetail.vue';
+import ChallengePersonalDetail from '../pages/challenge/ChallengePersonalDetail.vue';
 import OpenbankingDailyReport from '../pages/openbanking/Report/OpenbankingDailyReport.vue';
 import OpenbankingMonthlyReport from '../pages/openbanking/Report/OpenbankingMonthlyReport.vue';
 import DailyReportSelect from '../pages/openbanking/Report/DailyReportSelect.vue';
@@ -464,41 +471,37 @@ const router = createRouter({
         {
           path: 'joined-list',
           name: 'ChallengeJoinedList',
-          component: () => import('../pages/challenge/ChallengeJoinedList.vue'),
+          component: ChallengeJoinedList,
         },
         {
           path: 'recruiting-list',
           name: 'ChallengeRecruitingList',
-          component: () =>
-            import('../pages/challenge/ChallengeRecruitingList.vue'),
+          component: ChallengeRecruitingList,
         },
         {
           path: 'create',
           name: 'ChallengeCreate',
-          component: () => import('../pages/challenge/ChallengeCreate.vue'),
+          component: ChallengeCreate,
         },
         {
           path: 'ranking',
           name: 'ChallengeRanking',
-          component: () => import('../pages/challenge/ChallengeRanking.vue'),
+          component: ChallengeRanking,
         },
         {
           path: 'common-detail/:id',
           name: 'ChallengeCommonDetail',
-          component: () =>
-            import('../pages/challenge/ChallengeCommonDetail.vue'),
+          component: ChallengeCommonDetail,
         },
         {
           path: 'group-detail/:id',
           name: 'ChallengeGroupDetail',
-          component: () =>
-            import('../pages/challenge/ChallengeGroupDetail.vue'),
+          component: ChallengeGroupDetail,
         },
         {
           path: 'personal-detail/:id',
           name: 'ChallengePersonalDetail',
-          component: () =>
-            import('../pages/challenge/ChallengePersonalDetail.vue'),
+          component: ChallengePersonalDetail,
         },
       ],
     },
@@ -541,11 +544,14 @@ router.beforeEach(async (to) => {
 
   const auth = useAuthStore();
 
-  // 보호 라우트면 먼저 조용히 AT 복구 시도
+  // 보호 라우트면 인증 체크
   if (!publicPages.has(to.name)) {
-    await auth.bootstrap();
+    // 이미 인증된 상태라면 bootstrap 호출하지 않음
     if (!auth.isAuthenticated) {
-      return { name: 'Login', query: { redirect: to.fullPath } };
+      await auth.bootstrap();
+      if (!auth.isAuthenticated) {
+        return { name: 'Login', query: { redirect: to.fullPath } };
+      }
     }
   }
 });
