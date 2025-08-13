@@ -49,46 +49,100 @@
           </div>
         </div>
 
-        <p class="challenge-description">{{ challenge.description }}</p>
+        <!-- 비공개 챌린지이고 참여중이 아닌 경우: 제목과 기간만 표시 -->
+        <div v-if="!challenge.usePassword || challenge.isParticipating">
+          <p class="challenge-description">{{ challenge.description }}</p>
 
-        <div class="challenge-stats">
-          <div class="stat-item">
-            <span class="stat-label">참여자</span>
-            <span class="stat-value"
-              >{{ challenge.participantsCount || 0 }}명</span
-            >
+          <div class="challenge-stats">
+            <div class="stat-item">
+              <span class="stat-label">참여자</span>
+              <span class="stat-value"
+                >{{ challenge.participantsCount || 0 }}명</span
+              >
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">목표 {{ challenge.goalType }}</span>
+              <span class="stat-value"
+                >{{ (challenge.goalValue || 0).toLocaleString() }}원</span
+              >
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">남은 기간</span>
+              <span class="stat-value">D-{{ getRemainingDays() }}</span>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-label">목표 {{ challenge.goalType }}</span>
-            <span class="stat-value"
-              >{{ (challenge.goalValue || 0).toLocaleString() }}원</span
-            >
+
+          <!-- 내 진행률 (참여중일 때만) -->
+          <div class="progress-section" v-if="challenge.isParticipating">
+            <div class="progress-header">
+              <span class="progress-label">달성률</span>
+              <span class="progress-percentage"
+                >{{ Math.round((challenge.myProgress || 0) * 100) }}%</span
+              >
+            </div>
+            <div class="progress-bar">
+              <div
+                class="progress-fill"
+                :style="{
+                  width: Math.round((challenge.myProgress || 0) * 100) + '%',
+                }"
+              ></div>
+            </div>
           </div>
-          <div class="stat-item">
-            <span class="stat-label">남은 기간</span>
-            <span class="stat-value">D-{{ getRemainingDays() }}</span>
+
+          <!-- 참여자 목록 섹션 -->
+          <div
+            class="members-section"
+            v-if="
+              challenge.isParticipating &&
+              challenge.members &&
+              challenge.members.length
+            "
+          >
+            <h3 class="members-title">참여자</h3>
+
+            <div class="avatar-grid">
+              <div
+                v-for="m in challenge.members"
+                :key="m.userId"
+                class="avatar-card"
+              >
+                <AvatarStack
+                  :level-id="m.levelId"
+                  :top-id="m.topId"
+                  :shoes-id="m.shoesId"
+                  :accessory-id="m.accessoryId"
+                  :gift-card-id="m.giftCardId"
+                  :nickname="m.nickname"
+                  :size="56"
+                />
+                <div class="avatar-name" :title="m.nickname">
+                  {{ m.nickname }}
+                </div>
+
+                <div class="avatar-progress">
+                  <div class="avatar-progress-bar">
+                    <div
+                      class="avatar-progress-fill"
+                      :style="{
+                        width: Math.round((m.progress || 0) * 100) + '%',
+                      }"
+                    ></div>
+                  </div>
+                  <div class="avatar-progress-text">
+                    {{ Math.round((m.progress || 0) * 100) }}%
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p v-if="!challenge.isParticipating" class="members-hint">
+              참여 후 멤버들의 진행률이 표시돼요.
+            </p>
           </div>
         </div>
 
-        <!-- 내 진행률 (참여중일 때만) -->
-        <div class="progress-section" v-if="challenge.isParticipating">
-          <div class="progress-header">
-            <span class="progress-label">달성률</span>
-            <span class="progress-percentage"
-              >{{ Math.round((challenge.myProgress || 0) * 100) }}%</span
-            >
-          </div>
-          <div class="progress-bar">
-            <div
-              class="progress-fill"
-              :style="{
-                width: Math.round((challenge.myProgress || 0) * 100) + '%',
-              }"
-            ></div>
-          </div>
-        </div>
-
-        <!-- 모집 현황 (미참여 & 모집중일 때) -->
+        <!-- 모집 현황 (미참여 & 모집중일 때) - 비공개 챌린지에서도 표시 -->
         <div
           class="recruitment-section"
           v-if="!challenge.isParticipating && isRecruiting"
@@ -113,60 +167,47 @@
           </div>
         </div>
 
-        <!-- 참여자 목록 섹션 -->
+        <!-- 비밀번호 입력 섹션 (비공개 챌린지이고 참여중이 아닌 경우) -->
         <div
-          class="members-section"
           v-if="
-            challenge.isParticipating &&
-            challenge.members &&
-            challenge.members.length
+            challenge.usePassword &&
+            !challenge.isParticipating &&
+            showJoinButton
           "
+          class="password-section"
         >
-          <h3 class="members-title">참여자</h3>
-
-          <div class="avatar-grid">
-            <div
-              v-for="m in challenge.members"
-              :key="m.userId"
-              class="avatar-card"
-            >
-              <AvatarStack
-                :level-id="m.levelId"
-                :top-id="m.topId"
-                :shoes-id="m.shoesId"
-                :accessory-id="m.accessoryId"
-                :gift-card-id="m.giftCardId"
-                :nickname="m.nickname"
-                :size="56"
-              />
-              <div class="avatar-name" :title="m.nickname">
-                {{ m.nickname }}
-              </div>
-
-              <div class="avatar-progress">
-                <div class="avatar-progress-bar">
-                  <div
-                    class="avatar-progress-fill"
-                    :style="{
-                      width: Math.round((m.progress || 0) * 100) + '%',
-                    }"
-                  ></div>
-                </div>
-                <div class="avatar-progress-text">
-                  {{ Math.round((m.progress || 0) * 100) }}%
-                </div>
-              </div>
-            </div>
+          <div class="password-input-container">
+            <input
+              v-model="password"
+              type="password"
+              class="password-input"
+              placeholder="비밀번호 입력 (숫자 4자리)"
+              @keyup.enter="handlePasswordSubmit"
+            />
           </div>
-
-          <p v-if="!challenge.isParticipating" class="members-hint">
-            참여 후 멤버들의 진행률이 표시돼요.
-          </p>
         </div>
       </div>
 
-      <!-- 참여 버튼 -->
-      <div class="join-section" v-if="showJoinButton">
+      <!-- 비밀번호 참여 버튼 (비공개 챌린지이고 참여중이 아닌 경우) -->
+      <div
+        v-if="
+          challenge.usePassword && !challenge.isParticipating && showJoinButton
+        "
+        class="join-section"
+      >
+        <button class="join-button" @click="handlePasswordSubmit">
+          참여하기
+        </button>
+      </div>
+
+      <!-- 일반 참여 버튼 (공개 챌린지이거나 이미 참여중인 경우) -->
+      <div
+        class="join-section"
+        v-if="
+          showJoinButton &&
+          (!challenge.usePassword || challenge.isParticipating)
+        "
+      >
         <button class="join-button" @click="openJoinModal">
           챌린지 참여하기
         </button>
@@ -201,6 +242,7 @@ const challenge = ref(null);
 
 // join modal
 const showJoinModal = ref(false);
+const password = ref('');
 
 // result modals
 const showSuccessModal = ref(false);
@@ -262,9 +304,26 @@ const closeJoinModal = () => {
   showJoinModal.value = false;
 };
 
+const handlePasswordSubmit = async () => {
+  if (!password.value.trim()) {
+    alert('비밀번호를 입력해주세요.');
+    return;
+  }
+
+  try {
+    // 비밀번호 검증을 위해 joinChallenge 호출
+    await joinChallenge(route.params.id, { password: password.value });
+    password.value = '';
+    // 참여 완료 후 현재 페이지 새로고침하여 참여 상태 업데이트
+    await fetchDetail();
+  } catch (e) {
+    alert(e?.response?.data?.message || '비밀번호가 올바르지 않습니다.');
+  }
+};
+
 const confirmJoin = async () => {
   try {
-    await joinChallenge(route.params.id); // 비번 필요시 { password } 전달
+    await joinChallenge(route.params.id);
     showJoinModal.value = false;
     // 참여 완료 후 현재 페이지 새로고침하여 참여 상태 업데이트
     await fetchDetail();
@@ -646,6 +705,54 @@ const categoryTheme = computed(() => {
 
 .join-button:hover {
   transform: translateY(-2px);
+}
+
+/* 비밀번호 입력 섹션 스타일 */
+.password-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.password-info {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.password-title {
+  font-size: 20px;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 8px 0;
+  font-family: var(--font-main);
+}
+
+.password-description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+  font-family: var(--font-main);
+}
+
+.password-input-container {
+  margin-bottom: 20px;
+}
+
+.password-input {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: var(--font-main);
+  transition: border-color 0.2s ease;
+  box-sizing: border-box;
+}
+
+.password-input:focus {
+  outline: none;
+  border-color: var(--color-main);
 }
 
 .joined-button {
