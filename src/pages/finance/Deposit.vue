@@ -49,7 +49,7 @@
                   >월 {{ formData.amount.toLocaleString() }}원</span
                 >
               </div>
-
+              <<<<<<< Updated upstream ======= >>>>>>> Stashed changes
               <div
                 v-if="formData.selectedPrefer.length > 0"
                 class="summary-item-box"

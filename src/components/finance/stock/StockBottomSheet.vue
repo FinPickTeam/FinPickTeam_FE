@@ -13,11 +13,15 @@
         위시리스트가 없습니다.
       </div>
       <div v-else class="scroll-list">
-        <SelectableStockList
-          :products="products"
-          :selected-ids="selectedIds"
-          @toggle="toggleSelect"
-        />
+        <div
+          v-for="stock in products"
+          :key="stock.id"
+          class="selectable-card"
+          :class="{ selected: selectedIds.includes(stock.id) }"
+          @click="toggleSelect(stock.id)"
+        >
+          <ProductCard_stock :product="stock" />
+        </div>
         <button
           class="compare-btn"
           :disabled="selectedIds.length === 0"
@@ -38,7 +42,6 @@ import { getWishlist } from '@/api';
 import { ref, watch, onMounted, onBeforeUnmount, computed } from 'vue';
 import { useFavoriteStore } from '@/stores/favorite.js';
 import ProductCard_stock from './ProductCard_stock.vue';
-import SelectableStockList from './SelectableStockList.vue';
 
 const props = defineProps({
   open: { type: Boolean, default: false },
@@ -174,32 +177,15 @@ function onCompare() {
   justify-content: center;
 }
 .selectable-card {
-  width: 100%;
-  max-width: 340px;
-  margin: 0 auto 16px auto;
+  width: 90%;
+  max-width: 300px;
+  margin: 0 0 12px 0;
   cursor: pointer;
-  border-radius: 18px;
-  transition: box-shadow 0.25s, background 0.25s, border 0.25s;
-  box-sizing: border-box;
-  background: #f9fafb;
-  border: 1.5px solid #e5e8eb;
-  box-shadow: 0 2px 12px 0 rgba(30, 32, 36, 0.04);
-  position: relative;
-  overflow: hidden;
-}
-.selectable-card:hover {
-  background: #f1f4f8;
-  border: 1.5px solid #bcd7f7;
-  box-shadow: 0 4px 16px 0 rgba(30, 32, 36, 0.08);
+  border-radius: 12px;
+  transition: box-shadow 0.2s;
 }
 .selectable-card.selected {
-  background: #eaf4ff;
-  border: 2px solid #3182f6;
-  box-shadow: 0 0 0 2px #3182f6, 0 6px 24px 0 rgba(49, 130, 246, 0.1);
-}
-.selectable-card:active {
-  background: #e3eaf5;
-  border: 2px solid #3182f6;
+  box-shadow: 0 0 0 2px #2b8a3e;
 }
 .compare-btn {
   width: 100%;
