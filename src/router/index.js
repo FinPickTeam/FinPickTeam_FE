@@ -51,7 +51,7 @@ import Installment from '../pages/finance/Installment.vue';
 import Fund from '../pages/finance/Fund.vue';
 import Stock from '../pages/finance/Stock.vue';
 import FavoriteProducts from '../pages/finance/FavoriteProducts.vue';
-import StockDetail from '@/pages/finance/StockDetail.vue';
+import StockCompare from '@/pages/finance/StockCompare.vue';
 
 // 재테크 컴포넌트
 import ProductInputForm from '../components/finance/deposit/ProductInputForm_deposit.vue';
@@ -67,7 +67,6 @@ import ProductCard_installment from '../components/finance/installment/ProductCa
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 import AccountLinkSelect from '../pages/openbanking/openAuth/AccountLinkSelect.vue';
 import AccountAgreement from '../pages/openbanking/openAuth/AccountAgreement.vue';
-import ObAgreement from '../pages/openbanking/openAuth/ObAgreement.vue';
 
 // 핀픽 인증서 관련 컴포넌트들
 import CreateCertificate from '../pages/openbanking/openAuth/CertificateCreate.vue';
@@ -459,6 +458,11 @@ const router = createRouter({
           path: 'stock/:id',
           name: 'StockDetail',
           component: () => import('../pages/finance/StockDetail.vue'),
+        },
+        {
+          path: 'stock/compare/:id',
+          name: 'StockCompare',
+          component: StockCompare,
         },
         // ... 추가 재테크 탭들
       ],

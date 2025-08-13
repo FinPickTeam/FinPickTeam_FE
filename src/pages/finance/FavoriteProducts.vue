@@ -25,21 +25,21 @@
         />
       </div>
 
-      <!-- 주식 상품 -->
-      <div v-if="stockFavorites.length > 0">
-        <div class="group-title">주식 상품</div>
-        <ProductCardList_stock
-          :products="stockFavorites"
-          @favorite-removed="handleStockFavoriteRemoved"
-        />
-      </div>
-
       <!-- 펀드 상품 -->
       <div v-if="fundFavorites.length > 0">
         <div class="group-title">펀드 상품</div>
         <ProductCardList_fund
           :funds="fundFavorites"
           @favorite-removed="handleFundFavoriteRemoved"
+        />
+      </div>
+
+      <!-- 주식 상품 -->
+      <div v-if="stockFavorites.length > 0">
+        <div class="group-title">주식 상품</div>
+        <ProductCardList_stock
+          :products="stockFavorites"
+          @favorite-removed="handleStockFavoriteRemoved"
         />
       </div>
 
