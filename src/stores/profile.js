@@ -23,15 +23,24 @@ export const useProfileStore = defineStore('profile', {
             this.answers[`question${step}`] = value;
         },
         resetAnswers() {
-            // ... 답변 초기화 로직
-            // ⭐️ 결과도 함께 초기화해주는 것이 좋습니다.
+            // 답변 초기화 로직
+            // 결과도 함께 초기화해주는 것이 좋습니다.
             this.resultType = null;
             this.resultExplain = null;
         },
-        // ⬇️ 최종 결과를 저장하는 액션 추가
+        // 최종 결과를 저장하는 액션 추가
         setProfileResult(type, explain) {
             this.resultType = type;
             this.resultExplain = explain;
+        },
+        loadAnswers(surveyData) {
+            // surveyData 객체에 있는 모든 키-값 쌍에 대해 반복
+            for (const key in surveyData) {
+                // this.answers 객체에 해당 키가 존재하면 값을 업데이트
+                if (key in this.answers) {
+                    this.answers[key] = surveyData[key];
+                }
+            }
         },
     },
 });

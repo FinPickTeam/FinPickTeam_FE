@@ -16,18 +16,18 @@
       <!-- <div class="question-desc">총 자산 규모(순자산)</div> -->
       <div class="options">
         <div
-          v-for="(option, idx) in options"
-          :key="idx"
-          :class="['option', { selected: selected === idx }]"
-          @click="selected = idx"
+            v-for="(option, idx) in options"
+            :key="idx"
+            :class="['option', { selected: profileStore.answers.question10 === option }]"
+            @click="profileStore.answers.question10 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
     <!-- 완료 버튼 -->
-    <button class="next-btn" :disabled="selected === null" @click="goNext">
-      완료
+    <button class="next-btn" :disabled="profileStore.answers.question10 === null || isLoading" @click="goNext">
+      {{ isLoading ? '처리 중...' : '완료' }}
     </button>
   </div>
 </template>
@@ -35,8 +35,11 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import {useProfileStore} from "@/stores/profile.js";
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
+import {submitFullProfile} from "@/api/index.js";
 
+const profileStore=useProfileStore();
 const router = useRouter();
 const route = useRoute();
 const options = [
@@ -46,16 +49,40 @@ const options = [
   '10억원 이상~ 20억원 미만',
   '20억원 이상',
 ];
-const selected = ref(null);
+const isLoading = ref(false);
 
 // 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
 const totalSteps = ref(10);
 
 const goNext = () => {
-  if (selected.value !== null) {
+  if (profileStore.answers.question10 === null) return;
+  submitResults();
+};
+
+const submitResults = async () => {
+  if (isLoading.value) return;
+  isLoading.value = true;
+
+  try {
+    // API 호출 (submitFullProfile 사용)
+    const response = await submitFullProfile(profileStore.answers);
+
+    // 서버 응답에서 결과 타입과 설명을 추출
+    const type = response.data.propensityType;
+    const explain = response.data.propensityTypeExplain;
+
+    // Pinia에 최종 결과 저장
+    profileStore.setProfileResult(type, explain);
+
+    // 모든 작업이 성공적으로 끝난 후, 여기서 페이지를 이동합니다.
     const from = route.query.from || 'mypage';
-    // 투자성향 분석 완료 후 ProfileComplete로 이동
-    router.push(`/profile-complete?from=${from}`);
+    await router.push(`/profile-complete?from=${from}`);
+
+  } catch (error) {
+    console.error('결과 전송 실패:', error);
+    alert('오류가 발생했습니다.');
+  } finally {
+    isLoading.value = false;
   }
 };
 </script>

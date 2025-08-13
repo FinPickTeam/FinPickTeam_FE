@@ -50,8 +50,8 @@ export const submitFullProfile = async (payload) => {
 
 // 사용자 ID로 투자 성향 결과를 조회하는 API
 
-export const getProfileByUserId = async (userId) => {
-    console.log(`투자 성향 조회 API 요청: userId=${userId}`);
+export const getProfileByUserId = async ( ) => {
+    console.log(`투자 성향 조회 API 요청:`);
     try {
         const response = await api.get(`/survey/userId`);
 
@@ -70,11 +70,11 @@ export const getProfileByUserId = async (userId) => {
         });
         throw error;
     }
+
 };
 
-/**
- * ⭐️ [신규 추가] 10문항 설문 완료 여부를 조회하는 API
- */
+//10문항 설문 완료 여부를 조회하는 API
+
 export const checkSurveyCompletion = async () => {
     console.log("설문 완료 여부 조회 API 요청");
     try {
