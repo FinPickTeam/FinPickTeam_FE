@@ -1,25 +1,24 @@
 <template>
   <div class="challenge-group-detail">
-    <!-- 참여 확인/완료 모달 -->
+    <!-- 참여 확인 모달 -->
     <ChallengeJoinConfirmModal
-        :isVisible="showJoinModal"
-        :challenge="challenge"
-        :mode="joinModalMode"
-        @close="closeJoinModal"
-        @confirm="confirmJoin"
+      :isVisible="showJoinModal"
+      :challenge="challenge"
+      @close="closeJoinModal"
+      @confirm="confirmJoin"
     />
 
     <!-- 결과 모달들 (완료 + 미확인 진입 시) -->
     <ChallengeSuccessModal
-        v-if="showSuccessModal && challengeResult"
-        :isVisible="showSuccessModal"
-        :challengeResult="challengeResult"
-        @close="handleResultConfirm"
+      v-if="showSuccessModal && challengeResult"
+      :isVisible="showSuccessModal"
+      :challengeResult="challengeResult"
+      @close="handleResultConfirm"
     />
     <ChallengeFailModal
-        v-if="showFailModal"
-        :isVisible="showFailModal"
-        @close="handleResultConfirm"
+      v-if="showFailModal"
+      :isVisible="showFailModal"
+      @close="handleResultConfirm"
     />
 
     <!-- 로딩 -->
@@ -32,10 +31,10 @@
     <div v-else-if="challenge" class="content">
       <!-- 카테고리 뱃지 -->
       <div
-          class="category-chip"
-          :style="{
+        class="category-chip"
+        :style="{
           background: categoryTheme.bg,
-          boxShadow: '0 6px 16px ' + categoryTheme.shadow
+          boxShadow: '0 6px 16px ' + categoryTheme.shadow,
         }"
       >
         {{ displayCategory }}
@@ -45,7 +44,8 @@
         <div class="title-section">
           <h1 class="challenge-title">{{ challenge.title }}</h1>
           <div class="challenge-date">
-            {{ formatDate(challenge.startDate) }} ~ {{ formatDate(challenge.endDate) }}
+            {{ formatDate(challenge.startDate) }} ~
+            {{ formatDate(challenge.endDate) }}
           </div>
         </div>
 
@@ -54,11 +54,15 @@
         <div class="challenge-stats">
           <div class="stat-item">
             <span class="stat-label">참여자</span>
-            <span class="stat-value">{{ (challenge.participantsCount || 0) }}명</span>
+            <span class="stat-value"
+              >{{ challenge.participantsCount || 0 }}명</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">목표 {{ challenge.goalType }}</span>
-            <span class="stat-value">{{ (challenge.goalValue || 0).toLocaleString() }}원</span>
+            <span class="stat-value"
+              >{{ (challenge.goalValue || 0).toLocaleString() }}원</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">남은 기간</span>
@@ -70,49 +74,82 @@
         <div class="progress-section" v-if="challenge.isParticipating">
           <div class="progress-header">
             <span class="progress-label">달성률</span>
-            <span class="progress-percentage">{{ Math.round((challenge.myProgress || 0) * 100) }}%</span>
+            <span class="progress-percentage"
+              >{{ Math.round((challenge.myProgress || 0) * 100) }}%</span
+            >
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" :style="{ width: Math.round((challenge.myProgress || 0) * 100) + '%' }"></div>
+            <div
+              class="progress-fill"
+              :style="{
+                width: Math.round((challenge.myProgress || 0) * 100) + '%',
+              }"
+            ></div>
           </div>
         </div>
 
         <!-- 모집 현황 (미참여 & 모집중일 때) -->
-        <div class="recruitment-section" v-if="!challenge.isParticipating && isRecruiting">
+        <div
+          class="recruitment-section"
+          v-if="!challenge.isParticipating && isRecruiting"
+        >
           <div class="progress-header">
             <span class="progress-label">모집 현황</span>
-            <span class="progress-percentage">{{ challenge.participantsCount }}/{{ maxParticipants }}명</span>
+            <span class="progress-percentage"
+              >{{ challenge.participantsCount }}/{{ maxParticipants }}명</span
+            >
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" :style="{ width: Math.min(100, ((challenge.participantsCount || 0) / maxParticipants) * 100) + '%' }"></div>
+            <div
+              class="progress-fill"
+              :style="{
+                width:
+                  Math.min(
+                    100,
+                    ((challenge.participantsCount || 0) / maxParticipants) * 100
+                  ) + '%',
+              }"
+            ></div>
           </div>
         </div>
 
         <!-- 참여자 목록 섹션 -->
         <div
-            class="members-section"
-            v-if="challenge.isParticipating && challenge.members && challenge.members.length"
+          class="members-section"
+          v-if="
+            challenge.isParticipating &&
+            challenge.members &&
+            challenge.members.length
+          "
         >
           <h3 class="members-title">참여자</h3>
 
           <div class="avatar-grid">
-            <div v-for="m in challenge.members" :key="m.userId" class="avatar-card">
+            <div
+              v-for="m in challenge.members"
+              :key="m.userId"
+              class="avatar-card"
+            >
               <AvatarStack
-                  :level-id="m.levelId"
-                  :top-id="m.topId"
-                  :shoes-id="m.shoesId"
-                  :accessory-id="m.accessoryId"
-                  :gift-card-id="m.giftCardId"
-                  :nickname="m.nickname"
-                  :size="56"
+                :level-id="m.levelId"
+                :top-id="m.topId"
+                :shoes-id="m.shoesId"
+                :accessory-id="m.accessoryId"
+                :gift-card-id="m.giftCardId"
+                :nickname="m.nickname"
+                :size="56"
               />
-              <div class="avatar-name" :title="m.nickname">{{ m.nickname }}</div>
+              <div class="avatar-name" :title="m.nickname">
+                {{ m.nickname }}
+              </div>
 
               <div class="avatar-progress">
                 <div class="avatar-progress-bar">
                   <div
-                      class="avatar-progress-fill"
-                      :style="{ width: Math.round((m.progress || 0) * 100) + '%' }"
+                    class="avatar-progress-fill"
+                    :style="{
+                      width: Math.round((m.progress || 0) * 100) + '%',
+                    }"
                   ></div>
                 </div>
                 <div class="avatar-progress-text">
@@ -122,13 +159,17 @@
             </div>
           </div>
 
-          <p v-if="!challenge.isParticipating" class="members-hint">참여 후 멤버들의 진행률이 표시돼요.</p>
+          <p v-if="!challenge.isParticipating" class="members-hint">
+            참여 후 멤버들의 진행률이 표시돼요.
+          </p>
         </div>
       </div>
 
       <!-- 참여 버튼 -->
       <div class="join-section" v-if="showJoinButton">
-        <button class="join-button" @click="openJoinModal">챌린지 참여하기</button>
+        <button class="join-button" @click="openJoinModal">
+          챌린지 참여하기
+        </button>
       </div>
     </div>
 
@@ -142,7 +183,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { getChallengeDetail, joinChallenge, getChallengeResult, confirmChallengeResult } from '@/api/challenge/challenge.js';
+import {
+  getChallengeDetail,
+  joinChallenge,
+  getChallengeResult,
+  confirmChallengeResult,
+} from '@/api/challenge/challenge.js';
 import ChallengeJoinConfirmModal from '@/components/challenge/ChallengeJoinConfirmModal.vue';
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
@@ -155,7 +201,6 @@ const challenge = ref(null);
 
 // join modal
 const showJoinModal = ref(false);
-const joinModalMode = ref('confirm'); // 'confirm' | 'success'
 
 // result modals
 const showSuccessModal = ref(false);
@@ -167,11 +212,12 @@ const maxParticipants = computed(() => challenge.value?.maxParticipants ?? 6);
 
 const isRecruiting = computed(() => challenge.value?.status === 'RECRUITING');
 const isMine = computed(() => !!challenge.value?.isMine);
-const showJoinButton = computed(() =>
+const showJoinButton = computed(
+  () =>
     isRecruiting.value &&
     !challenge.value?.isParticipating &&
     !isMine.value &&
-    ((challenge.value?.participantsCount || 0) < maxParticipants.value)
+    (challenge.value?.participantsCount || 0) < maxParticipants.value
 );
 
 const fetchDetail = async () => {
@@ -182,11 +228,16 @@ const fetchDetail = async () => {
     challenge.value = data;
 
     // 완료 + 미확인 → 결과 모달
-    if (data?.status === 'COMPLETED' && data?.isParticipating && !data?.isResultCheck) {
+    if (
+      data?.status === 'COMPLETED' &&
+      data?.isParticipating &&
+      !data?.isResultCheck
+    ) {
       const result = await getChallengeResult(id);
       challengeResult.value = result || null;
 
-      if (result?.resultType?.startsWith('SUCCESS')) showSuccessModal.value = true;
+      if (result?.resultType?.startsWith('SUCCESS'))
+        showSuccessModal.value = true;
       else showFailModal.value = true;
     } else {
       showSuccessModal.value = false;
@@ -204,7 +255,6 @@ const fetchDetail = async () => {
 onMounted(fetchDetail);
 
 const openJoinModal = () => {
-  joinModalMode.value = 'confirm';
   showJoinModal.value = true;
 };
 
@@ -215,7 +265,9 @@ const closeJoinModal = () => {
 const confirmJoin = async () => {
   try {
     await joinChallenge(route.params.id); // 비번 필요시 { password } 전달
-    joinModalMode.value = 'success';
+    showJoinModal.value = false;
+    // 참여 완료 후 현재 페이지 새로고침하여 참여 상태 업데이트
+    await fetchDetail();
   } catch (e) {
     alert(e?.response?.data?.message || '참여에 실패했어요.');
     showJoinModal.value = false;
@@ -235,7 +287,11 @@ const handleResultConfirm = async () => {
 const formatDate = (d) => {
   if (!d) return '';
   const date = new Date(d);
-  return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 };
 
 const getRemainingDays = () => {
@@ -256,7 +312,9 @@ const CATEGORY_FALLBACK_BY_ID = {
 };
 
 const categoryKey = computed(() => {
-  const name = challenge.value?.categoryName || CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId];
+  const name =
+    challenge.value?.categoryName ||
+    CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId];
   if (!name) return 'default';
   if (name.includes('전체')) return 'total';
   if (name.includes('식비')) return 'food';
@@ -266,18 +324,39 @@ const categoryKey = computed(() => {
   return 'default';
 });
 
-const displayCategory = computed(() =>
-    challenge.value?.categoryName || CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId] || '카테고리'
+const displayCategory = computed(
+  () =>
+    challenge.value?.categoryName ||
+    CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId] ||
+    '카테고리'
 );
 
 const categoryTheme = computed(() => {
   const map = {
-    total:     { bg: 'linear-gradient(135deg,#6C5CE7,#8E7CFF)', shadow: 'rgba(108,92,231,.3)' },
-    food:      { bg: 'linear-gradient(135deg,#F0932B,#F5A623)', shadow: 'rgba(240,147,43,.3)' },
-    snack:     { bg: 'linear-gradient(135deg,#FF7675,#FF9AA2)', shadow: 'rgba(255,118,117,.3)' },
-    transport: { bg: 'linear-gradient(135deg,#00B894,#55EFC4)', shadow: 'rgba(0,184,148,.3)' },
-    beauty:    { bg: 'linear-gradient(135deg,#0984E3,#74B9FF)', shadow: 'rgba(9,132,227,.3)' },
-    default:   { bg: 'linear-gradient(135deg,var(--color-main),var(--color-main-dark))', shadow: 'rgba(102,51,204,.28)' },
+    total: {
+      bg: 'linear-gradient(135deg,#6C5CE7,#8E7CFF)',
+      shadow: 'rgba(108,92,231,.3)',
+    },
+    food: {
+      bg: 'linear-gradient(135deg,#F0932B,#F5A623)',
+      shadow: 'rgba(240,147,43,.3)',
+    },
+    snack: {
+      bg: 'linear-gradient(135deg,#FF7675,#FF9AA2)',
+      shadow: 'rgba(255,118,117,.3)',
+    },
+    transport: {
+      bg: 'linear-gradient(135deg,#00B894,#55EFC4)',
+      shadow: 'rgba(0,184,148,.3)',
+    },
+    beauty: {
+      bg: 'linear-gradient(135deg,#0984E3,#74B9FF)',
+      shadow: 'rgba(9,132,227,.3)',
+    },
+    default: {
+      bg: 'linear-gradient(135deg,var(--color-main),var(--color-main-dark))',
+      shadow: 'rgba(102,51,204,.28)',
+    },
   };
   return map[categoryKey.value] || map.default;
 });
@@ -285,50 +364,72 @@ const categoryTheme = computed(() => {
 
 <style scoped>
 /* 기존 스타일 + 아바타 그리드 추가 */
-.challenge-group-detail { min-height: 100vh; background-color: #f8f9fa; }
+.challenge-group-detail {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
 
 /* 카테고리 뱃지 */
-.category-chip{
+.category-chip {
   align-self: flex-start;
   color: #fff;
   font-weight: 700;
   font-size: 12px;
-  letter-spacing: .2px;
+  letter-spacing: 0.2px;
   padding: 8px 12px;
   border-radius: 9999px;
   margin-bottom: 12px;
 }
 
-.avatar-grid{
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap:12px;
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
 }
-.avatar-card{
-  background:#f8f9fa;
-  border-radius:12px;
-  padding:12px;
-  text-align:center;
+.avatar-card {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
 }
 
 .avatar-name {
   font-size: 12px;
   color: #333;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   margin-top: 8px;
 }
 
-.avatar-progress { margin-top: 6px; }
+.avatar-progress {
+  margin-top: 6px;
+}
 .avatar-progress-bar {
-  height: 6px; background-color: #e0e0e0; border-radius: 3px; overflow: hidden;
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
 }
 .avatar-progress-fill {
   height: 100%;
-  background: linear-gradient(to right, var(--color-main), var(--color-main-light));
+  background: linear-gradient(
+    to right,
+    var(--color-main),
+    var(--color-main-light)
+  );
 }
-.avatar-progress-text { font-size: 11px; color: #666; margin-top: 4px; }
+.avatar-progress-text {
+  font-size: 11px;
+  color: #666;
+  margin-top: 4px;
+}
 
-.members-hint{ margin-top:8px; font-size:12px; color:#888; }
+.members-hint {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #888;
+}
 
 /* 로딩 스타일 */
 .loading-container {

@@ -13,11 +13,10 @@
       @close="handleResultConfirm"
     />
 
-    <!-- 참여 확인/완료 모달 -->
+    <!-- 참여 확인 모달 -->
     <ChallengeJoinConfirmModal
       :isVisible="showJoinModal"
       :challenge="challenge"
-      :mode="joinModalMode"
       @close="closeJoinModal"
       @confirm="confirmJoin"
     />
@@ -135,7 +134,6 @@ const challenge = ref(null);
 
 // join modal
 const showJoinModal = ref(false);
-const joinModalMode = ref('confirm');
 
 // result modals
 const showSuccessModal = ref(false);
@@ -177,7 +175,6 @@ const fetchDetail = async () => {
 onMounted(fetchDetail);
 
 const openJoinModal = () => {
-  joinModalMode.value = 'confirm';
   showJoinModal.value = true;
 };
 
@@ -188,7 +185,9 @@ const closeJoinModal = () => {
 const confirmJoin = async () => {
   try {
     await joinChallenge(route.params.id);
-    joinModalMode.value = 'success';
+    showJoinModal.value = false;
+    // 참여 완료 후 현재 페이지 새로고침하여 참여 상태 업데이트
+    await fetchDetail();
   } catch (e) {
     alert(e?.response?.data?.message || '참여에 실패했어요.');
     showJoinModal.value = false;
