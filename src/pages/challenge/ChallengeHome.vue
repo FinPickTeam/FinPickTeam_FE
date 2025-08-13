@@ -62,12 +62,29 @@ const fetchSummary = async () => {
   }
 };
 
+const sortParticipating = (list) => {
+  const toKey = (c) => {
+    const unconfirmed = c?.status === 'COMPLETED' && !c?.isResultCheck;
+    const end = c?.endDate ? new Date(c.endDate).getTime() : Number.MAX_SAFE_INTEGER;
+    // 정렬 우선순위: 1) 미확인 먼저 (-1), 2) 종료일 빠른 순
+    return [unconfirmed ? -1 : 0, end];
+  };
+  return [...list].sort((a, b) => {
+    const [ua, ea] = toKey(a);
+    const [ub, eb] = toKey(b);
+    if (ua !== ub) return ua - ub;
+    return ea - eb;
+  });
+};
+
 const fetchParticipating = async () => {
   loading.value.participating = true;
   error.value.participating = null;
   try {
     const list = await getChallengeList({ participating: true });
-    participatingChallenges.value = Array.isArray(list) ? list : [];
+    const safe = Array.isArray(list) ? list : [];
+    // ✅ “완료+미확인”을 맨 앞으로 정렬
+    participatingChallenges.value = sortParticipating(safe);
     // 진행중 개수 갱신
     challengeStore.updateCountsFromList(participatingChallenges.value);
   } catch (e) {
@@ -100,7 +117,7 @@ const fetchMonthlyPoints = async () => {
     const y = now.getFullYear();
     const m = now.getMonth() + 1;
     const res = await getMonthlyPoints({ year: y, month: m });
-    monthlyPoints.value = res?.amount ?? null; // ← 이건 월누적 카드용만 사용
+    monthlyPoints.value = res?.amount ?? null; // ← 월누적 카드용
   } catch (e) {
     error.value.points = e?.response?.data?.message || e.message || '포인트 조회 실패';
     monthlyPoints.value = null;
@@ -115,8 +132,7 @@ onMounted(async () => {
     fetchParticipating(),
     fetchHot(),
     fetchMonthlyPoints(),
-    // ✅ 잔액/누적/월누적 스냅샷은 Pinia에 적재
-    challengeStore.fetchCoinStatus(),
+    challengeStore.fetchCoinStatus(), // Pinia 스냅샷 적재
   ]);
 });
 
@@ -157,17 +173,18 @@ watch(participatingChallenges, (list) => {
             v-for="c in participatingChallenges"
             :key="c.id"
             :challenge="{
-            id: c.id,
-            title: c.title,
-            type: c.type,
-            categoryName: c.categoryName,
-            startDate: c.startDate,
-            endDate: c.endDate,
-            participating: c.isParticipating,
-            myProgressRate: c.myProgressRate ?? 0,
-            participantsCount: c.participantsCount ?? 0,
-            isResultCheck: c.isResultCheck ?? false
-          }"
+              id: c.id,
+              title: c.title,
+              type: c.type,
+              categoryName: c.categoryName,
+              startDate: c.startDate,
+              endDate: c.endDate,
+              participating: c.isParticipating,
+              myProgressRate: c.myProgressRate ?? 0,
+              participantsCount: c.participantsCount ?? 0,
+              isResultCheck: c.isResultCheck ?? false,
+              status: c.status
+            }"
             @cardClick="handleCardClick"
         />
         <div v-if="participatingChallenges.length === 0" class="empty-message">참여중인 챌린지가 없어요.</div>

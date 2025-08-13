@@ -114,8 +114,8 @@
             <input
                 type="password"
                 v-model="roomPassword"
-                placeholder="비밀번호를 입력하세요"
-                maxlength="20"
+                placeholder="비밀번호를 입력하세요(숫자 4자리)"
+                maxlength="4"
             />
           </div>
         </div>
@@ -127,9 +127,11 @@
       </div>
     </div>
 
-    <!-- 성공 모달 -->
+    <!-- 성공 모달: 생성한 챌린지로 이동 -->
     <ChallengeCreateSuccessModal
         :isVisible="showSuccessModal"
+        :challengeId="createdChallengeId"
+        :challengeType="type"
         @close="closeSuccessModal"
     />
 
@@ -173,6 +175,9 @@ const loading = ref(false);
 const showSuccessModal = ref(false);
 const showInsufficientPointsModal = ref(false);
 
+// 방금 생성한 챌린지 정보
+const createdChallengeId = ref(null);
+
 // 포인트/제한 관련 (Pinia)
 const userPoints = computed(() => challengeStore.points.userPoints);
 const requiredPoints = computed(() => challengeStore.points.required[type.value] ?? 0);
@@ -187,7 +192,7 @@ const warningTextForType = computed(() => {
   return '';
 });
 
-// ✅ 직진입 대비: 정책 포인트 세팅 + 코인 스냅샷 보장
+// 직진입 대비: 정책 포인트 세팅 + 코인 스냅샷 보장
 onMounted(async () => {
   challengeStore.setRequiredPoints({ GROUP: 100, PERSONAL: 0, COMMON: 0 });
   if (!challengeStore.points.updatedAt) {
@@ -253,7 +258,13 @@ const createChallenge = async () => {
   try {
     loading.value = true;
     const token = auth.accessToken;
-    await axios.post('/api/challenge/create', payload, { headers: { Authorization: `Bearer ${token}` } });
+
+    // 생성 응답에서 challengeId 추출 (CommonResponseDTO<ChallengeCreateResponseDTO>)
+    const res = await axios.post('/api/challenge/create', payload, { headers: { Authorization: `Bearer ${token}` } });
+    const created = res?.data?.data;
+    createdChallengeId.value = created?.challengeId ?? null;
+
+    // 생성 성공 모달 오픈
     showSuccessModal.value = true;
   } catch (e) {
     const msg = e?.response?.data?.message || e?.message || '챌린지 생성 중 오류가 발생했어요.';
@@ -265,7 +276,7 @@ const createChallenge = async () => {
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false;
-  router.back();
+  router.push('/challenge'); // 닫기 → 목록으로
 };
 const closeInsufficientPointsModal = () => (showInsufficientPointsModal.value = false);
 const handleChargePoints = () => {
