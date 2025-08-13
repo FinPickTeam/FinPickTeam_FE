@@ -28,12 +28,23 @@
         <span class="progress-text">0% 완료</span>
       </div>
 
-      <div class="participants-info" v-if="!isParticipating && isRecruitingPage">
+      <!-- 모집 카드(참여중 아님) -->
+      <div class="participants-info" v-else-if="isRecruitingPage">
         <div class="participants-text">
-          <span>{{ curParticipants }}명 참여중</span>
-          <span class="max-participants">/ {{ maxParticipants }}명</span>
+          <!-- ✅ 공통: 참여자 수만 표기 -->
+          <template v-if="isCommon">
+            <span>{{ curParticipants }}명 참여중</span>
+          </template>
+
+          <!-- 그룹/개인: 정원 및 진행바 표시 -->
+          <template v-else>
+            <span>{{ curParticipants }}명 참여중</span>
+            <span class="max-participants">/ {{ maxParticipants }}명</span>
+          </template>
         </div>
-        <div class="progress-bar">
+
+        <!-- ✅ 공통은 정원 개념 없으므로 진행바 숨김 -->
+        <div class="progress-bar" v-if="!isCommon">
           <div class="progress-fill" :style="{ width: `${progressRecruiting}%` }"></div>
         </div>
       </div>
@@ -55,6 +66,7 @@ const props = defineProps({
 });
 
 const typeUpper = computed(() => (props.challenge?.type || 'GROUP').toUpperCase());
+const isCommon = computed(() => typeUpper.value === 'COMMON');
 const statusUpper = computed(() => (props.challenge?.status || 'RECRUITING').toUpperCase());
 const isParticipating = computed(() => props.challenge?.isParticipating ?? props.challenge?.participating ?? false);
 const progressNum = computed(() => {

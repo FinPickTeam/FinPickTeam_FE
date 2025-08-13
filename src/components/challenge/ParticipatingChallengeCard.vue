@@ -48,6 +48,7 @@ const props = defineProps({
       participantsCount: 0,
       isResultCheck: false,
       status: 'RECRUITING',
+      usePassword: false,
     }),
   },
 });

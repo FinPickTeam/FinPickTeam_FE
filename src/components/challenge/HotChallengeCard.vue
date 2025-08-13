@@ -19,13 +19,13 @@
         <span class="participants-text"
           >{{ challenge.participantsCount }}명 참여중</span
         >
-        <span class="max-participants">/ 6명</span>
+        <!-- ✅ 공통은 정원 없음 → 정원 텍스트 숨김 -->
+        <span v-if="!isCommon" class="max-participants">/ 6명</span>
       </div>
-      <div class="progress-bar">
-        <div
-          class="progress-fill"
-          :style="{ width: `${(challenge.participantsCount / 6) * 100}%` }"
-        ></div>
+
+      <!-- ✅ 공통은 정원 기반 게이지 제거 -->
+      <div v-if="!isCommon" class="progress-bar">
+        <div class="progress-fill" :style="{ width: `${(challenge.participantsCount / 6) * 100}%` }"></div>
       </div>
     </div>
     <button class="participate-btn" @click.stop="handleParticipate">

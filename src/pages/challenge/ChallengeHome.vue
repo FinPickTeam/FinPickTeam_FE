@@ -21,6 +21,7 @@ const summary = ref({ totalChallenges: 0, successCount: 0, achievementRate: 0 })
 const participatingChallenges = ref([]);
 const hotChallenges = ref([]);
 const monthlyPoints = ref(null); // StatsSwiper용(월누적)
+const commonHighlight = ref(null); // ✅ 스와이프 3번 슬라이드용 공통 챌린지
 
 const displayName = computed(() => {
   const u = auth.user || {};
@@ -126,12 +127,75 @@ const fetchMonthlyPoints = async () => {
   }
 };
 
+// ✅ 공통 챌린지 하이라이트 (RECRUITING 우선, 없으면 IN_PROGRESS)
+const fetchCommonHighlight = async () => {
+  loading.value.common = true;
+  error.value.common = null;
+
+  const pick = (item) =>
+      item && {
+        id: item.id,
+        title: item.title,
+        status: item.status,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        participantsCount: item.participantsCount ?? 0,
+      };
+
+  try {
+    // 1) 우선 모집중 공통
+    let list = await getChallengeList({ type: 'COMMON', status: 'RECRUITING' });
+    if (Array.isArray(list) && list.length > 0) {
+      commonHighlight.value = pick(list[0]);
+      return;
+    }
+
+    // 2) 내가 참여 중인 공통
+    const joined = await getChallengeList({ participating: true });
+    const myCommon = (Array.isArray(joined) ? joined : []).find(
+        (c) => (c?.type || '').toUpperCase() === 'COMMON'
+    );
+    if (myCommon) {
+      commonHighlight.value = pick(myCommon);
+      return;
+    }
+
+    // 3) 진행중 공통
+    list = await getChallengeList({ type: 'COMMON', status: 'IN_PROGRESS' });
+    if (Array.isArray(list) && list.length > 0) {
+      commonHighlight.value = pick(list[0]);
+      return;
+    }
+
+    // 4) 어떤 공통이든 1개
+    list = await getChallengeList({ type: 'COMMON' });
+    commonHighlight.value = Array.isArray(list) && list.length > 0 ? pick(list[0]) : null;
+  } catch (e) {
+    error.value.common = e?.response?.data?.message || e.message || '공통 챌린지 조회 실패';
+    commonHighlight.value = null;
+  } finally {
+    loading.value.common = false;
+  }
+};
+
+const openCommonFromSwiper = () => {
+  if (commonHighlight.value?.id) {
+    router.push({
+      name: 'ChallengeCommonDetail',
+      params: { id: commonHighlight.value.id },
+      state: { previousPage: '/challenge' },
+    });
+  }
+};
+
+
 onMounted(async () => {
   await Promise.all([
     fetchSummary(),
     fetchParticipating(),
     fetchHot(),
     fetchMonthlyPoints(),
+    fetchCommonHighlight(),
     challengeStore.fetchCoinStatus(), // Pinia 스냅샷 적재
   ]);
 });
@@ -151,10 +215,17 @@ watch(participatingChallenges, (list) => {
         </div>
       </div>
 
-      <ChallengeStatsSwiper :summary="summary" :points="monthlyPoints" />
+      <!-- ✅ 공통 챌린지 추가 슬라이드가 포함됨 -->
+      <ChallengeStatsSwiper
+          :summary="summary"
+          :points="monthlyPoints"
+          :common="commonHighlight"
+          @open-common="openCommonFromSwiper"
+      />
       <div v-if="loading.summary" style="color: #fff; margin: 6px 20px 0">요약 로딩중…</div>
       <div v-else-if="error.summary" style="color: #fff; margin: 6px 20px 0">{{ error.summary }}</div>
       <div v-if="error.points" style="color: #fff; margin: 6px 20px 0">{{ error.points }}</div>
+      <div v-if="error.common" style="color: #fff; margin: 6px 20px 0">{{ error.common }}</div>
     </div>
 
     <!-- 참여중인 챌린지 -->
@@ -183,7 +254,8 @@ watch(participatingChallenges, (list) => {
               myProgressRate: c.myProgressRate ?? 0,
               participantsCount: c.participantsCount ?? 0,
               isResultCheck: c.isResultCheck ?? false,
-              status: c.status
+              status: c.status,
+              usePassword: c.usePassword ?? false
             }"
             @cardClick="handleCardClick"
         />
@@ -217,7 +289,8 @@ watch(participatingChallenges, (list) => {
             participating: c.isParticipating,
             myProgressRate: c.myProgressRate ?? null,
             participantsCount: c.participantsCount ?? 0,
-            isResultCheck: c.isResultCheck ?? false
+            isResultCheck: c.isResultCheck ?? false,
+            usePassword: c.usePassword ?? false
           }"
             @participate="handleParticipate"
             @click="handleCardClick"
