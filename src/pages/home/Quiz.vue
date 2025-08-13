@@ -163,8 +163,9 @@ import { getTodayQuiz, submitQuiz } from "@/api/home";
 import { useAuthStore } from "@/stores/auth";
 import { useAvatarStore } from "@/stores/avatar.js";
 import { addQuizPoints } from "@/api/mypage/avatar";
+import { getMyCoinStatus } from "@/api/mypage/avatar/coinApi";
 
-const answer = ref('');
+const answer = ref("");
 const showResult = ref(false);
 const loading = ref(false);
 const error = ref(null);
@@ -210,18 +211,18 @@ const addQuizPointsToUser = async () => {
       const coinData = coinResponse.data.data;
       if (coinData) {
         // 현재 포인트와 누적 포인트 업데이트
-        if (updatedData.currentPoints !== undefined) {
-          avatarStore.setCoin(updatedData.currentPoints);
-          console.log("현재 포인트 업데이트:", updatedData.currentPoints);
+        if (coinData.amount !== undefined) {
+          avatarStore.setCoin(coinData.amount);
+          console.log("현재 포인트 업데이트:", coinData.amount);
         }
-        if (updatedData.cumulativePoints !== undefined) {
-          avatarStore.setCumulativePoints(updatedData.cumulativePoints);
-          console.log("누적 포인트 업데이트:", updatedData.cumulativePoints);
+        if (coinData.cumulativeAmount !== undefined) {
+          avatarStore.setCumulativePoints(coinData.cumulativeAmount);
+          console.log("누적 포인트 업데이트:", coinData.cumulativeAmount);
         }
 
         console.log("포인트 업데이트 완료:", {
-          current: updatedData.currentPoints,
-          cumulative: updatedData.cumulativePoints,
+          current: coinData.amount,
+          cumulative: coinData.cumulativeAmount,
         });
       }
     }
@@ -250,7 +251,7 @@ const addQuizPointsToUser = async () => {
   }
 };
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 
 const isCorrect = computed(() => {
   if (!quizData.value || !answer.value) return false;
@@ -265,53 +266,29 @@ const fetchQuiz = async () => {
 
     // 인증 상태 확인
     if (!authStore.isAuthenticated) {
-      console.warn('퀴즈를 보려면 로그인이 필요합니다.');
-      error.value = '퀴즈를 보려면 로그인이 필요합니다.';
+      console.warn("퀴즈를 보려면 로그인이 필요합니다.");
+      error.value = "퀴즈를 보려면 로그인이 필요합니다.";
       loading.value = false;
       return;
     }
 
     console.log("퀴즈 데이터 가져오기 시작");
-    const response = await getTodayQuiz();
-    console.log('받아온 퀴즈 데이터:', response);
 
-    // 백엔드 응답 구조에 따라 퀴즈 데이터 추출
-    let quizDataValue;
-
-    // 구조 1: { status: 200, message: "...", data: {...} }
-    if (response.status === 200 && response.data && response.data.data) {
-      quizDataValue = response.data.data;
-    }
-    // 구조 2: { status: 200, data: {...} }
-    else if (response.status === 200 && response.data) {
-      quizDataValue = response.data;
-    }
-    // 구조 3: { data: {...} }
-    else if (response.data) {
-      quizDataValue = response.data;
-    }
-
-    console.log('추출된 퀴즈 데이터:', quizDataValue);
-
-    if (quizDataValue && quizDataValue.id && quizDataValue.question) {
-      quizData.value = quizDataValue;
-      console.log('퀴즈 데이터 설정 완료:', quizData.value);
-    } else {
-      console.warn('유효한 퀴즈 데이터를 찾을 수 없습니다:', response);
-      error.value = '퀴즈 데이터를 가져오는데 실패했습니다.';
-    }
-    */
+    // 임시로 하드코딩된 오류 메시지 (API가 구현되지 않음)
+    error.value = "오늘은 응시할 수 있는 퀴즈가 없습니다.";
+    loading.value = false;
+    return;
   } catch (err) {
-    console.error('퀴즈 조회 에러:', err);
+    console.error("퀴즈 조회 에러:", err);
 
-    let errorMessage = '퀴즈를 불러오는데 실패했습니다.';
+    let errorMessage = "퀴즈를 불러오는데 실패했습니다.";
 
     if (err.response?.status === 401) {
       errorMessage = "로그인이 필요합니다.";
     } else if (err.response?.status === 404) {
-      errorMessage = '퀴즈를 찾을 수 없습니다.';
+      errorMessage = "퀴즈를 찾을 수 없습니다.";
     } else if (err.response?.status === 500) {
-      errorMessage = '서버 오류가 발생했습니다.';
+      errorMessage = "서버 오류가 발생했습니다.";
     } else if (err.message) {
       errorMessage = `연결 오류: ${err.message}`;
     }
@@ -328,19 +305,19 @@ async function checkAnswer() {
   console.log("정답 확인 시작:", {
     userAnswer: answer.value,
     correctAnswer: quizData.value.answer,
-    isCorrect: isAnswerCorrect,
+    isCorrect: isCorrect.value,
   });
 
   try {
     // 퀴즈 응답 제출 - API 스펙에 맞게 isCorrect 필드로 전송
     const submitData = {
       quizId: quizData.value.id,
-      isCorrect: isAnswerCorrect, // 정답 여부를 true/false로 전송
+      isCorrect: isCorrect.value, // 정답 여부를 true/false로 전송
     };
 
     console.log("퀴즈 응답 제출:", submitData);
     await submitQuiz(submitData);
-    console.log('퀴즈 응답 제출 성공');
+    console.log("퀴즈 응답 제출 성공");
 
     // 결과 표시
     showResult.value = true;
@@ -351,9 +328,10 @@ async function checkAnswer() {
       await addQuizPointsToUser();
     } else {
       console.log("오답 - 포인트 적립하지 않음");
+      pointsEarned.value = true; // 오답인 경우에도 포인트 표시를 위해 true로 설정
     }
   } catch (err) {
-    console.error('퀴즈 제출 에러:', err);
+    console.error("퀴즈 제출 에러:", err);
     // 제출 실패해도 결과는 표시
     showResult.value = true;
 
@@ -363,19 +341,20 @@ async function checkAnswer() {
       await addQuizPointsToUser();
     } else {
       console.log("제출 실패하고 오답이므로 포인트 적립하지 않음");
+      pointsEarned.value = true; // 오답인 경우에도 포인트 표시를 위해 true로 설정
     }
   }
 }
 
 function close() {
   // 상태 초기화
-  answer.value = '';
+  answer.value = "";
   showResult.value = false;
   quizData.value = null;
   error.value = null;
   pointsEarned.value = false;
   pointsLoading.value = false;
-  emit('close');
+  emit("close");
 }
 
 // 컴포넌트 마운트 시 퀴즈 데이터 가져오기
