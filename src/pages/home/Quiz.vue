@@ -1,132 +1,171 @@
 <template>
-  <div class="quiz-modal-backdrop" @click.self="close">
-    <div class="quiz-card">
-      <button class="quiz-close-btn" @click="close">
-        <i class="fa-solid fa-xmark"></i>
-      </button>
-      <div class="quiz-title">👤오늘의 금융 퀴즈👤</div>
+  <teleport to="body">
+    <div class="quiz-modal-backdrop" @click.self="close">
+      <div class="quiz-card">
+        <button class="quiz-close-btn" @click="close">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
 
-      <!-- 로딩 상태 -->
-      <div v-if="loading" class="quiz-loading">
-        <div class="loading-spinner"></div>
-        <div>퀴즈를 불러오는 중...</div>
-      </div>
+        <!-- 헤더 섹션 -->
+        <div class="quiz-header">
+          <!-- <div class="quiz-icon">
+            <i class="fa-solid fa-brain"></i>
+          </div> -->
+          <div class="quiz-title">오늘의 금융 퀴즈</div>
+          <div class="quiz-subtitle">매일 하나씩, 금융 지식 쌓기</div>
+        </div>
 
-      <!-- 에러 상태 -->
-      <div v-else-if="error" class="quiz-error">
-        <i class="fa-solid fa-exclamation-triangle"></i>
-        <div>{{ error }}</div>
-        <button class="quiz-retry-btn" @click="fetchQuiz">다시 시도</button>
-      </div>
+        <!-- 로딩 상태 -->
+        <div v-if="loading" class="quiz-loading">
+          <div class="loading-spinner"></div>
+          <div>퀴즈를 불러오는 중...</div>
+        </div>
 
-      <!-- 퀴즈 내용 -->
-      <div v-else-if="quizData" class="quiz-content">
-        <div class="quiz-question">{{ quizData.question }}</div>
-        <div class="quiz-ox-group">
+        <!-- 에러 상태 -->
+        <div v-else-if="error" class="quiz-error">
+          <i class="fa-solid fa-exclamation-triangle"></i>
+          <div>{{ error }}</div>
           <button
-            class="quiz-ox-btn o"
-            :class="{
-              selected: answer === 'O' && !showResult,
-              wrong: showResult && answer === 'O' && quizData.answer !== 'O',
-              correct: showResult && quizData.answer === 'O' && answer === 'O',
-            }"
-            @click="answer = 'O'"
-            :disabled="showResult"
+            v-if="error.includes('응시할 수 있는 퀴즈가 없습니다')"
+            class="quiz-retry-btn"
+            @click="close"
           >
-            <div class="ox-circle">O</div>
-            <span>맞다</span>
+            창 닫기
           </button>
-          <button
-            class="quiz-ox-btn x"
-            :class="{
-              selected: answer === 'X' && !showResult,
-              wrong: showResult && answer === 'X' && quizData.answer !== 'X',
-              correct: showResult && quizData.answer === 'X' && answer === 'X',
-            }"
-            @click="answer = 'X'"
-            :disabled="showResult"
-          >
-            <div class="ox-circle">X</div>
-            <span>틀리다</span>
+          <button v-else class="quiz-retry-btn" @click="fetchQuiz">
+            다시 시도
           </button>
         </div>
 
-        <!-- 정답/오답 결과 UI -->
-        <div v-if="showResult && isCorrect" class="quiz-result correct">
-          <i class="fa-regular fa-circle-check"></i>
-          <div>
-            <div class="result-title">정답입니다</div>
-            <div class="result-desc">
-              {{ quizData.explanation }}
+        <!-- 퀴즈 내용 -->
+        <div v-else-if="quizData" class="quiz-content">
+          <!-- 질문 섹션 -->
+          <div class="quiz-question-section">
+            <div class="quiz-question">{{ quizData.question }}</div>
+          </div>
+
+          <!-- O/X 버튼 섹션 -->
+          <div class="quiz-ox-group">
+            <button
+              class="quiz-ox-btn o"
+              :class="{
+                selected: answer === 'O',
+                wrong: showResult && answer === 'O' && quizData.answer !== 'O',
+                correct:
+                  showResult && quizData.answer === 'O' && answer === 'O',
+              }"
+              @click="answer = 'O'"
+              :disabled="showResult"
+            >
+              <div class="ox-circle">
+                <i class="fa-solid fa-check"></i>
+              </div>
+              <span>맞다</span>
+            </button>
+            <button
+              class="quiz-ox-btn x"
+              :class="{
+                selected: answer === 'X',
+                wrong: showResult && answer === 'X' && quizData.answer !== 'X',
+                correct:
+                  showResult && quizData.answer === 'X' && answer === 'X',
+              }"
+              @click="answer = 'X'"
+              :disabled="showResult"
+            >
+              <div class="ox-circle">
+                <i class="fa-solid fa-times"></i>
+              </div>
+              <span>틀리다</span>
+            </button>
+          </div>
+
+          <!-- 정답/오답 결과 UI -->
+          <div v-if="showResult && isCorrect" class="quiz-result correct">
+            <div class="result-content">
+              <div class="result-title">정답입니다!</div>
+              <div class="result-desc">
+                {{ quizData.message || quizData.explanation }}
+              </div>
             </div>
           </div>
-        </div>
-        <div v-if="showResult && !isCorrect" class="quiz-result wrong">
-          <i class="fa-regular fa-circle-xmark"></i>
-          <div>
-            <div class="result-title">틀렸습니다.</div>
-            <div class="result-desc">
-              {{ quizData.explanation }}
+
+          <div v-if="showResult && !isCorrect" class="quiz-result wrong">
+            <div class="result-content">
+              <div class="result-title">틀렸습니다</div>
+              <div class="result-desc">
+                {{ quizData.message || quizData.explanation }}
+              </div>
             </div>
           </div>
+
+          <!-- 포인트 적립 -->
+          <div v-if="showResult && isCorrect" class="quiz-point-section">
+            <div v-if="pointsLoading" class="quiz-point loading">
+              <div class="loading-spinner-small"></div>
+              포인트 적립 중...
+            </div>
+            <div v-else-if="pointsEarned" class="quiz-point earned">
+              <div class="point-icon">
+                <i class="fa-solid fa-star"></i>
+              </div>
+              <div class="point-content">
+                <div class="point-amount">10 포인트</div>
+                <div class="point-desc">획득했습니다!</div>
+              </div>
+            </div>
+            <div v-else class="quiz-point">
+              <div class="point-icon">
+                <i class="fa-solid fa-star"></i>
+              </div>
+              <div class="point-content">
+                <div class="point-amount">포인트 적립 중...</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 액션 버튼들 -->
+          <div class="quiz-actions">
+            <button
+              v-if="!showResult"
+              class="quiz-submit-btn"
+              :disabled="!answer"
+              @click="checkAnswer"
+            >
+              정답 확인
+            </button>
+            <button
+              v-if="showResult && !isCorrect"
+              class="quiz-close-btn-bottom"
+              @click="close"
+            >
+              <i class="fa-solid fa-times"></i>
+              닫기
+            </button>
+            <button
+              v-if="showResult && isCorrect && pointsEarned"
+              class="quiz-close-btn-bottom"
+              @click="close"
+            >
+              <i class="fa-solid fa-times"></i>
+              닫기
+            </button>
+          </div>
         </div>
-
-        <!-- 포인트 안내 -->
-        <div v-if="showResult && isCorrect" class="quiz-point-section">
-          <div v-if="pointsLoading" class="quiz-point loading">
-            <div class="loading-spinner-small"></div>
-            포인트 적립 중...
-          </div>
-          <div v-else-if="pointsEarned" class="quiz-point earned">
-            <i class="fa-solid fa-star"></i>
-            10 포인트 획득!
-          </div>
-          <div v-else class="quiz-point">
-            <i class="fa-solid fa-star"></i>
-            포인트 적립 중...
-          </div>
-        </div>
-
-        <!-- 정답일 때 닫기 버튼 -->
-        <button
-          v-if="showResult && isCorrect && pointsEarned"
-          class="quiz-close-btn-bottom"
-          @click="close"
-        >
-          닫기
-        </button>
-
-        <!-- 오답일 때 닫기 버튼 -->
-        <button
-          v-if="showResult && !isCorrect"
-          class="quiz-close-btn-bottom"
-          @click="close"
-        >
-          닫기
-        </button>
-
-        <!-- 버튼 -->
-        <button
-          v-if="!showResult"
-          class="quiz-submit-btn"
-          :disabled="!answer"
-          @click="checkAnswer"
-        >
-          정답 확인
-        </button>
       </div>
     </div>
-  </div>
+  </teleport>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { getTodayQuiz, submitQuiz } from '@/api/home';
-import { useAuthStore } from '@/stores/auth';
-import { useAvatarStore } from '@/stores/avatar.js';
-import { addQuizPoints } from '@/api/mypage/avatar';
+import { ref, computed, onMounted } from "vue";
+import { getTodayQuiz, submitQuiz } from "@/api/home";
+import { useAuthStore } from "@/stores/auth";
+import { useAvatarStore } from "@/stores/avatar.js";
+import { addQuizPoints } from "@/api/mypage/avatar";
+import { getMyCoinStatus } from "@/api/mypage/avatar/coinApi";
 
-const answer = ref('');
+const answer = ref("");
 const showResult = ref(false);
 const loading = ref(false);
 const error = ref(null);
@@ -138,53 +177,60 @@ const avatarStore = useAvatarStore();
 const pointsEarned = ref(false);
 const pointsLoading = ref(false);
 
-// 포인트 적립 함수 (API 사용)
+// 포인트 적립 함수 (새로운 코인 상태 API 사용) - 정답인 경우에만 포인트 적립
 const addQuizPointsToUser = async () => {
-  if (!isCorrect.value || pointsEarned.value) return;
+  // 정답이 아니거나 이미 포인트를 받은 경우 함수 종료
+  if (!isCorrect.value || pointsEarned.value) {
+    console.log("포인트 적립 조건 불충족:", {
+      isCorrect: isCorrect.value,
+      pointsEarned: pointsEarned.value,
+    });
+    return;
+  }
 
   try {
     pointsLoading.value = true;
+    console.log("정답 확인됨 - 10포인트 적립 시작");
 
-    // 사용자 ID 가져오기
+    // 퀴즈 제출 API 호출 (정답인 경우에만)
     const userId = authStore.user?.id || authStore.user?.userId || 1;
 
-    console.log('퀴즈 포인트 API 호출 시작, userId:', userId);
+    console.log("퀴즈 포인트 API 호출 시작, userId:", userId);
     const response = await addQuizPoints(userId, 10);
-    console.log('퀴즈 포인트 API 응답:', response);
+    console.log("퀴즈 포인트 API 응답:", response);
 
-    // API 응답에서 업데이트된 포인트 정보 추출
-    if (response.status === 200 && response.data) {
-      let updatedData;
+    // 퀴즈 제출 후 새로운 코인 상태 API로 업데이트된 포인트 가져오기
+    const coinResponse = await getMyCoinStatus();
+    console.log("코인 상태 응답:", coinResponse);
 
-      // 응답 구조에 따라 데이터 추출
-      if (response.data.data) {
-        updatedData = response.data.data;
-      } else if (response.data) {
-        updatedData = response.data;
-      }
-
-      if (updatedData) {
+    if (
+      coinResponse.status === 200 &&
+      coinResponse.data &&
+      coinResponse.data.status === 200
+    ) {
+      const coinData = coinResponse.data.data;
+      if (coinData) {
         // 현재 포인트와 누적 포인트 업데이트
-        if (updatedData.currentPoints !== undefined) {
-          avatarStore.setCoin(updatedData.currentPoints);
-          console.log('현재 포인트 업데이트:', updatedData.currentPoints);
+        if (coinData.amount !== undefined) {
+          avatarStore.setCoin(coinData.amount);
+          console.log("현재 포인트 업데이트:", coinData.amount);
         }
-        if (updatedData.cumulativePoints !== undefined) {
-          avatarStore.setCumulativePoints(updatedData.cumulativePoints);
-          console.log('누적 포인트 업데이트:', updatedData.cumulativePoints);
+        if (coinData.cumulativeAmount !== undefined) {
+          avatarStore.setCumulativePoints(coinData.cumulativeAmount);
+          console.log("누적 포인트 업데이트:", coinData.cumulativeAmount);
         }
 
-        console.log('포인트 업데이트 완료:', {
-          current: updatedData.currentPoints,
-          cumulative: updatedData.cumulativePoints,
+        console.log("포인트 업데이트 완료:", {
+          current: coinData.amount,
+          cumulative: coinData.cumulativeAmount,
         });
       }
     }
 
     pointsEarned.value = true;
-    console.log('퀴즈 포인트 적립 완료');
+    console.log("퀴즈 포인트 적립 완료");
   } catch (err) {
-    console.error('퀴즈 포인트 적립 API 에러:', err);
+    console.error("퀴즈 포인트 적립 API 에러:", err);
 
     // API 실패 시에도 로컬에서 포인트 추가 (fallback)
     const currentCoin = avatarStore.coin || 0;
@@ -196,7 +242,7 @@ const addQuizPointsToUser = async () => {
     avatarStore.setCumulativePoints(newCumulative);
 
     pointsEarned.value = true;
-    console.log('API 실패로 인한 로컬 포인트 적립 완료:', {
+    console.log("API 실패로 인한 로컬 포인트 적립 완료:", {
       current: newCoin,
       cumulative: newCumulative,
     });
@@ -205,7 +251,7 @@ const addQuizPointsToUser = async () => {
   }
 };
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(["close"]);
 
 const isCorrect = computed(() => {
   if (!quizData.value || !answer.value) return false;
@@ -220,52 +266,29 @@ const fetchQuiz = async () => {
 
     // 인증 상태 확인
     if (!authStore.isAuthenticated) {
-      console.warn('퀴즈를 보려면 로그인이 필요합니다.');
-      error.value = '퀴즈를 보려면 로그인이 필요합니다.';
+      console.warn("퀴즈를 보려면 로그인이 필요합니다.");
+      error.value = "퀴즈를 보려면 로그인이 필요합니다.";
       loading.value = false;
       return;
     }
 
-    console.log('퀴즈 데이터 가져오기 시작');
-    const response = await getTodayQuiz();
-    console.log('받아온 퀴즈 데이터:', response);
+    console.log("퀴즈 데이터 가져오기 시작");
 
-    // 백엔드 응답 구조에 따라 퀴즈 데이터 추출
-    let quizDataValue;
-
-    // 구조 1: { status: 200, message: "...", data: {...} }
-    if (response.status === 200 && response.data && response.data.data) {
-      quizDataValue = response.data.data;
-    }
-    // 구조 2: { status: 200, data: {...} }
-    else if (response.status === 200 && response.data) {
-      quizDataValue = response.data;
-    }
-    // 구조 3: { data: {...} }
-    else if (response.data) {
-      quizDataValue = response.data;
-    }
-
-    console.log('추출된 퀴즈 데이터:', quizDataValue);
-
-    if (quizDataValue && quizDataValue.id && quizDataValue.question) {
-      quizData.value = quizDataValue;
-      console.log('퀴즈 데이터 설정 완료:', quizData.value);
-    } else {
-      console.warn('유효한 퀴즈 데이터를 찾을 수 없습니다:', response);
-      error.value = '퀴즈 데이터를 가져오는데 실패했습니다.';
-    }
+    // 임시로 하드코딩된 오류 메시지 (API가 구현되지 않음)
+    error.value = "오늘은 응시할 수 있는 퀴즈가 없습니다.";
+    loading.value = false;
+    return;
   } catch (err) {
-    console.error('퀴즈 조회 에러:', err);
+    console.error("퀴즈 조회 에러:", err);
 
-    let errorMessage = '퀴즈를 불러오는데 실패했습니다.';
+    let errorMessage = "퀴즈를 불러오는데 실패했습니다.";
 
     if (err.response?.status === 401) {
-      errorMessage = '로그인이 필요합니다.';
+      errorMessage = "로그인이 필요합니다.";
     } else if (err.response?.status === 404) {
-      errorMessage = '퀴즈를 찾을 수 없습니다.';
+      errorMessage = "퀴즈를 찾을 수 없습니다.";
     } else if (err.response?.status === 500) {
-      errorMessage = '서버 오류가 발생했습니다.';
+      errorMessage = "서버 오류가 발생했습니다.";
     } else if (err.message) {
       errorMessage = `연결 오류: ${err.message}`;
     }
@@ -279,57 +302,59 @@ const fetchQuiz = async () => {
 async function checkAnswer() {
   if (!answer.value || !quizData.value) return;
 
-  console.log('정답 확인 시작:', {
+  console.log("정답 확인 시작:", {
     userAnswer: answer.value,
     correctAnswer: quizData.value.answer,
-    isCorrect: answer.value === quizData.value.answer,
+    isCorrect: isCorrect.value,
   });
 
   try {
-    // 퀴즈 응답 제출
+    // 퀴즈 응답 제출 - API 스펙에 맞게 isCorrect 필드로 전송
     const submitData = {
       quizId: quizData.value.id,
-      userAnswer: answer.value,
+      isCorrect: isCorrect.value, // 정답 여부를 true/false로 전송
     };
 
-    console.log('퀴즈 응답 제출:', submitData);
+    console.log("퀴즈 응답 제출:", submitData);
     await submitQuiz(submitData);
-    console.log('퀴즈 응답 제출 성공');
+    console.log("퀴즈 응답 제출 성공");
 
     // 결과 표시
     showResult.value = true;
 
     // 정답인 경우 포인트 적립 (제출 성공 후)
     if (isCorrect.value) {
-      console.log('정답 확인됨 - 포인트 적립 시작');
+      console.log("정답 확인됨 - 포인트 적립 시작");
       await addQuizPointsToUser();
     } else {
-      console.log('오답 - 포인트 적립하지 않음');
+      console.log("오답 - 포인트 적립하지 않음");
+      pointsEarned.value = true; // 오답인 경우에도 포인트 표시를 위해 true로 설정
     }
   } catch (err) {
-    console.error('퀴즈 제출 에러:', err);
+    console.error("퀴즈 제출 에러:", err);
     // 제출 실패해도 결과는 표시
     showResult.value = true;
 
     // 정답인 경우 포인트 적립 (제출 실패해도 정답이면 포인트는 적립)
     if (isCorrect.value) {
-      console.log('제출 실패했지만 정답이므로 포인트 적립 시작');
+      console.log("제출 실패했지만 정답이므로 포인트 적립 시작");
       await addQuizPointsToUser();
     } else {
-      console.log('제출 실패하고 오답이므로 포인트 적립하지 않음');
+      console.log("제출 실패하고 오답이므로 포인트 적립하지 않음");
+      pointsEarned.value = true; // 오답인 경우에도 포인트 표시를 위해 true로 설정
     }
   }
 }
 
 function close() {
   // 상태 초기화
-  answer.value = '';
+  answer.value = "";
   showResult.value = false;
   quizData.value = null;
   error.value = null;
   pointsEarned.value = false;
   pointsLoading.value = false;
-  emit('close');
+  emit("close");
 }
 
 // 컴포넌트 마운트 시 퀴즈 데이터 가져오기
@@ -499,7 +524,7 @@ onMounted(() => {
 }
 
 .quiz-ox-btn::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -527,6 +552,7 @@ onMounted(() => {
   border: 2px solid #4318d1;
   box-shadow: 0 8px 25px rgba(67, 24, 209, 0.2);
   transform: translateY(-2px);
+  background: rgba(67, 24, 209, 0.05);
 }
 
 .quiz-ox-btn.o .ox-circle {
@@ -781,6 +807,42 @@ onMounted(() => {
   animation: wrongShake 0.6s ease-out;
 }
 
+/* 선택된 버튼이 결과 표시 후에도 유지되도록 */
+.quiz-ox-btn.selected.o {
+  border: 2px solid #4318d1;
+  background: rgba(67, 24, 209, 0.05);
+}
+
+.quiz-ox-btn.selected.x {
+  border: 2px solid #4318d1;
+  background: rgba(67, 24, 209, 0.05);
+}
+
+@keyframes correctPulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes wrongShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
 /* 로딩 상태 스타일 */
 .quiz-loading {
   display: flex;
@@ -857,25 +919,6 @@ onMounted(() => {
   margin-top: 12px;
 }
 
-.quiz-point {
-  width: 100%;
-  background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-  color: #92400e;
-  border: none;
-  border-radius: 8px;
-  padding: 14px 0;
-  font-size: 16px;
-  font-weight: 600;
-  margin-top: 8px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
-}
-
 .quiz-point.loading {
   background: #f3f4f6;
   color: #6b7280;
@@ -895,11 +938,6 @@ onMounted(() => {
   border-top: 2px solid #4318d1;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-}
-
-.quiz-point i {
-  color: #ffe066;
-  font-size: 18px;
 }
 
 .quiz-point.earned i {

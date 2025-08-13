@@ -1,6 +1,5 @@
-// src/stores/auth.js
 import { defineStore } from 'pinia';
-import { loginApi } from '@/api/authApi';
+import { loginApi, logoutApi } from '@/api/authApi';
 import router from '@/router';
 import api from '@/api/instance';
 
@@ -64,14 +63,8 @@ export const useAuthStore = defineStore('auth', {
       this._bootstrapped = true;
 
       try {
-        // 쿠키(RT)만으로 재발급 시도 (withCredentials=true)
-        await api.post('/auth/refresh');
-        // AT 저장은 응답 인터셉터가 처리
-
-        // ---- (선택) 최신 프로필 동기화 ----
-        // 백엔드에 GET /api/user/me 가 있다면 주석 해제해서 사용하세요.
-        // const me = await api.get('/user/me');
-        // this.user = me.data?.data ?? this.user;
+        await api.post('/auth/refresh'); // 바디 없음, 쿠키 자동 전송(withCredentials)
+        // AT 저장은 응답 인터셉터(src/api/instance.js)가 처리
       } catch {
         // RT 만료/불일치면 조용히 실패 → 이후 보호 라우트 접근 시 가드가 로그인으로 이동
       }
@@ -82,7 +75,7 @@ export const useAuthStore = defineStore('auth', {
      */
     async refreshTokens() {
       try {
-        const res = await api.post('/auth/refresh'); // 바디 없음, 쿠키 자동 전송
+        const res = await api.post('/auth/refresh');
         const ok = !!res.headers?.authorization;
         if (!ok) throw new Error('리프레시 응답에 Authorization 헤더 없음');
         return res.headers.authorization.slice(7);
