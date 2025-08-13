@@ -49,10 +49,8 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useAuthStore } from '@/stores/auth';
-import { issueUserStockToken } from '@/api';
 import FinanceGuideFullscreenModal from '@/components/finance/FinanceGuideFullscreenModal.vue';
 
 const router = useRouter();
@@ -65,16 +63,6 @@ const guideImages = ref([
   '/src/assets/guide/step3.png',
   '/src/assets/guide/step4.png',
 ]);
-
-onMounted(async () => {
-  await issueToken();
-});
-
-const issueToken = async () => {
-  const userId = useAuthStore().getId;
-  await issueUserStockToken(userId);
-  console.log('토큰 발급 성공');
-};
 
 function goDeposit() {
   router.push({ name: 'Deposit' });

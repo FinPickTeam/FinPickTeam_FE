@@ -64,8 +64,13 @@
         </div>
       </div>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingRecommend" class="loading-section">
+        <LoadingSpinner message="추천 상품을 불러오는 중..." />
+      </div>
+
       <ProductCardList_deposit
-        v-if="showResults"
+        v-if="showResults && !isLoadingRecommend"
         :products="recommendProducts"
       />
     </div>
@@ -124,8 +129,13 @@
         </div>
       </div>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingAll">
+        <LoadingSpinner message="상품 목록을 불러오는 중..." />
+      </div>
+
       <!-- 전체 상품 리스트 -->
-      <div v-if="filteredAllDeposit && filteredAllDeposit.length > 0">
+      <div v-else-if="filteredAllDeposit && filteredAllDeposit.length > 0">
         <ProductCardList_deposit :products="filteredAllDeposit" />
       </div>
       <div v-else class="no-results">
@@ -141,6 +151,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductInputForm from '@/components/finance/deposit/ProductInputForm_deposit.vue';
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { getDepositList, getDepositRecommendList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
 
@@ -148,6 +159,7 @@ const router = useRouter();
 const activeSubtab = ref('추천');
 const recommendProducts = ref([]);
 const isLoadingRecommend = ref(false);
+const isLoadingAll = ref(false);
 const allProducts = ref([]);
 const showResults = ref(false);
 const isSummaryMode = ref(false);
@@ -202,11 +214,14 @@ onMounted(async () => {
 });
 
 const fetchDepositList = async (params) => {
+  isLoadingAll.value = true;
   try {
     const res = await getDepositList();
     allProducts.value = res.data ?? [];
   } catch (e) {
     console.error(e);
+  } finally {
+    isLoadingAll.value = false;
   }
 };
 
@@ -251,6 +266,7 @@ function showSearchResults(receivedFormData) {
 
 // 예금 추천 리스트 받기
 const fetchDepositRecommendation = async (receivedFormData) => {
+  isLoadingRecommend.value = true;
   try {
     const params = {
       amount: receivedFormData.amount,
@@ -270,6 +286,8 @@ const fetchDepositRecommendation = async (receivedFormData) => {
     recommendProducts.value = res?.data ?? [];
   } catch (e) {
     console.log(e);
+  } finally {
+    isLoadingRecommend.value = false;
   }
 };
 

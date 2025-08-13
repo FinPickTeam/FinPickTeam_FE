@@ -1,54 +1,64 @@
 <template>
   <div class="challenge-common-detail">
-    <!-- 챌린지 실패 모달 -->
+    <!-- 결과 모달 -->
+    <ChallengeSuccessModal
+        v-if="showSuccessModal && challengeResult"
+        :isVisible="showSuccessModal"
+        :challengeResult="challengeResult"
+        @close="handleResultConfirm"
+    />
     <ChallengeFailModal
-      :isVisible="showFailModal"
-      :challengeTitle="challenge?.title || ''"
-      :progressRate="challenge?.myProgress || 0"
-      :goalValue="challenge?.goalValue || 0"
-      @close="showFailModal = false"
-      @retry="handleRetry"
+        v-if="showFailModal"
+        :isVisible="showFailModal"
+        @close="handleResultConfirm"
     />
 
-    <!-- 챌린지 참여 확인 모달 -->
+    <!-- 참여 확인/완료 모달 -->
     <ChallengeJoinConfirmModal
-      :isVisible="showJoinConfirmModal"
-      :challenge="challenge"
-      @close="closeJoinConfirmModal"
-      @confirm="confirmJoin"
+        :isVisible="showJoinModal"
+        :challenge="challenge"
+        :mode="joinModalMode"
+        @close="closeJoinModal"
+        @confirm="confirmJoin"
     />
 
-    <!-- 로딩 상태 -->
+    <!-- 로딩 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
       <p class="loading-text">챌린지 정보를 불러오는 중...</p>
     </div>
 
-    <!-- 챌린지 상세 정보 -->
+    <!-- 본문 -->
     <div v-else-if="challenge" class="content">
-      <!-- 챌린지 기본 정보 -->
+      <!-- 카테고리 뱃지 -->
+      <div
+          class="category-chip"
+          :style="{
+          background: categoryTheme.bg,
+          boxShadow: '0 6px 16px ' + categoryTheme.shadow
+        }"
+      >
+        {{ displayCategory }}
+      </div>
+
       <div class="challenge-info">
         <div class="title-section">
           <h1 class="challenge-title">{{ challenge.title }}</h1>
           <div class="challenge-date">
-            {{ formatDate(challenge.startDate) }} ~
-            {{ formatDate(challenge.endDate) }}
+            {{ formatDate(challenge.startDate) }} ~ {{ formatDate(challenge.endDate) }}
           </div>
         </div>
+
         <p class="challenge-description">{{ challenge.description }}</p>
 
         <div class="challenge-stats">
           <div class="stat-item">
             <span class="stat-label">진행률</span>
-            <span class="stat-value"
-              >{{ Math.round(challenge.myProgress * 100) }}%</span
-            >
+            <span class="stat-value">{{ Math.round((challenge.myProgress || 0) * 100) }}%</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">목표 {{ challenge.goalType }}</span>
-            <span class="stat-value"
-              >{{ challenge.goalValue.toLocaleString() }}원</span
-            >
+            <span class="stat-value">{{ (challenge.goalValue || 0).toLocaleString() }}원</span>
           </div>
           <div class="stat-item">
             <span class="stat-label">남은 기간</span>
@@ -59,38 +69,27 @@
         <div class="progress-section" v-if="challenge.isParticipating">
           <div class="progress-header">
             <span class="progress-label">달성률</span>
-            <span class="progress-percentage"
-              >{{ Math.round(challenge.myProgress * 100) }}%</span
-            >
+            <span class="progress-percentage">{{ Math.round((challenge.myProgress || 0) * 100) }}%</span>
           </div>
           <div class="progress-bar">
-            <div
-              class="progress-fill"
-              :style="{
-                width: Math.round(challenge.myProgress * 100) + '%',
-              }"
-            ></div>
+            <div class="progress-fill" :style="{ width: Math.round((challenge.myProgress || 0) * 100) + '%' }"></div>
           </div>
         </div>
 
-        <!-- 참여자 수 표시 -->
         <div class="participants-section">
           <div class="participants-count">
-            <span class="participants-number">{{
-              challenge.participantsCount.toLocaleString()
-            }}</span>
+            <span class="participants-number">{{ (challenge.participantsCount || 0).toLocaleString() }}</span>
             <span class="participants-label">명 참여중</span>
           </div>
         </div>
       </div>
 
-      <!-- 참여 버튼 -->
-      <div class="join-section" v-if="!challenge.isParticipating">
-        <button class="join-button" @click="handleJoin">챌린지 참여하기</button>
+      <div class="join-section" v-if="!challenge.isParticipating && challenge.status === 'RECRUITING'">
+        <button class="join-button" @click="openJoinModal">챌린지 참여하기</button>
       </div>
     </div>
 
-    <!-- 에러 상태 -->
+    <!-- 에러 -->
     <div v-else class="error-container">
       <p class="error-text">챌린지 정보를 불러올 수 없습니다.</p>
     </div>
@@ -98,116 +97,153 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import challengeCommonDetailData from './challenge_common_detail.json';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute } from 'vue-router';
+import { getChallengeDetail, joinChallenge, getChallengeResult, confirmChallengeResult } from '@/api/challenge/challenge.js';
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
+import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
 import ChallengeJoinConfirmModal from '@/components/challenge/ChallengeJoinConfirmModal.vue';
 
 const route = useRoute();
-const router = useRouter();
 
-// 상태 관리
 const loading = ref(true);
 const challenge = ref(null);
+
+// join modal
+const showJoinModal = ref(false);
+const joinModalMode = ref('confirm');
+
+// result modals
+const showSuccessModal = ref(false);
 const showFailModal = ref(false);
-const showJoinConfirmModal = ref(false);
+const challengeResult = ref(null); // ✅ 실제 결과 보관
 
-// 챌린지 데이터 fetch 함수
-const fetchChallenge = async (challengeId) => {
+const fetchDetail = async () => {
+  loading.value = true;
   try {
-    loading.value = true;
+    const id = route.params.id;
+    const data = await getChallengeDetail(id);
+    challenge.value = data;
 
-    // 라우터 state에서 전달받은 챌린지 데이터 확인
-    if (route.state && route.state.challengeData) {
-      challenge.value = route.state.challengeData;
+    // 완료 + 미확인 → 결과 모달 표시
+    if (data?.status === 'COMPLETED' && data?.isParticipating && !data?.isResultCheck) {
+      const result = await getChallengeResult(id);
+      challengeResult.value = result || null;
+
+      if (result?.resultType?.startsWith('SUCCESS')) showSuccessModal.value = true;
+      else showFailModal.value = true;
     } else {
-      // 실제로는 API 호출
-      // const response = await fetch(`/api/challenges/${challengeId}`);
-      // const data = await response.json();
-
-      // JSON 파일에서 데이터 가져오기 (실제로는 API에서 가져올 데이터)
-      const data = challengeCommonDetailData.data;
-      challenge.value = data;
+      showSuccessModal.value = false;
+      showFailModal.value = false;
+      challengeResult.value = null;
     }
-
-    // 사용자의 참여 여부는 challenge.isParticipating에서 직접 확인
-  } catch (error) {
-    console.error('챌린지 데이터 로드 실패:', error);
+  } catch (e) {
+    console.error(e);
     challenge.value = null;
   } finally {
     loading.value = false;
   }
 };
 
-onMounted(() => {
-  // URL 파라미터에서 챌린지 ID 가져오기
-  const challengeId = route.params.id;
+onMounted(fetchDetail);
 
-  // 챌린지 데이터 fetch
-  fetchChallenge(challengeId);
-});
-
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('ko-KR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+const openJoinModal = () => {
+  joinModalMode.value = 'confirm';
+  showJoinModal.value = true;
 };
 
-// 남은 일수 계산 함수
+const closeJoinModal = () => {
+  showJoinModal.value = false;
+};
+
+const confirmJoin = async () => {
+  try {
+    await joinChallenge(route.params.id);
+    joinModalMode.value = 'success';
+  } catch (e) {
+    alert(e?.response?.data?.message || '참여에 실패했어요.');
+    showJoinModal.value = false;
+  }
+};
+
+const handleResultConfirm = async () => {
+  try {
+    await confirmChallengeResult(route.params.id);
+  } catch (_) {}
+  showSuccessModal.value = false;
+  showFailModal.value = false;
+  challengeResult.value = null;
+  await fetchDetail();
+};
+
+const formatDate = (d) => {
+  if (!d) return '';
+  const date = new Date(d);
+  return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+};
+
 const getRemainingDays = () => {
   if (!challenge.value?.endDate) return 0;
-  const endDate = new Date(challenge.value.endDate);
+  const end = new Date(challenge.value.endDate);
   const today = new Date();
-  const diffTime = endDate - today;
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  const diffDays = Math.ceil((end - today) / (1000 * 60 * 60 * 24));
   return Math.max(0, diffDays);
 };
 
-// checkParticipationStatus 함수 제거 - challenge.isParticipating을 직접 사용
-
-const handleJoin = () => {
-  // 이미 참여 중인지 확인
-  if (challenge.value.isParticipating) {
-    alert('이미 참여 중인 챌린지입니다.');
-    return;
-  }
-
-  // 참여 확인 모달 표시
-  showJoinConfirmModal.value = true;
+/* ---------- 카테고리 뱃지 ---------- */
+const CATEGORY_FALLBACK_BY_ID = {
+  1: '전체 소비 줄이기',
+  2: '식비 줄이기',
+  3: '카페·간식 줄이기',
+  4: '교통비 줄이기',
+  5: '미용·쇼핑 줄이기',
 };
 
-const confirmJoin = () => {
-  // 실제로는 API 호출로 참여 처리
-  challenge.value.isParticipating = true;
+const categoryKey = computed(() => {
+  const name = challenge.value?.categoryName || CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId];
+  if (!name) return 'default';
+  if (name.includes('전체')) return 'total';
+  if (name.includes('식비')) return 'food';
+  if (name.includes('카페') || name.includes('간식')) return 'snack';
+  if (name.includes('교통')) return 'transport';
+  if (name.includes('미용') || name.includes('쇼핑')) return 'beauty';
+  return 'default';
+});
 
-  // 모달 닫기
-  showJoinConfirmModal.value = false;
+const displayCategory = computed(() =>
+    challenge.value?.categoryName || CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId] || '카테고리'
+);
 
-  // 참여 중인 챌린지 상세 페이지로 이동 (공통 챌린지 상세)
-  const challengeId = route.params.id;
-  router.push(`/challenge/common-detail/${challengeId}`);
-};
-
-const closeJoinConfirmModal = () => {
-  showJoinConfirmModal.value = false;
-};
-
-const handleRetry = () => {
-  // 챌린지 재도전 로직
-  console.log('챌린지 재도전');
-  showFailModal.value = false;
-  // 여기에 재도전 로직 추가
-};
+const categoryTheme = computed(() => {
+  const map = {
+    total:     { bg: 'linear-gradient(135deg,#6C5CE7,#8E7CFF)', shadow: 'rgba(108,92,231,.3)' },
+    food:      { bg: 'linear-gradient(135deg,#F0932B,#F5A623)', shadow: 'rgba(240,147,43,.3)' },
+    snack:     { bg: 'linear-gradient(135deg,#FF7675,#FF9AA2)', shadow: 'rgba(255,118,117,.3)' },
+    transport: { bg: 'linear-gradient(135deg,#00B894,#55EFC4)', shadow: 'rgba(0,184,148,.3)' },
+    beauty:    { bg: 'linear-gradient(135deg,#0984E3,#74B9FF)', shadow: 'rgba(9,132,227,.3)' },
+    default:   { bg: 'linear-gradient(135deg,var(--color-main),var(--color-main-dark))', shadow: 'rgba(102,51,204,.28)' },
+  };
+  return map[categoryKey.value] || map.default;
+});
 </script>
+
 
 <style scoped>
 .challenge-common-detail {
   min-height: 100vh;
   background-color: #f8f9fa;
+}
+
+/* 카테고리 뱃지 */
+.category-chip{
+  align-self: flex-start;
+  color: #fff;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: .2px;
+  padding: 8px 12px;
+  border-radius: 9999px;
+  margin-bottom: 12px;
 }
 
 .content {

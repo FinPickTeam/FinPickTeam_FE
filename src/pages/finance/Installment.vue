@@ -68,7 +68,15 @@
         </div>
       </div>
 
-      <ProductCardList v-if="showResults" :products="recommendProducts" />
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingRecommend">
+        <LoadingSpinner message="추천 상품을 불러오는 중..." />
+      </div>
+
+      <ProductCardList
+        v-if="showResults && !isLoadingRecommend"
+        :products="recommendProducts"
+      />
     </div>
 
     <!-- 전체 보기 탭일 때 -->
@@ -127,9 +135,14 @@
         </div>
       </div>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingAll">
+        <LoadingSpinner message="상품 목록을 불러오는 중..." />
+      </div>
+
       <!-- 전체 상품 리스트 -->
       <div
-        v-if="filteredAllInstallment && filteredAllInstallment.length > 0"
+        v-else-if="filteredAllInstallment && filteredAllInstallment.length > 0"
         class="products-list-container"
       >
         <ProductCardList :products="filteredAllInstallment" />
@@ -147,12 +160,15 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductInputForm from '../../components/finance/installment/ProductInputForm_installment.vue';
 import ProductCardList from '../../components/finance/installment/ProductCardList_installment.vue';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { getInstallmentList, getInstallmentRecommendList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
 const recommendProducts = ref([]);
+const isLoadingRecommend = ref(false);
+const isLoadingAll = ref(false);
 const allProducts = ref([]);
 const showResults = ref(false);
 const isSummaryMode = ref(false);
@@ -209,16 +225,20 @@ onMounted(() => {
 
 //적금 상품 목록 가져오기
 const fetchInstallmentList = async (params) => {
+  isLoadingAll.value = true;
   try {
     const res = await getInstallmentList(params);
     allProducts.value = res.data ?? [];
   } catch (e) {
     console.log(e);
+  } finally {
+    isLoadingAll.value = false;
   }
 };
 
 //적금 추천 목록 가져오기
 const fetchInstallmentRecommendation = async (receivedFormData) => {
+  isLoadingRecommend.value = true;
   console.log(receivedFormData.value);
   try {
     const params = {
@@ -240,6 +260,8 @@ const fetchInstallmentRecommendation = async (receivedFormData) => {
     recommendProducts.value = res?.data ?? [];
   } catch (e) {
     console.log(e);
+  } finally {
+    isLoadingRecommend.value = false;
   }
 };
 
