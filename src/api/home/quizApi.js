@@ -57,6 +57,13 @@ export const getQuizHistoryList = async () => {
     console.log("퀴즈 히스토리 내역 조회 API 호출 시작:", url);
     const res = await instance.get(url);
     console.log("퀴즈 히스토리 내역 조회 API 응답 성공:", res);
+    console.log("응답 데이터 구조:", {
+      status: res.data?.status,
+      message: res.data?.message,
+      dataLength: res.data?.data?.length,
+      dataType: typeof res.data?.data,
+      isArray: Array.isArray(res.data?.data),
+    });
     return res.data;
   } catch (error) {
     console.error("퀴즈 히스토리 내역 조회 실패:", error);
@@ -82,6 +89,12 @@ export const getQuizHistoryDetail = async (quizId) => {
     console.log("퀴즈 히스토리 상세 조회 API 호출 시작:", url);
     const res = await instance.get(url);
     console.log("퀴즈 히스토리 상세 조회 API 응답 성공:", res);
+    console.log("응답 데이터 구조:", {
+      status: res.data?.status,
+      message: res.data?.message,
+      dataType: typeof res.data?.data,
+      hasData: !!res.data?.data,
+    });
     return res.data;
   } catch (error) {
     console.error("퀴즈 히스토리 상세 조회 실패:", error);
