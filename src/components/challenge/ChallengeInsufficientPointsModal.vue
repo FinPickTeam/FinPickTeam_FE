@@ -26,7 +26,7 @@
               >{{ requiredPoints?.toLocaleString() }}P</span
             >
           </div>
-          <div class="detail-item insufficient">
+          <div class="detail-item">
             <span class="detail-label">부족한 포인트</span>
             <span class="detail-value insufficient-points"
               >{{ insufficientAmount?.toLocaleString() }}P</span
@@ -196,14 +196,6 @@ const handleCharge = () => {
 
 .detail-item:last-child {
   border-bottom: none;
-}
-
-.detail-item.insufficient {
-  background: #ffebee;
-  border-radius: 8px;
-  padding: 8px 12px;
-  margin-top: 8px;
-  border: 1px solid #ffcdd2;
 }
 
 .detail-label {

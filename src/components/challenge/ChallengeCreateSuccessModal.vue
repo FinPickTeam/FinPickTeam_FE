@@ -21,11 +21,11 @@
 
       <!-- 액션 버튼들 -->
       <div class="modal-actions">
-        <button class="btn btn-secondary" @click="closeModal">
-          확인
+        <button class="btn btn-secondary" @click="$emit('close')">
+          홈으로 가기
         </button>
-        <button class="btn btn-primary" @click="goToChallengeList">
-          챌린지 목록으로
+        <button class="btn btn-primary" @click="$emit('view')">
+          생성한 챌린지 보기
         </button>
       </div>
     </div>
@@ -33,30 +33,25 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-
 const props = defineProps({
   isVisible: {
     type: Boolean,
     default: false,
   },
+  challengeId: {
+    type: [String, Number],
+    default: null,
+  },
+  challengeType: {
+    type: String,
+    default: null,
+  },
 });
 
-const emit = defineEmits(['close']);
+const emit = defineEmits(['close', 'view']);
 
 const handleOverlayClick = () => {
   emit('close');
-};
-
-const closeModal = () => {
-  emit('close');
-};
-
-const goToChallengeList = () => {
-  closeModal();
-  router.push('/challenge');
 };
 </script>
 
@@ -107,7 +102,7 @@ const goToChallengeList = () => {
 .success-circle {
   width: 80px;
   height: 80px;
-  background: linear-gradient(135deg, #4CAF50, #66BB6A);
+  background: linear-gradient(135deg, #4caf50, #66bb6a);
   border-radius: 50%;
   display: flex;
   align-items: center;
