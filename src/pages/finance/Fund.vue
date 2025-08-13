@@ -26,23 +26,50 @@
 
     <!-- 추천 탭일 때 -->
     <div class="scroll-area" v-if="activeSubtab === '추천'">
-      <!-- 투자 성향에 맞는 상품 확인하기 버튼 -->
-      <div class="button-container">
-        <button class="check-btn" @click="fetchFundRecommendedList">
-          투자 성향에 맞는 상품 확인하기
-        </button>
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingPropensity" class="button-container">
+        <LoadingSpinner message="투자성향을 확인하는 중..." />
+      </div>
+
+      <!-- 투자성향이 불완전한 경우 -->
+      <div v-else-if="hasIncompletePropensity">
+        <div class="button-container">
+          <button class="check-btn incomplete" @click="goToInvestmentTest">
+            투자성향 검사 완료하기
+          </button>
+        </div>
+        <div class="info-text">
+          <span class="emoji">📝</span>
+          <br />
+          투자성향 검사를 완료하면<br />맞춤형 펀드를 추천받을 수 있어요!
+        </div>
+      </div>
+
+      <!-- 투자성향이 완전한 경우 -->
+      <div v-else>
+        <div class="button-container">
+          <button class="check-btn" @click="fetchFundRecommendedList">
+            투자 성향에 맞는 상품 확인하기
+          </button>
+        </div>
+        <div class="info-text">
+          <span class="emoji">💡</span>
+          <br />
+          투자 성향에 맞는 펀드를 추천받아보세요!
+        </div>
+      </div>
+
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingRecommend">
+        <LoadingSpinner message="추천 상품을 불러오는 중..." />
       </div>
 
       <!-- 펀드 상품 리스트 -->
-      <div v-if="showProducts" class="products-container">
-        <ProductCardList_fund :funds="fundRecommendData.data" />
-      </div>
-
-      <!-- 추천 상품이 없을 때 안내 메시지 -->
-      <div v-else-if="!showProducts" class="info-text">
-        <span class="emoji">💡</span>
-        <br />
-        투자 성향에 맞는 펀드를 추천받아보세요!
+      <div
+        v-if="showProducts && !isLoadingRecommend && fundRecommendData.data"
+        class="products-container"
+      >
+        <ProductCardList_fund :funds="fundRecommendData.data || []" />
       </div>
     </div>
 
@@ -102,9 +129,14 @@
         </div>
       </div>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingAll">
+        <LoadingSpinner message="상품 목록을 불러오는 중..." />
+      </div>
+
       <!-- 전체 상품 리스트 -->
       <div
-        v-if="filteredAllFunds && filteredAllFunds.length > 0"
+        v-else-if="filteredAllFunds && filteredAllFunds.length > 0"
         class="products-list-container"
       >
         <ProductCardList_fund :funds="filteredAllFunds" />
@@ -121,14 +153,22 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductCardList_fund from '@/components/finance/fund/ProductCardList_fund.vue';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { getFundList, getFundRecommendedList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const showProducts = ref(false);
+const isLoadingRecommend = ref(false);
+const isLoadingAll = ref(false);
 const fundAllData = ref([]);
 const fundRecommendData = ref([]);
 const fav = useFavoriteStore();
+
+// 투자성향 관련 상태
+const investmentPropensity = ref(null);
+const hasIncompletePropensity = ref(false);
+const isLoadingPropensity = ref(false);
 
 // 확정된(실제로 목록을 거르는) 값
 const selectedFundTypes = ref([]);
@@ -140,15 +180,19 @@ const draftRisks = ref([]);
 
 onMounted(() => {
   fetchFundList();
+  fetchInvestmentPropensity();
   fav.syncIdSet('FUND');
 });
 
 const fetchFundList = async () => {
+  isLoadingAll.value = true;
   try {
     const res = await getFundList();
     fundAllData.value = res.data ?? [];
   } catch (error) {
     console.log('펀드 전체 목록 조회 실패', error);
+  } finally {
+    isLoadingAll.value = false;
   }
 };
 
@@ -160,6 +204,11 @@ const activeSubtab = ref('추천');
 function changeSubtab(tabName) {
   activeSubtab.value = tabName;
   showProducts.value = false; // 추천 탭 누르면 초기화
+
+  // 추천 탭으로 돌아올 때 투자성향 재확인
+  if (tabName === '추천') {
+    fetchInvestmentPropensity();
+  }
 }
 
 // 태그 토글 함수들
@@ -231,7 +280,53 @@ function closeFilter() {
   showFilter.value = false;
 }
 
+// 투자성향 조회 및 null 값 체크 (더미 데이터 사용)
+const fetchInvestmentPropensity = async () => {
+  isLoadingPropensity.value = true;
+
+  // 더미 데이터로 시뮬레이션
+  setTimeout(() => {
+    // 테스트용 더미 데이터 (null 값이 있는 경우)
+    const dummyData = {
+      id: 20,
+      totalScore: 40,
+      propensityType: '안전추구형',
+      question1: '금융투자상품에 투자해 본 경험이 없음',
+      question2: '생활비',
+      question3: '손실 위험이 있더라도 투자 수익이 더 중요',
+      question4: '1년 이상 ~ 3년 미만',
+      question5: '5만 원 미만',
+      question6: '2천만원 미만',
+      question7: '1년 미만',
+      question8:
+        '주식, 주식형펀드, 원금이 보장되지 않는 ELS, 신용도가 BBB- 이하인 채권 등',
+      question9:
+        '초과 손실까지 감수하며 적극적인 투자를 통하여 시중수익률(예: 주가지수)을 초과하는 높은 수익 추구',
+      question10: null, // null 값이 있어서 불완전한 상태
+    };
+
+    investmentPropensity.value = dummyData;
+
+    // null 값 체크
+    const hasNullValue = Object.values(dummyData).some(
+      (value) => value === null || value === undefined || value === ''
+    );
+
+    hasIncompletePropensity.value = hasNullValue;
+    console.log('투자성향 데이터:', dummyData);
+    console.log('null 값 존재 여부:', hasNullValue);
+
+    isLoadingPropensity.value = false;
+  }, 1000); // 1초 후 결과 표시
+};
+
+// 투자성향 검사 페이지로 이동
+const goToInvestmentTest = () => {
+  router.push('/mypage/financetest/profile-step-6?from=fund');
+};
+
 const fetchFundRecommendedList = async () => {
+  isLoadingRecommend.value = true;
   try {
     console.log('투자 성향에 맞는 상품 확인하기 클릭됨');
     const res = await getFundRecommendedList();
@@ -239,6 +334,8 @@ const fetchFundRecommendedList = async () => {
     showProducts.value = true;
   } catch (error) {
     console.log(error);
+  } finally {
+    isLoadingRecommend.value = false;
   }
 };
 </script>
@@ -329,6 +426,14 @@ const fetchFundRecommendedList = async () => {
 }
 
 .check-btn:hover {
+  background: var(--color-main-dark);
+}
+
+.check-btn.incomplete {
+  background: var(--color-main);
+}
+
+.check-btn.incomplete:hover {
   background: var(--color-main-dark);
 }
 

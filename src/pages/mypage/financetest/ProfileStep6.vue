@@ -34,10 +34,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
+const route = useRoute();
 const options = [
   '2천만원 미만',
   '2천만원 이상 ~ 5천만원 미만',
@@ -47,12 +48,13 @@ const options = [
 ];
 const selected = ref(null);
 
-// 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
-const totalSteps = ref(10);
+// 동적 progress-bar 설정
+const totalSteps = ref(10); // 투자성향 검사는 항상 10단계
 
 const goNext = () => {
   if (selected.value !== null) {
-    router.push('/mypage/financetest/profile-step-7');
+    const from = route.query.from || 'mypage';
+    router.push(`/mypage/financetest/profile-step-7?from=${from}`);
   }
 };
 </script>

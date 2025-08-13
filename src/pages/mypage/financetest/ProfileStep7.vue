@@ -13,12 +13,8 @@
     <!-- 질문 -->
     <div class="question-section">
       <div class="question-title">
-        [문항 7] 파생상품, 원금 비보장형 파생결합 증권 또는 파생상품
-        펀드투자경험
+        [문항 7] 원금 비보장형 파생결합 증권 또는 파생상품 펀드투자경험
       </div>
-      <!-- <div class="question-desc">
-        파생상품, 원금 비보장형 파생결합 증권 또는 파생상품 펀드투자경험
-      </div> -->
 
       <div class="options">
         <div
@@ -40,10 +36,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
+const route = useRoute();
 const options = ['경험 없음', '1년 미만', '1년 이상 ~ 3년 미만', '3년 이상'];
 const selected = ref(null);
 
@@ -52,7 +49,8 @@ const totalSteps = ref(10);
 
 const goNext = () => {
   if (selected.value !== null) {
-    router.push('/mypage/financetest/profile-step-8');
+    const from = route.query.from || 'mypage';
+    router.push(`/mypage/financetest/profile-step-8?from=${from}`);
   }
 };
 </script>
