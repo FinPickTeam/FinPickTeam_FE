@@ -15,29 +15,32 @@
       <div class="question-title">[문항 2] 투자 목적</div>
       <div class="options">
         <div
-          v-for="(option, idx) in options"
-          :key="idx"
-          :class="['option', { selected: selected === idx }]"
-          @click="selected = idx"
+            v-for="(option, idx) in options"
+            :key="idx"
+            :class="['option', { selected: profileStore.answers.question2 === option }]"
+            @click="profileStore.answers.question2 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
-    <!-- 다음 버튼 -->
-    <button class="next-btn" :disabled="selected === null" @click="goNext">
+    <button class="next-btn" :disabled="profileStore.answers.question2 === null" @click="goNext">
       다음
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+// Pinia Store를 가져옵니다.
+import { useProfileStore } from '@/stores/profile.js';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
 const route = useRoute();
+const profileStore = useProfileStore();
+
 const options = [
   '자산증식',
   '주택마련',
@@ -46,24 +49,26 @@ const options = [
   '채무상환',
   '결혼자금',
 ];
-const selected = ref(null);
 
-// 동적 progress-bar 설정 (computed로 변경)
+// 로컬 상태 'selected'는 이제 사용하지 않습니다.
+
 const totalSteps = computed(() => {
   const from = route.query.from;
   if (from === 'mypage' || from === 'fund') {
-    return 10; // 투자성향 재검사는 10단계
+    return 10;
   } else {
-    return 5; // 회원가입은 5단계
+    return 5;
   }
 });
 
 const goNext = () => {
-  if (selected.value !== null) {
+  // 로컬 상태 대신 Pinia에 저장된 2번 문항 답변을 확인합니다.
+  if (profileStore.answers.question2 !== null) {
     const from = route.query.from || 'signup';
     if (from === 'mypage') {
       router.push(`/mypage/financetest/profile-step-3?from=${from}`);
     } else if (from === 'fund') {
+      // 펀드 시나리오의 다음 경로는 6단계가 맞는지 확인이 필요합니다.
       router.push(`/mypage/financetest/profile-step-6?from=${from}`);
     } else {
       router.push('/profile-step-3');

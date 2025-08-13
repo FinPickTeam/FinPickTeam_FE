@@ -15,53 +15,62 @@
       <div class="question-title">[문항 1] 금융 지식 수준 / 이해도</div>
       <div class="options">
         <div
-          v-for="(option, idx) in options"
-          :key="idx"
-          :class="['option', { selected: selected === idx }]"
-          @click="selected = idx"
+            v-for="(option, idx) in options"
+            :key="idx"
+            :class="['option', { selected: profileStore.answers.question1 === option }]"
+            @click="profileStore.answers.question1 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
     <!-- 다음 버튼 -->
-    <button class="next-btn" :disabled="selected === null" @click="goNext">
+    <button class="next-btn" :disabled="profileStore.answers.question1 === null" @click="goNext">
       다음
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue'; // ref는 이제 사용하지 않습니다.
 import { useRouter, useRoute } from 'vue-router';
+// Pinia Store를 가져옵니다.
+import { useProfileStore } from '@/stores/profile.js';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
 const route = useRoute();
+// Pinia Store 인스턴스를 생성합니다.
+const profileStore = useProfileStore();
+
 const options = [
   '금융투자상품에 투자해 본 경험이 없음',
   '널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 일정 부분 이해하고 있음',
   '널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 깊이 있게 이해하고 있음',
   '파생상품을 포함한 대부분의 금융투자상품의 구조 및 위험을 이해하고 있음',
 ];
-const selected = ref(null);
 
-// 동적 progress-bar 설정 (computed로 변경)
+// 로컬 상태 'selected'는 이제 사용하지 않습니다.
+
 const totalSteps = computed(() => {
   const from = route.query.from;
   if (from === 'mypage' || from === 'fund') {
-    return 10; // 투자성향 재검사는 10단계
+    return 10;
   } else {
-    return 5; // 회원가입은 5단계
+    return 5;
   }
 });
 
+// goNext 함수는 요청하신 내비게이션 로직을 그대로 유지합니다.
 const goNext = () => {
-  if (selected.value !== null) {
+  // ⭐로컬 상태 대신 Pinia에 저장된 1번 문항 답변을 확인합니다.
+  if (profileStore.answers.question1 !== null) {
     const from = route.query.from || 'signup';
     if (from === 'mypage') {
       router.push(`/mypage/financetest/profile-step-2?from=${from}`);
     } else if (from === 'fund') {
+      // 펀드 시나리오의 다음 경로는 6단계가 맞는지 확인이 필요합니다.
+      //  (보통은 순서대로 2단계로 갑니다.)
       router.push(`/mypage/financetest/profile-step-6?from=${from}`);
     } else {
       router.push('/profile-step-2');
