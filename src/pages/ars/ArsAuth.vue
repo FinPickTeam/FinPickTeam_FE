@@ -1,9 +1,12 @@
 <template>
   <div class="wrap">
-    <div class="login-logo">
-      <h1 class="logo">FinPick</h1>
-      <p>금융 생활의 새로운 시작</p>
+    <!-- 상단 헤더 -->
+    <div class="ars-auth-header">
+      <button class="ars-auth-back" @click="goBack">
+        <font-awesome-icon :icon="['fas', 'angle-left']" />
+      </button>
     </div>
+
     <header>
       <div class="ars_message">ARS 인증 진행 중</div>
     </header>
@@ -140,6 +143,11 @@ function handleComposition(e) {
 import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { useUserStore } from "../../stores/user.js";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+
+library.add(faAngleLeft);
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -173,6 +181,10 @@ function validateAndSubmit() {
     // ArsVerification.vue로 라우팅
     router.push("/ars/verification");
   }
+}
+
+function goBack() {
+  router.back();
 }
 
 function filterNumbers(event) {
@@ -232,12 +244,66 @@ body {
 .wrap {
   width: 100%;
   min-height: 100vh;
-  background: #fff;
+  background: #f3f4f6;
   margin: 0;
   padding: 0;
   text-align: center;
   display: flex;
   flex-direction: column;
+  padding-top: 56px;
+}
+
+/* 상단 헤더 */
+.ars-auth-header {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  padding: 0 16px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
+  z-index: 100;
+}
+
+.ars-auth-back {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #222;
+  cursor: pointer;
+  padding: 4px 8px 4px 0;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.ars-auth-back:hover {
+  background: #f3f3f3;
+}
+
+.ars-auth-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.center-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
 .login-logo {

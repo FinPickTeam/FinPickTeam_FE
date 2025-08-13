@@ -1,12 +1,7 @@
 <template>
   <div class="profile-step-container">
     <!-- 상단 네비게이션 -->
-    <div class="nav-bar">
-      <span class="back-btn" @click="goBack">
-        <i class="fa-solid fa-angle-left"></i>
-      </span>
-      <span class="title">투자 성향 분석</span>
-    </div>
+    <ProfileStepHeader />
     <!-- 진행 바 -->
     <div class="progress-bar">
       <div
@@ -17,10 +12,8 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 8</div>
-      <div class="question-desc">
-        투자경험이 있는 금융투자상품과 투자경험 기간
-      </div>
+      <div class="question-title">[문항 8] 투자 형태 / 금융 자산</div>
+      <!-- <div class="question-desc">투자 형태 / 금융 자산</div> -->
 
       <div class="options">
         <div
@@ -41,28 +34,28 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
+const route = useRoute();
 const options = [
-  "국채, 지방채, 보증채, MMF 등 [초저위험]",
-  "금융채, 신용도가 높은 회사채, 채권형펀드, 원금지급형 ELS 등 [저위험]",
-  "신용도 중간 등급의 회사채, 원금의 일부만 보장되는 ELS, 혼합형 펀드 등 [중위험]",
-  "신용도가 낮은 회사채, 주식, 원금이 보장되지 않는 ELS, 시장수익률 수준의 수익을 추구하는 주식형펀드 등 [고위험]",
-  "ELW, 선물옵션, 시장수익률 이상의 수익을 추구하는 주식형펀드, 파생상품펀드, 주식 신용거래등 [초고위험]",
+  '경험없음',
+  '예금, CMA, MMF, RP, 국공채 등',
+  '채권형펀드, 원금보장형 ELS, 신용도가 A-이상인 채권 등',
+  '주식, 주식형펀드, 원금이 보장되지 않는 ELS, 신용도가 BBB- 이하인 채권 등',
+  '선물·옵션, 신용거래, ELW, 파생상품펀드 등',
 ];
 const selected = ref(null);
 
-// 동적 progress-bar 설정 (투자성향 재검사는 항상 9단계)
-const totalSteps = ref(9);
+// 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
+const totalSteps = ref(10);
 
-const goBack = () => {
-  router.back();
-};
 const goNext = () => {
   if (selected.value !== null) {
-    router.push("/mypage/financetest/profile-step-9");
+    const from = route.query.from || 'mypage';
+    router.push(`/mypage/financetest/profile-step-9?from=${from}`);
   }
 };
 </script>
@@ -72,31 +65,9 @@ const goNext = () => {
   min-height: 100vh;
   background: #fff;
   padding: 0 20px 32px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-.nav-bar {
-  display: flex;
-  align-items: center;
-  height: 56px;
-  position: relative;
-  margin-bottom: 8px;
-}
-.back-btn {
-  font-size: 24px;
-  cursor: pointer;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #222;
-}
-.title {
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  font-weight: 600;
-  color: #222;
-}
+
 .progress-bar {
   display: flex;
   gap: 8px;
@@ -120,7 +91,7 @@ const goNext = () => {
 .question-title {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   color: #222;
 }
 .question-desc {
@@ -142,8 +113,8 @@ const goNext = () => {
 .option {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 16px 0;
-  text-align: center;
+  padding: 16px 20px;
+  text-align: left;
   font-size: 16px;
   color: #222;
   background: #fff;
@@ -170,7 +141,7 @@ const goNext = () => {
   transition: background 0.2s;
 }
 .next-btn:disabled {
-  background-color: #8e74e3;
+  background-color: #9ca3af;
   cursor: not-allowed;
 }
 .next-btn:hover {

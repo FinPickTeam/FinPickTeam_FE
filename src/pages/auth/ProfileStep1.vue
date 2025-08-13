@@ -1,12 +1,7 @@
 <template>
   <div class="profile-step-container">
     <!-- 상단 네비게이션 -->
-    <div class="nav-bar">
-      <span class="back-btn" @click="goBack">
-        <i class="fa-solid fa-angle-left"></i>
-      </span>
-      <span class="title">투자 성향 분석</span>
-    </div>
+    <ProfileStepHeader />
     <!-- 진행 바 -->
     <div class="progress-bar">
       <div
@@ -17,8 +12,7 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">문항 1</div>
-      <div class="question-desc">금융 지식 수준 / 이해도</div>
+      <div class="question-title">[문항 1] 금융 지식 수준 / 이해도</div>
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -38,36 +32,40 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref, computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
 const route = useRoute();
 const options = [
-  "금융투자상품에 투자해 본 경험이 없음",
-  "널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 일정 부분 이해하고 있음",
-  "널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 깊이 있게 이해하고 있음",
-  "파생상품을 포함한 대부분의 금융투자상품의 구조 및 위험을 이해하고 있음",
+  '금융투자상품에 투자해 본 경험이 없음',
+  '널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 일정 부분 이해하고 있음',
+  '널리 알려진 금융투자상품(주식, 채권 및 펀드 등)의 구조 및 위험을 깊이 있게 이해하고 있음',
+  '파생상품을 포함한 대부분의 금융투자상품의 구조 및 위험을 이해하고 있음',
 ];
 const selected = ref(null);
 
-// 동적 progress-bar 설정
-const totalSteps = ref(4); // 기본값
+// 동적 progress-bar 설정 (computed로 변경)
+const totalSteps = computed(() => {
+  const from = route.query.from;
+  if (from === 'mypage' || from === 'fund') {
+    return 10; // 투자성향 재검사는 10단계
+  } else {
+    return 5; // 회원가입은 5단계
+  }
+});
 
-// 라우터 쿼리에서 from 파라미터 확인하여 단계 수 결정
-if (route.query.from === "mypage") {
-  totalSteps.value = 9; // 투자성향 재검사는 9단계
-} else {
-  totalSteps.value = 4; // 회원가입은 4단계
-}
-
-const goBack = () => {
-  router.back();
-};
 const goNext = () => {
   if (selected.value !== null) {
-    const from = route.query.from || "mypage";
-    router.push(`/profile-step-2?from=${from}`);
+    const from = route.query.from || 'signup';
+    if (from === 'mypage') {
+      router.push(`/mypage/financetest/profile-step-2?from=${from}`);
+    } else if (from === 'fund') {
+      router.push(`/mypage/financetest/profile-step-6?from=${from}`);
+    } else {
+      router.push('/profile-step-2');
+    }
   }
 };
 </script>
@@ -77,31 +75,9 @@ const goNext = () => {
   min-height: 100vh;
   background: #fff;
   padding: 0 20px 32px 20px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
-.nav-bar {
-  display: flex;
-  align-items: center;
-  height: 56px;
-  position: relative;
-  margin-bottom: 8px;
-}
-.back-btn {
-  font-size: 24px;
-  cursor: pointer;
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #222;
-}
-.title {
-  width: 100%;
-  text-align: center;
-  font-size: 20px;
-  font-weight: 600;
-  color: #222;
-}
+
 .progress-bar {
   display: flex;
   gap: 8px;
@@ -125,7 +101,7 @@ const goNext = () => {
 .question-title {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 8px;
+  margin-bottom: 14px;
   color: #222;
 }
 .question-desc {
@@ -147,8 +123,8 @@ const goNext = () => {
 .option {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  padding: 16px 0;
-  text-align: center;
+  padding: 16px 20px;
+  text-align: left;
   font-size: 16px;
   color: #222;
   background: #fff;
@@ -175,7 +151,7 @@ const goNext = () => {
   transition: background 0.2s;
 }
 .next-btn:disabled {
-  background-color: #8e74e3;
+  background-color: #9ca3af;
   cursor: not-allowed;
 }
 .next-btn:hover {

@@ -142,11 +142,12 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
 import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
 import { useFinancialTerms } from '@/components/finance/useFinancialTerms.js';
+import { getDepositDetail } from '@/api/index.js';
 
 const route = useRoute();
 const router = useRouter();
@@ -161,59 +162,6 @@ const { financialTerms, loadFinancialTerms } = useFinancialTerms();
 
 // 하이라이팅 토글 상태
 const isHighlightEnabled = ref(false);
-
-// deposit_all.json에서 해당 상품 데이터 찾기
-const loadProductData = async () => {
-  try {
-    const response = await fetch(
-      '/src/components/finance/deposit/deposit_all.json'
-    );
-    const allProducts = await response.json();
-
-    // URL 파라미터의 상품명과 일치하는 상품 찾기
-    const requestedProductName = route.params.id;
-    const foundProduct = allProducts.find(
-      (product) => product.depositProductName === requestedProductName
-    );
-
-    if (foundProduct) {
-      // 상세 정보를 위해 deposit_detail.json도 로드
-      try {
-        const detailResponse = await fetch(
-          '/src/components/finance/deposit/deposit_detail.json'
-        );
-        const detailData = await detailResponse.json();
-
-        // 상세 정보의 상품명과 요청된 상품명이 일치하는지 확인
-        if (detailData.depositProductName === requestedProductName) {
-          // 상세 정보와 기본 정보를 합침
-          product.value = {
-            ...foundProduct,
-            ...detailData,
-          };
-          isLoading.value = false;
-        } else {
-          // 상세 정보가 없거나 상품명이 일치하지 않으면 404 페이지로 리다이렉트
-          router.push('/404');
-          return;
-        }
-      } catch (detailError) {
-        // 상세 정보 로드 실패 시에도 404 페이지로 리다이렉트
-        router.push('/404');
-        return;
-      }
-    } else {
-      // 상품을 찾지 못했으면 404 페이지로 리다이렉트
-      router.push('/404');
-      return;
-    }
-  } catch (error) {
-    console.error('상품 데이터 로드 실패:', error);
-    // 에러 발생 시에도 404 페이지로 리다이렉트
-    router.push('/404');
-    return;
-  }
-};
 
 // 투자 조건
 const investmentAmount = ref(100000000); // 1억원
@@ -282,12 +230,12 @@ const bankLogoMap = {
   케이뱅크: '케이뱅크.png',
   토스뱅크: '토스뱅크.png',
   iM뱅크: 'iM뱅크.png',
-  광주은행: '광주은행, 전북은행.png',
-  전북은행: '광주은행, 전북은행.png',
-  신한은행: '신한은행, 제주은행.png',
-  제주은행: '신한은행, 제주은행.png',
-  경남은행: '경남은행, 부산은행.png',
-  부산은행: '경남은행, 부산은행.png',
+  광주은행: '광주은행.png',
+  전북은행: '전북은행.png',
+  신한은행: '신한은행.png',
+  제주은행: '제주은행.png',
+  경남은행: '경남은행.png',
+  부산은행: '부산은행.png',
 };
 
 const getLogoUrl = (bankName) => {
@@ -302,10 +250,23 @@ const getLogoUrl = (bankName) => {
 };
 
 onMounted(async () => {
+  console.log(route.params);
   console.log('상품 ID:', route.params.id);
-  await loadProductData();
   await loadFinancialTerms();
+  fetchDepositDetail();
+  isLoading.value = false;
 });
+
+const fetchDepositDetail = async () => {
+  try {
+    const id = route.params.id;
+    console.log(id);
+    const res = await getDepositDetail(id);
+    product.value = res.data ?? null;
+  } catch (e) {
+    console.error(e);
+  }
+};
 </script>
 
 <style scoped>
@@ -316,6 +277,12 @@ onMounted(async () => {
   font-family: var(--font-main);
   background: var(--color-bg-light);
   min-height: 100vh;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-top: 20px;
+  padding-bottom: 150px;
+  box-sizing: border-box;
 }
 
 .title-section {

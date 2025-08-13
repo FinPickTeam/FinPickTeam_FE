@@ -3,25 +3,20 @@
     :modules="[Pagination, Autoplay]"
     :slides-per-view="1"
     :space-between="20"
-    :pagination="{
-      clickable: true,
-    }"
-    :loop="true"
-    :autoplay="{
-      delay: 3000,
-      disableOnInteraction: false,
-    }"
+    :pagination="{ clickable: true }"
+    :loop="false"
+    :autoplay="{ delay: 3000, disableOnInteraction: false }"
     class="stats-swiper"
   >
-    <SwiperSlide v-for="(item, index) in statsData" :key="index">
+    <SwiperSlide v-for="(item, index) in slides" :key="index">
       <div class="stats-container">
         <!-- 누적 포인트 슬라이드 -->
-        <div v-if="item.points" class="points-container">
-          <div class="points-number">{{ item.points.toLocaleString() }}</div>
-          <div class="points-label">포인트</div>
+        <div v-if="item.kind === 'points'" class="points-container">
+          <div class="points-number">{{ formatNumber(item.value) }}</div>
+          <div class="points-label">월별 누적 포인트</div>
         </div>
 
-        <!-- 기존 통계 슬라이드 -->
+        <!-- 요약 통계 슬라이드 -->
         <div v-else class="stats-content">
           <div class="stat-item">
             <div class="stat-number">{{ item.total }}</div>
@@ -44,16 +39,49 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import { Pagination, Autoplay } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
-// 더미 통계 데이터 (슬라이드 여러 개로 만들고 싶을 경우)
-const statsData = [
-  { total: 10, success: 8, rate: 80 },
-  { points: 1250 }, // 누적 포인트 슬라이드
-];
+/**
+ * props
+ * summary: { totalChallenges, successCount, achievementRate }
+ * points: number | null (월별 누적 포인트)
+ */
+const props = defineProps({
+  summary: {
+    type: Object,
+    default: () => ({
+      totalChallenges: 0,
+      successCount: 0,
+      achievementRate: 0,
+    }),
+  },
+  points: {
+    type: [Number, null],
+    default: null,
+  },
+});
+
+const slides = computed(() => {
+  const arr = [];
+  // 1) 요약 슬라이드
+  arr.push({
+    kind: 'summary',
+    total: props.summary.totalChallenges ?? 0,
+    success: props.summary.successCount ?? 0,
+    rate: Math.round(props.summary.achievementRate ?? 0),
+  });
+  // 2) 포인트 슬라이드 (API가 값 줄 때만 표시)
+  if (props.points != null) {
+    arr.push({ kind: 'points', value: Number(props.points) || 0 });
+  }
+  return arr;
+});
+
+const formatNumber = (n) => Number(n || 0).toLocaleString();
 </script>
 
 <style scoped>
@@ -102,7 +130,6 @@ const statsData = [
   background: #e0e0e0;
 }
 
-/* 누적 포인트 스타일 */
 .points-container {
   display: flex;
   flex-direction: row;
@@ -131,7 +158,6 @@ const statsData = [
   align-items: center;
 }
 
-/* Swiper pagination 커스터마이징 */
 :deep(.swiper-pagination) {
   bottom: 0;
   position: relative;

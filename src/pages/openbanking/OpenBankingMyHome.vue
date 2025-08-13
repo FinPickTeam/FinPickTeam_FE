@@ -431,7 +431,7 @@ const goToDictionary = () => {
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
-  background: #f7f8fa;
+  background: #f3f4f6;
   min-height: 844px;
   font-family: "Noto Sans KR", sans-serif;
   position: relative;
@@ -451,7 +451,7 @@ const goToDictionary = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  background: #f3f4f6;
   position: fixed;
   top: 0;
   left: 50%;
@@ -460,8 +460,6 @@ const goToDictionary = () => {
   z-index: 100;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
-  margin-bottom: 0;
 }
 .obmyhome-back {
   background: none;
@@ -497,7 +495,7 @@ const goToDictionary = () => {
 .obmyhome-asset-card {
   background: #fff;
   border-radius: 18px;
-  margin: 12px 16px 16px 16px;
+  margin: 1px 16px 16px 16px;
   padding: 20px 20px 16px 20px;
   display: flex;
   flex-direction: column;
@@ -522,7 +520,7 @@ const goToDictionary = () => {
 .obmyhome-refresh-btn {
   background: none;
   border: none;
-  font-size: 1rem;
+  font-size: 0.85rem;
   color: #bdbdbd;
   cursor: default;
   padding: 4px;
@@ -569,7 +567,7 @@ const goToDictionary = () => {
   background: #fff;
   border-radius: 18px;
   margin: 0 16px 12px 16px;
-  padding: 16px 20px 16px 20px;
+  padding: 6px 20px 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;

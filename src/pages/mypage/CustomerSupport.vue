@@ -155,6 +155,12 @@ const faqList = ref([
     isOpen: false,
   },
   {
+    question: "기프티콘을 구매했는데 오류가 났어요.",
+    answer:
+      "기프티콘 구매 중 오류가 발생한 경우, 구매 내역을 확인해주세요. 결제는 되었지만 기프티콘이 발송되지 않았다면 고객센터로 연락해주시면 빠르게 해결해드리겠습니다.",
+    isOpen: false,
+  },
+  {
     question: "회원탈퇴는 어떻게 하나요?",
     answer:
       "마이페이지 하단의 '회원탈퇴' 버튼을 클릭하시면 탈퇴 절차를 진행할 수 있습니다.",
@@ -188,10 +194,13 @@ function openKakaoChat() {
 .customer-support-container {
   max-width: 390px;
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100vh;
   background-color: #fff;
-  padding: 120px 20px 80px 20px;
+  padding: 76px 20px 80px 20px;
   box-sizing: border-box;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 
 .customer-support-container::-webkit-scrollbar {
@@ -200,15 +209,20 @@ function openKakaoChat() {
 
 /* 헤더 스타일 */
 .dictionary-header-bar {
-  margin-top: 32px;
-  position: relative;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   width: 100%;
-  height: 48px;
-  padding: 0;
-  margin-bottom: 30px;
+  max-width: 390px;
+  height: 56px;
+  padding: 0 16px;
+  margin-bottom: 0;
   z-index: 1100;
+  background: #fff;
+  border-bottom: 1px solid #e5e6ea;
 }
 
 .dictionary-header-title {

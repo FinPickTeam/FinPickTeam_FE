@@ -23,6 +23,7 @@ import HeaderBar from "@/components/Headerbar.vue";
 import Navbar from "@/components/Navbar.vue";
 import { useRoute } from "vue-router";
 import { computed } from "vue";
+import WithdrawSuccess from "@/pages/mypage/WithdrawSuccess.vue";
 
 const route = useRoute();
 // HeaderBar를 숨길 라우트 이름 목록
@@ -34,6 +35,7 @@ const hideHeaderNames = [
   "profile",
   "my-history",
   "withdraw",
+  "WithdrawSuccess",
   "avatar-shop",
   "ChallengeHome",
   "OpenBankingMyHome",
@@ -45,6 +47,12 @@ const hideHeaderNames = [
   "DailyReportSelect",
   "DailyReportDetail",
   "CardList",
+  "AccountList",
+  "AccountDetail",
+  "CardDetail",
+  "ObAgreement",
+  "OpenBankingAgreement",
+  "ObArsAgreement",
 ];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);

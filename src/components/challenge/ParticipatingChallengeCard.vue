@@ -66,6 +66,10 @@ const formatDate = (dateString) => {
 
 // 카테고리 이름 반환 함수
 const getCategoryName = (categoryId) => {
+  // 서버가 categoryName을 내려주면 그걸 우선 사용
+  if (props.challenge?.categoryName) return props.challenge.categoryName;
+
+  // (구) local dummy 대비 호환
   const categories = {
     1: '전체 소비',
     2: '식비',

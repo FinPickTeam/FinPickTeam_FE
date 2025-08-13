@@ -10,7 +10,7 @@
           <button class="diaryhome-icon-btn" @click="goToDictionary">
             <font-awesome-icon :icon="['fas', 'search']" />
           </button>
-          <button class="diaryhome-icon-btn">
+          <button class="diaryhome-icon-btn" @click="goToAccountLinkSelect">
             <font-awesome-icon :icon="['fas', 'plus']" />
           </button>
         </div>
@@ -74,7 +74,12 @@
           <!-- 한달 달력 -->
           <div v-else class="diaryhome-calendar-month">
             <div class="diaryhome-calendar-header">
-              <span v-for="day in weekDays" :key="day">{{ day }}</span>
+              <span
+                v-for="day in weekDays"
+                :key="day"
+                class="diaryhome-weekday-header"
+                >{{ day }}</span
+              >
             </div>
             <div class="diaryhome-calendar-grid">
               <span
@@ -103,7 +108,6 @@
           </span>
         </div>
       </div>
-      <hr class="diaryhome-divider" />
       <!-- 거래 내역 리스트 -->
       <div class="diaryhome-list-section">
         <div class="diaryhome-list-title">선택된 날짜 거래 내역</div>
@@ -570,6 +574,10 @@ const goCalendarDetail = () => {
   toggleCalendarMode();
 };
 
+const goToAccountLinkSelect = () => {
+  router.push("/openbanking/account-link-select");
+};
+
 // 거래 객체로부터 전체 배열에서의 인덱스를 찾는 함수
 const getTransactionIndex = (transaction) => {
   // originalIndex가 있으면 사용, 없으면 기존 방식으로 찾기
@@ -627,7 +635,7 @@ updateCurrentWeekStart();
   width: 390px;
   min-height: 844px;
   margin: 0 auto;
-  background: #f7f8fa;
+  background: #f3f4f6;
   font-family: "Noto Sans KR", sans-serif;
   box-sizing: border-box;
   padding-top: 56px;
@@ -638,7 +646,7 @@ updateCurrentWeekStart();
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
+  background: #f3f4f6;
   position: fixed;
   top: 0;
   left: 50%;
@@ -647,7 +655,6 @@ updateCurrentWeekStart();
   z-index: 100;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
 }
 .diaryhome-back {
   background: none;
@@ -751,13 +758,25 @@ updateCurrentWeekStart();
   font-weight: 600;
   color: #222;
   margin-bottom: 2px;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+  min-height: 40px;
+  width: 100%;
+  padding: 0;
+}
+
+.diaryhome-weekday-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  text-align: center;
-  min-height: 70px; /* 버튼과 컬럼의 높이 증가 */
-  width: 100%;
-  gap: 2px; /* 버튼과 컬럼 사이 간격 줄임 */
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  height: 40px;
+  padding: 0;
+  margin: 0;
 }
 
 .diaryhome-calendar-columns {
@@ -865,7 +884,12 @@ updateCurrentWeekStart();
 }
 
 .diaryhome-list-item:hover {
-  background: #f8f9fa;
+  background: #0890fe;
+}
+
+.diaryhome-list-item:hover .diaryhome-list-amount,
+.diaryhome-list-item:hover .diaryhome-list-name {
+  color: white;
 }
 
 .diaryhome-list-item:last-child {
@@ -921,7 +945,7 @@ updateCurrentWeekStart();
 
 .diaryhome-more-btn {
   width: 100%;
-  background: #f7f8fa;
+  background: #f3f4f6;
   color: #4318d1;
   border: none;
   border-radius: 8px;
@@ -963,11 +987,16 @@ updateCurrentWeekStart();
 }
 .diaryhome-date.selected,
 .diaryhome-calendar-grid span.selected {
-  background: #4318d1;
-  color: #fff;
+  background: #4318d1 !important;
+  color: #fff !important;
   border-radius: 50%;
-  padding: 8px;
+  padding: 6px;
   font-weight: 700;
+  min-width: 32px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .diaryhome-calendar-grid {
@@ -975,6 +1004,8 @@ updateCurrentWeekStart();
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
   margin-top: 8px;
+  align-items: center;
+  padding: 0;
 }
 
 .diaryhome-calendar-grid span {
@@ -988,6 +1019,8 @@ updateCurrentWeekStart();
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 40px;
+  margin: 0;
 }
 
 .diaryhome-calendar-grid span:hover {
@@ -1016,11 +1049,6 @@ updateCurrentWeekStart();
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
-}
-.diaryhome-divider {
-  border: none;
-  border-top: 1.5px solid #ececec;
-  margin: 0 0 10px 0;
 }
 
 @media (max-width: 430px) {

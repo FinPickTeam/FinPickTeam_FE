@@ -1,13 +1,10 @@
 <template>
   <div class="ars_fail_bg">
+    <!-- 상단 헤더 -->
+
     <div class="ars_fail_outer_box">
-      <div class="ars_fail_header">
-        <div class="login-logo">
-          <h1 class="logo">FinPick</h1>
-          <p>금융 생활의 새로운 시작</p>
-        </div>
-        <div class="subtitle">ARS 인증 실패</div>
-      </div>
+      <div class="ars_fail_header"></div>
+
       <div class="ars_fail_wrapper">
         <div class="ars_fail_card">
           <div class="ars_fail_info">
@@ -69,6 +66,11 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { ref, onMounted } from "vue";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+
+library.add(faAngleLeft);
 
 const router = useRouter();
 const currentTime = ref("");
@@ -79,6 +81,10 @@ function retryArs() {
 
 function goToCustomerSupport() {
   router.push("/customer-support");
+}
+
+function goBack() {
+  router.back();
 }
 
 function updateCurrentTime() {
@@ -101,20 +107,79 @@ onMounted(() => {
 <style scoped>
 .ars_fail_bg {
   width: 100%;
-  min-height: 100vh;
-  background: #ffffff;
+  max-width: 390px;
+  height: 100vh;
+  background: #f3f4f6;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 20px;
   box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  overflow: hidden;
+}
+
+/* 상단 헤더 */
+.ars-fail-header {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  padding: 0 16px;
+  box-sizing: border-box;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
+  z-index: 100;
+}
+
+.ars-fail-back {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #222;
+  cursor: pointer;
+  padding: 4px 8px 4px 0;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.ars-fail-back:hover {
+  background: #f3f3f3;
+}
+
+.ars-fail-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.center-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
 
 .ars_fail_outer_box {
   width: 100%;
-  max-width: 540px;
-  min-height: 100vh;
-  background: #fff;
+  max-width: 390px;
+  height: 100vh;
+  background: #f3f4f6;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -122,6 +187,8 @@ onMounted(() => {
   justify-content: flex-start;
   padding: 20px;
   box-sizing: border-box;
+  padding-top: 56px;
+  overflow: hidden;
 }
 
 .ars_fail_header {
@@ -178,7 +245,7 @@ onMounted(() => {
   position: relative;
   padding-top: 0;
   padding-bottom: 24px;
-  overflow-y: visible;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -186,7 +253,7 @@ onMounted(() => {
   width: 100%;
   max-width: 100%;
   margin: 0 auto 24px auto;
-  background: #fafbfc;
+  background: #fff;
   border: 1.5px solid #e5e6ea;
   border-radius: 12px;
   box-shadow: none;
@@ -222,7 +289,7 @@ onMounted(() => {
   border-radius: 8px;
   padding: 16px;
   margin-bottom: 20px;
-  background: #fff;
+  background: #f3f4f6;
   width: 100%;
   box-sizing: border-box;
 }

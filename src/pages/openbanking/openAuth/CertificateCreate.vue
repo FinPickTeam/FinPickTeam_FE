@@ -5,26 +5,18 @@
       <button class="certificate-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="certificate-title center-title">핀픽 인증서 만들기</span>
+      <span class="certificate-title center-title">간편 비밀번호 생성</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
     <div class="certificate-content">
-      <!-- 인증서 아이콘 -->
-      <div class="certificate-icon">
-        <font-awesome-icon :icon="['fas', 'certificate']" />
-      </div>
-
-      <!-- 제목 -->
-      <h1 class="main-title">핀픽 인증서 만들기</h1>
-
       <!-- 설명 -->
       <div class="description-section">
         <p class="description-text">
-          핀픽 인증서는 안전한 금융 거래를 위한 디지털 인증서입니다.
+          간편 비밀번호는 안전한 오픈뱅킹 서비스 위한 디지털 보안 절차입니다.
         </p>
         <p class="description-text">
-          인증서를 만들면 다음과 같은 서비스를 이용할 수 있습니다:
+          간편 비밀번호를 만들면 다음과 같은 서비스를 이용할 수 있습니다.
         </p>
       </div>
 
@@ -35,14 +27,14 @@
             <font-awesome-icon :icon="['fas', 'shield-alt']" />
           </div>
           <div class="feature-content">
-            <h3 class="feature-title">안전한 거래</h3>
+            <h3 class="feature-title">안전한 오픈뱅킹 열람</h3>
             <p class="feature-description">
-              암호화된 보안으로 안전한 금융 거래
+              암호화된 보안으로 안전한 오픈뱅킹 열람
             </p>
           </div>
         </div>
 
-        <div class="feature-item">
+        <!-- <div class="feature-item">
           <div class="feature-icon">
             <font-awesome-icon :icon="['fas', 'user-check']" />
           </div>
@@ -50,17 +42,7 @@
             <h3 class="feature-title">본인 인증</h3>
             <p class="feature-description">신원 확인 및 본인 인증 서비스</p>
           </div>
-        </div>
-
-        <div class="feature-item">
-          <div class="feature-icon">
-            <font-awesome-icon :icon="['fas', 'file-contract']" />
-          </div>
-          <div class="feature-content">
-            <h3 class="feature-title">전자 서명</h3>
-            <p class="feature-description">전자 문서 서명 및 계약 체결</p>
-          </div>
-        </div>
+        </div> -->
       </div>
 
       <!-- 주의사항 -->
@@ -121,11 +103,10 @@ const startCertificate = () => {
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
-  background: #f7f8fa;
+  background: #f3f4f6;
   min-height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
   position: relative;
-  padding-bottom: 120px;
 }
 
 .certificate-header {
@@ -134,12 +115,14 @@ const startCertificate = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: #f3f4f6;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   z-index: 100;
 }
 
@@ -166,6 +149,9 @@ const startCertificate = () => {
   font-size: 1.1rem;
   font-weight: 600;
   color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .center-title {
@@ -176,8 +162,9 @@ const startCertificate = () => {
 }
 
 .certificate-content {
-  padding: 40px 20px;
+  padding: 120px 20px 40px 20px;
   text-align: center;
+  background: #f3f4f6;
 }
 
 .certificate-icon {
@@ -219,7 +206,6 @@ const startCertificate = () => {
   background: #fff;
   border-radius: 12px;
   margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .feature-icon {
@@ -262,7 +248,7 @@ const startCertificate = () => {
   background: #fff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  text-align: left;
 }
 
 .notice-title {
@@ -301,14 +287,12 @@ const startCertificate = () => {
 
 .certificate-bottom {
   position: fixed;
-  bottom: 80px;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
   width: 100%;
   max-width: 390px;
   padding: 16px;
-  background: #fff;
-  border-top: 1px solid #e5e7eb;
   z-index: 1000;
 }
 
@@ -321,14 +305,15 @@ const startCertificate = () => {
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  background: #4318d1;
   color: #fff;
+  box-shadow: none;
+  outline: none;
 }
 
 .certificate-start-btn:hover {
   background: #3a16b8;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(67, 24, 209, 0.3);
+  transform: none;
+  box-shadow: none;
 }
 
 .certificate-start-btn:active {

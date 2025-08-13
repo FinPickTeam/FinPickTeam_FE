@@ -1,13 +1,12 @@
-// src/api/index.js
-// 모든 API 요청에 기본 설정 및 오류 핸들링 적용
-import axios from 'axios';
+// 챌린지 api
+export * from './challenge/challenge.js';
 
-const instance = axios.create({
-  baseURL: '/api', // 프록시 설정 때문에 /api 붙이면 자동으로 http://52.79.124.217:8080으로 연결됨
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
-});
+// 재테크 api
+export * from './finance/deposit.js';
+export * from './finance/installment.js';
+export * from './finance/fund.js';
+export * from './finance/stock.js';
+export * from './finance/wishlist.js';
 
-export default instance;
+export * from './coin/coin.js';
+export * from './authApi.js';

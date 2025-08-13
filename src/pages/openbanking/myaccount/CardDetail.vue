@@ -40,10 +40,15 @@
     <!-- 카드 사용 내역 -->
     <div class="card-transaction-section">
       <div class="card-transaction-header">
-        <div class="card-transaction-title">카드 사용 내역</div>
+        <div class="card-transaction-title">
+          카드 사용 내역 ({{ getPeriodDisplayName() }})
+        </div>
         <div class="transaction-count">{{ filteredTransactions.length }}건</div>
       </div>
       <div class="card-transaction-list">
+        <div v-if="filteredTransactions.length === 0" class="no-transactions">
+          <p>해당 기간에 거래 내역이 없습니다.</p>
+        </div>
         <div
           class="card-transaction-item"
           v-for="(transaction, index) in filteredTransactions"
@@ -152,7 +157,7 @@
           <button class="modal-btn cancel-btn" @click="closeFilterModal">
             취소
           </button>
-          <button class="modal-btn confirm-btn" @click="closeFilterModal">
+          <button class="modal-btn confirm-btn" @click="applyFilterAndClose">
             확인
           </button>
         </div>
@@ -217,6 +222,30 @@ const closeFilterModal = () => {
 // 필터 적용
 const applyFilter = () => {
   // 필터 로직은 computed에서 처리됨
+  // 여기서는 모달을 닫거나 추가 로직이 필요한 경우에만 사용
+};
+
+// 필터 적용 후 모달 닫기
+const applyFilterAndClose = () => {
+  // 필터가 이미 computed에서 자동으로 적용되므로
+  // 모달만 닫으면 됩니다
+  closeFilterModal();
+};
+
+// 기간 표시 이름
+const getPeriodDisplayName = () => {
+  switch (selectedPeriod.value) {
+    case "thisMonth":
+      return "이번달";
+    case "lastMonth":
+      return "지난달";
+    case "all":
+      return "전체";
+    case "custom":
+      return "직접 선택";
+    default:
+      return "전체";
+  }
 };
 
 // 날짜 포맷팅
@@ -231,12 +260,28 @@ const formatDate = (dateString) => {
 const filteredTransactions = computed(() => {
   if (!transactionData?.transactions || !cardInfo.value.bank) return [];
 
+  // 카드 거래 내역 필터링 (카드 타입이 포함된 계좌명 찾기)
   let filteredTransactions = transactionData.transactions.filter(
-    (transaction) =>
-      transaction.bank === cardInfo.value.bank &&
-      transaction.account.includes(cardInfo.value.type)
+    (transaction) => {
+      // 은행이 일치하는지 확인
+      if (transaction.bank !== cardInfo.value.bank) return false;
+
+      // 카드 타입이 계좌명에 포함되어 있는지 확인
+      const accountName = transaction.account.toLowerCase();
+      const cardType = cardInfo.value.type.toLowerCase();
+
+      // 카드 관련 계좌명 패턴 매칭
+      const cardPatterns = ["카드", "card", "체크", "신용", "debit", "credit"];
+
+      // 카드 타입이 직접 포함되어 있거나, 카드 관련 패턴이 포함되어 있는지 확인
+      return (
+        accountName.includes(cardType) ||
+        cardPatterns.some((pattern) => accountName.includes(pattern))
+      );
+    }
   );
 
+  // 기간 필터링 적용
   if (selectedPeriod.value === "all") {
     return filteredTransactions.sort(
       (a, b) => new Date(b.date) - new Date(a.date)
@@ -259,6 +304,8 @@ const filteredTransactions = computed(() => {
       if (startDate.value && endDate.value) {
         startDateFilter = new Date(startDate.value);
         endDateFilter = new Date(endDate.value);
+        // 종료일을 해당 날짜의 마지막 시간으로 설정
+        endDateFilter.setHours(23, 59, 59, 999);
       } else {
         return filteredTransactions.sort(
           (a, b) => new Date(b.date) - new Date(a.date)
@@ -271,14 +318,15 @@ const filteredTransactions = computed(() => {
       );
   }
 
-  return filteredTransactions
-    .filter((transaction) => {
-      const transactionDate = new Date(transaction.date);
-      return (
-        transactionDate >= startDateFilter && transactionDate <= endDateFilter
-      );
-    })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
+  // 날짜 범위로 필터링
+  const filteredByDate = filteredTransactions.filter((transaction) => {
+    const transactionDate = new Date(transaction.date);
+    return (
+      transactionDate >= startDateFilter && transactionDate <= endDateFilter
+    );
+  });
+
+  return filteredByDate.sort((a, b) => new Date(b.date) - new Date(a.date));
 });
 
 // 카드 로고 동적 로딩
@@ -333,6 +381,15 @@ onMounted(() => {
   min-height: 100vh;
   background: #f7f8fa;
   padding-bottom: 120px;
+  padding-top: 56px;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  height: 100vh;
+}
+
+.card-detail-container::-webkit-scrollbar {
+  display: none;
 }
 
 .account-header {
@@ -341,13 +398,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  position: sticky;
+  background: #f7f8fa;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   z-index: 100;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
 }
 
 .account-back {
@@ -537,85 +596,6 @@ onMounted(() => {
 }
 
 /* 필터 모달 스타일 */
-.filter-modal {
-  max-width: 400px;
-}
-
-.filter-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.filter-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.filter-option:hover {
-  background: #f9fafb;
-}
-
-.filter-option input[type="radio"] {
-  margin: 0;
-  cursor: pointer;
-}
-
-.filter-option label {
-  font-size: 0.95rem;
-  color: #222;
-  cursor: pointer;
-  flex: 1;
-}
-
-.custom-date-inputs {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.date-input-row {
-  display: flex;
-  gap: 16px;
-}
-
-.date-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.date-input-group label {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #222;
-}
-
-.date-input {
-  padding: 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  color: #222;
-  background: #fff;
-}
-
-.date-input:focus {
-  outline: none;
-  border-color: #4318d1;
-}
-
-/* 모달 스타일 */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -633,8 +613,12 @@ onMounted(() => {
   background: #fff;
   border-radius: 16px;
   width: 90%;
-  max-width: 350px;
+  max-width: 400px;
   overflow: hidden;
+}
+
+.filter-modal {
+  max-width: 350px;
 }
 
 .modal-header {
@@ -671,11 +655,75 @@ onMounted(() => {
   padding: 20px;
 }
 
-.modal-body p {
-  margin: 0;
-  font-size: 0.875rem;
-  color: #374151;
-  text-align: center;
+.filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.filter-option:hover {
+  background: #f9fafb;
+}
+
+.filter-option input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #4318d1;
+}
+
+.filter-option label {
+  font-size: 1rem;
+  color: #222;
+  cursor: pointer;
+  flex: 1;
+}
+
+.custom-date-inputs {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.date-input-row {
+  display: flex;
+  gap: 12px;
+}
+
+.date-input-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.date-input-group label {
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.date-input {
+  padding: 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  color: #222;
+  background: #fff;
+}
+
+.date-input:focus {
+  outline: none;
+  border-color: #4318d1;
+  box-shadow: 0 0 0 3px rgba(67, 24, 209, 0.1);
 }
 
 .modal-footer {
@@ -714,6 +762,17 @@ onMounted(() => {
   background: #3b16b8;
 }
 
+.no-transactions {
+  text-align: center;
+  padding: 40px 20px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.no-transactions p {
+  margin: 0;
+}
+
 @media (max-width: 430px) {
   .card-detail-container {
     width: 100vw;
@@ -722,6 +781,11 @@ onMounted(() => {
   .modal-content {
     width: 95%;
     margin: 0 10px;
+  }
+
+  .date-input-row {
+    flex-direction: column;
+    gap: 16px;
   }
 }
 </style>

@@ -5,7 +5,7 @@
       <button class="certificate-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="certificate-title">정보</span>
+      <span class="certificate-title">간편 비밀번호 정보</span>
       <div class="certificate-header-right"></div>
     </div>
 
@@ -21,11 +21,11 @@
       </div>
       <div class="info-row">
         <span class="info-label">만료일</span>
-        <span class="info-value">2028-07-31</span>
+        <span class="info-value">2026-07-31</span>
       </div>
       <div class="info-row">
         <span class="info-label">유효기간</span>
-        <span class="info-value">3년</span>
+        <span class="info-value">1년</span>
       </div>
       <div class="info-row">
         <span class="info-label">발급기관명</span>

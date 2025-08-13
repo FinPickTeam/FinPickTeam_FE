@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite.js';
 
@@ -43,15 +43,17 @@ const props = defineProps({
   product: Object,
 });
 
+const emit = defineEmits(['favorite-removed']);
+
 const router = useRouter();
 const favoriteStore = useFavoriteStore();
 const isFavorite = computed(() => favoriteStore.isFavorite(props.product));
 
 function goToDetail() {
-  // 상품명을 기반으로 상세 페이지로 이동
-  const productName = props.product.installmentProductName;
-  if (productName) {
-    router.push(`/finance/installment/${productName}`);
+  // 상품id를 기반으로 상세 페이지로 이동
+  const installmentProductId = props.product.id;
+  if (installmentProductId) {
+    router.push(`/finance/installment/${installmentProductId}`);
   }
 }
 
@@ -62,6 +64,8 @@ function toggleFavorite() {
   if (isFavorite.value) {
     console.log('Removing from favorites');
     favoriteStore.removeFavorite(props.product);
+    // 부모 컴포넌트로 찜 해제 이벤트 전달
+    emit('favorite-removed', props.product);
   } else {
     console.log('Adding to favorites');
     favoriteStore.addFavorite(props.product);

@@ -42,12 +42,23 @@
           >
             <div class="account-item-header">
               <div class="account-bank-info">
-                <div class="account-bank-name">{{ account.bank }}</div>
-                <div
-                  class="account-type-badge"
-                  :class="getAccountTypeClass(account.type)"
-                >
-                  {{ account.type }}
+                <div class="account-bank-logo">
+                  <img
+                    :src="getBankLogo(account.bank)"
+                    :alt="account.bank + ' 로고'"
+                    class="bank-logo-img"
+                  />
+                </div>
+                <div class="account-bank-details">
+                  <div class="account-bank-name">
+                    {{ account.bank }}
+                    <span
+                      class="account-type-badge"
+                      :class="getAccountTypeClass(account.type)"
+                    >
+                      {{ account.type }}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div
@@ -80,12 +91,23 @@
           >
             <div class="account-item-header">
               <div class="account-bank-info">
-                <div class="account-bank-name">{{ account.bank }}</div>
-                <div
-                  class="account-type-badge"
-                  :class="getAccountTypeClass(account.type)"
-                >
-                  {{ account.type }}
+                <div class="account-bank-logo">
+                  <img
+                    :src="getBankLogo(account.bank)"
+                    :alt="account.bank + ' 로고'"
+                    class="bank-logo-img"
+                  />
+                </div>
+                <div class="account-bank-details">
+                  <div class="account-bank-name">
+                    {{ account.bank }}
+                    <span
+                      class="account-type-badge"
+                      :class="getAccountTypeClass(account.type)"
+                    >
+                      {{ account.type }}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div
@@ -114,6 +136,7 @@
             class="account-item"
             :class="{
               'account-item-selected': selectedAccounts.includes(account),
+              'account-item-disabled': account.type === '투자' && !isDeleteMode,
             }"
             v-for="(account, index) in investmentAccounts"
             :key="`investment-${index}`"
@@ -121,12 +144,23 @@
           >
             <div class="account-item-header">
               <div class="account-bank-info">
-                <div class="account-bank-name">{{ account.bank }}</div>
-                <div
-                  class="account-type-badge"
-                  :class="getAccountTypeClass(account.type)"
-                >
-                  {{ account.type }}
+                <div class="account-bank-logo">
+                  <img
+                    :src="getBankLogo(account.bank)"
+                    :alt="account.bank + ' 로고'"
+                    class="bank-logo-img"
+                  />
+                </div>
+                <div class="account-bank-details">
+                  <div class="account-bank-name">
+                    {{ account.bank }}
+                    <span
+                      class="account-type-badge"
+                      :class="getAccountTypeClass(account.type)"
+                    >
+                      {{ account.type }}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div
@@ -321,6 +355,10 @@ const handleAccountClick = (account) => {
   if (isDeleteMode.value) {
     toggleAccountSelection(account);
   } else {
+    // 투자 계좌는 상세보기 비활성화
+    if (account.type === "투자") {
+      return;
+    }
     selectAccount(account);
   }
 };
@@ -366,6 +404,19 @@ const confirmDelete = () => {
   closeDeleteModal();
 };
 
+// 은행 로고 경로 생성 함수
+const getBankLogo = (bankName) => {
+  try {
+    return new URL(`../../../assets/bank_logo/${bankName}.png`, import.meta.url)
+      .href;
+  } catch (error) {
+    // 로고가 없는 경우 기본 이미지 반환
+    console.warn(`Bank logo not found for: ${bankName}`);
+    return new URL(`../../../assets/bank_logo/KB국민은행.png`, import.meta.url)
+      .href;
+  }
+};
+
 // 계좌 데이터 초기화
 onMounted(() => {
   accounts.value = extractAccountsFromTransactions();
@@ -377,6 +428,15 @@ onMounted(() => {
   min-height: 100vh;
   background: #f7f8fa;
   padding-bottom: 100px;
+  padding-top: 56px;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  height: 100vh;
+}
+
+.account-list-container::-webkit-scrollbar {
+  display: none;
 }
 
 .account-header {
@@ -385,13 +445,15 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  position: sticky;
+  background: #f7f8fa;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   z-index: 100;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
 }
 
 .account-back {
@@ -525,6 +587,12 @@ onMounted(() => {
   background: #fef2f2;
 }
 
+.account-item-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .account-item-header {
   display: flex;
   align-items: center;
@@ -535,21 +603,49 @@ onMounted(() => {
 .account-bank-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+}
+
+.account-bank-logo {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bank-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.account-bank-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .account-bank-name {
   font-size: 1.1rem;
   font-weight: 600;
   color: #222;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .account-type-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 0.7rem;
   font-weight: 600;
   color: #fff;
+  text-align: center;
+  display: inline-block;
+  line-height: 1.2;
 }
 
 .account-type-badge.type-deposit {

@@ -37,10 +37,11 @@
         v-for="(agreement, index) in agreements"
         :key="index"
       >
-        <div class="ars-agreement-item-header" @click="toggleAgreement(index)">
+        <div class="ars-agreement-item-header">
           <div
             class="ars-agreement-checkbox"
             :class="{ checked: agreement.checked }"
+            @click.stop="toggleIndividualAgreement(index)"
           >
             <font-awesome-icon
               v-if="agreement.checked"
@@ -48,13 +49,22 @@
               class="check-icon"
             />
           </div>
-          <div class="ars-agreement-content">
-            <span class="ars-agreement-text">{{ agreement.securities }}</span>
-            <span class="ars-agreement-subtext">{{ agreement.bank }}</span>
+          <div class="ars-agreement-content" @click="toggleAgreement(index)">
+            <div class="ars-agreement-logo">
+              <img
+                :src="getLogoPath(agreement)"
+                :alt="agreement.securities"
+                class="ars-agreement-logo-img"
+              />
+            </div>
+            <div class="ars-agreement-text-container">
+              <span class="ars-agreement-text">{{ agreement.securities }}</span>
+            </div>
           </div>
           <font-awesome-icon
             :icon="['fas', agreement.expanded ? 'angle-up' : 'angle-right']"
             class="arrow-icon"
+            @click="toggleAgreement(index)"
           />
         </div>
         <div class="ars-agreement-content-section" v-show="agreement.expanded">
@@ -311,6 +321,19 @@ const toggleAgreement = (index) => {
     !agreementStates.value[index].expanded;
 };
 
+const toggleIndividualAgreement = (index) => {
+  if (!agreementStates.value[index]) {
+    agreementStates.value[index] = { checked: false, expanded: false };
+  }
+
+  // 개별 체크박스 토글
+  agreementStates.value[index].checked = !agreementStates.value[index].checked;
+
+  // 전체동의 상태 업데이트
+  const allChecked = agreements.value.every((agreement) => agreement.checked);
+  allAgreed.value = allChecked;
+};
+
 const confirmAgreement = (index) => {
   if (!agreementStates.value[index]) {
     agreementStates.value[index] = { checked: false, expanded: false };
@@ -327,6 +350,26 @@ const goBack = () => {
   router.back();
 };
 
+const getLogoPath = (agreement) => {
+  const name = agreement.securities;
+
+  // 은행 로고
+  if (agreement.type === "bank") {
+    return `/src/assets/bank_logo/${name}.png`;
+  }
+  // 카드 로고
+  else if (agreement.type === "card") {
+    return `/src/assets/card_logo/${name}.png`;
+  }
+  // 증권 로고 (은행 로고 사용)
+  else if (agreement.type === "securities") {
+    return `/src/assets/bank_logo/${agreement.bank}.png`;
+  }
+
+  // 기본값
+  return `/src/assets/bank_logo/KB국민은행.png`;
+};
+
 const goToNext = () => {
   if (canProceed.value) {
     // ObAgreement.vue로 라우팅
@@ -340,32 +383,41 @@ const goToNext = () => {
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
-  background: #f7f8fa;
-  min-height: 100vh;
+  background: #f3f4f6;
+  height: 100vh;
   font-family: "Noto Sans KR", sans-serif;
   position: relative;
   padding-bottom: 120px; /* 하단 버튼과 navbar 공간 확보 */
   overflow-y: auto; /* 스크롤 활성화 */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.ars-agreement-container::-webkit-scrollbar {
+  display: none;
 }
 
 .ars-agreement-header {
-  width: 100%;
-  height: 56px;
+  margin-top: 0;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: #fff;
-  padding: 0 16px;
-  box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
-  position: relative;
+  width: 100%;
+  max-width: 390px;
+  height: 56px;
+  padding: 0 20px;
+  margin-bottom: 18px;
+  z-index: 1100;
+  background: #f3f4f6;
 }
 
 .ars-agreement-back {
-  position: absolute;
-  left: 16px;
-  top: 50%;
-  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
   background: none;
   border: none;
   font-size: 24px;
@@ -374,6 +426,8 @@ const goToNext = () => {
   padding: 4px 8px 4px 0;
   border-radius: 8px;
   transition: background 0.15s;
+  position: relative;
+  z-index: 1200;
 }
 
 .ars-agreement-back:hover {
@@ -381,9 +435,18 @@ const goToNext = () => {
 }
 
 .ars-agreement-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-title-sub);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  margin: 0;
 }
 
 .center-title {
@@ -399,6 +462,7 @@ const goToNext = () => {
   padding: 20px 16px 12px 16px;
   line-height: 1.5;
   text-align: center;
+  margin-top: 80px; /* 고정 헤더 높이 + 여백 */
 }
 
 .ars-agreement-list {
@@ -415,11 +479,11 @@ const goToNext = () => {
   border-bottom: 1px solid #f3f4f6;
   cursor: pointer;
   transition: background 0.15s;
-  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  background: #fff;
 }
 
 .ars-agreement-item-all:hover {
-  background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+  background: #f8f9fa;
 }
 
 .ars-agreement-checkbox-all {
@@ -539,6 +603,7 @@ const goToNext = () => {
   align-items: center;
   justify-content: center;
   transition: all 0.15s;
+  cursor: pointer;
 }
 
 .ars-agreement-checkbox.checked {
@@ -554,19 +619,34 @@ const goToNext = () => {
 .ars-agreement-content {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.ars-agreement-logo {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+}
+
+.ars-agreement-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 6px;
+}
+
+.ars-agreement-text-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
 .ars-agreement-text {
   font-size: 0.95rem;
   color: #222;
   font-weight: 500;
-  margin-bottom: 2px;
-}
-
-.ars-agreement-subtext {
-  font-size: 0.85rem;
-  color: #6b7280;
+  margin: 0;
 }
 
 .arrow-icon {
@@ -581,10 +661,9 @@ const goToNext = () => {
   transform: translateX(-50%);
   width: 100%;
   max-width: 390px;
-  padding: 16px;
-  background: #fff;
-  border-top: 1px solid #e5e7eb;
+  background: transparent;
   z-index: 1000; /* 다른 요소들 위에 표시 */
+  padding: 16px;
 }
 
 .ars-agreement-next-btn {

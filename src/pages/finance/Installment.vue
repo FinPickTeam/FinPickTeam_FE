@@ -68,7 +68,15 @@
         </div>
       </div>
 
-      <ProductCardList v-if="showResults" :products="recommendProducts" />
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingRecommend">
+        <LoadingSpinner message="추천 상품을 불러오는 중..." />
+      </div>
+
+      <ProductCardList
+        v-if="showResults && !isLoadingRecommend"
+        :products="recommendProducts"
+      />
     </div>
 
     <!-- 전체 보기 탭일 때 -->
@@ -127,12 +135,17 @@
         </div>
       </div>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingAll">
+        <LoadingSpinner message="상품 목록을 불러오는 중..." />
+      </div>
+
       <!-- 전체 상품 리스트 -->
       <div
-        v-if="filteredAllProducts.length > 0"
+        v-else-if="filteredAllInstallment && filteredAllInstallment.length > 0"
         class="products-list-container"
       >
-        <ProductCardList :products="filteredAllProducts" />
+        <ProductCardList :products="filteredAllInstallment" />
       </div>
       <div v-else class="no-results">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -147,12 +160,15 @@ import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductInputForm from '../../components/finance/installment/ProductInputForm_installment.vue';
 import ProductCardList from '../../components/finance/installment/ProductCardList_installment.vue';
-import recommendData from '../../components/finance/installment/installment_recommend.json';
-import allData from '../../components/finance/installment/installment_all.json';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
+import { getInstallmentList, getInstallmentRecommendList } from '@/api';
+import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
 const recommendProducts = ref([]);
+const isLoadingRecommend = ref(false);
+const isLoadingAll = ref(false);
 const allProducts = ref([]);
 const showResults = ref(false);
 const isSummaryMode = ref(false);
@@ -163,6 +179,7 @@ const formData = ref({
   savingType: '자유적립식',
   selectedPrefer: [],
 });
+const fav = useFavoriteStore();
 
 // 전체보기용 상태
 const searchKeyword = ref('');
@@ -202,16 +219,72 @@ const interestTags = ref([
 ]);
 
 onMounted(() => {
-  // 추천 상품 데이터 로드
-  if (recommendData.status === 200 && recommendData.data) {
-    recommendProducts.value = recommendData.data;
-  }
-
-  // 전체 상품 데이터 로드
-  if (allData.status === 200 && allData.data) {
-    allProducts.value = allData.data;
-  }
+  fetchInstallmentList();
+  fav.syncIdSet('INSTALLMENT');
 });
+
+//적금 상품 목록 가져오기
+const fetchInstallmentList = async (params) => {
+  isLoadingAll.value = true;
+  try {
+    const res = await getInstallmentList(params);
+    allProducts.value = res.data ?? [];
+  } catch (e) {
+    console.log(e);
+  } finally {
+    isLoadingAll.value = false;
+  }
+};
+
+//적금 추천 목록 가져오기
+const fetchInstallmentRecommendation = async (receivedFormData) => {
+  isLoadingRecommend.value = true;
+  console.log(receivedFormData.value);
+  try {
+    const params = {
+      amount: receivedFormData.amount,
+      period: toMonths(receivedFormData.period),
+    };
+    const body = {
+      autoTransfer: receivedFormData.filterObject.autoTransfer,
+      couponUsed: receivedFormData.filterObject.couponUsed,
+      openBanking: receivedFormData.filterObject.openBanking,
+      utilityPayment: receivedFormData.filterObject.utilityPayment,
+      marketingConsent: receivedFormData.filterObject.marketingConsent,
+      housingSubscription: receivedFormData.filterObject.housingSubscription,
+      greenMission: receivedFormData.filterObject.greenMission,
+      incomeTransfer: receivedFormData.filterObject.incomeTransfer,
+      newCustomer: receivedFormData.filterObject.newCustomer,
+    };
+    const res = await getInstallmentRecommendList(params, body);
+    recommendProducts.value = res?.data ?? [];
+  } catch (e) {
+    console.log(e);
+  } finally {
+    isLoadingRecommend.value = false;
+  }
+};
+
+// 전체보기 필터링된 데이터
+const filteredAllInstallment = computed(() => {
+  const list = Array.isArray(allProducts.value) ? allProducts.value : [];
+  const q = (searchKeyword.value ?? '').toLowerCase().replace(/\s+/g, '');
+  if (!q) return list;
+  return list.filter((d) =>
+    (d.installmentProductName ?? '')
+      .toLowerCase()
+      .replace(/\s+/g, '')
+      .includes(q)
+  );
+});
+
+function toMonths(periodLabel) {
+  if (typeof periodLabel === 'number') return periodLabel;
+  const m = String(periodLabel).match(/(\d+)/);
+  if (!m) return 12;
+  const n = Number(m[1]);
+  return /년/.test(periodLabel) ? n * 12 : n;
+}
 
 function goTo(path) {
   router.push(path);
@@ -247,6 +320,8 @@ function showSearchResults(receivedFormData) {
   } | 월 ${receivedFormData.amount.toLocaleString()}원 | ${
     receivedFormData.savingType
   }${preferText ? ' | ' + preferText : ''}`;
+
+  fetchInstallmentRecommendation(receivedFormData);
 }
 
 function hideSearchResults() {
@@ -283,47 +358,6 @@ function toggleInterestTag(tagValue) {
 function closeFilter() {
   showFilter.value = false;
 }
-
-// 전체보기 필터링된 데이터
-const filteredAllProducts = computed(() => {
-  let result = allProducts.value;
-
-  // 🔍 키워드 검색
-  if (searchKeyword.value) {
-    result = result.filter((product) => {
-      const productName = product.productName || '';
-      return productName
-        .toLowerCase()
-        .replace(/\s+/g, '')
-        .includes(searchKeyword.value.toLowerCase().replace(/\s+/g, ''));
-    });
-  }
-
-  // 🏦 은행 필터
-  if (selectedTargets.value.length > 0) {
-    result = result.filter((product) =>
-      selectedTargets.value.includes(product.bankName || '')
-    );
-  }
-
-  // 💰 금리 구간 필터
-  if (selectedInterests.value.length > 0) {
-    result = result.filter((product) => {
-      const rate = Number((product.interestRate || '0').replace('%', ''));
-      return selectedInterests.value.some((range) => {
-        if (range === '1% 미만') return rate < 1;
-        if (range === '1~2%') return rate >= 1 && rate < 2;
-        if (range === '2~3%') return rate >= 2 && rate < 3;
-        if (range === '3~4%') return rate >= 3 && rate < 4;
-        if (range === '4~5%') return rate >= 4 && rate < 5;
-        if (range === '5% 이상') return rate >= 5;
-        return false;
-      });
-    });
-  }
-
-  return result;
-});
 </script>
 
 <style scoped>
@@ -355,7 +389,7 @@ const filteredAllProducts = computed(() => {
 .tab.active {
   color: var(--color-main);
   font-weight: var(--font-weight-bold);
-  font-size: var(--font-size-title-sub);
+  font-size: 20px;
 }
 
 .subtab-row {

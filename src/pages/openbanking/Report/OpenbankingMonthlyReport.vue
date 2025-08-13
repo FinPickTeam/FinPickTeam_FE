@@ -1,5 +1,5 @@
 <template>
-  <div class="monthly-report-container">
+  <div class="monthly-report-container" ref="reportContainer">
     <!-- 상단 헤더 -->
     <div class="obmyhome-header">
       <button class="obmyhome-back" @click="goBack">
@@ -9,8 +9,12 @@
         <button class="obmyhome-icon-btn" @click="goToDictionary">
           <font-awesome-icon :icon="['fas', 'search']" />
         </button>
-        <button class="obmyhome-icon-btn">
-          <font-awesome-icon :icon="['fas', 'plus']" />
+        <button
+          class="obmyhome-icon-btn"
+          @click="captureAndDownloadPDF"
+          title="월보고서 PDF 다운로드"
+        >
+          <font-awesome-icon :icon="['fas', 'download']" />
         </button>
       </div>
     </div>
@@ -170,6 +174,25 @@
         걸 추천드려요.
       </div>
     </section>
+
+    <!-- 다음 달 추천 챌린지 -->
+    <section class="report-section challenge-section">
+      <div class="challenge-title">다음 달 추천 챌린지</div>
+      <div class="challenge-item">
+        <div class="challenge-icon">
+          <i class="fas fa-coins"></i>
+        </div>
+        <div class="challenge-content">
+          <div class="challenge-text">저축률 회복하기</div>
+          <div class="challenge-goal">최소 450,000원 저축해보아요.</div>
+        </div>
+        <div class="challenge-edit">
+          <button class="challenge-edit-btn" @click="goToChallengeCreate">
+            <i class="fa-solid fa-pen-to-square"></i>
+          </button>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -182,10 +205,15 @@ import {
   faAngleLeft,
   faSearch,
   faPlus,
+  faDownload,
 } from "@fortawesome/free-solid-svg-icons";
-library.add(faAngleLeft, faSearch, faPlus);
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+library.add(faAngleLeft, faSearch, faPlus, faDownload);
 
 import transactionData from "../Transaction_dummy.json";
+
+const reportContainer = ref(null);
 
 const router = useRouter();
 
@@ -195,6 +223,10 @@ const goToDictionary = () => {
 
 const goBack = () => {
   router.push("/openbanking/myhome");
+};
+
+const goToChallengeCreate = () => {
+  router.push("/challenge/create");
 };
 
 // 월 상태 - 현재 날짜로 초기화
@@ -428,14 +460,71 @@ const getSpendingLogo = (label) => {
     return new URL("/src/assets/spending_logo/기타.png", import.meta.url).href;
   }
 };
+
+// PDF 캡처 및 다운로드 함수
+const captureAndDownloadPDF = async () => {
+  if (!reportContainer.value) return;
+
+  try {
+    // 로딩 상태 표시 (선택사항)
+    console.log("PDF 생성 중...");
+
+    const canvas = await html2canvas(reportContainer.value, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+      logging: false,
+      width: reportContainer.value.scrollWidth,
+      height: reportContainer.value.scrollHeight,
+    });
+
+    const imgData = canvas.toDataURL("image/png", 1.0);
+
+    // 이미지 크기에 맞춰 PDF 크기 계산
+    const imgWidth = canvas.width;
+    const imgHeight = canvas.height;
+
+    // PDF 크기를 이미지 비율에 맞춰 설정 (가로 기준)
+    const pdfWidth = 210; // A4 가로 크기 (mm)
+    const pdfHeight = (imgHeight * pdfWidth) / imgWidth;
+
+    // PDF 생성 (크기를 이미지에 맞춤)
+    const pdf = new jsPDF("p", "mm", [pdfWidth, pdfHeight]);
+
+    // 이미지를 PDF에 맞춰 추가 (한 페이지에 전체 내용)
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+    // 파일명 생성
+    const fileName = `${currentYear.value}-${String(
+      currentMonth.value
+    ).padStart(2, "0")}-월보고서.pdf`;
+    pdf.save(fileName);
+
+    console.log("PDF 다운로드 완료:", fileName);
+  } catch (error) {
+    console.error("PDF 생성 중 오류 발생:", error);
+    alert("PDF 생성 중 오류가 발생했습니다. 다시 시도해주세요.");
+  }
+};
 </script>
 
 <style scoped>
 .monthly-report-container {
-  background: var(--color-bg-light);
+  background: #f3f4f6;
   min-height: 100vh;
-  padding-top: 0;
-  padding-bottom: 20px;
+  padding-top: 56px; /* 상단 헤더 높이만큼 패딩 추가 */
+  padding-bottom: 60px; /* 하단 NAVBAR 높이만큼 패딩 추가 (20px + 30px) */
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  height: 100vh; /* 명시적 높이 설정 */
+  box-sizing: border-box;
+}
+
+/* Webkit 브라우저(Chrome, Safari, Edge)에서 스크롤바 숨기기 */
+.monthly-report-container::-webkit-scrollbar {
+  display: none;
 }
 
 /* 상단 헤더 스타일 */
@@ -445,13 +534,15 @@ const getSpendingLogo = (label) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #fff;
-  position: sticky;
+  background: #f3f4f6;
+  position: fixed;
   top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  max-width: 390px;
   z-index: 100;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
 }
 .obmyhome-back {
   background: none;
@@ -479,9 +570,24 @@ const getSpendingLogo = (label) => {
   padding: 4px 4px;
   border-radius: 8px;
   transition: background 0.15s;
+  position: relative;
 }
-.obmyhome-icon-btn:hover {
+/* .obmyhome-icon-btn:hover {
   background: #f3f3f3;
+} */
+
+.obmyhome-icon-btn::after {
+  position: absolute;
+  bottom: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
 }
 .report-header {
   display: flex;
@@ -677,9 +783,11 @@ const getSpendingLogo = (label) => {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--color-bg-light);
-  border-radius: 12px;
-  padding: 10px 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.top3-item:last-child {
+  border-bottom: none;
 }
 .top3-icon {
   width: 36px;
@@ -738,66 +846,75 @@ const getSpendingLogo = (label) => {
 /* 챌린지 */
 .challenge-section {
   margin-bottom: 18px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
+  border-top: 1px solid #e0e7ff;
 }
-.challenge-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+
+.challenge-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 16px;
 }
+
 .challenge-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: var(--color-bg-light);
-  border-radius: 12px;
-  padding: 10px 14px;
 }
-.challenge-label {
-  font-size: 15px;
-  font-weight: var(--font-weight-medium);
+
+.challenge-icon {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fef3c7;
+  border-radius: 8px;
+  color: #d97706;
+  font-size: 16px;
 }
-.challenge-desc {
-  font-size: 13px;
-  color: var(--color-text-light);
+
+.challenge-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 38px;
-  height: 22px;
+
+.challenge-text {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4318d1;
+}
+
+.challenge-goal {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.challenge-edit {
   margin-left: auto;
 }
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.slider {
-  position: absolute;
+
+.challenge-edit-btn {
+  background: none;
+  border: none;
+  color: #4318d1;
+  font-size: 18px;
   cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--color-main-light-2);
-  border-radius: 22px;
-  transition: 0.4s;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
-.switch input:checked + .slider {
-  background-color: var(--color-main);
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  left: 3px;
-  bottom: 3px;
-  background-color: #fff;
-  border-radius: 50%;
-  transition: 0.4s;
-}
-.switch input:checked + .slider:before {
-  transform: translateX(16px);
+
+.challenge-edit-btn:hover {
+  background: #f3f4f6;
 }
 </style>

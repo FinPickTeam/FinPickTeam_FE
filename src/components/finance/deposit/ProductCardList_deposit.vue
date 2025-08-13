@@ -4,6 +4,7 @@
       v-for="(product, index) in products"
       :key="index"
       :product="product"
+      @favorite-removed="handleFavoriteRemoved"
     />
   </div>
 </template>
@@ -17,13 +18,19 @@ const props = defineProps({
     required: true,
   },
 });
+
+const emit = defineEmits(['favorite-removed']);
+
+const handleFavoriteRemoved = (product) => {
+  emit('favorite-removed', product);
+};
 </script>
 
 <style scoped>
 .product-card-list {
   display: flex;
   flex-direction: column;
-  gap: 0px;
+  gap: 10px;
   align-items: center;
   justify-content: center;
   padding: 20px;

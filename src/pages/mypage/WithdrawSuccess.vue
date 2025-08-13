@@ -1,12 +1,10 @@
 <template>
   <div class="withdraw-success-container">
-    <Headerbar />
     <div class="success-content">
       <div class="success-icon">ℹ️</div>
       <p class="success-message">회원탈퇴가 완료되었습니다.</p>
       <button class="confirm-btn" @click="goToLogin">확인</button>
     </div>
-    <Navbar />
   </div>
 </template>
 
@@ -27,10 +25,16 @@ function goToLogin() {
   justify-content: center;
   background: var(--color-bg);
   font-family: var(--font-main);
+  padding-top: 56px; /* 헤더 높이만큼 패딩 추가 */
+  padding-bottom: 80px; /* 네비게이션 높이만큼 패딩 추가 */
 }
 .success-content {
   text-align: center;
-  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
   padding: 20px;
 }
 .success-icon {

@@ -6,6 +6,12 @@
         <div class="avatar-pixel">
           <img :src="baseAvatar" class="avatar-img" alt="아바타" />
           <img
+            v-if="wearingTitle"
+            :src="getTitleImage"
+            class="title-img"
+            alt="칭호"
+          />
+          <img
             v-if="wearingShirt"
             :src="getShirtImage"
             class="shirt-img"
@@ -17,11 +23,13 @@
             class="shoes-img"
             alt="신발"
           />
+          <!-- 여러 액세서리를 동시에 표시 -->
           <img
-            v-if="wearingGlasses"
-            :src="getGlassesImage"
+            v-for="(image, index) in getGlassesImages"
+            :key="index"
+            :src="image"
             class="glasses-img"
-            alt="안경"
+            alt="액세서리"
           />
         </div>
       </div>
@@ -37,14 +45,16 @@
     <div class="info-item">
       <div class="coin-stack">
         <div class="coin-line">
-          <span class="coin-value">{{ coin }}</span>
+          <span v-if="loadingCoin" class="coin-value loading">...</span>
+          <span v-else-if="coinError" class="coin-value error">-</span>
+          <span v-else class="coin-value">{{ currentCoin }}</span>
           <span class="coin-icon">🪙</span>
         </div>
         <div class="coin-label">포인트</div>
       </div>
     </div>
     <div class="info-item">
-      <div class="info-value">묵은지</div>
+      <div class="info-value">{{ levelText }}</div>
       <div class="info-subtitle">레벨</div>
     </div>
   </div>
@@ -72,7 +82,7 @@
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
     <div class="menu-item" @click="goToPinpickCertificate">
-      <span>핀픽 인증서 관리</span>
+      <span>간편 비밀번호 관리</span>
       <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
     </div>
     <div class="menu-item" @click="goToInvestmentTest">
@@ -114,13 +124,20 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAvatarStore } from "../../stores/avatar.js";
+import { getCurrentCoin, getCumulativeCoin } from "@/api/mypage/avatar";
+import { useAuthStore } from "@/stores/auth";
 import baseAvatar from "./avatar/avatarimg/avatar-base.png";
+import hatWizardhat from "./avatar/avatarimg/hat-3wizardhat.png";
+import hatSprout from "./avatar/avatarimg/hat-1sprout.png";
+import hatDosa from "./avatar/avatarimg/hat-4dosa.png";
+import hatBeginner from "./avatar/avatarimg/hat-2beginner.png";
 import shirtBlue from "./avatar/avatarimg/shirts-blue.png";
 import shirtRed from "./avatar/avatarimg/shirt-red.png";
 import shoesBrown from "./avatar/avatarimg/shoese-brown.png";
 import shoes from "./avatar/avatarimg/shoese.png";
 import sportGlasses from "./avatar/avatarimg/sporglasses.png";
-import sunGlasses from "./avatar/avatarimg/sunglasses.png";
+import sunGlasses from "./avatar/avatarimg/etc-sunglasses.png";
+import blush from "./avatar/avatarimg/etc-blush.png";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
@@ -130,9 +147,38 @@ library.add(faAngleRight);
 
 const router = useRouter();
 const avatarStore = useAvatarStore();
-const { coin } = storeToRefs(avatarStore);
+const authStore = useAuthStore();
+const { coin, cumulativePoints } = storeToRefs(avatarStore);
+
+// 레벨 텍스트 계산
+const levelText = computed(() => {
+  const points = cumulativePoints.value;
+  if (points >= 0 && points <= 19999) {
+    return "금융 새싹";
+  } else if (points >= 20000 && points <= 39999) {
+    return "금융 견습";
+  } else if (points >= 40000 && points <= 59999) {
+    return "금융 법사";
+  } else if (points >= 60000) {
+    return "금융 도사";
+  } else {
+    return "금융 새싹"; // 기본값
+  }
+});
+
+// 포인트 상태 관리
+const currentCoin = ref(0);
+const loadingCoin = ref(false);
+const coinError = ref(null);
+const loadingCumulative = ref(false);
+const cumulativeError = ref(null);
 
 // 착용 중인 아이템 확인
+const wearingTitle = computed(() => {
+  const wearingItem = avatarStore.getWearingItem("titles");
+  return wearingItem ? wearingItem.id : null;
+});
+
 const wearingShirt = computed(() => {
   const wearingItem = avatarStore.getWearingItem("shirts");
   return wearingItem ? wearingItem.id : null;
@@ -143,12 +189,21 @@ const wearingShoes = computed(() => {
   return wearingItem ? wearingItem.id : null;
 });
 
+// 여러 액세서리를 동시에 착용할 수 있도록 수정
 const wearingGlasses = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("glasses");
-  return wearingItem ? wearingItem.id : null;
+  const wearingItems = avatarStore.getWearingItems("glasses");
+  return wearingItems.map((item) => item.id);
 });
 
 // 착용 중인 아이템 이미지 가져오기
+const getTitleImage = computed(() => {
+  if (wearingTitle.value === "hat-1sprout") return hatSprout;
+  if (wearingTitle.value === "hat-2beginner") return hatBeginner;
+  if (wearingTitle.value === "hat-3wizardhat") return hatWizardhat;
+  if (wearingTitle.value === "hat-4dosa") return hatDosa;
+  return null;
+});
+
 const getShirtImage = computed(() => {
   if (wearingShirt.value === "shirt-blue") return shirtBlue;
   if (wearingShirt.value === "shirt-red") return shirtRed;
@@ -161,10 +216,15 @@ const getShoesImage = computed(() => {
   return null;
 });
 
-const getGlassesImage = computed(() => {
-  if (wearingGlasses.value === "sport-glasses") return sportGlasses;
-  if (wearingGlasses.value === "sun-glasses") return sunGlasses;
-  return null;
+// 여러 액세서리 이미지를 반환하는 함수
+const getGlassesImages = computed(() => {
+  const images = [];
+  wearingGlasses.value.forEach((glassesId) => {
+    if (glassesId === "sport-glasses") images.push(sportGlasses);
+    if (glassesId === "etc-sunglasses") images.push(sunGlasses);
+    if (glassesId === "etc-blush") images.push(blush);
+  });
+  return images;
 });
 
 function goToMyHistory() {
@@ -188,24 +248,171 @@ function goToCustomerService() {
   router.push("/customer-support");
 }
 
-// 컴포넌트 마운트 시 저장된 아바타 정보 불러오기
+// 포인트 데이터 가져오기
+const fetchCurrentCoin = async () => {
+  try {
+    loadingCoin.value = true;
+    coinError.value = null;
+
+    // 인증 상태 확인
+    if (!authStore.isAuthenticated) {
+      console.warn("로그인이 필요합니다.");
+      return;
+    }
+
+    // 사용자 ID 가져오기
+    const userId = authStore.user?.id || authStore.user?.userId || 1; // user 객체에서 id 또는 userId 필드 확인
+
+    console.log("포인트 데이터 가져오기 시작, userId:", userId);
+    const response = await getCurrentCoin(userId);
+    console.log("받아온 포인트 데이터:", response);
+
+    if (response.status === 200 && response.data !== undefined) {
+      // 백엔드 응답 구조에 따라 coin 값 추출
+      let coinValue;
+
+      // 구조 1: { status: 200, data: 1500 }
+      if (typeof response.data === "number") {
+        coinValue = response.data;
+      }
+      // 구조 2: { status: 200, message: "...", data: 1500 }
+      else if (response.data.data !== undefined) {
+        coinValue = response.data.data;
+      }
+      // 구조 3: { data: 1500 }
+      else if (response.data !== undefined) {
+        coinValue = response.data;
+      }
+
+      console.log("Mypage 추출된 코인 값:", coinValue);
+
+      if (coinValue !== undefined && typeof coinValue === "number") {
+        currentCoin.value = coinValue;
+        avatarStore.setCoin(coinValue);
+        console.log("Mypage 포인트 업데이트 완료:", currentCoin.value);
+      } else {
+        console.warn("유효한 코인 값을 찾을 수 없습니다:", response);
+        coinError.value = "포인트 데이터를 가져오는데 실패했습니다.";
+      }
+    } else {
+      console.warn("포인트 데이터 형식이 올바르지 않습니다:", response);
+      coinError.value = "포인트 데이터를 가져오는데 실패했습니다.";
+    }
+  } catch (err) {
+    console.error("포인트 조회 에러:", err);
+
+    let errorMessage = "포인트를 불러오는데 실패했습니다.";
+
+    if (err.response?.status === 401) {
+      errorMessage = "로그인이 필요합니다.";
+    } else if (err.response?.status === 404) {
+      errorMessage = "사용자 정보를 찾을 수 없습니다.";
+    } else if (err.response?.status === 500) {
+      errorMessage = "서버 오류가 발생했습니다.";
+    } else if (err.message) {
+      errorMessage = `연결 오류: ${err.message}`;
+    }
+
+    coinError.value = errorMessage;
+  } finally {
+    loadingCoin.value = false;
+  }
+};
+
+// 누적 포인트 데이터 가져오기
+const fetchCumulativePoints = async () => {
+  try {
+    loadingCumulative.value = true;
+    cumulativeError.value = null;
+
+    // 인증 상태 확인
+    if (!authStore.isAuthenticated) {
+      console.warn("로그인이 필요합니다.");
+      return;
+    }
+
+    // 사용자 ID 가져오기
+    const userId = authStore.user?.id || authStore.user?.userId || 1;
+
+    console.log("Mypage 누적 포인트 데이터 가져오기 시작, userId:", userId);
+    const response = await getCumulativeCoin(userId);
+    console.log("받아온 누적 포인트 데이터:", response);
+
+    if (response.status === 200 && response.data !== undefined) {
+      // 백엔드 응답 구조에 따라 누적 포인트 값 추출
+      let cumulativeValue;
+
+      // 구조 1: { status: 200, data: 1500 }
+      if (typeof response.data === "number") {
+        cumulativeValue = response.data;
+      }
+      // 구조 2: { status: 200, message: "...", data: 1500 }
+      else if (response.data.data !== undefined) {
+        cumulativeValue = response.data.data;
+      }
+      // 구조 3: { data: 1500 }
+      else if (response.data !== undefined) {
+        cumulativeValue = response.data;
+      }
+
+      console.log("Mypage 추출된 누적 포인트 값:", cumulativeValue);
+
+      if (
+        cumulativeValue !== undefined &&
+        typeof cumulativeValue === "number"
+      ) {
+        avatarStore.setCumulativePoints(cumulativeValue);
+        console.log("Mypage 누적 포인트 업데이트 완료:", cumulativeValue);
+      } else {
+        console.warn("유효한 누적 포인트 값을 찾을 수 없습니다:", response);
+        cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
+      }
+    } else {
+      console.warn("누적 포인트 데이터 형식이 올바르지 않습니다:", response);
+      cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
+    }
+  } catch (err) {
+    console.error("Mypage 누적 포인트 조회 에러:", err);
+
+    let errorMessage = "누적 포인트를 불러오는데 실패했습니다.";
+
+    if (err.response?.status === 401) {
+      errorMessage = "로그인이 필요합니다.";
+    } else if (err.response?.status === 404) {
+      errorMessage = "사용자 정보를 찾을 수 없습니다.";
+    } else if (err.response?.status === 500) {
+      errorMessage = "서버 오류가 발생했습니다.";
+    } else if (err.message) {
+      errorMessage = `연결 오류: ${err.message}`;
+    }
+
+    cumulativeError.value = errorMessage;
+  } finally {
+    loadingCumulative.value = false;
+  }
+};
+
+// 컴포넌트 마운트 시 저장된 아바타 정보와 포인트 불러오기
 onMounted(() => {
   avatarStore.loadAvatar();
+  fetchCurrentCoin();
+  fetchCumulativePoints();
 });
 </script>
 
 <style scoped>
 .mypage-container {
-  min-height: 100vh;
+  height: 100vh;
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
   background: var(--color-bg);
   position: relative;
-  padding-top: 80px;
-  padding-bottom: 80px;
+  padding-top: 90px;
+  padding-bottom: 0;
   box-sizing: border-box;
   font-family: var(--font-main);
+  overflow: hidden;
 }
 .profile-section,
 .user-info-card,
@@ -231,8 +438,8 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   margin: 0 30px;
-  margin-top: 80px;
-  padding: 20px;
+  margin-top: 100px;
+  padding: 15px 0 0 0;
   border: 2px solid #ffffff;
   border-radius: 12px;
   background: var(--color-bg);
@@ -244,8 +451,8 @@ onMounted(() => {
 
 .avatar-container {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -253,22 +460,27 @@ onMounted(() => {
 
 .avatar-pixel {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .shoes-img,
-.glasses-img {
+.glasses-img,
+.title-img {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+.title-img {
+  z-index: 2;
 }
 
 .shoes-img {
@@ -302,8 +514,8 @@ onMounted(() => {
   justify-content: center;
 }
 .avatar-img {
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   z-index: 1;
 }
 .shirt-img,
@@ -312,8 +524,8 @@ onMounted(() => {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 100px;
-  height: 100px;
+  width: 140px;
+  height: 218px;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
@@ -327,10 +539,10 @@ onMounted(() => {
   z-index: 3;
 }
 .user-info-card {
-  margin-top: 8px;
+  margin-top: 2px;
   margin-left: 30px;
   margin-right: 30px;
-  padding: 10px 0;
+  padding: 8px 0;
   border: 2px solid #4318d1;
   border-radius: 12px;
   background: var(--color-bg);
@@ -384,6 +596,25 @@ onMounted(() => {
   font-size: 16px;
 }
 
+.coin-value.loading {
+  color: #666;
+  animation: pulse 1.5s infinite;
+}
+
+.coin-value.error {
+  color: #e74c3c;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
 .coin-icon {
   font-size: 16px;
 }
@@ -409,7 +640,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 0;
+  padding: 16px 0;
   border-bottom: 1px solid var(--color-border);
   font-size: 15px;
   color: var(--color-text);

@@ -141,7 +141,14 @@
 
     <!-- 연결하기 버튼 -->
     <div class="connect-section">
-      <button class="connect-btn" @click="connectAccounts">연결하기</button>
+      <button
+        class="connect-btn"
+        :class="{ disabled: !hasSelectedItems }"
+        :disabled="!hasSelectedItems"
+        @click="connectAccounts"
+      >
+        연결하기
+      </button>
     </div>
 
     <!-- 오픈뱅킹 연동 혜택 -->
@@ -522,6 +529,15 @@ const selectedSecurities = computed(() =>
   securitiesList.value.filter((security) => security.selected)
 );
 
+// 선택된 항목이 있는지 확인
+const hasSelectedItems = computed(() => {
+  return (
+    selectedBanks.value.length > 0 ||
+    selectedCards.value.length > 0 ||
+    selectedSecurities.value.length > 0
+  );
+});
+
 function goBack() {
   router.back();
 }
@@ -593,11 +609,6 @@ function connectAccounts() {
     }))
   );
 
-  if (selectedItems.length === 0) {
-    alert("연결할 항목을 선택해주세요.");
-    return;
-  }
-
   // 선택된 항목들을 저장하고 AccountAgreement 페이지로 이동
   console.log("선택된 항목들:", selectedItems);
 
@@ -613,9 +624,14 @@ function connectAccounts() {
 .account-link-select-container {
   max-width: 390px;
   margin: 0 auto;
-  min-height: 100vh;
+  height: 100vh;
   box-sizing: border-box;
   color: #333;
+  padding: 0 20px 120px 20px; /* 좌우 여백 추가, 하단 여백 추가 (고정 버튼 높이 + 패딩) */
+  background: #f3f4f6;
+  overflow-y: auto;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
 }
 
 .account-link-select-container::-webkit-scrollbar {
@@ -624,15 +640,20 @@ function connectAccounts() {
 
 /* 헤더 스타일 */
 .dictionary-header-bar {
-  margin-top: 32px;
-  position: relative;
+  margin-top: 0;
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   width: 100%;
-  height: 48px;
-  padding: 0;
-  margin-bottom: 30px;
+  max-width: 390px;
+  height: 56px;
+  padding: 0 20px;
+  margin-bottom: 18px;
   z-index: 1100;
+  background: #f3f4f6;
 }
 
 .dictionary-header-title {
@@ -644,9 +665,9 @@ function connectAccounts() {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #333;
+  font-size: var(--font-size-title-sub);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
   margin: 0;
 }
 
@@ -656,10 +677,10 @@ function connectAccounts() {
   justify-content: flex-start;
   background: none;
   border: none;
-  font-size: 22px;
+  font-size: 24px;
   color: #222;
   cursor: pointer;
-  padding: 2px 8px 2px 2px;
+  padding: 4px 8px 4px 0;
   border-radius: 8px;
   transition: background 0.15s;
   position: relative;
@@ -672,7 +693,9 @@ function connectAccounts() {
 
 /* 상단 제목 및 설명 */
 .header-section {
-  margin-bottom: 30px;
+  margin-top: 56px; /* 고정 헤더 높이만큼만 */
+  margin-bottom: 50px;
+  background: #f3f4f6;
 }
 
 .main-title {
@@ -693,39 +716,45 @@ function connectAccounts() {
 /* 탭 네비게이션 */
 .tab-navigation {
   display: flex;
-  background: white;
-  border-radius: 12px;
-  padding: 4px;
-  margin-bottom: 30px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border: none;
 }
 
 .tab-item {
   flex: 1;
   text-align: center;
-  padding: 12px 8px;
+  padding: 10px 10px;
   font-size: 14px;
   font-weight: 500;
   color: #666;
   cursor: pointer;
   border-radius: 8px;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   position: relative;
+  background: transparent;
+}
+
+.tab-item:last-child {
+  border-right: none;
 }
 
 .tab-item.active {
   color: white;
-  background: #8e74e3;
+  background: #4318d1;
 }
 
 .tab-item:hover:not(.active) {
   color: #333;
-  background: #f8f8f8;
+  background: rgba(255, 255, 255, 0.8);
 }
 
 .tab-text {
   font-size: 14px;
   font-weight: 500;
+  display: block;
+  line-height: 1.2;
 }
 
 /* 섹션 헤더 */
@@ -733,14 +762,17 @@ function connectAccounts() {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  padding: 20px 0 0 0;
+  background: #f3f4f6;
 }
 
 .section-title {
-  font-size: 18px;
-  font-weight: bold;
+  font-size: 16px;
+  font-weight: 600;
   color: #333;
   margin: 0;
+  padding: 0 20px;
 }
 
 .section-actions {
@@ -769,9 +801,19 @@ function connectAccounts() {
 /* 은행 목록 */
 .bank-list {
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-left: 0;
+  margin-right: 0;
+  border: 1px solid #e0e0e0;
+}
+
+/* 은행 섹션 */
+.bank-section {
+  margin-bottom: 50px;
+  margin-left: 0;
+  margin-right: 0;
+  background: #f3f4f6;
 }
 
 .bank-item {
@@ -825,8 +867,8 @@ function connectAccounts() {
 }
 
 .checkbox.checked {
-  background: #8e74e3;
-  border-color: #8e74e3;
+  background: #4318d1;
+  border-color: #4318d1;
 }
 
 .check-icon {
@@ -837,9 +879,19 @@ function connectAccounts() {
 /* 카드 목록 */
 .card-list {
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-left: 0;
+  margin-right: 0;
+  border: 1px solid #e0e0e0;
+}
+
+/* 카드 섹션 */
+.card-section {
+  margin-bottom: 50px;
+  margin-left: 0;
+  margin-right: 0;
+  background: #f3f4f6;
 }
 
 .card-item {
@@ -880,9 +932,19 @@ function connectAccounts() {
 /* 증권 목록 */
 .securities-list {
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-left: 0;
+  margin-right: 0;
+  border: 1px solid #e0e0e0;
+}
+
+/* 증권 섹션 */
+.securities-section {
+  margin-bottom: 50px;
+  margin-left: 0;
+  margin-right: 0;
+  background: #f3f4f6;
 }
 
 .security-item {
@@ -926,7 +988,7 @@ function connectAccounts() {
   border-radius: 12px;
   padding: 40px 20px;
   text-align: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0;
 }
 
 .empty-message p {
@@ -937,13 +999,20 @@ function connectAccounts() {
 
 /* 연결하기 버튼 */
 .connect-section {
-  margin-top: 40px;
-  margin-bottom: 40px;
+  position: fixed;
+  bottom: 80px; /* navbar 높이만큼 위로 이동 */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 390px;
+  background: transparent;
+  z-index: 1000; /* 다른 요소들 위에 표시 */
+  padding: 16px;
   text-align: center;
 }
 
 .connect-btn {
-  background: #8e74e3;
+  background: #4318d1;
   color: white;
   border: none;
   padding: 16px 32px;
@@ -957,31 +1026,46 @@ function connectAccounts() {
 }
 
 .connect-btn:hover {
-  background: #7a5fd8;
+  background: #3a16b8;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(142, 116, 227, 0.3);
+  box-shadow: 0 4px 12px rgba(67, 24, 209, 0.3);
 }
 
 .connect-btn:active {
   transform: translateY(0);
 }
 
+.connect-btn.disabled {
+  background-color: #ccc;
+  color: #888;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* 혜택 섹션 */
 .benefits-section {
-  margin-top: 40px;
-  margin-bottom: 40px;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  background: #f3f4f6;
+}
+
+.benefits-section .section-title {
+  margin-bottom: 20px;
 }
 
 .benefits-list {
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-left: 0;
+  margin-right: 0;
+  border: 1px solid #e0e0e0;
 }
 
 .benefit-item {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   padding: 20px;
   border-bottom: 1px solid #e0e0e0;
 }
@@ -993,7 +1077,7 @@ function connectAccounts() {
 .benefit-icon {
   width: 24px;
   height: 24px;
-  background: #8e74e3;
+  background: #4318d1;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1027,14 +1111,21 @@ function connectAccounts() {
 
 /* FAQ 섹션 */
 .faq-section {
-  margin-bottom: 40px;
+  margin-bottom: 50px;
+  background: #f3f4f6;
+}
+
+.faq-section .section-title {
+  margin-bottom: 20px;
 }
 
 .faq-list {
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-left: 0;
+  margin-right: 0;
+  border: 1px solid #e0e0e0;
 }
 
 .faq-item {
@@ -1092,6 +1183,10 @@ function connectAccounts() {
 
 @media (max-width: 540px) {
   .account-link-select-container {
+    max-width: 100vw;
+  }
+
+  .connect-section {
     max-width: 100vw;
   }
 }

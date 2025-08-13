@@ -44,15 +44,17 @@ const props = defineProps({
   fund: Object,
 });
 
+const emit = defineEmits(['favorite-removed']);
+
 const router = useRouter();
 const favoriteStore = useFavoriteStore();
 const isFavorite = computed(() => favoriteStore.isFavorite(props.fund));
 
 function goToDetail() {
   // 상품명을 기반으로 상세 페이지로 이동
-  const productName = props.fund.fundProductName;
-  if (productName) {
-    router.push(`/finance/fund/${productName}`);
+  const productId = props.fund.id;
+  if (productId) {
+    router.push(`/finance/fund/${productId}`);
   }
 }
 
@@ -63,6 +65,8 @@ function toggleFavorite() {
   if (isFavorite.value) {
     console.log('Removing fund from favorites');
     favoriteStore.removeFavorite(props.fund);
+    // 부모 컴포넌트로 찜 해제 이벤트 전달
+    emit('favorite-removed', props.fund);
   } else {
     console.log('Adding fund to favorites');
     favoriteStore.addFavorite(props.fund);

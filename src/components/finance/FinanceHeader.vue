@@ -1,8 +1,11 @@
 <template>
   <header class="finance-header">
-    <button class="icon-btn back-btn" @click="goBack">
-      <i class="fas fa-chevron-left"></i>
-    </button>
+    <div class="header-left">
+      <button class="icon-btn" @click="goBack">
+        <i class="fas fa-chevron-left"></i>
+      </button>
+    </div>
+
     <div class="header-icons">
       <button class="icon-btn" @click="goToDictionary">
         <i class="fas fa-search"></i>
@@ -44,16 +47,19 @@ const toggleFavorite = () => {
 <style scoped>
 .finance-header {
   width: 100%;
+  max-width: 390px;
+  height: 60px;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  background: var(--color-bg-light);
+  padding: 0 16px;
   position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
   max-width: 390px;
   background: var(--color-bg-light);
-  padding: 5px 0;
   min-height: 80px;
   z-index: 100;
 }
@@ -68,7 +74,7 @@ const toggleFavorite = () => {
   align-items: center;
 }
 .back-btn {
-  margin-right: 8px;
+  margin-left: 10px;
 }
 .header-title {
   position: absolute;
