@@ -121,21 +121,15 @@
         <span v-if="errors.type" class="error-message">{{ errors.type }}</span>
 
         <!-- 타입 풀일 때 즉시 안내 -->
-        <p
-          v-if="isSelectedTypeFull"
-          style="margin-top: 8px; color: #d32f2f; font-weight: 600"
-        >
+        <p v-if="isSelectedTypeFull" class="warning-text">
           {{ warningTextForType }}
         </p>
 
         <!-- 그룹 선택 시 필요한 포인트 안내 -->
-        <p v-if="type === 'GROUP'" style="margin-top: 8px; color: #555">
+        <p v-if="type === 'GROUP'" class="points-info">
           생성 필요 포인트: {{ requiredPoints.toLocaleString() }}P / 보유:
           {{ userPoints.toLocaleString() }}P
-          <span
-            v-if="userPoints < requiredPoints"
-            style="color: #d32f2f; font-weight: 600"
-          >
+          <span v-if="userPoints < requiredPoints" class="points-lack">
             ({{ lackAmount.toLocaleString() }}P 부족)
           </span>
         </p>
@@ -178,7 +172,10 @@
     <!-- 성공 모달 -->
     <ChallengeCreateSuccessModal
       :isVisible="showSuccessModal"
+      :challengeId="createdChallengeId"
+      :challengeType="createdChallengeType"
       @close="closeSuccessModal"
+      @view="handleViewCreatedChallenge"
     />
 
     <!-- 포인트 부족 모달 -->
@@ -232,6 +229,8 @@ const errors = reactive({
 // 모달 상태
 const showSuccessModal = ref(false);
 const showInsufficientPointsModal = ref(false);
+const createdChallengeId = ref(null);
+const createdChallengeType = ref(null);
 
 // 포인트/제한 관련 (Pinia)
 const userPoints = computed(() => challengeStore.points.userPoints);
@@ -319,6 +318,15 @@ const validateForm = () => {
   if (!startDate.value) {
     errors.startDate = '시작일을 선택해주세요.';
     isValid = false;
+  } else {
+    // 시작일이 생성일 기준 일주일 이내인지 검증
+    const startDiff = Math.floor(
+      (new Date(startDate.value) - new Date()) / 86400000
+    );
+    if (startDiff > 7) {
+      errors.startDate = '챌린지 시작일은 생성일 기준 일주일 이내여야 합니다.';
+      isValid = false;
+    }
   }
 
   // 종료일 검증
@@ -332,14 +340,28 @@ const validateForm = () => {
   ) {
     errors.endDate = '종료일은 시작일보다 늦어야 합니다.';
     isValid = false;
+  } else if (startDate.value && endDate.value) {
+    // 기간 검증 (3일 이상, 30일 이하)
+    const diffDays =
+      Math.floor(
+        (new Date(endDate.value) - new Date(startDate.value)) / 86400000
+      ) + 1;
+
+    if (diffDays < 3) {
+      errors.endDate = '챌린지 기간은 최소 3일 이상이어야 합니다.';
+      isValid = false;
+    } else if (diffDays > 30) {
+      errors.endDate = '챌린지 기간은 최대 30일까지 가능합니다.';
+      isValid = false;
+    }
   }
 
   // 목표 금액 검증
   if (goalValue.value <= 0) {
     errors.goalValue = '목표 금액을 입력해주세요.';
     isValid = false;
-  } else if (goalValue.value < 10000) {
-    errors.goalValue = '목표 금액은 10,000원 이상 입력해주세요.';
+  } else if (goalValue.value < 1000) {
+    errors.goalValue = '목표 금액은 1,000원 이상 입력해주세요.';
     isValid = false;
   }
 
@@ -348,8 +370,8 @@ const validateForm = () => {
     if (!roomPassword.value.trim()) {
       errors.roomPassword = '비밀번호를 입력해주세요.';
       isValid = false;
-    } else if (roomPassword.value.length < 4) {
-      errors.roomPassword = '비밀번호는 4자 이상 입력해주세요.';
+    } else if (!/^\d{4}$/.test(roomPassword.value)) {
+      errors.roomPassword = '비밀번호는 숫자 4자리여야 합니다.';
       isValid = false;
     }
   }
@@ -419,16 +441,62 @@ const createChallenge = async () => {
   try {
     loading.value = true;
     const token = auth.accessToken;
-    await axios.post('/api/challenge/create', payload, {
+    const response = await axios.post('/api/challenge/create', payload, {
       headers: { Authorization: `Bearer ${token}` },
     });
+    console.log('API 응답 전체:', response);
+    console.log('response.data:', response.data);
+    console.log('response.data.data:', response.data.data);
+
+    // API 응답 구조에 따라 challengeId 추출
+    const challengeId =
+      response.data.data?.challengeId || response.data.challengeId;
+    createdChallengeId.value = challengeId; // 생성된 챌린지 ID 저장
+    createdChallengeType.value = type.value; // 생성된 챌린지 유형 저장
     showSuccessModal.value = true;
+    console.log('생성된 챌린지 ID:', createdChallengeId.value);
+    console.log('생성된 챌린지 타입:', createdChallengeType.value);
+    console.log('모달 표시 상태:', showSuccessModal.value);
   } catch (e) {
-    const msg =
-      e?.response?.data?.message ||
-      e?.message ||
-      '챌린지 생성 중 오류가 발생했어요.';
-    alert(msg);
+    const serverMessage = e?.response?.data?.message || '';
+
+    // 서버 에러 메시지를 해당 필드에 매핑
+    if (serverMessage.includes('시작일은 종료일보다 이후일 수 없습니다')) {
+      errors.endDate = '종료일은 시작일보다 늦어야 합니다.';
+    } else if (
+      serverMessage.includes('챌린지 기간은 최소 3일 이상이어야 합니다')
+    ) {
+      errors.endDate = '챌린지 기간은 최소 3일 이상이어야 합니다.';
+    } else if (
+      serverMessage.includes('챌린지 기간은 최대 30일까지 가능합니다')
+    ) {
+      errors.endDate = '챌린지 기간은 최대 30일까지 가능합니다.';
+    } else if (
+      serverMessage.includes(
+        '챌린지 시작일은 생성일 기준 일주일 이내여야 합니다'
+      )
+    ) {
+      errors.startDate = '챌린지 시작일은 생성일 기준 일주일 이내여야 합니다.';
+    } else if (
+      serverMessage.includes(
+        '챌린지 목표 금액은 최소 1,000원 이상이어야 합니다'
+      )
+    ) {
+      errors.goalValue = '챌린지 목표 금액은 최소 1,000원 이상이어야 합니다.';
+    } else if (
+      serverMessage.includes(
+        '비밀번호 사용 여부가 true일 때는 비밀번호가 필수입니다'
+      )
+    ) {
+      errors.roomPassword = '비밀번호를 입력해주세요.';
+    } else if (serverMessage.includes('비밀번호는 숫자 4자리여야 합니다')) {
+      errors.roomPassword = '비밀번호는 숫자 4자리여야 합니다.';
+    } else {
+      // 기타 서버 에러는 alert로 표시
+      const msg =
+        serverMessage || e?.message || '챌린지 생성 중 오류가 발생했어요.';
+      alert(msg);
+    }
   } finally {
     loading.value = false;
   }
@@ -436,7 +504,22 @@ const createChallenge = async () => {
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false;
-  router.back();
+  router.push('/challenge'); // 홈으로
+};
+
+const handleViewCreatedChallenge = () => {
+  const id = createdChallengeId.value;
+  const t = (createdChallengeType.value || '').toUpperCase();
+  showSuccessModal.value = false;
+
+  // 요구사항: PERSONAL -> /challenge/personal-detail/{id}
+  //           공통/그 외  -> /challenge/group-detail/{id}
+  const path =
+    t === 'PERSONAL'
+      ? `/challenge/personal-detail/${id}`
+      : `/challenge/group-detail/${id}`;
+
+  router.push(path);
 };
 
 const closeInsufficientPointsModal = () =>
@@ -448,7 +531,6 @@ const handleChargePoints = () => {
   // router.push('/points/charge');
 };
 </script>
-
 <style scoped>
 .challenge-create {
   padding: 10px 16px 20px 16px;
@@ -736,5 +818,25 @@ const handleChargePoints = () => {
 .btn-cancel:hover,
 .btn-create:hover {
   transform: translateY(-1px);
+}
+
+.warning-text {
+  margin-top: 4px;
+  color: #ff4757;
+  font-size: 12px;
+  font-family: var(--font-main);
+}
+
+.points-info {
+  margin-top: 4px;
+  color: #555;
+  font-size: 12px;
+  font-family: var(--font-main);
+}
+
+.points-lack {
+  color: #ff4757;
+  font-size: 12px;
+  font-family: var(--font-main);
 }
 </style>
