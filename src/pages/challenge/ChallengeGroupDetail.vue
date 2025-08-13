@@ -450,6 +450,9 @@ const categoryTheme = computed(() => {
   border-radius: 12px;
   padding: 12px;
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .avatar-name {
@@ -463,12 +466,14 @@ const categoryTheme = computed(() => {
 
 .avatar-progress {
   margin-top: 6px;
+  width: 100%;
 }
 .avatar-progress-bar {
   height: 6px;
   background-color: #e0e0e0;
   border-radius: 3px;
   overflow: hidden;
+  width: 100%;
 }
 .avatar-progress-fill {
   height: 100%;
