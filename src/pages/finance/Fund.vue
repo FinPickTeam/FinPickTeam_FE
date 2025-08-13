@@ -59,6 +59,8 @@
           </div>
         </div>
 
+
+
         <!-- 로딩 상태 -->
         <div v-if="isLoadingRecommend">
           <LoadingSpinner message="추천 상품을 불러오는 중..." />
