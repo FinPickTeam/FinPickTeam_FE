@@ -8,7 +8,11 @@
           id="challenge-title"
           v-model="title"
           placeholder="챌린지 제목을 입력하세요"
+          :class="{ error: errors.title }"
         />
+        <span v-if="errors.title" class="error-message">{{
+          errors.title
+        }}</span>
       </div>
 
       <div class="form-group">
@@ -18,16 +22,33 @@
           v-model="description"
           placeholder="챌린지에 대한 설명을 입력하세요"
           rows="4"
+          :class="{ error: errors.description }"
         ></textarea>
+        <span v-if="errors.description" class="error-message">{{
+          errors.description
+        }}</span>
       </div>
 
       <div class="form-group">
         <label for="challenge-period">챌린지 기간</label>
         <div class="date-inputs">
-          <input type="date" id="start-date" v-model="startDate" />
+          <input
+            type="date"
+            id="start-date"
+            v-model="startDate"
+            :class="{ error: errors.startDate }"
+          />
           <span>~</span>
-          <input type="date" id="end-date" v-model="endDate" />
+          <input
+            type="date"
+            id="end-date"
+            v-model="endDate"
+            :class="{ error: errors.endDate }"
+          />
         </div>
+        <span v-if="errors.startDate || errors.endDate" class="error-message">
+          {{ errors.startDate || errors.endDate }}
+        </span>
       </div>
 
       <div class="form-group">
@@ -39,9 +60,13 @@
             :value="formatAmount(goalValue)"
             @input="handleAmountInput"
             placeholder="목표 금액을 입력하세요"
+            :class="{ error: errors.goalValue }"
           />
           <span class="amount-unit">원</span>
         </div>
+        <span v-if="errors.goalValue" class="error-message">{{
+          errors.goalValue
+        }}</span>
         <div class="amount-buttons">
           <button
             v-for="unit in [10000, 100000, 1000000]"
@@ -62,6 +87,7 @@
           id="challenge-category"
           v-model="categoryId"
           class="category-select"
+          :class="{ error: errors.categoryId }"
         >
           <option :value="1">전체 소비 줄이기</option>
           <option :value="2">식비 줄이기</option>
@@ -69,6 +95,9 @@
           <option :value="4">교통비 줄이기</option>
           <option :value="5">미용·쇼핑 줄이기</option>
         </select>
+        <span v-if="errors.categoryId" class="error-message">{{
+          errors.categoryId
+        }}</span>
       </div>
 
       <div class="form-group">
@@ -89,6 +118,7 @@
             <span>소그룹 챌린지</span>
           </label>
         </div>
+        <span v-if="errors.type" class="error-message">{{ errors.type }}</span>
       </div>
 
       <div class="form-group" v-if="type === 'GROUP'">
@@ -110,7 +140,11 @@
               v-model="roomPassword"
               placeholder="비밀번호를 입력하세요"
               maxlength="20"
+              :class="{ error: errors.roomPassword }"
             />
+            <span v-if="errors.roomPassword" class="error-message">{{
+              errors.roomPassword
+            }}</span>
           </div>
         </div>
       </div>
@@ -124,7 +158,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -140,12 +174,28 @@ const categoryId = ref(1); // 카테고리 ID   (1: 전체 소비 줄이기, 2: 
 const usePassword = ref(false); // 비밀번호 사용 여부
 const roomPassword = ref(''); // 비밀번호
 
+// 에러 메시지 관리
+const errors = reactive({
+  title: '',
+  description: '',
+  startDate: '',
+  endDate: '',
+  goalValue: '',
+  categoryId: '',
+  type: '',
+  roomPassword: '',
+});
+
 const goBack = () => {
   router.back();
 };
 
 const addAmount = (amount) => {
   goalValue.value += amount;
+  // 금액 변경 시 에러 메시지 초기화
+  if (errors.goalValue) {
+    errors.goalValue = '';
+  }
 };
 
 const formatAmount = (value) => {
@@ -156,9 +206,85 @@ const handleAmountInput = (event) => {
   // 콤마 제거 후 숫자만 추출
   const numericValue = event.target.value.replace(/,/g, '');
   goalValue.value = parseInt(numericValue) || 0;
+  // 금액 입력 시 에러 메시지 초기화
+  if (errors.goalValue) {
+    errors.goalValue = '';
+  }
+};
+
+const validateForm = () => {
+  // 에러 메시지 초기화
+  Object.keys(errors).forEach((key) => {
+    errors[key] = '';
+  });
+
+  let isValid = true;
+
+  // 제목 검증
+  if (!title.value.trim()) {
+    errors.title = '챌린지 제목을 입력해주세요.';
+    isValid = false;
+  } else if (title.value.trim().length < 2) {
+    errors.title = '챌린지 제목은 2자 이상 입력해주세요.';
+    isValid = false;
+  }
+
+  // 설명 검증
+  if (!description.value.trim()) {
+    errors.description = '챌린지 설명을 입력해주세요.';
+    isValid = false;
+  } else if (description.value.trim().length < 10) {
+    errors.description = '챌린지 설명은 10자 이상 입력해주세요.';
+    isValid = false;
+  }
+
+  // 시작일 검증
+  if (!startDate.value) {
+    errors.startDate = '시작일을 선택해주세요.';
+    isValid = false;
+  }
+
+  // 종료일 검증
+  if (!endDate.value) {
+    errors.endDate = '종료일을 선택해주세요.';
+    isValid = false;
+  } else if (
+    startDate.value &&
+    endDate.value &&
+    startDate.value >= endDate.value
+  ) {
+    errors.endDate = '종료일은 시작일보다 늦어야 합니다.';
+    isValid = false;
+  }
+
+  // 목표 금액 검증
+  if (goalValue.value <= 0) {
+    errors.goalValue = '목표 금액을 입력해주세요.';
+    isValid = false;
+  } else if (goalValue.value < 10000) {
+    errors.goalValue = '목표 금액은 10,000원 이상 입력해주세요.';
+    isValid = false;
+  }
+
+  // 비밀번호 검증 (그룹 챌린지이고 비밀번호 사용 시)
+  if (type.value === 'GROUP' && usePassword.value) {
+    if (!roomPassword.value.trim()) {
+      errors.roomPassword = '비밀번호를 입력해주세요.';
+      isValid = false;
+    } else if (roomPassword.value.length < 4) {
+      errors.roomPassword = '비밀번호는 4자 이상 입력해주세요.';
+      isValid = false;
+    }
+  }
+
+  return isValid;
 };
 
 const createChallenge = () => {
+  if (!validateForm()) {
+    return; // 유효성 검사 실패 시 함수 종료
+  }
+
   // 챌린지 생성 로직
   const challengeData = {
     title: title.value,
@@ -223,6 +349,21 @@ const createChallenge = () => {
   outline: none;
   border-color: var(--color-main);
   background: white;
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.category-select.error {
+  border-color: #ff4757;
+  background: #fff5f5;
+}
+
+.error-message {
+  display: block;
+  color: #ff4757;
+  font-size: 12px;
+  margin-top: 4px;
+  font-family: var(--font-main);
 }
 
 .date-inputs {
