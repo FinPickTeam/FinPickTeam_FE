@@ -8,6 +8,7 @@
             id="challenge-category"
             v-model="categoryId"
             class="category-select"
+            :class="{ error: errors.categoryId }"
         >
           <option :value="1">전체 소비 줄이기</option>
           <option :value="2">식비 줄이기</option>
@@ -15,7 +16,9 @@
           <option :value="4">교통비 줄이기</option>
           <option :value="5">미용·쇼핑 줄이기</option>
         </select>
+        <span v-if="errors.categoryId" class="error-message">{{ errors.categoryId }}</span>
       </div>
+
       <div class="form-group">
         <label for="challenge-title">챌린지 제목</label>
         <input
@@ -23,7 +26,9 @@
             id="challenge-title"
             v-model="title"
             placeholder="챌린지 제목을 입력하세요"
+            :class="{ error: errors.title }"
         />
+        <span v-if="errors.title" class="error-message">{{ errors.title }}</span>
       </div>
 
       <div class="form-group">
@@ -33,16 +38,21 @@
             v-model="description"
             placeholder="챌린지에 대한 설명을 입력하세요"
             rows="4"
+            :class="{ error: errors.description }"
         ></textarea>
+        <span v-if="errors.description" class="error-message">{{ errors.description }}</span>
       </div>
 
       <div class="form-group">
         <label for="challenge-period">챌린지 기간</label>
         <div class="date-inputs">
-          <input type="date" id="start-date" v-model="startDate" />
+          <input type="date" id="start-date" v-model="startDate" :class="{ error: errors.startDate }" />
           <span>~</span>
-          <input type="date" id="end-date" v-model="endDate" />
+          <input type="date" id="end-date" v-model="endDate" :class="{ error: errors.endDate }" />
         </div>
+        <span v-if="errors.startDate || errors.endDate" class="error-message">
+          {{ errors.startDate || errors.endDate }}
+        </span>
       </div>
 
       <div class="form-group">
@@ -54,9 +64,11 @@
               :value="formatAmount(goalValue)"
               @input="handleAmountInput"
               placeholder="목표 금액을 입력하세요"
+              :class="{ error: errors.goalValue }"
           />
           <span class="amount-unit">원</span>
         </div>
+        <span v-if="errors.goalValue" class="error-message">{{ errors.goalValue }}</span>
         <div class="amount-buttons">
           <button
               v-for="unit in [10000, 100000, 1000000]"
@@ -82,18 +94,17 @@
             <span>소그룹 챌린지</span>
           </label>
         </div>
+        <span v-if="errors.type" class="error-message">{{ errors.type }}</span>
 
         <!-- 타입 풀일 때 즉시 안내 -->
-        <p v-if="isSelectedTypeFull" style="margin-top:8px;color:#d32f2f;font-weight:600;">
+        <p v-if="isSelectedTypeFull" class="warning-text">
           {{ warningTextForType }}
         </p>
 
         <!-- 그룹 선택 시 필요한 포인트 안내 -->
-        <p v-if="type === 'GROUP'" style="margin-top:8px;color:#555;">
+        <p v-if="type === 'GROUP'" class="points-info">
           생성 필요 포인트: {{ requiredPoints.toLocaleString() }}P / 보유: {{ userPoints.toLocaleString() }}P
-          <span v-if="userPoints < requiredPoints" style="color:#d32f2f;font-weight:600;">
-            ({{ lackAmount.toLocaleString() }}P 부족)
-          </span>
+          <span v-if="userPoints < requiredPoints" class="points-lack"> ({{ lackAmount.toLocaleString() }}P 부족) </span>
         </p>
       </div>
 
@@ -116,7 +127,9 @@
                 v-model="roomPassword"
                 placeholder="비밀번호를 입력하세요(숫자 4자리)"
                 maxlength="4"
+                :class="{ error: errors.roomPassword }"
             />
+            <span v-if="errors.roomPassword" class="error-message">{{ errors.roomPassword }}</span>
           </div>
         </div>
       </div>
@@ -131,8 +144,9 @@
     <ChallengeCreateSuccessModal
         :isVisible="showSuccessModal"
         :challengeId="createdChallengeId"
-        :challengeType="type"
+        :challengeType="createdChallengeType"
         @close="closeSuccessModal"
+        @view="handleViewCreatedChallenge"
     />
 
     <!-- 포인트 부족 모달 -->
@@ -147,7 +161,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
@@ -172,12 +186,23 @@ const usePassword = ref(false);
 const roomPassword = ref('');
 const loading = ref(false);
 
-// 모달 상태
+// 에러 메시지 관리
+const errors = reactive({
+  title: '',
+  description: '',
+  startDate: '',
+  endDate: '',
+  goalValue: '',
+  categoryId: '',
+  type: '',
+  roomPassword: '',
+});
+
+// 모달 상태 + 생성 결과
 const showSuccessModal = ref(false);
 const showInsufficientPointsModal = ref(false);
-
-// 방금 생성한 챌린지 정보
 const createdChallengeId = ref(null);
+const createdChallengeType = ref(null);
 
 // 포인트/제한 관련 (Pinia)
 const userPoints = computed(() => challengeStore.points.userPoints);
@@ -193,46 +218,103 @@ const warningTextForType = computed(() => {
   return '';
 });
 
-// 직진입 대비: 정책 포인트 세팅 + 코인 스냅샷 보장
+// 직진입 대비: 정책 포인트 세팅 + 코인 스냅샷 보장 + 참여중 목록 로드
 onMounted(async () => {
   challengeStore.setRequiredPoints({ GROUP: 100, PERSONAL: 0, COMMON: 0 });
   if (!challengeStore.points.updatedAt) {
     await challengeStore.fetchCoinStatus();
   }
-
-  // 생성 페이지에서도 참여중 목록을 불러와 counts 채움 (홈에만 의존 X)
   try {
-      const list = await getChallengeList({ participating: true });
-      challengeStore.updateCountsFromList(Array.isArray(list) ? list : []);
-    } catch (e) {
-      console.warn('[Create] failed to load participating list:', e?.message || e);
-      challengeStore.resetCounts();
-    }
+    const list = await getChallengeList({ participating: true });
+    challengeStore.updateCountsFromList(Array.isArray(list) ? list : []);
+  } catch (e) {
+    console.warn('[Create] failed to load participating list:', e?.message || e);
+    challengeStore.resetCounts();
+  }
 });
 
 const routerBack = () => router.back();
-const addAmount = (amount) => (goalValue.value += amount);
-const formatAmount = (v) => v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-const handleAmountInput = (e) => {
-  const numericValue = e.target.value.replace(/,/g, '');
-  goalValue.value = parseInt(numericValue) || 0;
+
+const addAmount = (amount) => {
+  goalValue.value += amount;
+  if (errors.goalValue) errors.goalValue = '';
 };
 
-const validateClient = () => {
-  if (!title.value.trim()) return '제목을 입력해주세요.';
-  if (!description.value.trim()) return '설명을 입력해주세요.';
-  if (!startDate.value || !endDate.value) return '기간을 선택해주세요.';
-  if (new Date(startDate.value) > new Date(endDate.value)) return '시작일이 종료일보다 이후일 수 없어요.';
-  const diffDays = Math.floor((new Date(endDate.value) - new Date(startDate.value)) / 86400000) + 1;
-  if (diffDays < 3) return '기간은 최소 3일 이상이어야 해요.';
-  if (diffDays > 30) return '기간은 최대 30일까지 가능해요.';
-  const startDiff = Math.floor((new Date(startDate.value) - new Date()) / 86400000);
-  if (startDiff > 7) return '시작일은 7일 이내여야 해요.';
-  if (goalValue.value < 1000) return '목표금액은 1,000원 이상이어야 해요.';
-  if (goalValue.value > 10000000) return '목표금액은 10,000,000원 이하여야 해요.';
-  if (type.value === 'GROUP' && usePassword.value && !/^\d{4}$/.test(roomPassword.value))
-    return '비밀번호는 숫자 4자리여야 해요.';
-  return null;
+const formatAmount = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+
+const handleAmountInput = (event) => {
+  const numericValue = event.target.value.replace(/,/g, '');
+  goalValue.value = parseInt(numericValue) || 0;
+  if (errors.goalValue) errors.goalValue = '';
+};
+
+const validateForm = () => {
+  Object.keys(errors).forEach((k) => (errors[k] = ''));
+  let isValid = true;
+
+  if (!title.value.trim()) {
+    errors.title = '챌린지 제목을 입력해주세요.';
+    isValid = false;
+  } else if (title.value.trim().length < 2) {
+    errors.title = '챌린지 제목은 2자 이상 입력해주세요.';
+    isValid = false;
+  }
+
+  if (!description.value.trim()) {
+    errors.description = '챌린지 설명을 입력해주세요.';
+    isValid = false;
+  } else if (description.value.trim().length < 10) {
+    errors.description = '챌린지 설명은 10자 이상 입력해주세요.';
+    isValid = false;
+  }
+
+  if (!startDate.value) {
+    errors.startDate = '시작일을 선택해주세요.';
+    isValid = false;
+  } else {
+    const startDiff = Math.floor((new Date(startDate.value) - new Date()) / 86400000);
+    if (startDiff > 7) {
+      errors.startDate = '챌린지 시작일은 생성일 기준 일주일 이내여야 합니다.';
+      isValid = false;
+    }
+  }
+
+  if (!endDate.value) {
+    errors.endDate = '종료일을 선택해주세요.';
+    isValid = false;
+  } else if (startDate.value && endDate.value && startDate.value >= endDate.value) {
+    errors.endDate = '종료일은 시작일보다 늦어야 합니다.';
+    isValid = false;
+  } else if (startDate.value && endDate.value) {
+    const diffDays = Math.floor((new Date(endDate.value) - new Date(startDate.value)) / 86400000) + 1;
+    if (diffDays < 3) {
+      errors.endDate = '챌린지 기간은 최소 3일 이상이어야 합니다.';
+      isValid = false;
+    } else if (diffDays > 30) {
+      errors.endDate = '챌린지 기간은 최대 30일까지 가능합니다.';
+      isValid = false;
+    }
+  }
+
+  if (goalValue.value <= 0) {
+    errors.goalValue = '목표 금액을 입력해주세요.';
+    isValid = false;
+  } else if (goalValue.value < 1000) {
+    errors.goalValue = '목표 금액은 1,000원 이상 입력해주세요.';
+    isValid = false;
+  }
+
+  if (type.value === 'GROUP' && usePassword.value) {
+    if (!roomPassword.value.trim()) {
+      errors.roomPassword = '비밀번호를 입력해주세요.';
+      isValid = false;
+    } else if (!/^\d{4}$/.test(roomPassword.value)) {
+      errors.roomPassword = '비밀번호는 숫자 4자리여야 합니다.';
+      isValid = false;
+    }
+  }
+
+  return isValid;
 };
 
 const createChallenge = async () => {
@@ -242,9 +324,8 @@ const createChallenge = async () => {
     return;
   }
 
-  // 1) 폼 유효성
-  const err = validateClient();
-  if (err) return alert(err);
+  // 1) 폼 유효성 검사
+  if (!validateForm()) return;
 
   // 2) 포인트 확인
   if (requiredPoints.value > 0 && userPoints.value < requiredPoints.value) {
@@ -269,16 +350,42 @@ const createChallenge = async () => {
     loading.value = true;
     const token = auth.accessToken;
 
-    // 생성 응답에서 challengeId 추출 (CommonResponseDTO<ChallengeCreateResponseDTO>)
-    const res = await axios.post('/api/challenge/create', payload, { headers: { Authorization: `Bearer ${token}` } });
-    const created = res?.data?.data;
-    createdChallengeId.value = created?.challengeId ?? null;
+    const response = await axios.post('/api/challenge/create', payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
 
-    // 생성 성공 모달 오픈
+    // CommonResponseDTO<ChallengeCreateResponseDTO> 에서 추출
+    const created = response?.data?.data;
+    const challengeId = created?.challengeId ?? response?.data?.challengeId ?? null;
+
+    createdChallengeId.value = challengeId;
+    createdChallengeType.value = type.value;
+
     showSuccessModal.value = true;
+
+    console.log('[Create] createdChallengeId:', createdChallengeId.value);
+    console.log('[Create] createdChallengeType:', createdChallengeType.value);
   } catch (e) {
-    const msg = e?.response?.data?.message || e?.message || '챌린지 생성 중 오류가 발생했어요.';
-    alert(msg);
+    const serverMessage = e?.response?.data?.message || '';
+
+    if (serverMessage.includes('시작일은 종료일보다 이후일 수 없습니다')) {
+      errors.endDate = '종료일은 시작일보다 늦어야 합니다.';
+    } else if (serverMessage.includes('챌린지 기간은 최소 3일 이상이어야 합니다')) {
+      errors.endDate = '챌린지 기간은 최소 3일 이상이어야 합니다.';
+    } else if (serverMessage.includes('챌린지 기간은 최대 30일까지 가능합니다')) {
+      errors.endDate = '챌린지 기간은 최대 30일까지 가능합니다.';
+    } else if (serverMessage.includes('챌린지 시작일은 생성일 기준 일주일 이내여야 합니다')) {
+      errors.startDate = '챌린지 시작일은 생성일 기준 일주일 이내여야 합니다.';
+    } else if (serverMessage.includes('챌린지 목표 금액은 최소 1,000원 이상이어야 합니다')) {
+      errors.goalValue = '챌린지 목표 금액은 최소 1,000원 이상이어야 합니다.';
+    } else if (serverMessage.includes('비밀번호 사용 여부가 true일 때는 비밀번호가 필수입니다')) {
+      errors.roomPassword = '비밀번호를 입력해주세요.';
+    } else if (serverMessage.includes('비밀번호는 숫자 4자리여야 합니다')) {
+      errors.roomPassword = '비밀번호는 숫자 4자리여야 합니다.';
+    } else {
+      const msg = serverMessage || e?.message || '챌린지 생성 중 오류가 발생했어요.';
+      alert(msg);
+    }
   } finally {
     loading.value = false;
   }
@@ -286,9 +393,24 @@ const createChallenge = async () => {
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false;
-  router.push('/challenge'); // 닫기 → 목록으로
+  router.push('/challenge'); // 홈/목록으로
 };
-const closeInsufficientPointsModal = () => (showInsufficientPointsModal.value = false);
+
+const handleViewCreatedChallenge = () => {
+  const id = createdChallengeId.value;
+  const t = (createdChallengeType.value || '').toUpperCase();
+  showSuccessModal.value = false;
+
+  const path = t === 'PERSONAL'
+      ? `/challenge/personal-detail/${id}`
+      : t === 'GROUP'
+          ? `/challenge/group-detail/${id}`
+          : `/challenge/common-detail/${id}`;
+
+  router.push(path);
+};
+
+const closeInsufficientPointsModal = () => (showSuccessModal.value = false);
 const handleChargePoints = () => {
   console.log('포인트 충전 페이지로 이동');
   closeInsufficientPointsModal();
@@ -330,7 +452,8 @@ const handleChargePoints = () => {
   font-family: var(--font-main);
 }
 
-.form-group input, .form-group textarea {
+.form-group input,
+.form-group textarea {
   width: 100%;
   padding: 12px 16px;
   border: 1px solid #ddd;
@@ -340,10 +463,26 @@ const handleChargePoints = () => {
   background: #f8f9fa;
 }
 
-.form-group input:focus, .form-group textarea:focus {
+.form-group input:focus,
+.form-group textarea:focus {
   outline: none;
   border-color: var(--color-main);
   background: white;
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.category-select.error {
+  border-color: #ff4757;
+  background: #fff5f5;
+}
+
+.error-message {
+  display: block;
+  color: #ff4757;
+  font-size: 12px;
+  margin-top: 4px;
+  font-family: var(--font-main);
 }
 
 .date-inputs {
@@ -536,7 +675,8 @@ const handleChargePoints = () => {
   margin-top: 32px;
 }
 
-.btn-cancel, .btn-create {
+.btn-cancel,
+.btn-create {
   flex: 1;
   padding: 14px 20px;
   border: none;
@@ -554,11 +694,36 @@ const handleChargePoints = () => {
 }
 
 .btn-create {
-  background: linear-gradient(135deg, var(--color-main) 0%, var(--color-main-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
   color: white;
 }
 
-.btn-cancel:hover, .btn-create:hover {
+.btn-cancel:hover,
+.btn-create:hover {
   transform: translateY(-1px);
+}
+
+.warning-text {
+  margin-top: 4px;
+  color: #ff4757;
+  font-size: 12px;
+  font-family: var(--font-main);
+}
+
+.points-info {
+  margin-top: 4px;
+  color: #555;
+  font-size: 12px;
+  font-family: var(--font-main);
+}
+
+.points-lack {
+  color: #ff4757;
+  font-size: 12px;
+  font-family: var(--font-main);
 }
 </style>

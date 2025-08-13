@@ -10,10 +10,9 @@ import './assets/main.css';
 import 'v-calendar/style.css';
 
 const app = createApp(App);
-const pinia = createPinia();
 
-// ★ Pinia 영구 저장 플러그인 연결
-pinia.use(piniaPluginPersistedstate);
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate); // ★ Pinia 영구 저장 플러그인 연결
 
 app.use(setupCalendar, { componentPrefix: 'V' });
 app.use(pinia);

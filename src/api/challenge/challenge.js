@@ -29,3 +29,11 @@ export const getChallengeResult = (id) =>
 // 결과 확인 처리
 export const confirmChallengeResult = (id) =>
     api.patch(`/challenge/${id}/result/confirm`).then((res) => res.data?.data);
+
+// 공통 챌린지 현재 랭킹 조회 (전체 리스트)
+export const getCommonChallengeRank = (challengeId) =>
+    api.get(`/challenge/rank/${challengeId}`).then(res => res.data);
+
+// 공통 챌린지 랭킹 강제 새로고침
+export const refreshCommonChallengeRank = (challengeId) =>
+    api.post(`/challenge/rank/${challengeId}/refresh`).then(res => res.data);
