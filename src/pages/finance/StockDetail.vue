@@ -223,23 +223,31 @@
           찜한 주식과 나의 종목, 지금 바로 비교해 보세요!
         </p>
         <p class="action-subtext">아래 버튼을 눌러 비교 페이지로 이동합니다</p>
-        <button class="action-btn" @click="goToProduct">이동하기</button>
+        <button class="action-btn" @click="openBottomSheet">주식 선택</button>
       </div>
+      <!-- 바텀시트 -->
+      <StockBottomSheet
+        v-model:open="bottomSheetOpen"
+        :base-id="String(route.params.id)"
+        @confirm="goCompare"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, unref } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
 import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
 import { getStockDetail, getStockReturns } from '@/api';
 import StockChart from '@/components/finance/stock/StockChart.vue';
 import loadingImg from '@/assets/stock_logo/loading.png';
 import startImg from '@/assets/stock_logo/start.png';
+import StockBottomSheet from '@/components/finance/stock/StockBottomSheet.vue';
 
 const route = useRoute();
+const router = useRouter();
 const favoriteStore = useFavoriteStore();
 
 // 상품 데이터
@@ -256,7 +264,6 @@ const endDate = ref('');
 const simulationResult = ref('');
 const simulationLoading = ref(false);
 const hasResult = computed(() => !!String(simulationResult.value ?? '').trim());
-
 const profitNumber = computed(() => {
   const v = simulationResult.value;
   const n =
@@ -270,6 +277,9 @@ const isFlat = computed(() => profitNumber.value === 0);
 const currentIcon = computed(() =>
   simulationLoading.value ? loadingImg : startImg
 );
+
+// 모달달 상태관리
+const bottomSheetOpen = ref(false);
 
 // "+27,182" 같은 문자열/숫자 모두 처리 → "27,182"로 반환
 const formattedAbsAmount = computed(() => {
@@ -385,6 +395,21 @@ function toggleFavorite() {
   } else {
     favoriteStore.addFavorite(product.value);
   }
+}
+//모달창 열기
+function openBottomSheet() {
+  bottomSheetOpen.value = true;
+  console.log(bottomSheetOpen.value);
+}
+
+function goCompare(ids) {
+  bottomSheetOpen.value = false;
+  const withParam = (ids || []).slice(0, 2).join(',');
+  router.push({
+    name: 'StockCompare',
+    params: { id: String(route.params.id) },
+    query: { with: withParam },
+  });
 }
 </script>
 

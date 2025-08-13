@@ -3,16 +3,13 @@
     <div class="modal-content" @click.stop>
       <!-- 확인 아이콘 -->
       <div class="confirm-icon">
-        <div class="confirm-circle" :class="{ 'success-circle': mode === 'success' }">
-          <span v-if="mode === 'confirm'" class="confirm-question">?</span>
-          <span v-else class="success-check">✓</span>
+        <div class="confirm-circle">
+          <span class="confirm-question">?</span>
         </div>
       </div>
 
       <!-- 제목 -->
-      <h2 class="modal-title">
-        {{ mode === 'confirm' ? '챌린지 참여 확인' : '참여 완료!' }}
-      </h2>
+      <h2 class="modal-title">챌린지 참여 확인</h2>
 
       <!-- 챌린지 정보 -->
       <div class="challenge-preview" v-if="challenge">
@@ -20,39 +17,37 @@
         <div class="challenge-details">
           <div class="detail-item">
             <span class="detail-label">목표 금액</span>
-            <span class="detail-value">{{ challenge.goalValue?.toLocaleString() }}원</span>
+            <span class="detail-value"
+              >{{ challenge.goalValue?.toLocaleString() }}원</span
+            >
           </div>
           <div class="detail-item">
             <span class="detail-label">참여 기간</span>
-            <span class="detail-value">{{ formatDateRange(challenge.startDate, challenge.endDate) }}</span>
+            <span class="detail-value">{{
+              formatDateRange(challenge.startDate, challenge.endDate)
+            }}</span>
           </div>
           <div class="detail-item">
             <span class="detail-label">현재 참여자</span>
-            <span class="detail-value">{{ challenge.participantsCount?.toLocaleString() }}명</span>
+            <span class="detail-value"
+              >{{ challenge.participantsCount?.toLocaleString() }}명</span
+            >
           </div>
         </div>
       </div>
 
       <!-- 확인 메시지 -->
       <div class="confirm-message">
-        <p class="confirm-description" v-if="mode === 'confirm'">
+        <p class="confirm-description">
           이 챌린지에 참여하시겠습니까?<br />
           참여 후에는 목표 달성을 위해 함께 노력해주세요!
-        </p>
-        <p class="success-description" v-else>
-          챌린지에 성공적으로 참여했습니다!<br />
-          목표 달성을 위해 함께 노력해보세요! 💪
         </p>
       </div>
 
       <!-- 액션 버튼들 -->
       <div class="modal-actions">
-        <button v-if="mode === 'confirm'" class="btn btn-cancel" @click="handleCancel">
-          취소
-        </button>
-        <button class="btn btn-confirm" @click="handleConfirm">
-          {{ mode === 'confirm' ? '참여하기' : '확인' }}
-        </button>
+        <button class="btn btn-cancel" @click="handleCancel">취소</button>
+        <button class="btn btn-confirm" @click="handleConfirm">참여하기</button>
       </div>
     </div>
   </div>
@@ -67,11 +62,6 @@ const props = defineProps({
   challenge: {
     type: Object,
     default: null,
-  },
-  mode: {
-    type: String,
-    default: 'confirm', // 'confirm' | 'success'
-    validator: (value) => ['confirm', 'success'].includes(value)
   },
 });
 
@@ -91,17 +81,17 @@ const handleConfirm = () => {
 
 const formatDateRange = (startDate, endDate) => {
   if (!startDate || !endDate) return '';
-  
+
   const start = new Date(startDate);
   const end = new Date(endDate);
-  
+
   const formatDate = (date) => {
     return date.toLocaleDateString('ko-KR', {
       month: 'short',
       day: 'numeric',
     });
   };
-  
+
   return `${formatDate(start)} ~ ${formatDate(end)}`;
 };
 </script>
@@ -169,11 +159,6 @@ const formatDateRange = (startDate, endDate) => {
   animation: pulse 0.6s ease;
 }
 
-.success-circle {
-  background: linear-gradient(135deg, #4CAF50, #66BB6A) !important;
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3) !important;
-}
-
 @keyframes pulse {
   0% {
     transform: scale(0.8);
@@ -187,12 +172,6 @@ const formatDateRange = (startDate, endDate) => {
 }
 
 .confirm-question {
-  font-size: 36px;
-  color: white;
-  font-weight: bold;
-}
-
-.success-check {
   font-size: 36px;
   color: white;
   font-weight: bold;
@@ -259,14 +238,6 @@ const formatDateRange = (startDate, endDate) => {
 }
 
 .confirm-description {
-  font-size: 16px;
-  color: #666;
-  line-height: 1.6;
-  margin: 0;
-  font-family: var(--font-main);
-}
-
-.success-description {
   font-size: 16px;
   color: #666;
   line-height: 1.6;

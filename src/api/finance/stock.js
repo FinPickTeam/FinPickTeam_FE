@@ -73,7 +73,7 @@ export const getStockRecommendedList = (limit, priceLimit) => {
     params.priceLimit = priceLimit;
   }
   return api
-    .get('/v1/stock/recommend', { params })
+    .get('/v1/stock/recommend/', { params })
     .then((res) => res.data)
     .catch((err) => {
       throw err;

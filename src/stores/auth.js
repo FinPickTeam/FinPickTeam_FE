@@ -1,9 +1,9 @@
-import { defineStore } from "pinia";
-import { loginApi, logoutApi } from "@/api/authApi";
-import router from "@/router";
-import api from "@/api/instance";
+import { defineStore } from 'pinia';
+import { loginApi, logoutApi } from '@/api/authApi';
+import router from '@/router';
+import api from '@/api/instance';
 
-export const useAuthStore = defineStore("auth", {
+export const useAuthStore = defineStore('auth', {
   state: () => ({
     accessToken: null, // AT는 메모리만 (새로고침 시 사라짐)
     user: null, // 닉네임 포함한 사용자 정보 -> localStorage에 영구 저장
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore("auth", {
         return true;
       } catch (err) {
         this.error =
-          err?.response?.data?.message || err?.message || "로그인 실패";
+          err?.response?.data?.message || err?.message || '로그인 실패';
         return false;
       } finally {
         this.loading = false;
@@ -63,7 +63,7 @@ export const useAuthStore = defineStore("auth", {
       this._bootstrapped = true;
 
       try {
-        await api.post("/auth/refresh"); // 바디 없음, 쿠키 자동 전송(withCredentials)
+        await api.post('/auth/refresh'); // 바디 없음, 쿠키 자동 전송(withCredentials)
         // AT 저장은 응답 인터셉터(src/api/instance.js)가 처리
       } catch {
         // RT 만료/불일치면 조용히 실패 → 이후 보호 라우트 접근 시 가드가 로그인으로 이동
@@ -75,9 +75,9 @@ export const useAuthStore = defineStore("auth", {
      */
     async refreshTokens() {
       try {
-        const res = await api.post("/auth/refresh");
+        const res = await api.post('/auth/refresh');
         const ok = !!res.headers?.authorization;
-        if (!ok) throw new Error("리프레시 응답에 Authorization 헤더 없음");
+        if (!ok) throw new Error('리프레시 응답에 Authorization 헤더 없음');
         return res.headers.authorization.slice(7);
       } catch (e) {
         this.logout();
@@ -85,26 +85,18 @@ export const useAuthStore = defineStore("auth", {
       }
     },
 
-    async logout() {
-      try {
-        // 서버에 로그아웃 요청
-        await logoutApi();
-        console.log("로그아웃 API 호출 성공");
-      } catch (error) {
-        console.error("로그아웃 API 호출 실패:", error);
-        // API 호출이 실패해도 클라이언트 상태는 정리
-      } finally {
-        // 클라이언트 상태 정리
-        this.clearTokens();
-        this.user = null;
-        router.push("/login");
+    logout(redirect = true) {
+      this.clearTokens();
+      this.user = null; // localStorage의 user도 제거됨(플러그인이 반영)
+      if (redirect) {
+        router.push('/login');
       }
     },
   },
 
   // ★ user만 localStorage에 영구 저장
   persist: {
-    paths: ["user"],
+    paths: ['user'],
     storage: window.localStorage,
   },
 });

@@ -51,7 +51,12 @@
 
       <div class="challenge-stats">
         <span class="stat">{{ getRemainingDays() }}일 남음</span>
-        <span class="stat">{{ getStatText() }}</span>
+        <!-- 참여중인 챌린지 리스트 페이지에서는 참여자 수 표시하지 않음 -->
+        <span v-if="!isParticipating" class="stat">{{ getStatText() }}</span>
+        <!-- 그룹 챌린지인 경우에만 공개 설정 표시 -->
+        <span v-if="typeUpper === 'GROUP'" class="stat">
+          {{ challenge.usePassword ? '비공개' : '공개' }}
+        </span>
       </div>
     </div>
   </div>
@@ -66,17 +71,16 @@ const props = defineProps({
 });
 
 const typeUpper = computed(() => (props.challenge?.type || 'GROUP').toUpperCase());
-const isCommon = computed(() => typeUpper.value === 'COMMON');
+const isCommon = computed(() => typeUpper.value === 'COMMON'); // ✅ 공통 여부
 const statusUpper = computed(() => (props.challenge?.status || 'RECRUITING').toUpperCase());
 const isParticipating = computed(() => props.challenge?.isParticipating ?? props.challenge?.participating ?? false);
+
 const progressNum = computed(() => {
   const v = props.challenge?.myProgressRate ?? props.challenge?.myProgress ?? null;
   return (typeof v === 'number') ? v : null;
 });
 const isCreatorFlag = computed(() =>
-    (props.challenge?.isMine === true) ||
-    (props.challenge?.isCreator === true) ||
-    (props.challenge?.creator === true)
+    (props.challenge?.isMine === true) || (props.challenge?.isCreator === true) || (props.challenge?.creator === true)
 );
 
 const maxParticipants = computed(() => props.challenge?.maxParticipants ?? 6);
@@ -89,6 +93,7 @@ const needsResultConfirm = computed(() =>
 );
 
 const progressRecruiting = computed(() => {
+  // 공통은 정원 개념이 없어도 v-if로 막대 자체를 숨기므로 값은 상관없음
   const max = Number(maxParticipants.value) || 1;
   const cur = Number(curParticipants.value) || 0;
   const pct = (cur / max) * 100;
@@ -152,6 +157,6 @@ const handleCardClick = () => emit('cardClick', { challenge: props.challenge, ty
 .participants-text{display:flex;align-items:center;gap:4px;font-size:12px;color:#666}
 .max-participants{color:#999}
 .participants-info .progress-bar{width:100%;flex:none}
-.challenge-stats{display:flex;gap:16px}
+.challenge-stats{display:flex;gap:6px}
 .stat{font-size:12px;color:#999;background:#f5f5f5;padding:4px 8px;border-radius:8px}
 </style>
