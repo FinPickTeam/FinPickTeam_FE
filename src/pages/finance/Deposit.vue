@@ -235,10 +235,14 @@ function changeSubtab(tabName) {
 
 function showSearchResults(receivedFormData) {
   showResults.value = true;
-
-  // 폼 데이터 저장
   formData.value = receivedFormData;
   console.log('데이터: ', receivedFormData);
+
+  // amount가 유효한 값인지 확인하고 toLocaleString() 호출
+  const amountToDisplay =
+    receivedFormData.amount !== undefined
+      ? receivedFormData.amount.toLocaleString()
+      : '0'; // 또는 다른 기본값 설정
 
   // 요약 텍스트 생성
   const preferText =

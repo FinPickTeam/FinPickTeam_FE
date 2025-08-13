@@ -2,7 +2,7 @@ import api from '../instance';
 
 export const getWishlist = () => {
   return api
-    .get('/v1/wishlist')
+    .get('/v1/wishlist/')
     .then((res) => res.data)
     .catch((err) => {
       throw err;
