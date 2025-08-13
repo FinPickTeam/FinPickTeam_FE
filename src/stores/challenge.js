@@ -33,6 +33,7 @@ export const useChallengeStore = defineStore('challenge', {
                 c &&
                 (c.status === 'RECRUITING' ||
                     c.status === 'IN_PROGRESS' ||
+                    c.status === 'CLOSED' ||
                     (c.status === 'COMPLETED' && c.isResultCheck === false));
             this.counts.PERSONAL = list.filter((c) => c.type === 'PERSONAL' && isActive(c)).length;
             this.counts.GROUP = list.filter((c) => c.type === 'GROUP' && isActive(c)).length;

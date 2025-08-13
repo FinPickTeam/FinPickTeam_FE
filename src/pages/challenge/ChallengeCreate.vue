@@ -152,6 +152,7 @@ import { useRouter } from 'vue-router';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useChallengeStore } from '@/stores/challenge';
+import { getChallengeList } from '@/api/challenge/challenge.js';
 import ChallengeCreateSuccessModal from '@/components/challenge/ChallengeCreateSuccessModal.vue';
 import ChallengeInsufficientPointsModal from '@/components/challenge/ChallengeInsufficientPointsModal.vue';
 
@@ -198,6 +199,15 @@ onMounted(async () => {
   if (!challengeStore.points.updatedAt) {
     await challengeStore.fetchCoinStatus();
   }
+
+  // 생성 페이지에서도 참여중 목록을 불러와 counts 채움 (홈에만 의존 X)
+  try {
+      const list = await getChallengeList({ participating: true });
+      challengeStore.updateCountsFromList(Array.isArray(list) ? list : []);
+    } catch (e) {
+      console.warn('[Create] failed to load participating list:', e?.message || e);
+      challengeStore.resetCounts();
+    }
 });
 
 const routerBack = () => router.back();
