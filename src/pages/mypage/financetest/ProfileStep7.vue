@@ -18,17 +18,17 @@
 
       <div class="options">
         <div
-          v-for="(option, idx) in options"
-          :key="idx"
-          :class="['option', { selected: selected === idx }]"
-          @click="selected = idx"
+            v-for="(option, idx) in options"
+            :key="idx"
+            :class="['option', { selected: profileStore.answers.question7 === option }]"
+            @click="profileStore.answers.question7 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
     <!-- 다음 버튼 -->
-    <button class="next-btn" :disabled="selected === null" @click="goNext">
+    <button class="next-btn" :disabled="profileStore.answers.question7 === null" @click="goNext">
       다음
     </button>
   </div>
@@ -37,21 +37,21 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import {useProfileStore} from "@/stores/profile.js";
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
+const profileStore=useProfileStore();
 const router = useRouter();
 const route = useRoute();
 const options = ['경험 없음', '1년 미만', '1년 이상 ~ 3년 미만', '3년 이상'];
-const selected = ref(null);
 
 // 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
 const totalSteps = ref(10);
 
 const goNext = () => {
-  if (selected.value !== null) {
-    const from = route.query.from || 'mypage';
-    router.push(`/mypage/financetest/profile-step-8?from=${from}`);
-  }
+  if (profileStore.answers.question7 === null) return;
+  const from = route.query.from || 'mypage';
+  router.push(`/mypage/financetest/profile-step-8?from=${from}`);
 };
 </script>
 

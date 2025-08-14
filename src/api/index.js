@@ -10,3 +10,4 @@ export * from './finance/wishlist.js';
 
 export * from './coin/coin.js';
 export * from './authApi.js';
+export * from './profile.js';

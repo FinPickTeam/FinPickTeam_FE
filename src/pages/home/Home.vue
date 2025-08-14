@@ -9,9 +9,9 @@
         <img :src="textballonImage" class="textballon-img" alt="말풍선" />
         <div class="quiz-text">
           <span v-if="loadingBubble" class="loading-text">로딩 중...</span>
-          <span v-else-if="bubbleError" class="error-text"
-            >오늘은 퀴즈 풀어</span
-          >
+          <span v-else-if="bubbleError" class="error-text">{{
+            bubbleError
+          }}</span>
           <span v-else>{{ bubbleText }}</span>
         </div>
       </div>
@@ -157,18 +157,8 @@ import { getCumulativeCoin, getMyCoinStatus } from '@/api/mypage/avatar';
 import { getBubbleText } from '@/api/home/bubbleApi';
 import { useAuthStore } from '@/stores/auth';
 import baseAvatar from '../mypage/avatar/avatarimg/avatar-base.png';
-import hatWizardhat from '../mypage/avatar/avatarimg/hat-3wizardhat.png';
-import hatSprout from '../mypage/avatar/avatarimg/hat-1sprout.png';
-import hatDosa from '../mypage/avatar/avatarimg/hat-4dosa.png';
-import hatBeginner from '../mypage/avatar/avatarimg/hat-2beginner.png';
-import shirtBlue from '../mypage/avatar/avatarimg/shirts-blue.png';
-import shirtRed from '../mypage/avatar/avatarimg/shirt-red.png';
-import shoesBrown from '../mypage/avatar/avatarimg/shoese-brown.png';
-import shoes from '../mypage/avatar/avatarimg/shoese.png';
-import sportGlasses from '../mypage/avatar/avatarimg/sporglasses.png';
-import sunGlasses from '../mypage/avatar/avatarimg/etc-sunglasses.png';
-import blush from '../mypage/avatar/avatarimg/etc-blush.png';
 import textballonImage from './homeimg/textballon.png';
+// import bubbleApi from "@/api/home/bubbleApi.js";
 import { storeToRefs } from 'pinia';
 import { useRouter } from 'vue-router';
 import { onMounted } from 'vue';
@@ -183,7 +173,7 @@ const loadingCumulative = ref(false);
 const cumulativeError = ref(null);
 
 // 말풍선 텍스트 상태 관리
-const bubbleText = ref('오늘은 퀴즈 풀어');
+const bubbleText = ref('오늘의 퀴즈를 풀어보세요.');
 const loadingBubble = ref(false);
 const bubbleError = ref(null);
 
@@ -341,66 +331,39 @@ const fetchBubbleText = async () => {
     loadingBubble.value = true;
     bubbleError.value = null;
 
-    console.log('말풍선 텍스트 가져오기 시작');
     const response = await getBubbleText();
-    console.log('받아온 말풍선 텍스트:', response);
 
-    if (response.data !== undefined) {
-      // API 응답 구조에 따라 텍스트 추출
+    // 응답 데이터가 존재하는지 먼저 확인
+    if (response && response.data.message) {
       let textValue;
 
-      // 구조 1: { data: "텍스트" }
-      if (typeof response.data === 'string') {
-        textValue = response.data;
-        console.log('구조 1 적용 - 문자열 데이터:', textValue);
+      // 백엔드 응답이 `{"message": "텍스트"}` 형태일 경우
+      if (typeof response.data.message === 'string') {
+        textValue = response.data.data.message;
       }
-      // 구조 2: { data: { text: "텍스트" } }
-      else if (response.data && typeof response.data === 'object') {
-        if (response.data.text !== undefined) {
-          textValue = response.data.text;
-          console.log('구조 2 적용 - data.text:', textValue);
-        } else if (response.data.message !== undefined) {
-          textValue = response.data.message;
-          console.log('구조 2 적용 - data.message:', textValue);
-        } else if (response.data.content !== undefined) {
-          textValue = response.data.content;
-          console.log('구조 2 적용 - data.content:', textValue);
-        }
+      // 백엔드 응답이 `{"data": "텍스트"}` 형태일 경우
+      else if (typeof response.data.data.message === 'string') {
+        textValue = response.data.data.message;
+      }
+      // 백엔드 응답이 ` "텍스트" ` 형태일 경우
+      else if (typeof response.data.message === 'string') {
+        textValue = response.data.data.message;
       }
 
-      if (textValue && typeof textValue === 'string') {
+      if (textValue) {
         bubbleText.value = textValue;
         console.log('말풍선 텍스트 업데이트 완료:', textValue);
       } else {
-        console.warn(
-          '유효한 말풍선 텍스트를 찾을 수 없습니다. 기본 메시지 표시:',
-          response
-        );
+        console.warn('유효한 말풍선 텍스트를 찾을 수 없습니다.');
         bubbleText.value = '오늘의 퀴즈를 풀어보세요.';
       }
     } else {
-      console.warn(
-        '말풍선 텍스트 데이터가 없습니다. 기본 메시지 표시:',
-        response
-      );
+      console.warn('말풍선 텍스트 데이터가 없습니다.');
       bubbleText.value = '오늘의 퀴즈를 풀어보세요.';
     }
   } catch (err) {
     console.error('말풍선 텍스트 조회 에러:', err);
-
-    let errorMessage = '말풍선 텍스트를 불러오는데 실패했습니다.';
-
-    if (err.response?.status === 401) {
-      errorMessage = '로그인이 필요합니다.';
-    } else if (err.response?.status === 404) {
-      errorMessage = '말풍선 텍스트를 찾을 수 없습니다.';
-    } else if (err.response?.status === 500) {
-      errorMessage = '서버 오류가 발생했습니다.';
-    } else if (err.message) {
-      errorMessage = `연결 오류: ${err.message}`;
-    }
-
-    bubbleError.value = errorMessage;
+    bubbleError.value = '말풍선 텍스트를 불러오는데 실패했습니다.';
   } finally {
     loadingBubble.value = false;
   }

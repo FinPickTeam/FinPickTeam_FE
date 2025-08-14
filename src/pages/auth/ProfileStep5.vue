@@ -16,18 +16,18 @@
       <!-- <div class="question-desc">투자경험</div> -->
       <div class="options">
         <div
-          v-for="(option, idx) in options"
-          :key="idx"
-          :class="['option', { selected: selected === idx }]"
-          @click="selected = idx"
+            v-for="(option, idx) in options"
+            :key="idx"
+            :class="['option', { selected: profileStore.answers.question5 === option }]"
+            @click="profileStore.answers.question5 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
     <!-- 완료 버튼 -->
-    <button class="next-btn" :disabled="selected === null" @click="goNext">
-      완료
+    <button class="next-btn" :disabled="profileStore.answers.question5 === null || isLoading" @click="goNext">
+      {{ isLoading ? '처리 중...' : '완료' }}
     </button>
   </div>
 </template>
@@ -35,10 +35,16 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import {useProfileStore} from "@/stores/profile.js";
+import {submitSignupProfile} from "@/api/index.js";
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
 const route = useRoute();
+const profileStore = useProfileStore();
+
+const isLoading = ref(false);
+
 const options = [
   '5만 원 미만',
   '5만 원 이상 ~ 10만 원 미만',
@@ -48,7 +54,6 @@ const options = [
   '100만 원 이상 ~ 200만 원 미만',
   '100만 원 이상',
 ];
-const selected = ref(null);
 
 // 동적 progress-bar 설정 (computed로 변경)
 const totalSteps = computed(() => {
@@ -60,19 +65,54 @@ const totalSteps = computed(() => {
   }
 });
 
+// goNext 함수가 상황 판단 및 로직 분기 역할을 합니다.
 const goNext = () => {
-  if (selected.value !== null) {
-    const from = route.query.from || 'signup';
-    if (from === 'mypage') {
-      router.push(`/mypage/financetest/profile-step-6?from=${from}`);
-    } else if (from === 'fund') {
-      router.push(`/mypage/financetest/profile-step-6?from=${from}`);
-    } else {
-      // 투자성향 분석 완료 후 ProfileComplete로 이동
-      router.push('/profile-complete');
-    }
+  // Pinia에 5번 문항 답변이 저장되었는지 확인
+  if (profileStore.answers.question5 === null) return;
+
+  const from = route.query.from || 'signup';
+
+  if (from === 'mypage') {
+    // 마이페이지에서 왔으면 6단계로 이동
+    router.push(`/mypage/financetest/profile-step-6?from=${from}`);
+  } else if (from === 'fund') {
+    // 펀드에서 왔으면 6단계로 이동
+    router.push(`/mypage/financetest/profile-step-6?from=${from}`);
+  } else {
+    // 그 외, 즉 'signup' 시나리오일 경우, 페이지 이동이 아니라 '결과 제출' 함수를 호출합니다.
+    submitResults();
   }
 };
+
+const submitResults = async () => {
+  if (isLoading.value) return;
+  isLoading.value = true;
+
+  try {
+    // 1~5번 답변만 추출하여 payload 생성
+    const {question1, question2, question3, question4, question5} = profileStore.answers;
+    const payload = {question1, question2, question3, question4, question5};
+
+    // API 호출
+    const response = await submitSignupProfile(payload);
+
+    // 서버 응답에서 결과 타입과 설명을 추출
+    const type = response.data.propensityType;
+    const explain = response.data.propensityTypeExplain;
+
+    // Pinia에 최종 결과 저장
+    profileStore.setProfileResult(type, explain);
+
+    const from = route.query.from || 'signup';
+    await router.push(`/profile-complete?from=${from}`);
+
+  } catch (error) {
+    console.error('결과 전송 실패:', error);
+    alert('오류가 발생했습니다.');
+  } finally {
+    isLoading.value = false;
+  }
+}
 </script>
 
 <style scoped>

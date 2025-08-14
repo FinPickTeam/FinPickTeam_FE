@@ -14,20 +14,19 @@
     <div class="question-section">
       <div class="question-title">[문항 9] 기대수익률 및 손실감내도</div>
       <!-- <div class="question-desc">기대수익률 및 손실감내도</div> -->
-
       <div class="options">
         <div
-          v-for="(option, idx) in options"
-          :key="idx"
-          :class="['option', { selected: selected === idx }]"
-          @click="selected = idx"
+            v-for="(option, idx) in options"
+            :key="idx"
+            :class="['option', { selected: profileStore.answers.question9 === option }]"
+            @click="profileStore.answers.question9= option"
         >
           {{ option }}
         </div>
       </div>
     </div>
     <!-- 다음 버튼 -->
-    <button class="next-btn" :disabled="selected === null" @click="goNext">
+    <button class="next-btn" :disabled="profileStore.answers.question9 === null" @click="goNext">
       다음
     </button>
   </div>
@@ -36,8 +35,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import {useProfileStore} from "@/stores/profile.js";
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
+const profileStore=useProfileStore();
 const router = useRouter();
 const route = useRoute();
 const options = [
@@ -46,16 +47,14 @@ const options = [
   '원금 손실을 감수하며 시장성과 비슷한 수준의 수익을 기대',
   '초과 손실까지 감수하며 적극적인 투자를 통하여 시중수익률(예: 주가지수)을 초과하는 높은 수익 추구',
 ];
-const selected = ref(null);
 
 // 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
 const totalSteps = ref(10);
 
 const goNext = () => {
-  if (selected.value !== null) {
-    const from = route.query.from || 'mypage';
-    router.push(`/mypage/financetest/profile-step-10?from=${from}`);
-  }
+  if (profileStore.answers.question9 === null) return;
+  const from = route.query.from || 'mypage';
+  router.push(`/mypage/financetest/profile-step-10?from=${from}`);
 };
 </script>
 

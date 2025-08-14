@@ -14,20 +14,19 @@
     <div class="question-section">
       <div class="question-title">[문항 8] 투자 형태 / 금융 자산</div>
       <!-- <div class="question-desc">투자 형태 / 금융 자산</div> -->
-
       <div class="options">
         <div
-          v-for="(option, idx) in options"
-          :key="idx"
-          :class="['option', { selected: selected === idx }]"
-          @click="selected = idx"
+            v-for="(option, idx) in options"
+            :key="idx"
+            :class="['option', { selected: profileStore.answers.question8 === option }]"
+            @click="profileStore.answers.question8 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
     <!-- 다음 버튼 -->
-    <button class="next-btn" :disabled="selected === null" @click="goNext">
+    <button class="next-btn" :disabled="profileStore.answers.question8 === null" @click="goNext">
       다음
     </button>
   </div>
@@ -36,8 +35,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import {useProfileStore} from "@/stores/profile.js";
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
+const profileStore=useProfileStore();
 const router = useRouter();
 const route = useRoute();
 const options = [
@@ -47,16 +48,15 @@ const options = [
   '주식, 주식형펀드, 원금이 보장되지 않는 ELS, 신용도가 BBB- 이하인 채권 등',
   '선물·옵션, 신용거래, ELW, 파생상품펀드 등',
 ];
-const selected = ref(null);
 
 // 동적 progress-bar 설정 (투자성향 재검사는 항상 10단계)
 const totalSteps = ref(10);
 
 const goNext = () => {
-  if (selected.value !== null) {
-    const from = route.query.from || 'mypage';
-    router.push(`/mypage/financetest/profile-step-9?from=${from}`);
-  }
+  if (profileStore.answers.question8 === null) return;
+
+  const from = route.query.from || 'mypage';
+  router.push(`/mypage/financetest/profile-step-9?from=${from}`);
 };
 </script>
 
