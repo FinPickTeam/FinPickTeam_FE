@@ -42,7 +42,7 @@ const route = useRoute();
 const profileStore = useProfileStore();
 
 const options = [
-  '자산증식',
+  '자산중식',
   '주택마련',
   '생활비',
   '교육비',

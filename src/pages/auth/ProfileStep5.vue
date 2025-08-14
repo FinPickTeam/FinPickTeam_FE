@@ -103,8 +103,8 @@ const submitResults = async () => {
     // Pinia에 최종 결과 저장
     profileStore.setProfileResult(type, explain);
 
-    // 결과 페이지로 이동
-    await router.push('/profile-complete');
+    const from = route.query.from || 'signup';
+    await router.push(`/profile-complete?from=${from}`);
 
   } catch (error) {
     console.error('결과 전송 실패:', error);

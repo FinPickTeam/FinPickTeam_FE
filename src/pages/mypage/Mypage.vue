@@ -142,6 +142,7 @@ import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { onMounted } from "vue";
+import {useProfileStore} from "@/stores/profile.js";
 
 library.add(faAngleRight);
 
@@ -149,6 +150,7 @@ const router = useRouter();
 const avatarStore = useAvatarStore();
 const authStore = useAuthStore();
 const { coin } = storeToRefs(avatarStore);
+const profileStore=useProfileStore();
 
 // 레벨 텍스트 계산 (기본값으로 설정)
 const levelText = computed(() => {
@@ -220,6 +222,7 @@ const getGlassesImages = computed(() => {
 });
 
 function goToMyHistory() {
+  profileStore.resetAnswers();
   router.push("/my-history");
 }
 
@@ -235,6 +238,7 @@ async function handleLogout() {
 }
 
 function goToInvestmentTest() {
+  profileStore.resetAnswers();
   router.push("/profile-step-1?from=mypage");
 }
 

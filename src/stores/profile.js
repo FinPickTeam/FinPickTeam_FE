@@ -24,6 +24,9 @@ export const useProfileStore = defineStore('profile', {
         },
         resetAnswers() {
             // 답변 초기화 로직
+            Object.keys(this.answers).forEach(key => {
+                this.answers[key] = null;
+            });
             // 결과도 함께 초기화해주는 것이 좋습니다.
             this.resultType = null;
             this.resultExplain = null;

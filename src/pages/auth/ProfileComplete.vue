@@ -49,7 +49,7 @@
 
     <!-- 하단 버튼 -->
     <div class="action-section">
-      <button class="start-btn" @click="goToHome">핀픽 시작하기</button>
+      <button class="start-btn" @click="goToHome">{{ buttonText }}</button>
     </div>
   </div>
 </template>
@@ -64,6 +64,16 @@ const route = useRoute();
 const profileStore = useProfileStore();
 const investmentType = computed(() => profileStore.resultType || '분석 결과 없음');
 const investmentDescription = computed(() => profileStore.resultExplain || '결과를 불러오는 데 실패했습니다.');
+const buttonText = computed(() => {
+  const from = route.query.from;
+  if (from === 'fund') {
+    return '펀드 시작하기';
+  } else if (from === 'mypage') {
+    return '투자성향 재설정 완료';
+  } else {
+    return '핀픽 시작하기'; // 기본값
+  }
+});
 
 const investmentTypeData = {
   안정형: { riskTolerance: 17, experience: 14, period: 30, expectedReturn: 16 },
@@ -83,6 +93,7 @@ const detailedAnalysis = computed(() => {
     { label: '수익 기대치', value: data.expectedReturn },
   ];
 });
+
 
 // 홈으로 이동
 const goToHome = () => {
