@@ -2,15 +2,16 @@
   <div class="challenge-personal-detail">
     <!-- 결과 모달들 -->
     <ChallengeSuccessModal
-        v-if="showSuccessModal && challengeResult"
-        :isVisible="showSuccessModal"
-        :challengeResult="challengeResult"
-        @close="handleResultConfirm"
+      v-if="showSuccessModal && challengeResult"
+      :isVisible="showSuccessModal"
+      :challengeResult="challengeResult"
+      @close="handleResultConfirm"
     />
     <ChallengeFailModal
-        v-if="showFailModal"
-        :isVisible="showFailModal"
-        @close="handleResultConfirm"
+      v-if="showFailModal && challengeResult"
+      :isVisible="showFailModal"
+      :challengeResult="challengeResult"
+      @close="handleResultConfirm"
     />
 
     <!-- 로딩 -->
@@ -23,10 +24,10 @@
     <div v-else-if="challenge" class="content">
       <!-- 카테고리 뱃지 -->
       <div
-          class="category-chip"
-          :style="{
+        class="category-chip"
+        :style="{
           background: categoryTheme.bg,
-          boxShadow: '0 6px 16px ' + categoryTheme.shadow
+          boxShadow: '0 6px 16px ' + categoryTheme.shadow,
         }"
       >
         {{ displayCategory }}
@@ -36,7 +37,8 @@
         <div class="title-section">
           <h1 class="challenge-title">{{ challenge.title }}</h1>
           <div class="challenge-date">
-            {{ formatDate(challenge.startDate) }} ~ {{ formatDate(challenge.endDate) }}
+            {{ formatDate(challenge.startDate) }} ~
+            {{ formatDate(challenge.endDate) }}
           </div>
         </div>
 
@@ -45,11 +47,15 @@
         <div class="challenge-stats">
           <div class="stat-item">
             <span class="stat-label">진행률</span>
-            <span class="stat-value">{{ Math.round((challenge.myProgress || 0) * 100) }}%</span>
+            <span class="stat-value"
+              >{{ Math.round((challenge.myProgress || 0) * 100) }}%</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">목표 {{ challenge.goalType }}</span>
-            <span class="stat-value">{{ (challenge.goalValue || 0).toLocaleString() }}원</span>
+            <span class="stat-value"
+              >{{ (challenge.goalValue || 0).toLocaleString() }}원</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">남은 기간</span>
@@ -60,10 +66,17 @@
         <div class="progress-section">
           <div class="progress-header">
             <span class="progress-label">{{ challenge.goalType }} 진행률</span>
-            <span class="progress-percentage">{{ Math.round((challenge.myProgress || 0) * 100) }}%</span>
+            <span class="progress-percentage"
+              >{{ Math.round((challenge.myProgress || 0) * 100) }}%</span
+            >
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" :style="{ width: Math.round((challenge.myProgress || 0) * 100) + '%' }"></div>
+            <div
+              class="progress-fill"
+              :style="{
+                width: Math.round((challenge.myProgress || 0) * 100) + '%',
+              }"
+            ></div>
           </div>
         </div>
 
@@ -71,12 +84,18 @@
           <div class="savings-info">
             <span class="savings-label">현재 {{ challenge.goalType }}</span>
             <span class="savings-amount">
-              {{ Math.round((challenge.goalValue || 0) * (challenge.myProgress || 0)).toLocaleString() }}원
+              {{
+                Math.round(
+                  (challenge.goalValue || 0) * (challenge.myProgress || 0)
+                ).toLocaleString()
+              }}원
             </span>
           </div>
           <div class="daily-goal">
             <span class="goal-label">목표 {{ challenge.goalType }}</span>
-            <span class="goal-amount">{{ (challenge.goalValue || 0).toLocaleString() }}원</span>
+            <span class="goal-amount"
+              >{{ (challenge.goalValue || 0).toLocaleString() }}원</span
+            >
           </div>
         </div>
       </div>
@@ -92,7 +111,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { getChallengeDetail, getChallengeResult, confirmChallengeResult } from '@/api/challenge/challenge.js';
+import {
+  getChallengeDetail,
+  getChallengeResult,
+  confirmChallengeResult,
+} from '@/api/challenge/challenge.js';
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
 
@@ -113,14 +136,33 @@ const fetchDetail = async () => {
     challenge.value = data;
 
     // (1) 완료 + (2) 내가 참여중 + (3) 결과 미확인 → 진입 시 결과 모달 자동 표시
-    if (data?.status === 'COMPLETED' && data?.isParticipating && !data?.isResultCheck) {
+    if (
+      data?.status === 'COMPLETED' &&
+      data?.isParticipating &&
+      !data?.isResultCheck
+    ) {
+      // 결과 데이터 가져오기
       const result = await getChallengeResult(id);
+      console.log('=== ChallengePersonalDetail - API 응답 ===');
+      console.log('getChallengeResult API 응답:', result);
+      console.log('stockRecommendation:', result?.stockRecommendation);
+      console.log('==========================================');
       challengeResult.value = result || null;
 
-      if (result?.resultType?.startsWith('SUCCESS')) {
+      // isSuccess 값에 따라 모달 표시
+      if (data?.isSuccess === true) {
         showSuccessModal.value = true;
-      } else {
+        showFailModal.value = false;
+      } else if (data?.isSuccess === false) {
+        showSuccessModal.value = false;
         showFailModal.value = true;
+      } else {
+        // isSuccess가 null인 경우 기존 로직 사용
+        if (result?.resultType?.startsWith('SUCCESS')) {
+          showSuccessModal.value = true;
+        } else {
+          showFailModal.value = true;
+        }
       }
     } else {
       // 자동 노출 조건 아니면 모달 숨김
@@ -154,7 +196,11 @@ const handleResultConfirm = async () => {
 const formatDate = (d) => {
   if (!d) return '';
   const date = new Date(d);
-  return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 };
 
 const getRemainingDays = () => {
@@ -175,7 +221,9 @@ const CATEGORY_FALLBACK_BY_ID = {
 };
 
 const categoryKey = computed(() => {
-  const name = challenge.value?.categoryName || CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId];
+  const name =
+    challenge.value?.categoryName ||
+    CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId];
   if (!name) return 'default';
   if (name.includes('전체')) return 'total';
   if (name.includes('식비')) return 'food';
@@ -185,18 +233,39 @@ const categoryKey = computed(() => {
   return 'default';
 });
 
-const displayCategory = computed(() =>
-    challenge.value?.categoryName || CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId] || '카테고리'
+const displayCategory = computed(
+  () =>
+    challenge.value?.categoryName ||
+    CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId] ||
+    '카테고리'
 );
 
 const categoryTheme = computed(() => {
   const map = {
-    total:     { bg: 'linear-gradient(135deg,#6C5CE7,#8E7CFF)', shadow: 'rgba(108,92,231,.3)' },
-    food:      { bg: 'linear-gradient(135deg,#F0932B,#F5A623)', shadow: 'rgba(240,147,43,.3)' },
-    snack:     { bg: 'linear-gradient(135deg,#FF7675,#FF9AA2)', shadow: 'rgba(255,118,117,.3)' },
-    transport: { bg: 'linear-gradient(135deg,#00B894,#55EFC4)', shadow: 'rgba(0,184,148,.3)' },
-    beauty:    { bg: 'linear-gradient(135deg,#0984E3,#74B9FF)', shadow: 'rgba(9,132,227,.3)' },
-    default:   { bg: 'linear-gradient(135deg,var(--color-main),var(--color-main-dark))', shadow: 'rgba(102,51,204,.28)' },
+    total: {
+      bg: 'linear-gradient(135deg,#6C5CE7,#8E7CFF)',
+      shadow: 'rgba(108,92,231,.3)',
+    },
+    food: {
+      bg: 'linear-gradient(135deg,#F0932B,#F5A623)',
+      shadow: 'rgba(240,147,43,.3)',
+    },
+    snack: {
+      bg: 'linear-gradient(135deg,#FF7675,#FF9AA2)',
+      shadow: 'rgba(255,118,117,.3)',
+    },
+    transport: {
+      bg: 'linear-gradient(135deg,#00B894,#55EFC4)',
+      shadow: 'rgba(0,184,148,.3)',
+    },
+    beauty: {
+      bg: 'linear-gradient(135deg,#0984E3,#74B9FF)',
+      shadow: 'rgba(9,132,227,.3)',
+    },
+    default: {
+      bg: 'linear-gradient(135deg,var(--color-main),var(--color-main-dark))',
+      shadow: 'rgba(102,51,204,.28)',
+    },
   };
   return map[categoryKey.value] || map.default;
 });
@@ -209,12 +278,12 @@ const categoryTheme = computed(() => {
 }
 
 /* 카테고리 뱃지 */
-.category-chip{
+.category-chip {
   align-self: flex-start;
   color: #fff;
   font-weight: 700;
   font-size: 12px;
-  letter-spacing: .2px;
+  letter-spacing: 0.2px;
   padding: 8px 12px;
   border-radius: 9999px;
   margin-bottom: 12px;
@@ -277,7 +346,7 @@ const categoryTheme = computed(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 80px - 68px); /* 헤더와 네비바 높이를 제외한 전체 높이 */
+  min-height: calc(100vh - 80px); /* 헤더 높이를 제외한 전체 높이 */
 }
 
 .challenge-info {

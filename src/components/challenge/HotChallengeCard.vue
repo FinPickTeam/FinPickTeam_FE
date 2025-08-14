@@ -25,7 +25,10 @@
 
       <!-- ✅ 공통은 정원 기반 게이지 제거 -->
       <div v-if="!isCommon" class="progress-bar">
-        <div class="progress-fill" :style="{ width: `${(challenge.participantsCount / 6) * 100}%` }"></div>
+        <div
+          class="progress-fill"
+          :style="{ width: `${(challenge.participantsCount / 6) * 100}%` }"
+        ></div>
       </div>
     </div>
     <button class="participate-btn" @click.stop="handleParticipate">
@@ -35,6 +38,8 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
+
 const props = defineProps({
   challenge: {
     type: Object,
@@ -55,6 +60,11 @@ const props = defineProps({
 });
 
 const emit = defineEmits(['participate', 'click', 'cardClick']);
+
+// 공통 챌린지 여부 확인
+const isCommon = computed(() => {
+  return props.challenge.type === 'COMMON';
+});
 
 // 날짜 포맷팅 함수
 const formatDate = (dateString) => {
