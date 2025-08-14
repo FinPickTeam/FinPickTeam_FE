@@ -103,12 +103,11 @@ export const logoutApi = async () => {
   }
 };
 
-
 //간편비밀번호 로그인 API
 export const pinLogin = async (pin) => {
   try {
     console.log("간편비밀번호 로그인 API 요청 시작");
-    const response = await api.post("/auth/pin/login",{pin: pin});
+    const response = await api.post("/auth/pin/login",{pin});
 
     console.log("간편비밀번호 로그인 API 응답 데이터:", {
       status: response.data.status,
@@ -131,7 +130,7 @@ export const pinLogin = async (pin) => {
 export const pinSet = async (pin) => {
   try {
     console.log("간편비밀번호 설정 API 요청 시작");
-    const response = await api.post("/user/pin",{pin:pin});
+    const response = await api.post("/user/pin",{pin});
 
     console.log("간편비밀번호 설정 API 응답 데이터:", {
       status: response.data.status,
@@ -154,7 +153,7 @@ export const pinSet = async (pin) => {
 export const pinReset = async (pin) => {
   try {
     console.log("간편비밀번호 재설정 API 요청 시작");
-    const response = await api.post("/user/pin/reset",{pin: pin});
+    const response = await api.put("/user/pin/reset",{pin});
 
     console.log("간편비밀번호 재설정 API 응답 데이터:", {
       status: response.data.status,
