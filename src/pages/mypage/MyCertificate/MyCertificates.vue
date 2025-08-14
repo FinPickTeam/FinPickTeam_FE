@@ -8,6 +8,10 @@
       <span class="dictionary-header-title">간편 비밀번호 관리</span>
     </div>
 
+    <!-- 로딩 후 화면-->
+    <div v-if="!isLoading" class="content-wrapper">\
+      <!--핀번호가 있을 때 화면-->
+      <div v-if="hasPin">
     <!-- 보안 배너 -->
     <div class="security-banner">
       <span class="security-text">간편 비밀번호가 안전하게 보호됩니다</span>
@@ -42,10 +46,23 @@
       </div>
     </div>
   </div>
+      <!-- 간편 비밀번호가 없을 때 화면 -->
+      <div v-else class="no-pin-container">
+        <div class="no-pin-icon">
+          <font-awesome-icon :icon="['fas', 'shield-alt']" />
+        </div>
+        <h2 class="no-pin-title">간편 비밀번호 미설정</h2>
+        <p class="no-pin-description">
+          등록된 간편 비밀번호가 없습니다. <br />
+          ARS 인증을 통해 간편 비밀번호를 설정해주세요.
+        </p>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import {ref, computed, onMounted} from "vue";
 import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -54,17 +71,40 @@ import {
   faAngleRight,
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
-import { useUserStore } from "../../../stores/user.js";
+import { useUserStore } from "@/stores/user.js";
+import { isPin } from "@/api/authApi.js"; // isPin API 함수 import
 
 library.add(faAngleLeft, faAngleRight, faUser);
 
 const router = useRouter();
 const userStore = useUserStore();
+const isLoading = ref(true);
+const hasPin = ref(false);
 
 // ARS 인증에서 입력한 사용자 이름 가져오기
 const userName = computed(() => {
   const name = userStore.getUserName();
   return name || "사용자";
+});
+
+//
+onMounted(async () => {
+  try {
+    const response = await isPin();
+    // isPin API의 응답 데이터(boolean)를 확인합니다.
+    // 만약 간편 비밀번호가 설정되어 있지 않다면 (false)
+    if (response.data === true) {
+      hasPin.value = true; // 비밀번호 있음
+    } else {
+      hasPin.value = false; // 비밀번호 없음
+    }
+  } catch (error) {
+    console.error("간편 비밀번호 설정 여부 확인 중 에러 발생:", error);
+    alert("오류가 발생했습니다. 이전 페이지로 돌아갑니다.");
+    router.back();
+  } finally {
+    isLoading.value = false; // API 호출이 끝나면 로딩 상태 해제
+  }
 });
 
 function goBack() {
@@ -345,4 +385,17 @@ function goToPasswordChange() {
     max-width: 100vw;
   }
 }
+
+/* 수정: 간편 비밀번호 미설정 UI 스타일 */
+.no-pin-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* 수직 중앙 정렬 */
+  text-align: center;
+  /* 헤더 높이를 제외한 전체 화면 높이를 차지하도록 설정 */
+  height: calc(100vh - 100px);
+  min-height: 500px;
+}
+
 </style>
