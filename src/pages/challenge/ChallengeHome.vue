@@ -14,13 +14,26 @@ const router = useRouter();
 const auth = useAuthStore();
 const challengeStore = useChallengeStore();
 
-const loading = ref({ summary: false, participating: false, hot: false, points: false });
-const error = ref({ summary: null, participating: null, hot: null, points: null });
+const loading = ref({
+  summary: false,
+  participating: false,
+  hot: false,
+  points: false,
+  common: false,        // ✅ 충돌 해결: 공통 로딩 상태 추가
+});
+const error = ref({
+  summary: null,
+  participating: null,
+  hot: null,
+  points: null,
+  common: null,         // ✅ 충돌 해결: 공통 에러 상태 추가
+});
 
 const summary = ref({ totalChallenges: 0, successCount: 0, achievementRate: 0 });
 const participatingChallenges = ref([]);
 const hotChallenges = ref([]);
-const monthlyPoints = ref(null); // StatsSwiper용(월누적)
+const monthlyPoints = ref(null);      // StatsSwiper용(월누적)
+const commonHighlight = ref(null);    // ✅ 스와이프 3번 슬라이드용 공통 챌린지
 
 const displayName = computed(() => {
   const u = auth.user || {};
@@ -28,20 +41,17 @@ const displayName = computed(() => {
 });
 
 const handleParticipate = (challenge) => {
-  router.push({
-    name: 'ChallengeCommonDetail',
-    params: { id: challenge.id },
-    state: { previousPage: '/challenge' },
-  });
+  goDetail(challenge);
 };
 
 const goDetail = (challenge) => {
-  if (challenge.type === 'COMMON')
+  if (challenge.type === 'COMMON') {
     router.push({ name: 'ChallengeCommonDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
-  else if (challenge.type === 'GROUP')
+  } else if (challenge.type === 'GROUP') {
     router.push({ name: 'ChallengeGroupDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
-  else if (challenge.type === 'PERSONAL')
+  } else if (challenge.type === 'PERSONAL') {
     router.push({ name: 'ChallengePersonalDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+  }
 };
 
 const handleCardClick = (payload) => {
@@ -62,12 +72,29 @@ const fetchSummary = async () => {
   }
 };
 
+const sortParticipating = (list) => {
+  const toKey = (c) => {
+    const unconfirmed = c?.status === 'COMPLETED' && !c?.isResultCheck;
+    const end = c?.endDate ? new Date(c.endDate).getTime() : Number.MAX_SAFE_INTEGER;
+    // 정렬 우선순위: 1) 미확인 먼저 (-1), 2) 종료일 빠른 순
+    return [unconfirmed ? -1 : 0, end];
+  };
+  return [...list].sort((a, b) => {
+    const [ua, ea] = toKey(a);
+    const [ub, eb] = toKey(b);
+    if (ua !== ub) return ua - ub;
+    return ea - eb;
+  });
+};
+
 const fetchParticipating = async () => {
   loading.value.participating = true;
   error.value.participating = null;
   try {
     const list = await getChallengeList({ participating: true });
-    participatingChallenges.value = Array.isArray(list) ? list : [];
+    const safe = Array.isArray(list) ? list : [];
+    // ✅ “완료+미확인”을 맨 앞으로 정렬
+    participatingChallenges.value = sortParticipating(safe);
     // 진행중 개수 갱신
     challengeStore.updateCountsFromList(participatingChallenges.value);
   } catch (e) {
@@ -100,12 +127,73 @@ const fetchMonthlyPoints = async () => {
     const y = now.getFullYear();
     const m = now.getMonth() + 1;
     const res = await getMonthlyPoints({ year: y, month: m });
-    monthlyPoints.value = res?.amount ?? null; // ← 이건 월누적 카드용만 사용
+    monthlyPoints.value = res?.amount ?? null; // ← 월누적 카드용
   } catch (e) {
     error.value.points = e?.response?.data?.message || e.message || '포인트 조회 실패';
     monthlyPoints.value = null;
   } finally {
     loading.value.points = false;
+  }
+};
+
+// ✅ 공통 챌린지 하이라이트 (참여 여부와 무관하게 1개 노출: RECRUITING → 내가 참여중 → IN_PROGRESS → 아무 공통)
+const fetchCommonHighlight = async () => {
+  loading.value.common = true;
+  error.value.common = null;
+
+  const pick = (item) =>
+      item && {
+        id: item.id,
+        title: item.title,
+        status: item.status,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        participantsCount: item.participantsCount ?? 0,
+      };
+
+  try {
+    // 1) 모집중 공통
+    let list = await getChallengeList({ type: 'COMMON', status: 'RECRUITING' });
+    if (Array.isArray(list) && list.length > 0) {
+      commonHighlight.value = pick(list[0]);
+      return;
+    }
+
+    // 2) 내가 참여 중인 공통
+    const joined = await getChallengeList({ participating: true });
+    const myCommon = (Array.isArray(joined) ? joined : []).find(
+        (c) => (c?.type || '').toUpperCase() === 'COMMON'
+    );
+    if (myCommon) {
+      commonHighlight.value = pick(myCommon);
+      return;
+    }
+
+    // 3) 진행중 공통
+    list = await getChallengeList({ type: 'COMMON', status: 'IN_PROGRESS' });
+    if (Array.isArray(list) && list.length > 0) {
+      commonHighlight.value = pick(list[0]);
+      return;
+    }
+
+    // 4) 어떤 공통이든 1개
+    list = await getChallengeList({ type: 'COMMON' });
+    commonHighlight.value = Array.isArray(list) && list.length > 0 ? pick(list[0]) : null;
+  } catch (e) {
+    error.value.common = e?.response?.data?.message || e.message || '공통 챌린지 조회 실패';
+    commonHighlight.value = null;
+  } finally {
+    loading.value.common = false;
+  }
+};
+
+const openCommonFromSwiper = () => {
+  if (commonHighlight.value?.id) {
+    router.push({
+      name: 'ChallengeCommonDetail',
+      params: {id: commonHighlight.value.id},
+      state: {previousPage: '/challenge'},
+    });
   }
 };
 
@@ -115,8 +203,8 @@ onMounted(async () => {
     fetchParticipating(),
     fetchHot(),
     fetchMonthlyPoints(),
-    // ✅ 잔액/누적/월누적 스냅샷은 Pinia에 적재
-    challengeStore.fetchCoinStatus(),
+    fetchCommonHighlight(),           // ✅ 항상 배너에 공통 1개
+    challengeStore.fetchCoinStatus(), // Pinia 스냅샷 적재
   ]);
 });
 
@@ -135,10 +223,17 @@ watch(participatingChallenges, (list) => {
         </div>
       </div>
 
-      <ChallengeStatsSwiper :summary="summary" :points="monthlyPoints" />
+      <!-- ✅ 공통 챌린지 추가 슬라이드가 포함됨 -->
+      <ChallengeStatsSwiper
+          :summary="summary"
+          :points="monthlyPoints"
+          :common="commonHighlight"
+          @open-common="openCommonFromSwiper"
+      />
       <div v-if="loading.summary" style="color: #fff; margin: 6px 20px 0">요약 로딩중…</div>
       <div v-else-if="error.summary" style="color: #fff; margin: 6px 20px 0">{{ error.summary }}</div>
       <div v-if="error.points" style="color: #fff; margin: 6px 20px 0">{{ error.points }}</div>
+      <div v-if="error.common" style="color: #fff; margin: 6px 20px 0">{{ error.common }}</div>
     </div>
 
     <!-- 참여중인 챌린지 -->
@@ -166,7 +261,9 @@ watch(participatingChallenges, (list) => {
             participating: c.isParticipating,
             myProgressRate: c.myProgressRate ?? 0,
             participantsCount: c.participantsCount ?? 0,
-            isResultCheck: c.isResultCheck ?? false
+            isResultCheck: c.isResultCheck ?? false,
+            status: c.status,                // ✅ HEAD 유지
+            usePassword: c.usePassword ?? false
           }"
             @cardClick="handleCardClick"
         />
@@ -200,7 +297,8 @@ watch(participatingChallenges, (list) => {
             participating: c.isParticipating,
             myProgressRate: c.myProgressRate ?? null,
             participantsCount: c.participantsCount ?? 0,
-            isResultCheck: c.isResultCheck ?? false
+            isResultCheck: c.isResultCheck ?? false,
+            usePassword: c.usePassword ?? false
           }"
             @participate="handleParticipate"
             @click="handleCardClick"
@@ -216,6 +314,9 @@ watch(participatingChallenges, (list) => {
   padding: 0;
   background: var(--color-bg-light);
   min-height: 100vh;
+  //height: 100dvh;
+  //overflow-y: auto;
+  //overflow-x: hidden;
 }
 
 /* 헤더 섹션 */
@@ -224,15 +325,10 @@ watch(participatingChallenges, (list) => {
   max-width: 390px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(
-      to right,
-      var(--color-main-light-2),
-      var(--color-main-dark)
-  );
+  background: linear-gradient(to right, var(--color-main-light-2), var(--color-main-dark));
   border-radius: 0;
   padding: 0px 16px 0px 16px;
   margin-bottom: 12px;
-
   margin-left: auto;
   margin-right: auto;
 }
@@ -276,73 +372,6 @@ watch(participatingChallenges, (list) => {
 .username {
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-title-main);
-}
-
-/* 통계 섹션 */
-.stats-section {
-  background: transparent;
-  border-radius: 16px;
-  margin-bottom: 24px;
-}
-
-.stats-container {
-  display: flex;
-  background: #fff;
-  border-radius: 18px;
-  padding: 30px 30px;
-  width: 90%;
-  max-width: 320px;
-  justify-content: space-around;
-  align-items: center;
-  margin-bottom: 10px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  gap: 10px;
-}
-
-.stat-number {
-  font-family: 'JalnanGothic', var(--font-main);
-  font-size: 1.5rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  color: #222;
-  margin-bottom: 2px;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #666;
-}
-
-.stat-divider {
-  width: 1px;
-  height: 40px;
-  background: #e0e0e0;
-}
-
-.pagination-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ddd;
-}
-
-.dot.active {
-  background: #6b46c1;
 }
 
 /* 섹션 공통 스타일 */
@@ -396,7 +425,6 @@ watch(participatingChallenges, (list) => {
   padding-bottom: 8px;
 }
 
-/* 스크롤바 스타일링 */
 .challenges-scroll::-webkit-scrollbar {
   height: 4px;
 }
@@ -415,7 +443,7 @@ watch(participatingChallenges, (list) => {
   background: #5a3d9e;
 }
 
-/* 빈 상태 메시지 스타일 */
+/* 빈 상태 메시지 */
 .empty-message {
   color: #666;
   text-align: center;

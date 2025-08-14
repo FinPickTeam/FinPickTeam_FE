@@ -55,7 +55,7 @@ instance.interceptors.response.use(
         original.headers.Authorization = `Bearer ${newAT}`;
         return instance(original);
       } catch (e) {
-        auth.logout(); // RT 만료/불일치 등 → 세션 종료
+        auth.logout(false); // RT 만료/불일치 등 → 세션 종료 (리다이렉트 없이)
       }
     }
 

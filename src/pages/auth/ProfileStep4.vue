@@ -15,45 +15,48 @@
       <div class="question-title">[문항 4] 투자경험</div>
       <div class="options">
         <div
-          v-for="(option, idx) in options"
-          :key="idx"
-          :class="['option', { selected: selected === idx }]"
-          @click="selected = idx"
+            v-for="(option, idx) in options"
+            :key="idx"
+            :class="['option', { selected: profileStore.answers.question4 === option }]"
+            @click="profileStore.answers.question4 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
-    <!-- 완료 버튼 -->
-    <button class="next-btn" :disabled="selected === null" @click="goNext">
-      완료
+    <button class="next-btn" :disabled="profileStore.answers.question4 === null" @click="goNext">
+      다음
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+// Pinia Store를 가져옵니다.
+import { useProfileStore } from '@/stores/profile.js';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
 const route = useRoute();
+// Pinia Store 인스턴스를 생성합니다.
+const profileStore = useProfileStore();
 
 const options = ['경험 없음', '1년 미만', '1년 이상 ~ 3년 미만', '3년 이상'];
-const selected = ref(null);
 
-// 동적 progress-bar 설정 (computed로 변경)
+
 const totalSteps = computed(() => {
   const from = route.query.from;
   if (from === 'mypage' || from === 'fund') {
-    return 10; // 투자성향 재검사는 10단계
+    return 10;
   } else {
-    return 5; // 회원가입은 5단계
+    return 5;
   }
 });
 
 const goNext = () => {
-  if (selected.value !== null) {
+  // 로컬 상태 대신 Pinia에 저장된 4번 문항 답변을 확인합니다.
+  if (profileStore.answers.question4 !== null) {
     const from = route.query.from || 'signup';
     if (from === 'mypage') {
       router.push(`/mypage/financetest/profile-step-5?from=${from}`);

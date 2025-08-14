@@ -1,6 +1,9 @@
 <template>
   <div class="home-container">
     <main class="main-content">
+      <!-- pixel clouds -->
+      <div class="pixel-cloud cloud-1"></div>
+      <div class="pixel-cloud cloud-2"></div>
       <!-- 캐릭터 말풍선 -->
       <div class="quiz-bubble">
         <img :src="textballonImage" class="textballon-img" alt="말풍선" />
@@ -18,8 +21,7 @@
         <div class="avatar-pixel">
           <img :src="baseAvatar" class="avatar-img" alt="아바타" />
           <img
-            v-if="wearingTitle"
-            :src="getTitleImage"
+            :src="wearingTitle ? getTitleImage : hatSprout"
             class="title-img"
             alt="칭호"
           />
@@ -64,7 +66,6 @@
           </div>
         </div>
         <div class="progress-bar-container">
-          <span class="progress-bracket">[</span>
           <div class="progress-bar">
             <div v-if="loadingCumulative" class="progress-fill loading"></div>
             <div
@@ -95,7 +96,6 @@
               </span>
             </div>
           </div>
-          <span class="progress-bracket">]</span>
         </div>
 
         <!-- 포인트 정보 표시 (기존 위치는 숨김) -->
@@ -484,7 +484,11 @@ const getProgressPercentage = computed(() => {
 
 <style scoped>
 /* 전역 스크롤 차단 */
-:global(body),
+:global(body) {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
 :global(html) {
   overflow: hidden !important;
   height: 100vh !important;
@@ -519,6 +523,22 @@ const getProgressPercentage = computed(() => {
   padding: 20px 0;
   overflow: hidden;
 }
+
+/* 캐릭터 뒤에 스카이-블루(하늘) + 그린(잔디) 배경 */
+.main-content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#b9ddee 0% 70%, #5ea152 70% 100%);
+  z-index: 0;
+}
+
+/* 내부 컨텐츠가 배경보다 위에 표시되도록 */
+.main-content > * {
+  position: relative;
+  z-index: 1;
+}
+
 .quiz-bubble {
   position: relative;
   display: inline-block;
@@ -546,18 +566,19 @@ const getProgressPercentage = computed(() => {
   padding: 0 20px;
   box-sizing: border-box;
 }
+
 .main-card {
   width: 260px;
   height: 260px;
   background: #d1d5db;
   border-radius: 12px;
-  margin: 0 auto;
-  margin-bottom: 16px;
+  margin: 0 auto 16px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .avatar-section {
   display: flex;
   flex-direction: column;
@@ -574,11 +595,13 @@ const getProgressPercentage = computed(() => {
   align-items: center;
   justify-content: center;
 }
+
 .avatar-img {
   width: 230px;
   height: 359px;
   z-index: 1;
 }
+
 .title-img,
 .shirt-img,
 .shoes-img,
@@ -591,18 +614,23 @@ const getProgressPercentage = computed(() => {
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
+
 .title-img {
   z-index: 2;
 }
+
 .shirt-img {
   z-index: 2;
 }
+
 .shoes-img {
   z-index: 2;
 }
+
 .glasses-img {
   z-index: 3;
 }
+
 .floating-btn-group {
   position: absolute;
   top: 350px;
@@ -612,6 +640,7 @@ const getProgressPercentage = computed(() => {
   gap: 18px;
   z-index: 2;
 }
+
 .floating-btn {
   width: 48px;
   height: 48px;
@@ -627,16 +656,16 @@ const getProgressPercentage = computed(() => {
   transition: background 0.2s;
   cursor: pointer;
 }
+
 .floating-btn:hover {
   background: #6c4cf1;
 }
+
 .points-progress {
   width: 340px;
   background: transparent;
-  /* border-radius: 12px; */
   margin-top: 16px;
   padding: 16px;
-  /* border: 1px solid #e2e8f0; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -682,18 +711,11 @@ const getProgressPercentage = computed(() => {
   margin-top: 6px;
 }
 
-.progress-bracket {
-  font-size: 28px;
-  color: #1e293b;
-  font-weight: 600;
-  margin: 0 8px;
-}
-
 .progress-bar {
   flex: 1;
   height: 24px;
   background: #f1f5f9;
-  border-radius: 6px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
 }
@@ -701,8 +723,8 @@ const getProgressPercentage = computed(() => {
 .progress-fill {
   height: 100%;
   background: #4318d1;
-  border-radius: 6px;
-  transition: width 0.3s ease;
+  border-radius: 12px;
+  transition: width 0.4s ease;
 }
 
 .progress-fill.loading {
@@ -763,13 +785,11 @@ const getProgressPercentage = computed(() => {
   font-weight: 700;
   color: #ffffff;
   z-index: 10;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .current-points {
-  color: #4318d1;
+  color: #ffffff;
   font-size: 28px;
 }
 
@@ -777,7 +797,6 @@ const getProgressPercentage = computed(() => {
   color: #ffffff;
   font-size: 10px;
   font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 
 .separator {
@@ -794,16 +813,15 @@ const getProgressPercentage = computed(() => {
 }
 
 .target-points {
-  color: #1f5fb9;
+  color: #ffffff;
   font-size: 28px;
   font-weight: 600;
 }
 
 .points-display-inside .target-points {
-  color: #303030;
+  color: #ffffff;
   font-size: 10px;
   font-weight: 800;
-  /* text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9); */
 }
 
 .points-status {
@@ -821,5 +839,31 @@ const getProgressPercentage = computed(() => {
 
 .status-progress {
   color: #64748b;
+}
+
+.pixel-cloud {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  box-shadow: 8px 0 #ffffff, 16px 0 #ffffff, -8px 8px #ffffff, 0 8px #ffffff,
+    8px 8px #ffffff, 16px 8px #ffffff, 24px 8px #ffffff, -8px 16px #ffffff,
+    0 16px #ffffff, 8px 16px #ffffff, 16px 16px #ffffff, 0 24px #ffffff,
+    8px 24px #ffffff;
+  transform: scale(4);
+  transform-origin: top left;
+  image-rendering: pixelated;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cloud-1 {
+  top: 40px;
+  left: 30px;
+}
+
+.cloud-2 {
+  top: 100px;
+  right: 40px;
 }
 </style>

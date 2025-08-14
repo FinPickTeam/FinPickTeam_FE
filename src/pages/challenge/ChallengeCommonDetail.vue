@@ -2,24 +2,23 @@
   <div class="challenge-common-detail">
     <!-- 결과 모달 -->
     <ChallengeSuccessModal
-        v-if="showSuccessModal && challengeResult"
-        :isVisible="showSuccessModal"
-        :challengeResult="challengeResult"
-        @close="handleResultConfirm"
+      v-if="showSuccessModal && challengeResult"
+      :isVisible="showSuccessModal"
+      :challengeResult="challengeResult"
+      @close="handleResultConfirm"
     />
     <ChallengeFailModal
-        v-if="showFailModal"
-        :isVisible="showFailModal"
-        @close="handleResultConfirm"
+      v-if="showFailModal"
+      :isVisible="showFailModal"
+      @close="handleResultConfirm"
     />
 
-    <!-- 참여 확인/완료 모달 -->
+    <!-- 참여 확인 모달 -->
     <ChallengeJoinConfirmModal
-        :isVisible="showJoinModal"
-        :challenge="challenge"
-        :mode="joinModalMode"
-        @close="closeJoinModal"
-        @confirm="confirmJoin"
+      :isVisible="showJoinModal"
+      :challenge="challenge"
+      @close="closeJoinModal"
+      @confirm="confirmJoin"
     />
 
     <!-- 로딩 -->
@@ -32,10 +31,10 @@
     <div v-else-if="challenge" class="content">
       <!-- 카테고리 뱃지 -->
       <div
-          class="category-chip"
-          :style="{
+        class="category-chip"
+        :style="{
           background: categoryTheme.bg,
-          boxShadow: '0 6px 16px ' + categoryTheme.shadow
+          boxShadow: '0 6px 16px ' + categoryTheme.shadow,
         }"
       >
         {{ displayCategory }}
@@ -45,7 +44,8 @@
         <div class="title-section">
           <h1 class="challenge-title">{{ challenge.title }}</h1>
           <div class="challenge-date">
-            {{ formatDate(challenge.startDate) }} ~ {{ formatDate(challenge.endDate) }}
+            {{ formatDate(challenge.startDate) }} ~
+            {{ formatDate(challenge.endDate) }}
           </div>
         </div>
 
@@ -54,11 +54,15 @@
         <div class="challenge-stats">
           <div class="stat-item">
             <span class="stat-label">진행률</span>
-            <span class="stat-value">{{ Math.round((challenge.myProgress || 0) * 100) }}%</span>
+            <span class="stat-value"
+              >{{ Math.round((challenge.myProgress || 0) * 100) }}%</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">목표 {{ challenge.goalType }}</span>
-            <span class="stat-value">{{ (challenge.goalValue || 0).toLocaleString() }}원</span>
+            <span class="stat-value"
+              >{{ (challenge.goalValue || 0).toLocaleString() }}원</span
+            >
           </div>
           <div class="stat-item">
             <span class="stat-label">남은 기간</span>
@@ -69,23 +73,37 @@
         <div class="progress-section" v-if="challenge.isParticipating">
           <div class="progress-header">
             <span class="progress-label">달성률</span>
-            <span class="progress-percentage">{{ Math.round((challenge.myProgress || 0) * 100) }}%</span>
+            <span class="progress-percentage"
+              >{{ Math.round((challenge.myProgress || 0) * 100) }}%</span
+            >
           </div>
           <div class="progress-bar">
-            <div class="progress-fill" :style="{ width: Math.round((challenge.myProgress || 0) * 100) + '%' }"></div>
+            <div
+              class="progress-fill"
+              :style="{
+                width: Math.round((challenge.myProgress || 0) * 100) + '%',
+              }"
+            ></div>
           </div>
         </div>
 
         <div class="participants-section">
           <div class="participants-count">
-            <span class="participants-number">{{ (challenge.participantsCount || 0).toLocaleString() }}</span>
+            <span class="participants-number">{{
+              (challenge.participantsCount || 0).toLocaleString()
+            }}</span>
             <span class="participants-label">명 참여중</span>
           </div>
         </div>
       </div>
 
-      <div class="join-section" v-if="!challenge.isParticipating && challenge.status === 'RECRUITING'">
-        <button class="join-button" @click="openJoinModal">챌린지 참여하기</button>
+      <div
+        class="join-section"
+        v-if="!challenge.isParticipating && challenge.status === 'RECRUITING'"
+      >
+        <button class="join-button" @click="openJoinModal">
+          챌린지 참여하기
+        </button>
       </div>
     </div>
 
@@ -99,7 +117,12 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import { getChallengeDetail, joinChallenge, getChallengeResult, confirmChallengeResult } from '@/api/challenge/challenge.js';
+import {
+  getChallengeDetail,
+  joinChallenge,
+  getChallengeResult,
+  confirmChallengeResult,
+} from '@/api/challenge/challenge.js';
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
 import ChallengeJoinConfirmModal from '@/components/challenge/ChallengeJoinConfirmModal.vue';
@@ -111,7 +134,6 @@ const challenge = ref(null);
 
 // join modal
 const showJoinModal = ref(false);
-const joinModalMode = ref('confirm');
 
 // result modals
 const showSuccessModal = ref(false);
@@ -126,11 +148,16 @@ const fetchDetail = async () => {
     challenge.value = data;
 
     // 완료 + 미확인 → 결과 모달 표시
-    if (data?.status === 'COMPLETED' && data?.isParticipating && !data?.isResultCheck) {
+    if (
+      data?.status === 'COMPLETED' &&
+      data?.isParticipating &&
+      !data?.isResultCheck
+    ) {
       const result = await getChallengeResult(id);
       challengeResult.value = result || null;
 
-      if (result?.resultType?.startsWith('SUCCESS')) showSuccessModal.value = true;
+      if (result?.resultType?.startsWith('SUCCESS'))
+        showSuccessModal.value = true;
       else showFailModal.value = true;
     } else {
       showSuccessModal.value = false;
@@ -148,7 +175,6 @@ const fetchDetail = async () => {
 onMounted(fetchDetail);
 
 const openJoinModal = () => {
-  joinModalMode.value = 'confirm';
   showJoinModal.value = true;
 };
 
@@ -159,7 +185,9 @@ const closeJoinModal = () => {
 const confirmJoin = async () => {
   try {
     await joinChallenge(route.params.id);
-    joinModalMode.value = 'success';
+    showJoinModal.value = false;
+    // 참여 완료 후 현재 페이지 새로고침하여 참여 상태 업데이트
+    await fetchDetail();
   } catch (e) {
     alert(e?.response?.data?.message || '참여에 실패했어요.');
     showJoinModal.value = false;
@@ -179,7 +207,11 @@ const handleResultConfirm = async () => {
 const formatDate = (d) => {
   if (!d) return '';
   const date = new Date(d);
-  return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  return date.toLocaleDateString('ko-KR', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
 };
 
 const getRemainingDays = () => {
@@ -200,7 +232,9 @@ const CATEGORY_FALLBACK_BY_ID = {
 };
 
 const categoryKey = computed(() => {
-  const name = challenge.value?.categoryName || CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId];
+  const name =
+    challenge.value?.categoryName ||
+    CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId];
   if (!name) return 'default';
   if (name.includes('전체')) return 'total';
   if (name.includes('식비')) return 'food';
@@ -210,23 +244,43 @@ const categoryKey = computed(() => {
   return 'default';
 });
 
-const displayCategory = computed(() =>
-    challenge.value?.categoryName || CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId] || '카테고리'
+const displayCategory = computed(
+  () =>
+    challenge.value?.categoryName ||
+    CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId] ||
+    '카테고리'
 );
 
 const categoryTheme = computed(() => {
   const map = {
-    total:     { bg: 'linear-gradient(135deg,#6C5CE7,#8E7CFF)', shadow: 'rgba(108,92,231,.3)' },
-    food:      { bg: 'linear-gradient(135deg,#F0932B,#F5A623)', shadow: 'rgba(240,147,43,.3)' },
-    snack:     { bg: 'linear-gradient(135deg,#FF7675,#FF9AA2)', shadow: 'rgba(255,118,117,.3)' },
-    transport: { bg: 'linear-gradient(135deg,#00B894,#55EFC4)', shadow: 'rgba(0,184,148,.3)' },
-    beauty:    { bg: 'linear-gradient(135deg,#0984E3,#74B9FF)', shadow: 'rgba(9,132,227,.3)' },
-    default:   { bg: 'linear-gradient(135deg,var(--color-main),var(--color-main-dark))', shadow: 'rgba(102,51,204,.28)' },
+    total: {
+      bg: 'linear-gradient(135deg,#6C5CE7,#8E7CFF)',
+      shadow: 'rgba(108,92,231,.3)',
+    },
+    food: {
+      bg: 'linear-gradient(135deg,#F0932B,#F5A623)',
+      shadow: 'rgba(240,147,43,.3)',
+    },
+    snack: {
+      bg: 'linear-gradient(135deg,#FF7675,#FF9AA2)',
+      shadow: 'rgba(255,118,117,.3)',
+    },
+    transport: {
+      bg: 'linear-gradient(135deg,#00B894,#55EFC4)',
+      shadow: 'rgba(0,184,148,.3)',
+    },
+    beauty: {
+      bg: 'linear-gradient(135deg,#0984E3,#74B9FF)',
+      shadow: 'rgba(9,132,227,.3)',
+    },
+    default: {
+      bg: 'linear-gradient(135deg,var(--color-main),var(--color-main-dark))',
+      shadow: 'rgba(102,51,204,.28)',
+    },
   };
   return map[categoryKey.value] || map.default;
 });
 </script>
-
 
 <style scoped>
 .challenge-common-detail {
@@ -235,12 +289,12 @@ const categoryTheme = computed(() => {
 }
 
 /* 카테고리 뱃지 */
-.category-chip{
+.category-chip {
   align-self: flex-start;
   color: #fff;
   font-weight: 700;
   font-size: 12px;
-  letter-spacing: .2px;
+  letter-spacing: 0.2px;
   padding: 8px 12px;
   border-radius: 9999px;
   margin-bottom: 12px;
@@ -252,7 +306,7 @@ const categoryTheme = computed(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 80px); /* 헤더 높이를 제외한 전체 높이 */
+  min-height: calc(100vh - 80px - 68px); /* 헤더와 네비바 높이를 제외한 전체 높이 */
 }
 
 /* 로딩 스타일 */

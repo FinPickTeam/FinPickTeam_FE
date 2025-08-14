@@ -22,17 +22,19 @@ onMounted(async () => {
     const normalized = (list || []).map((c) => ({
       ...c,
       participating:
-          typeof c.participating === 'boolean'
-              ? c.participating
-              : !!c.isParticipating,
+        typeof c.participating === 'boolean'
+          ? c.participating
+          : !!c.isParticipating,
       // participantsCount 기본값 케어
       participantsCount: c.participantsCount ?? 0,
     }));
 
     // (선택) 결과확인 필요 항목 우선 정렬: COMPLETED && participating && !isResultCheck
     normalized.sort((a, b) => {
-      const needA = a.participating && a.status === 'COMPLETED' && !a.isResultCheck;
-      const needB = b.participating && b.status === 'COMPLETED' && !b.isResultCheck;
+      const needA =
+        a.participating && a.status === 'COMPLETED' && !a.isResultCheck;
+      const needB =
+        b.participating && b.status === 'COMPLETED' && !b.isResultCheck;
       return Number(needB) - Number(needA);
     });
 
@@ -46,23 +48,41 @@ onMounted(async () => {
 });
 
 // 타입별 필터
-const commonChallenges = computed(() => allJoined.value.filter((c) => c.type === 'COMMON'));
-const personalChallenges = computed(() => allJoined.value.filter((c) => c.type === 'PERSONAL'));
-const groupChallenges = computed(() => allJoined.value.filter((c) => c.type === 'GROUP'));
+const commonChallenges = computed(() =>
+  allJoined.value.filter((c) => c.type === 'COMMON')
+);
+const personalChallenges = computed(() =>
+  allJoined.value.filter((c) => c.type === 'PERSONAL')
+);
+const groupChallenges = computed(() =>
+  allJoined.value.filter((c) => c.type === 'GROUP')
+);
 
 // 라우팅
-const handleCardClick = ({ challenge }) => {
-  const routeMap = {
-    PERSONAL: 'ChallengePersonalDetail',
-    GROUP: 'ChallengeGroupDetail',
-    COMMON: 'ChallengeCommonDetail',
-  };
-  const name = routeMap[challenge.type] || 'ChallengeCommonDetail';
-  router.push({
-    name,
-    params: { id: challenge.id },
-    state: { previousPage: '/challenge/joined-list', challengeData: challenge },
-  });
+const goDetail = (challenge) => {
+  if (challenge.type === 'COMMON')
+    router.push({
+      name: 'ChallengeCommonDetail',
+      params: { id: challenge.id },
+      state: { previousPage: '/challenge/joined-list' },
+    });
+  else if (challenge.type === 'GROUP')
+    router.push({
+      name: 'ChallengeGroupDetail',
+      params: { id: challenge.id },
+      state: { previousPage: '/challenge/joined-list' },
+    });
+  else if (challenge.type === 'PERSONAL')
+    router.push({
+      name: 'ChallengePersonalDetail',
+      params: { id: challenge.id },
+      state: { previousPage: '/challenge/joined-list' },
+    });
+};
+
+const handleCardClick = (payload) => {
+  const challenge = payload.challenge || payload;
+  goDetail(challenge);
 };
 
 // 테스트 모달 유지
@@ -87,7 +107,7 @@ const testChallengeResult = ref({
     priceChange: 2500,
     priceChangeRate: 3.45,
     recommendationReason:
-        'AI 반도체 시장 성장과 함께 삼성전자의 기술 경쟁력이 향상되고 있어 투자 가치가 높습니다.',
+      'AI 반도체 시장 성장과 함께 삼성전자의 기술 경쟁력이 향상되고 있어 투자 가치가 높습니다.',
   },
 });
 const testFailChallengeResult = ref({
@@ -103,15 +123,15 @@ const showFailModalExample = () => (showFailModal.value = true);
 <template>
   <div class="challenge-joined-list">
     <ChallengeSuccessModal
-        :isVisible="showSuccessModal"
-        :challenge="testChallenge"
-        :challengeResult="testChallengeResult"
-        @close="showSuccessModal = false"
+      :isVisible="showSuccessModal"
+      :challenge="testChallenge"
+      :challengeResult="testChallengeResult"
+      @close="showSuccessModal = false"
     />
     <ChallengeFailModal
-        :isVisible="showFailModal"
-        :challengeResult="testFailChallengeResult"
-        @close="showFailModal = false"
+      :isVisible="showFailModal"
+      :challengeResult="testFailChallengeResult"
+      @close="showFailModal = false"
     />
 
     <div class="content">
@@ -119,39 +139,43 @@ const showFailModalExample = () => (showFailModal.value = true);
       <div v-else-if="error" class="state error">{{ error }}</div>
       <template v-else>
         <ChallengeSection
-            title="공통 챌린지"
-            :challenges="commonChallenges"
-            type="common"
-            icon-class="fas fa-users"
-            empty-message="현재 공통 챌린지에 참여하고 있지 않습니다."
-            @cardClick="handleCardClick"
+          title="공통 챌린지"
+          :challenges="commonChallenges"
+          type="common"
+          icon-class="fas fa-users"
+          empty-message="현재 공통 챌린지에 참여하고 있지 않습니다."
+          @cardClick="handleCardClick"
         />
 
         <ChallengeSection
-            title="개인 챌린지"
-            :challenges="personalChallenges"
-            type="personal"
-            icon-class="fas fa-user"
-            :max-count="3"
-            :show-count="true"
-            empty-message="현재 참여중인 개인 챌린지가 없습니다."
-            @cardClick="handleCardClick"
+          title="개인 챌린지"
+          :challenges="personalChallenges"
+          type="personal"
+          icon-class="fas fa-user"
+          :max-count="3"
+          :show-count="true"
+          empty-message="현재 참여중인 개인 챌린지가 없습니다."
+          @cardClick="handleCardClick"
         />
 
         <ChallengeSection
-            title="소그룹 챌린지"
-            :challenges="groupChallenges"
-            type="group"
-            icon-class="fas fa-user-friends"
-            :max-count="3"
-            :show-count="true"
-            empty-message="현재 참여중인 소그룹 챌린지가 없습니다."
-            @cardClick="handleCardClick"
+          title="소그룹 챌린지"
+          :challenges="groupChallenges"
+          type="group"
+          icon-class="fas fa-user-friends"
+          :max-count="3"
+          :show-count="true"
+          empty-message="현재 참여중인 소그룹 챌린지가 없습니다."
+          @cardClick="handleCardClick"
         />
 
         <div class="test-buttons">
-          <button class="test-success-btn" @click="showSuccessModalExample">성공 모달 테스트</button>
-          <button class="test-fail-btn" @click="showFailModalExample">실패 모달 테스트</button>
+          <button class="test-success-btn" @click="showSuccessModalExample">
+            성공 모달 테스트
+          </button>
+          <button class="test-fail-btn" @click="showFailModalExample">
+            실패 모달 테스트
+          </button>
         </div>
       </template>
     </div>
