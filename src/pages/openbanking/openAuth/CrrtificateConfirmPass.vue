@@ -108,6 +108,7 @@ import {
   faTimes,
   faBackspace,
 } from "@fortawesome/free-solid-svg-icons";
+import {pinSet} from "@/api/index.js";
 
 library.add(faAngleLeft, faCheck, faTimes, faBackspace);
 
@@ -115,6 +116,7 @@ const router = useRouter();
 
 const confirmPassword = ref("");
 const originalPassword = ref("");
+const isLoading = ref(false);
 
 // 숫자 패드 배열을 이미지와 동일하게 고정
 const numberPad = ref([
@@ -168,16 +170,34 @@ const goBack = () => {
   router.back();
 };
 
-const completeCertificate = () => {
-  if (isPasswordMatch.value && confirmPassword.value.length > 0) {
-    // 인증서 생성 완료 처리
-    // 여기서 실제 인증서 생성 로직을 구현할 수 있습니다
+const completeCertificate = async () => {
+  // 유효성 검사 또는 로딩 중일 경우 함수 실행 방지
+  if (!isPasswordMatch.value || confirmPassword.value.length === 0 || isLoading.value) {
+    return;
+  }
+
+  isLoading.value = true; // API 요청 시작, 로딩 상태로 변경
+
+  try {
+
+    const response = await pinSet(confirmPassword.value);
+
+    console.log("간편 비밀번호 설정이 성공적으로 완료되었습니다.");
 
     // 세션스토리지에서 비밀번호 제거
     sessionStorage.removeItem("certificatePassword");
 
-    // 완료 페이지로 이동 (또는 메인 페이지로)
-    router.push("/openbanking/certificate-complete");
+    // 완료 페이지로 이동
+    await router.push("/openbanking/certificate-complete");
+
+  } catch (error) {
+    // 3. API 요청 실패 시 에러 처리
+    console.error("간편 비밀번호 설정 API 호출 중 오류가 발생했습니다:", error);
+    alert(error.response?.data?.message || "비밀번호 설정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+
+  } finally {
+    // 4. 요청 성공/실패와 관계없이 로딩 상태 해제
+    isLoading.value = false;
   }
 };
 </script>

@@ -79,6 +79,7 @@ export const checkEmailDuplicate = async (email) => {
   }
 };
 
+
 // 로그아웃 API
 export const logoutApi = async () => {
   try {
@@ -101,3 +102,73 @@ export const logoutApi = async () => {
     throw error;
   }
 };
+
+
+//간편비밀번호 로그인 API
+export const pinLogin = async (pin) => {
+  try {
+    console.log("간편비밀번호 로그인 API 요청 시작");
+    const response = await api.post("/auth/pin/login",{pin: pin});
+
+    console.log("간편비밀번호 로그인 API 응답 데이터:", {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log("간편비밀번호 로그인 API 에러 응답 데이터:", {
+      status: error.response?.data?.status,
+      message: error.response?.data?.message,
+      data: error.response?.data?.data,
+    });
+    throw error;
+  }
+}
+
+//간편비밀번호 생성 API
+export const pinSet = async (pin) => {
+  try {
+    console.log("간편비밀번호 설정 API 요청 시작");
+    const response = await api.post("/user/pin",{pin:pin});
+
+    console.log("간편비밀번호 설정 API 응답 데이터:", {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log("간편비밀번호 설정 API 에러 응답 데이터:", {
+      status: error.response?.data?.status,
+      message: error.response?.data?.message,
+      data: error.response?.data?.data,
+    });
+    throw error;
+  }
+}
+
+//간편비밀번호 재설정 API
+export const pinReset = async (pin) => {
+  try {
+    console.log("간편비밀번호 재설정 API 요청 시작");
+    const response = await api.post("/user/pin/reset",{pin: pin});
+
+    console.log("간편비밀번호 재설정 API 응답 데이터:", {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log("간편비밀번호 로그인 API 에러 응답 데이터:", {
+      status: error.response?.data?.status,
+      message: error.response?.data?.message,
+      data: error.response?.data?.data,
+    });
+    throw error;
+  }
+}
