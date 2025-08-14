@@ -171,3 +171,26 @@ export const pinReset = async (pin) => {
     throw error;
   }
 }
+
+//간편비밀번호 소유여부 조회 API
+export const isPin = async () => {
+  try {
+    console.log("간편비밀번호 재설정 API 요청 시작");
+    const response = await api.get("/user/pin/isCreated",{});
+
+    console.log("간편비밀번호 재설정 API 응답 데이터:", {
+      status: response.data.status,
+      message: response.data.message,
+      data: response.data.data,
+    });
+
+    return response.data;
+  } catch (error) {
+    console.log("간편비밀번호 로그인 API 에러 응답 데이터:", {
+      status: error.response?.data?.status,
+      message: error.response?.data?.message,
+      data: error.response?.data?.data,
+    });
+    throw error;
+  }
+}
