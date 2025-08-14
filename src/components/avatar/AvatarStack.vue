@@ -17,6 +17,8 @@
 
 <script setup>
 import { computed } from 'vue';
+// 기본 아바타 이미지 import
+import baseAvatar from '../../pages/mypage/avatar/avatarimg/avatar-base.png';
 
 const props = defineProps({
   levelId: Number,
@@ -70,12 +72,17 @@ const makeUrl = (path) => `${S3_BASE}/${path}`;
 
 const layerUrls = computed(() => {
   const arr = [];
+  
+  // 기본 아바타 이미지를 베이스로 설정
+  arr.push(baseAvatar);
+  
   // 레이어 순서: 레벨(베이스) → 상의 → 신발 → 액세서리 → 기프트카드
   if (props.levelId && LEVEL_MAP[props.levelId]) arr.push(makeUrl(LEVEL_MAP[props.levelId]));
   if (props.topId && TOP_MAP[props.topId]) arr.push(makeUrl(TOP_MAP[props.topId]));
   if (props.shoesId && SHOES_MAP[props.shoesId]) arr.push(makeUrl(SHOES_MAP[props.shoesId]));
   if (props.accessoryId && ACCESSORY_MAP[props.accessoryId]) arr.push(makeUrl(ACCESSORY_MAP[props.accessoryId]));
   if (props.giftCardId && GIFT_CARD_MAP[props.giftCardId]) arr.push(makeUrl(GIFT_CARD_MAP[props.giftCardId]));
+  
   return arr;
 });
 
@@ -86,9 +93,7 @@ const initial = computed(() => (props.nickname || '?').slice(0, 1));
 <style scoped>
 .avatar-stack {
   position: relative;
-  border-radius: 50%;
   overflow: hidden;
-  background: #f1f3f5;
 }
 
 .layer {
