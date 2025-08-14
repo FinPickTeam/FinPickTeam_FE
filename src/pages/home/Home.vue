@@ -1,6 +1,9 @@
 <template>
   <div class="home-container">
     <main class="main-content">
+      <!-- pixel clouds -->
+      <div class="pixel-cloud cloud-1"></div>
+      <div class="pixel-cloud cloud-2"></div>
       <!-- 캐릭터 말풍선 -->
       <div class="quiz-bubble">
         <img :src="textballonImage" class="textballon-img" alt="말풍선" />
@@ -18,8 +21,7 @@
         <div class="avatar-pixel">
           <img :src="baseAvatar" class="avatar-img" alt="아바타" />
           <img
-            v-if="wearingTitle"
-            :src="getTitleImage"
+            :src="wearingTitle ? getTitleImage : hatSprout"
             class="title-img"
             alt="칭호"
           />
@@ -64,7 +66,6 @@
           </div>
         </div>
         <div class="progress-bar-container">
-          <span class="progress-bracket">[</span>
           <div class="progress-bar">
             <div v-if="loadingCumulative" class="progress-fill loading"></div>
             <div
@@ -95,7 +96,6 @@
               </span>
             </div>
           </div>
-          <span class="progress-bracket">]</span>
         </div>
 
         <!-- 포인트 정보 표시 (기존 위치는 숨김) -->
@@ -149,29 +149,29 @@
 </template>
 
 <script setup>
-import Quiz from "./Quiz.vue";
-import Newsletter from "./Newsletter.vue";
-import { ref, computed } from "vue";
-import { useAvatarStore } from "../../stores/avatar.js";
-import { getCumulativeCoin, getMyCoinStatus } from "@/api/mypage/avatar";
-import { getBubbleText } from "@/api/home/bubbleApi";
-import { useAuthStore } from "@/stores/auth";
-import baseAvatar from "../mypage/avatar/avatarimg/avatar-base.png";
-import hatWizardhat from "../mypage/avatar/avatarimg/hat-3wizardhat.png";
-import hatSprout from "../mypage/avatar/avatarimg/hat-1sprout.png";
-import hatDosa from "../mypage/avatar/avatarimg/hat-4dosa.png";
-import hatBeginner from "../mypage/avatar/avatarimg/hat-2beginner.png";
-import shirtBlue from "../mypage/avatar/avatarimg/shirts-blue.png";
-import shirtRed from "../mypage/avatar/avatarimg/shirt-red.png";
-import shoesBrown from "../mypage/avatar/avatarimg/shoese-brown.png";
-import shoes from "../mypage/avatar/avatarimg/shoese.png";
-import sportGlasses from "../mypage/avatar/avatarimg/sporglasses.png";
-import sunGlasses from "../mypage/avatar/avatarimg/etc-sunglasses.png";
-import blush from "../mypage/avatar/avatarimg/etc-blush.png";
-import textballonImage from "./homeimg/textballon.png";
-import { storeToRefs } from "pinia";
-import { useRouter } from "vue-router";
-import { onMounted } from "vue";
+import Quiz from './Quiz.vue';
+import Newsletter from './Newsletter.vue';
+import { ref, computed } from 'vue';
+import { useAvatarStore } from '../../stores/avatar.js';
+import { getCumulativeCoin, getMyCoinStatus } from '@/api/mypage/avatar';
+import { getBubbleText } from '@/api/home/bubbleApi';
+import { useAuthStore } from '@/stores/auth';
+import baseAvatar from '../mypage/avatar/avatarimg/avatar-base.png';
+import hatWizardhat from '../mypage/avatar/avatarimg/hat-3wizardhat.png';
+import hatSprout from '../mypage/avatar/avatarimg/hat-1sprout.png';
+import hatDosa from '../mypage/avatar/avatarimg/hat-4dosa.png';
+import hatBeginner from '../mypage/avatar/avatarimg/hat-2beginner.png';
+import shirtBlue from '../mypage/avatar/avatarimg/shirts-blue.png';
+import shirtRed from '../mypage/avatar/avatarimg/shirt-red.png';
+import shoesBrown from '../mypage/avatar/avatarimg/shoese-brown.png';
+import shoes from '../mypage/avatar/avatarimg/shoese.png';
+import sportGlasses from '../mypage/avatar/avatarimg/sporglasses.png';
+import sunGlasses from '../mypage/avatar/avatarimg/etc-sunglasses.png';
+import blush from '../mypage/avatar/avatarimg/etc-blush.png';
+import textballonImage from './homeimg/textballon.png';
+import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 
 const router = useRouter();
 
@@ -183,7 +183,7 @@ const loadingCumulative = ref(false);
 const cumulativeError = ref(null);
 
 // 말풍선 텍스트 상태 관리
-const bubbleText = ref("오늘은 퀴즈 풀어");
+const bubbleText = ref('오늘은 퀴즈 풀어');
 const loadingBubble = ref(false);
 const bubbleError = ref(null);
 
@@ -203,7 +203,7 @@ function closeNewsletter() {
 }
 
 function goToAvatarShop() {
-  router.push("/avatar-shop");
+  router.push('/avatar-shop');
 }
 
 const avatarStore = useAvatarStore();
@@ -211,44 +211,44 @@ const authStore = useAuthStore();
 
 // 착용 중인 아이템 확인
 const wearingTitle = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("titles");
+  const wearingItem = avatarStore.getWearingItem('titles');
   return wearingItem ? wearingItem.id : null;
 });
 
 const wearingShirt = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("shirts");
+  const wearingItem = avatarStore.getWearingItem('shirts');
   return wearingItem ? wearingItem.id : null;
 });
 
 const wearingShoes = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("shoes");
+  const wearingItem = avatarStore.getWearingItem('shoes');
   return wearingItem ? wearingItem.id : null;
 });
 
 // 여러 액세서리를 동시에 착용할 수 있도록 수정
 const wearingGlasses = computed(() => {
-  const wearingItems = avatarStore.getWearingItems("glasses");
+  const wearingItems = avatarStore.getWearingItems('glasses');
   return wearingItems.map((item) => item.id);
 });
 
 // 착용 중인 아이템 이미지 가져오기
 const getTitleImage = computed(() => {
-  if (wearingTitle.value === "hat-1sprout") return hatSprout;
-  if (wearingTitle.value === "hat-2beginner") return hatBeginner;
-  if (wearingTitle.value === "hat-3wizardhat") return hatWizardhat;
-  if (wearingTitle.value === "hat-4dosa") return hatDosa;
+  if (wearingTitle.value === 'hat-1sprout') return hatSprout;
+  if (wearingTitle.value === 'hat-2beginner') return hatBeginner;
+  if (wearingTitle.value === 'hat-3wizardhat') return hatWizardhat;
+  if (wearingTitle.value === 'hat-4dosa') return hatDosa;
   return null;
 });
 
 const getShirtImage = computed(() => {
-  if (wearingShirt.value === "shirt-blue") return shirtBlue;
-  if (wearingShirt.value === "shirt-red") return shirtRed;
+  if (wearingShirt.value === 'shirt-blue') return shirtBlue;
+  if (wearingShirt.value === 'shirt-red') return shirtRed;
   return null;
 });
 
 const getShoesImage = computed(() => {
-  if (wearingShoes.value === "shoes-brown") return shoesBrown;
-  if (wearingShoes.value === "shoes") return shoes;
+  if (wearingShoes.value === 'shoes-brown') return shoesBrown;
+  if (wearingShoes.value === 'shoes') return shoes;
   return null;
 });
 
@@ -256,9 +256,9 @@ const getShoesImage = computed(() => {
 const getGlassesImages = computed(() => {
   const images = [];
   wearingGlasses.value.forEach((glassesId) => {
-    if (glassesId === "sport-glasses") images.push(sportGlasses);
-    if (glassesId === "etc-sunglasses") images.push(sunGlasses);
-    if (glassesId === "etc-blush") images.push(blush);
+    if (glassesId === 'sport-glasses') images.push(sportGlasses);
+    if (glassesId === 'etc-sunglasses') images.push(sunGlasses);
+    if (glassesId === 'etc-blush') images.push(blush);
   });
   return images;
 });
@@ -267,9 +267,9 @@ const getGlassesImages = computed(() => {
 const totalEarnedPoints = computed(() => {
   const points = avatarStore.cumulativePoints || 0;
   console.log(
-    "totalEarnedPoints 계산:",
+    'totalEarnedPoints 계산:',
     points,
-    "avatarStore.cumulativePoints:",
+    'avatarStore.cumulativePoints:',
     avatarStore.cumulativePoints
   );
   return points;
@@ -283,16 +283,16 @@ const fetchCumulativePoints = async () => {
 
     // 인증 상태 확인
     if (!authStore.isAuthenticated) {
-      console.warn("로그인이 필요합니다.");
+      console.warn('로그인이 필요합니다.');
       return;
     }
 
-    console.log("Home 누적 포인트 데이터 가져오기 시작 (새로운 API 사용)");
-    console.log("인증 상태:", authStore.isAuthenticated);
-    console.log("사용자 정보:", authStore.user);
+    console.log('Home 누적 포인트 데이터 가져오기 시작 (새로운 API 사용)');
+    console.log('인증 상태:', authStore.isAuthenticated);
+    console.log('사용자 정보:', authStore.user);
 
     const response = await getMyCoinStatus();
-    console.log("받아온 코인 상태 데이터:", response);
+    console.log('받아온 코인 상태 데이터:', response);
 
     if (
       response.status === 200 &&
@@ -300,31 +300,31 @@ const fetchCumulativePoints = async () => {
       response.data.status === 200
     ) {
       const coinData = response.data.data;
-      if (coinData && typeof coinData.cumulativeAmount === "number") {
+      if (coinData && typeof coinData.cumulativeAmount === 'number') {
         avatarStore.setCumulativePoints(coinData.cumulativeAmount);
         console.log(
-          "Home 누적 포인트 업데이트 완료:",
+          'Home 누적 포인트 업데이트 완료:',
           coinData.cumulativeAmount
         );
       } else {
-        console.warn("유효한 누적 포인트 값을 찾을 수 없습니다:", response);
-        cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
+        console.warn('유효한 누적 포인트 값을 찾을 수 없습니다:', response);
+        cumulativeError.value = '누적 포인트 데이터를 가져오는데 실패했습니다.';
       }
     } else {
-      console.warn("코인 상태 데이터 형식이 올바르지 않습니다:", response);
-      cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
+      console.warn('코인 상태 데이터 형식이 올바르지 않습니다:', response);
+      cumulativeError.value = '누적 포인트 데이터를 가져오는데 실패했습니다.';
     }
   } catch (err) {
-    console.error("Home 누적 포인트 조회 에러:", err);
+    console.error('Home 누적 포인트 조회 에러:', err);
 
-    let errorMessage = "누적 포인트를 불러오는데 실패했습니다.";
+    let errorMessage = '누적 포인트를 불러오는데 실패했습니다.';
 
     if (err.response?.status === 401) {
-      errorMessage = "로그인이 필요합니다.";
+      errorMessage = '로그인이 필요합니다.';
     } else if (err.response?.status === 404) {
-      errorMessage = "사용자 정보를 찾을 수 없습니다.";
+      errorMessage = '사용자 정보를 찾을 수 없습니다.';
     } else if (err.response?.status === 500) {
-      errorMessage = "서버 오류가 발생했습니다.";
+      errorMessage = '서버 오류가 발생했습니다.';
     } else if (err.message) {
       errorMessage = `연결 오류: ${err.message}`;
     }
@@ -341,61 +341,61 @@ const fetchBubbleText = async () => {
     loadingBubble.value = true;
     bubbleError.value = null;
 
-    console.log("말풍선 텍스트 가져오기 시작");
+    console.log('말풍선 텍스트 가져오기 시작');
     const response = await getBubbleText();
-    console.log("받아온 말풍선 텍스트:", response);
+    console.log('받아온 말풍선 텍스트:', response);
 
     if (response.data !== undefined) {
       // API 응답 구조에 따라 텍스트 추출
       let textValue;
 
       // 구조 1: { data: "텍스트" }
-      if (typeof response.data === "string") {
+      if (typeof response.data === 'string') {
         textValue = response.data;
-        console.log("구조 1 적용 - 문자열 데이터:", textValue);
+        console.log('구조 1 적용 - 문자열 데이터:', textValue);
       }
       // 구조 2: { data: { text: "텍스트" } }
-      else if (response.data && typeof response.data === "object") {
+      else if (response.data && typeof response.data === 'object') {
         if (response.data.text !== undefined) {
           textValue = response.data.text;
-          console.log("구조 2 적용 - data.text:", textValue);
+          console.log('구조 2 적용 - data.text:', textValue);
         } else if (response.data.message !== undefined) {
           textValue = response.data.message;
-          console.log("구조 2 적용 - data.message:", textValue);
+          console.log('구조 2 적용 - data.message:', textValue);
         } else if (response.data.content !== undefined) {
           textValue = response.data.content;
-          console.log("구조 2 적용 - data.content:", textValue);
+          console.log('구조 2 적용 - data.content:', textValue);
         }
       }
 
-      if (textValue && typeof textValue === "string") {
+      if (textValue && typeof textValue === 'string') {
         bubbleText.value = textValue;
-        console.log("말풍선 텍스트 업데이트 완료:", textValue);
+        console.log('말풍선 텍스트 업데이트 완료:', textValue);
       } else {
         console.warn(
-          "유효한 말풍선 텍스트를 찾을 수 없습니다. 기본 메시지 표시:",
+          '유효한 말풍선 텍스트를 찾을 수 없습니다. 기본 메시지 표시:',
           response
         );
-        bubbleText.value = "오늘의 퀴즈를 풀어보세요.";
+        bubbleText.value = '오늘의 퀴즈를 풀어보세요.';
       }
     } else {
       console.warn(
-        "말풍선 텍스트 데이터가 없습니다. 기본 메시지 표시:",
+        '말풍선 텍스트 데이터가 없습니다. 기본 메시지 표시:',
         response
       );
-      bubbleText.value = "오늘의 퀴즈를 풀어보세요.";
+      bubbleText.value = '오늘의 퀴즈를 풀어보세요.';
     }
   } catch (err) {
-    console.error("말풍선 텍스트 조회 에러:", err);
+    console.error('말풍선 텍스트 조회 에러:', err);
 
-    let errorMessage = "말풍선 텍스트를 불러오는데 실패했습니다.";
+    let errorMessage = '말풍선 텍스트를 불러오는데 실패했습니다.';
 
     if (err.response?.status === 401) {
-      errorMessage = "로그인이 필요합니다.";
+      errorMessage = '로그인이 필요합니다.';
     } else if (err.response?.status === 404) {
-      errorMessage = "말풍선 텍스트를 찾을 수 없습니다.";
+      errorMessage = '말풍선 텍스트를 찾을 수 없습니다.';
     } else if (err.response?.status === 500) {
-      errorMessage = "서버 오류가 발생했습니다.";
+      errorMessage = '서버 오류가 발생했습니다.';
     } else if (err.message) {
       errorMessage = `연결 오류: ${err.message}`;
     }
@@ -416,10 +416,10 @@ const progressPercentage = computed(() => {
 
 const nextTargetPoints = computed(() => {
   const current = totalEarnedPoints.value;
-  if (current >= 60000) return "완료!";
-  if (current >= 40000) return "60,000";
-  if (current >= 20000) return "40,000";
-  return "20,000";
+  if (current >= 60000) return '완료!';
+  if (current >= 40000) return '60,000';
+  if (current >= 20000) return '40,000';
+  return '20,000';
 });
 
 // 컴포넌트 마운트 시 저장된 아바타 정보 불러오기
@@ -446,10 +446,10 @@ function formatNumber(num) {
 // 진행 상태 메시지 함수
 function getProgressMessage() {
   const current = totalEarnedPoints.value;
-  if (current >= 60000) return "🎉 모든 목표 달성!";
-  if (current >= 40000) return "🔥 40,000P 달성!";
-  if (current >= 20000) return "💪 20,000P 달성!";
-  return "🚀 목표 달성 중...";
+  if (current >= 60000) return '🎉 모든 목표 달성!';
+  if (current >= 40000) return '🔥 40,000P 달성!';
+  if (current >= 20000) return '💪 20,000P 달성!';
+  return '🚀 목표 달성 중...';
 }
 
 // 현재 레벨 계산
@@ -464,28 +464,28 @@ const getCurrentLevel = computed(() => {
 // 현재 레벨 제목
 const getCurrentLevelTitle = computed(() => {
   const points = totalEarnedPoints.value;
-  if (points >= 60000) return "금융도사";
-  if (points >= 40000) return "금융법사";
-  if (points >= 20000) return "금융견습";
-  return "금융새싹";
+  if (points >= 60000) return '금융도사';
+  if (points >= 40000) return '금융법사';
+  if (points >= 20000) return '금융견습';
+  return '금융새싹';
 });
 
 // 다음 레벨 제목
 const getNextLevelTitle = computed(() => {
   const points = totalEarnedPoints.value;
-  if (points >= 60000) return "완료";
-  if (points >= 40000) return "금융도사";
-  if (points >= 20000) return "금융법사";
-  return "금융견습";
+  if (points >= 60000) return '완료';
+  if (points >= 40000) return '금융도사';
+  if (points >= 20000) return '금융법사';
+  return '금융견습';
 });
 
 // 진행률 계산 (현재 레벨 내에서의 진행률)
 const getProgressPercentage = computed(() => {
   const current = totalEarnedPoints.value;
-  console.log("진행률 계산 - 현재 포인트:", current);
+  console.log('진행률 계산 - 현재 포인트:', current);
 
   if (current >= 60000) {
-    console.log("진행률: 100% (최고 레벨)");
+    console.log('진행률: 100% (최고 레벨)');
     return 100;
   }
   if (current >= 40000) {
@@ -494,7 +494,7 @@ const getProgressPercentage = computed(() => {
       100,
       Math.round(((current - 40000) / 20000) * 100)
     );
-    console.log("진행률 계산 (40000-59999):", percentage + "%");
+    console.log('진행률 계산 (40000-59999):', percentage + '%');
     return percentage;
   }
   if (current >= 20000) {
@@ -503,13 +503,13 @@ const getProgressPercentage = computed(() => {
       100,
       Math.round(((current - 20000) / 20000) * 100)
     );
-    console.log("진행률 계산 (20000-39999):", percentage + "%");
+    console.log('진행률 계산 (20000-39999):', percentage + '%');
     return percentage;
   }
   // 0-19999 구간에서 0-100%
   const percentage = Math.min(100, Math.round((current / 20000) * 100));
-  console.log("진행률 계산 (0-19999):", percentage + "%");
-  console.log("상세 계산:", {
+  console.log('진행률 계산 (0-19999):', percentage + '%');
+  console.log('상세 계산:', {
     current: current,
     division: current / 20000,
     percentage: (current / 20000) * 100,
@@ -521,7 +521,11 @@ const getProgressPercentage = computed(() => {
 
 <style scoped>
 /* 전역 스크롤 차단 */
-:global(body),
+:global(body) {
+  overflow: hidden !important;
+  height: 100vh !important;
+}
+
 :global(html) {
   overflow: hidden !important;
   height: 100vh !important;
@@ -556,6 +560,22 @@ const getProgressPercentage = computed(() => {
   padding: 20px 0;
   overflow: hidden;
 }
+
+/* 캐릭터 뒤에 스카이-블루(하늘) + 그린(잔디) 배경 */
+.main-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(#b9ddee 0% 70%, #5ea152 70% 100%);
+  z-index: 0;
+}
+
+/* 내부 컨텐츠가 배경보다 위에 표시되도록 */
+.main-content > * {
+  position: relative;
+  z-index: 1;
+}
+
 .quiz-bubble {
   position: relative;
   display: inline-block;
@@ -583,18 +603,19 @@ const getProgressPercentage = computed(() => {
   padding: 0 20px;
   box-sizing: border-box;
 }
+
 .main-card {
   width: 260px;
   height: 260px;
   background: #d1d5db;
   border-radius: 12px;
-  margin: 0 auto;
-  margin-bottom: 16px;
+  margin: 0 auto 16px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
+
 .avatar-section {
   display: flex;
   flex-direction: column;
@@ -611,11 +632,13 @@ const getProgressPercentage = computed(() => {
   align-items: center;
   justify-content: center;
 }
+
 .avatar-img {
   width: 230px;
   height: 359px;
   z-index: 1;
 }
+
 .title-img,
 .shirt-img,
 .shoes-img,
@@ -628,18 +651,23 @@ const getProgressPercentage = computed(() => {
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
+
 .title-img {
   z-index: 2;
 }
+
 .shirt-img {
   z-index: 2;
 }
+
 .shoes-img {
   z-index: 2;
 }
+
 .glasses-img {
   z-index: 3;
 }
+
 .floating-btn-group {
   position: absolute;
   top: 350px;
@@ -649,6 +677,7 @@ const getProgressPercentage = computed(() => {
   gap: 18px;
   z-index: 2;
 }
+
 .floating-btn {
   width: 48px;
   height: 48px;
@@ -664,16 +693,16 @@ const getProgressPercentage = computed(() => {
   transition: background 0.2s;
   cursor: pointer;
 }
+
 .floating-btn:hover {
   background: #6c4cf1;
 }
+
 .points-progress {
   width: 340px;
   background: transparent;
-  /* border-radius: 12px; */
   margin-top: 16px;
   padding: 16px;
-  /* border: 1px solid #e2e8f0; */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -719,18 +748,11 @@ const getProgressPercentage = computed(() => {
   margin-top: 6px;
 }
 
-.progress-bracket {
-  font-size: 28px;
-  color: #1e293b;
-  font-weight: 600;
-  margin: 0 8px;
-}
-
 .progress-bar {
   flex: 1;
   height: 24px;
   background: #f1f5f9;
-  border-radius: 6px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
 }
@@ -738,8 +760,8 @@ const getProgressPercentage = computed(() => {
 .progress-fill {
   height: 100%;
   background: #4318d1;
-  border-radius: 6px;
-  transition: width 0.3s ease;
+  border-radius: 12px;
+  transition: width 0.4s ease;
 }
 
 .progress-fill.loading {
@@ -800,13 +822,11 @@ const getProgressPercentage = computed(() => {
   font-weight: 700;
   color: #ffffff;
   z-index: 10;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8), 0 0 8px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.5));
 }
 
 .current-points {
-  color: #4318d1;
+  color: #ffffff;
   font-size: 28px;
 }
 
@@ -814,7 +834,6 @@ const getProgressPercentage = computed(() => {
   color: #ffffff;
   font-size: 10px;
   font-weight: 800;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9);
 }
 
 .separator {
@@ -831,16 +850,15 @@ const getProgressPercentage = computed(() => {
 }
 
 .target-points {
-  color: #1f5fb9;
+  color: #ffffff;
   font-size: 28px;
   font-weight: 600;
 }
 
 .points-display-inside .target-points {
-  color: #303030;
+  color: #ffffff;
   font-size: 10px;
   font-weight: 800;
-  /* text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9); */
 }
 
 .points-status {
@@ -858,5 +876,31 @@ const getProgressPercentage = computed(() => {
 
 .status-progress {
   color: #64748b;
+}
+
+.pixel-cloud {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  box-shadow: 8px 0 #ffffff, 16px 0 #ffffff, -8px 8px #ffffff, 0 8px #ffffff,
+    8px 8px #ffffff, 16px 8px #ffffff, 24px 8px #ffffff, -8px 16px #ffffff,
+    0 16px #ffffff, 8px 16px #ffffff, 16px 16px #ffffff, 0 24px #ffffff,
+    8px 24px #ffffff;
+  transform: scale(4);
+  transform-origin: top left;
+  image-rendering: pixelated;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.cloud-1 {
+  top: 40px;
+  left: 30px;
+}
+
+.cloud-2 {
+  top: 100px;
+  right: 40px;
 }
 </style>
