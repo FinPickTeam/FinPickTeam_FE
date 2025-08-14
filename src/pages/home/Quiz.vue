@@ -163,7 +163,7 @@ import { getTodayQuiz, submitQuiz } from "@/api/home";
 import { useAuthStore } from "@/stores/auth";
 import { useAvatarStore } from "@/stores/avatar.js";
 import { addQuizPoints } from "@/api/mypage/avatar";
-import { getMyCoinStatus } from "@/api/mypage/avatar/coinApi";
+// import { getMyCoinStatus } from "@/api/mypage/avatar/coinApi";
 
 const answer = ref("");
 const showResult = ref(false);

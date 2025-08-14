@@ -12,49 +12,26 @@
     <div class="avatar-section">
       <div class="avatar-container">
         <div class="avatar-pixel">
-          <img
-            :src="avatarBase"
-            class="avatar-img"
-            alt="아바타"
-            @error="handleImageError"
-            @load="handleImageLoad"
-          />
-          <img
-            v-if="tempWearingTitle"
-            :src="
-              titleItems.find((item) => item.id === tempWearingTitle)?.image
-            "
-            class="title-img"
-            alt="칭호"
-            @error="handleImageError"
-          />
-          <img
-            v-if="tempWearingShirt"
-            :src="
-              shirtItems.find((item) => item.id === tempWearingShirt)?.image
-            "
-            class="shirt-img"
-            alt="상의"
-            @error="handleImageError"
-          />
-          <img
-            v-if="tempWearingShoes"
-            :src="
-              shoesItems.find((item) => item.id === tempWearingShoes)?.image
-            "
-            class="shoes-img"
-            alt="신발"
-            @error="handleImageError"
-          />
+          <div class="avatar-placeholder">
+            <span class="avatar-text">아바타</span>
+          </div>
+          <div v-if="tempWearingTitle" class="title-placeholder">
+            <span class="item-text">칭호</span>
+          </div>
+          <div v-if="tempWearingShirt" class="shirt-placeholder">
+            <span class="item-text">상의</span>
+          </div>
+          <div v-if="tempWearingShoes" class="shoes-placeholder">
+            <span class="item-text">신발</span>
+          </div>
           <!-- 여러 액세서리를 동시에 표시 -->
-          <img
+          <div
             v-for="glassesId in tempWearingGlasses"
             :key="glassesId"
-            :src="glassesItems.find((item) => item.id === glassesId)?.image"
-            class="glasses-img"
-            :alt="glassesItems.find((item) => item.id === glassesId)?.name"
-            @error="handleImageError"
-          />
+            class="glasses-placeholder"
+          >
+            <span class="item-text">액세서리</span>
+          </div>
         </div>
       </div>
       <div class="coin-container">
@@ -108,7 +85,9 @@
           :key="item.id"
           @click="handleTitleItemClick(item)"
         >
-          <img :src="item.image" class="item-img" :alt="item.name" />
+          <div class="item-image-placeholder">
+            <span class="item-image-text">{{ item.name }}</span>
+          </div>
           <span class="item-requirement">
             {{
               item.requiredPoints === 0
@@ -156,7 +135,9 @@
           :key="item.id"
           @click="handleBuyOrToggleShirt(item)"
         >
-          <img :src="item.image" class="item-img" :alt="item.name" />
+          <div class="item-image-placeholder">
+            <span class="item-image-text">{{ item.name }}</span>
+          </div>
           <span class="item-price">🪙 {{ item.price }}</span>
           <span v-if="item.purchased" class="own-label">보유중</span>
           <span v-if="tempWearingShirt === item.id" class="wearing-label"
@@ -191,7 +172,9 @@
           :key="item.id"
           @click="handleBuyOrToggleShoes(item)"
         >
-          <img :src="item.image" class="item-img" :alt="item.name" />
+          <div class="item-image-placeholder">
+            <span class="item-image-text">{{ item.name }}</span>
+          </div>
           <span class="item-price">🪙 {{ item.price }}</span>
           <span v-if="item.purchased" class="own-label">보유중</span>
           <span v-if="tempWearingShoes === item.id" class="wearing-label"
@@ -226,7 +209,9 @@
           :key="item.id"
           @click="handleBuyOrToggleGlasses(item)"
         >
-          <img :src="item.image" class="item-img" :alt="item.name" />
+          <div class="item-image-placeholder">
+            <span class="item-image-text">{{ item.name }}</span>
+          </div>
           <span class="item-price">🪙 {{ item.price }}</span>
           <span v-if="item.purchased" class="own-label">보유중</span>
           <span
@@ -284,7 +269,9 @@
             :key="item.id"
             @click="handleBuyGifticon(item)"
           >
-            <img :src="item.image" class="gifticon-item-img" :alt="item.name" />
+            <div class="gifticon-item-image-placeholder">
+              <span class="gifticon-item-image-text">{{ item.name }}</span>
+            </div>
             <div class="gifticon-item-info">
               <div class="gifticon-item-name">{{ item.name }}</div>
               <div class="gifticon-item-price">
@@ -311,7 +298,9 @@
             :key="item.id"
             @click="handleBuyGifticon(item)"
           >
-            <img :src="item.image" class="gifticon-item-img" :alt="item.name" />
+            <div class="gifticon-item-image-placeholder">
+              <span class="gifticon-item-image-text">{{ item.name }}</span>
+            </div>
             <div class="gifticon-item-info">
               <div class="gifticon-item-name">{{ item.name }}</div>
               <div class="gifticon-item-price">
@@ -335,7 +324,9 @@
             :key="item.id"
             @click="handleBuyGifticon(item)"
           >
-            <img :src="item.image" class="gifticon-item-img" :alt="item.name" />
+            <div class="gifticon-item-image-placeholder">
+              <span class="gifticon-item-image-text">{{ item.name }}</span>
+            </div>
             <div class="gifticon-item-info">
               <div class="gifticon-item-name">{{ item.name }}</div>
               <div class="gifticon-item-price">
@@ -359,7 +350,9 @@
             :key="item.id"
             @click="handleBuyGifticon(item)"
           >
-            <img :src="item.image" class="gifticon-item-img" :alt="item.name" />
+            <div class="gifticon-item-image-placeholder">
+              <span class="gifticon-item-image-text">{{ item.name }}</span>
+            </div>
             <div class="gifticon-item-info">
               <div class="gifticon-item-name">{{ item.name }}</div>
               <div class="gifticon-item-price">
@@ -440,11 +433,10 @@ import { useRouter } from "vue-router";
 import { useAvatarStore } from "../../../stores/avatar.js";
 import {
   getCurrentCoin,
-  getCumulativeCoin,
   getClothes,
   insertClothe,
-  getMyCoinStatus,
-} from "@/api/mypage/avatar";
+  updateAvatar,
+} from "@/api/mypage/avatar/avatarApi.js";
 import { useAuthStore } from "@/stores/auth";
 import Navbar from "../../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -457,32 +449,13 @@ import {
 import { ref, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 
-// 아바타 이미지 import
-import avatarBase from "./avatarimg/avatar-base.png";
+// 아바타 이미지 import (제거됨 - 이미지 파일이 삭제됨)
+const avatarBase = "";
 
 // fallback 이미지 (기본 아바타가 로드되지 않을 경우)
-const fallbackAvatar =
-  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDE2MCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxNjAiIGhlaWdodD0iMjUwIiBmaWxsPSIjRkZGRkZGIi8+CjxjaXJjbGUgY3g9IjgwIiBjeT0iNjAiIHI9IjMwIiBmaWxsPSIjNjY2NjY2Ii8+CjxyZWN0IHg9IjUwIiB5PSI5MCIgd2lkdGg9IjYwIiBoZWlnaHQ9IjgwIiBmaWxsPSIjNjY2NjY2Ii8+Cjwvc3ZnPgo=";
-import hatWizardhat from "./avatarimg/hat-3wizardhat.png";
-import hatSprout from "./avatarimg/hat-1sprout.png";
-import hatDosa from "./avatarimg/hat-4dosa.png";
-import hatBeginner from "./avatarimg/hat-2beginner.png";
-import shirtBlue from "./avatarimg/shirts-blue.png";
-import shirtRed from "./avatarimg/shirt-red.png";
-import shoesBrown from "./avatarimg/shoese-brown.png";
-import shoes from "./avatarimg/shoese.png";
-import sportGlasses from "./avatarimg/sporglasses.png";
-import sunGlasses from "./avatarimg/etc-sunglasses.png";
-import blush from "./avatarimg/etc-blush.png";
+const fallbackAvatar = "";
 
-// 기프티콘 이미지 import
-import twosomeColdBrew from "./giftshopimg/TWOSOMEPLACE  COLDBRUE.png";
-import twosomeCafeLatte from "./giftshopimg/TWOSOMEPLACE  CAFELATTE.png";
-import twosomeHotLatte from "./giftshopimg/TWOSOMEPLACE HOTLATTE.png";
-import twosomeAmericano from "./giftshopimg/TWOSOMEPLACE AMECARICANO.png";
-import megaboxPopcorn from "./giftshopimg/MEGABOX CINEMA POPCORN SET.jpg";
-import cgvTicket from "./giftshopimg/CGV TICKET.jpeg";
-import lotteCombo from "./giftshopimg/LOTTECINEMA SWEET COMBO.jpg";
+// 기프티콘 이미지 import (제거됨 - 이미지 파일이 삭제됨)
 
 library.add(faAngleLeft, faCheckCircle, faCheckDouble);
 
@@ -549,107 +522,100 @@ const shoesItems = ref([]);
 const glassesItems = ref([]);
 const gifticonItems = ref([]);
 
-// 서버에서 의상 데이터 가져오기 (API 명세에 맞게 수정)
-const fetchUserClothes = async () => {
+// 포인트 조회
+const fetchCurrentCoin = async () => {
+  if (!authStore.user?.id) return;
+
+  loadingCoin.value = true;
+  coinError.value = null;
+
   try {
-    const userId = authStore.user?.id || authStore.user?.userId || 1;
-    console.log("사용자 의상 조회 시작, userId:", userId);
+    const response = await getCurrentCoin(authStore.user.id);
+    if (response.data && response.data.data) {
+      avatarStore.setCoin(response.data.data);
+    }
+  } catch (error) {
+    console.error("포인트 조회 실패:", error);
+    coinError.value = true;
+  } finally {
+    loadingCoin.value = false;
+  }
+};
 
-    const response = await getClothes(userId);
-    console.log("사용자 의상 조회 결과:", response);
-    console.log("response.data:", response.data);
-    console.log("response.data.data:", response.data?.data);
+// 아바타 아이템 조회
+const fetchAvatarItems = async () => {
+  if (!authStore.user?.id) return;
 
-    // API 명세에 따른 응답 구조 확인
-    // { "data": [...], "message": "string", "status": 0 }
-    if (response.data && response.data.status === 0 && response.data.data) {
+  try {
+    const response = await getClothes(authStore.user.id);
+    if (response.data && response.data.data) {
       const userClothes = response.data.data;
       console.log("서버에서 받은 의상 데이터:", userClothes);
-      console.log("userClothes 타입:", typeof userClothes);
-      console.log(
-        "userClothes 길이:",
-        Array.isArray(userClothes) ? userClothes.length : "배열이 아님"
-      );
 
       if (Array.isArray(userClothes) && userClothes.length > 0) {
-        console.log("첫 번째 아이템 예시:", userClothes[0]);
-        console.log(
-          "모든 아이템의 type:",
-          userClothes.map((item) => item.type)
-        );
-
         // 타입별로 아이템 분류 (API 명세의 필드명 사용)
         titleItems.value = userClothes
-          .filter((item) => item.type === "title")
+          .filter((item) => item.type === "level")
           .map((item) => ({
-            id: `hat-${item.itemId}sprout`, // 서버 itemId를 로컬 ID 형식으로 변환
+            id: item.itemId,
             name: item.name,
             price: item.cost,
-            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
-            purchased: item.owned, // API 명세: owned
-            wearing: item.wearing, // API 명세: wearing
+            image: item.imageUrl || "",
+            purchased: item.owned,
+            wearing: item.wearing,
             requiredPoints: getRequiredPoints(item.type, item.itemId),
           }));
 
         shirtItems.value = userClothes
-          .filter((item) => item.type === "shirt")
+          .filter((item) => item.type === "top")
           .map((item) => ({
-            id: `shirt-${item.itemId}`, // 서버 itemId를 로컬 ID 형식으로 변환
+            id: item.itemId,
             name: item.name,
             price: item.cost,
-            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
-            purchased: item.owned, // API 명세: owned
-            wearing: item.wearing, // API 명세: wearing
+            image: item.imageUrl || "",
+            purchased: item.owned,
+            wearing: item.wearing,
           }));
 
         shoesItems.value = userClothes
           .filter((item) => item.type === "shoes")
           .map((item) => ({
-            id: `shoes-${item.itemId}`, // 서버 itemId를 로컬 ID 형식으로 변환
+            id: item.itemId,
             name: item.name,
             price: item.cost,
-            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
-            purchased: item.owned, // API 명세: owned
-            wearing: item.wearing, // API 명세: wearing
+            image: item.imageUrl || "",
+            purchased: item.owned,
+            wearing: item.wearing,
           }));
 
         glassesItems.value = userClothes
-          .filter((item) => item.type === "glasses")
+          .filter((item) => item.type === "accessory")
           .map((item) => ({
-            id: `glasses-${item.itemId}`, // 서버 itemId를 로컬 ID 형식으로 변환
+            id: item.itemId,
             name: item.name,
             price: item.cost,
-            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
-            purchased: item.owned, // API 명세: owned
-            wearing: item.wearing, // API 명세: wearing
+            image: item.imageUrl || "",
+            purchased: item.owned,
+            wearing: item.wearing,
           }));
 
         gifticonItems.value = userClothes
-          .filter((item) => item.type === "gifticon")
+          .filter((item) => item.type === "giftCard")
           .map((item) => ({
-            id: `gifticon-${item.itemId}`, // 서버 itemId를 로컬 ID 형식으로 변환
+            id: item.itemId,
             name: item.name,
             price: item.cost,
-            image: item.imageUrl || getItemImage(item.type, item.itemId), // imageUrl 우선 사용
-            purchased: item.owned, // API 명세: owned
-            wearing: item.wearing, // API 명세: wearing
+            image: item.imageUrl || "",
+            purchased: item.owned,
+            wearing: item.wearing,
           }));
 
-        console.log("아이템 데이터 변환 완료 (API 명세 준수):", {
+        console.log("아이템 데이터 변환 완료:", {
           titles: titleItems.value,
           shirts: shirtItems.value,
           shoes: shoesItems.value,
           glasses: glassesItems.value,
           gifticons: gifticonItems.value,
-        });
-
-        // 디버깅: 각 배열의 길이 확인
-        console.log("아이템 배열 길이:", {
-          titleItemsLength: titleItems.value.length,
-          shirtItemsLength: shirtItems.value.length,
-          shoesItemsLength: shoesItems.value.length,
-          glassesItemsLength: glassesItems.value.length,
-          gifticonItemsLength: gifticonItems.value.length,
         });
       } else {
         console.log("서버 응답에 데이터가 없어서 기본 데이터 사용");
@@ -670,32 +636,10 @@ const fetchUserClothes = async () => {
   }
 };
 
-// 아이템 이미지 매핑 함수
+// 아이템 이미지 매핑 함수 (이미지 제거됨)
 const getItemImage = (type, itemId) => {
-  // 서버에서 받은 itemId에 따라 적절한 이미지 반환
-  const imageMap = {
-    title: {
-      1: "https://finpickbucket.s3.ap-northeast-2.amazonaws.com/level/SEEDLING/sprout.png", // 금융새싹
-      2: "https://finpickbucket.s3.ap-northeast-2.amazonaws.com/level/TRAINEE/beginner.png", // 금융견습
-      3: "https://finpickbucket.s3.ap-northeast-2.amazonaws.com/level/WIZARD/wizardhat.png", // 금융법사
-      4: "https://finpickbucket.s3.ap-northeast-2.amazonaws.com/level/MASTER/dosa.png", // 금융도사
-    },
-    shirt: {
-      1: shirtBlue,
-      2: shirtRed,
-    },
-    shoes: {
-      1: shoesBrown,
-      2: shoes,
-    },
-    glasses: {
-      1: sportGlasses,
-      2: sunGlasses,
-    },
-  };
-
-  const image = imageMap[type]?.[itemId] || avatarBase;
-  return image;
+  // 이미지 파일이 삭제되어 빈 문자열 반환
+  return "";
 };
 
 // 필요 포인트 매핑 함수
@@ -726,7 +670,7 @@ const initializeDefaultItems = () => {
       id: "hat-1sprout",
       name: "씨앗",
       price: 50000,
-      image: hatSprout,
+      image: "",
       purchased: false,
       wearing: false,
       requiredPoints: 0,
@@ -735,7 +679,7 @@ const initializeDefaultItems = () => {
       id: "hat-2beginner",
       name: "초보자 모자",
       price: 25000,
-      image: hatBeginner,
+      image: "",
       purchased: false,
       wearing: false,
       requiredPoints: 20000,
@@ -744,7 +688,7 @@ const initializeDefaultItems = () => {
       id: "hat-3wizardhat",
       name: "마법사 모자",
       price: 100000,
-      image: hatWizardhat,
+      image: "",
       purchased: false,
       wearing: false,
       requiredPoints: 40000,
@@ -753,7 +697,7 @@ const initializeDefaultItems = () => {
       id: "hat-4dosa",
       name: "도사 모자",
       price: 75000,
-      image: hatDosa,
+      image: "",
       purchased: false,
       wearing: false,
       requiredPoints: 60000,
@@ -765,7 +709,7 @@ const initializeDefaultItems = () => {
       id: "shirt-blue",
       name: "파란 상의",
       price: 50000,
-      image: shirtBlue,
+      image: "",
       purchased: false,
       wearing: false,
     },
@@ -773,7 +717,7 @@ const initializeDefaultItems = () => {
       id: "shirt-red",
       name: "빨간 상의",
       price: 50,
-      image: shirtRed,
+      image: "",
       purchased: false,
       wearing: false,
     },
@@ -784,7 +728,7 @@ const initializeDefaultItems = () => {
       id: "shoes-brown",
       name: "갈색 신발",
       price: 30,
-      image: shoesBrown,
+      image: "",
       purchased: false,
       wearing: false,
     },
@@ -792,7 +736,7 @@ const initializeDefaultItems = () => {
       id: "shoes",
       name: "검은 신발",
       price: 30,
-      image: shoes,
+      image: "",
       purchased: false,
       wearing: false,
     },
@@ -803,7 +747,7 @@ const initializeDefaultItems = () => {
       id: "sport-glasses",
       name: "스포츠 안경",
       price: 40,
-      image: sportGlasses,
+      image: "",
       purchased: false,
       wearing: false,
     },
@@ -811,7 +755,7 @@ const initializeDefaultItems = () => {
       id: "etc-sunglasses",
       name: "선글라스",
       price: 40,
-      image: sunGlasses,
+      image: "",
       purchased: false,
       wearing: false,
     },
@@ -819,7 +763,7 @@ const initializeDefaultItems = () => {
       id: "etc-blush",
       name: "블러시",
       price: 30,
-      image: blush,
+      image: "",
       purchased: false,
       wearing: false,
     },
@@ -884,92 +828,6 @@ function syncStoreState() {
     item.wearing = wearing;
   });
 }
-
-// 포인트 데이터 가져오기
-const fetchCurrentCoin = async () => {
-  try {
-    loadingCoin.value = true;
-    coinError.value = null;
-
-    // 인증 상태 확인
-    console.log("인증 상태 확인:", {
-      isAuthenticated: authStore.isAuthenticated,
-      user: authStore.user,
-      accessToken: authStore.accessToken ? "존재함" : "없음",
-    });
-
-    if (!authStore.isAuthenticated) {
-      console.warn("로그인이 필요합니다.");
-      return;
-    }
-
-    // 사용자 ID 가져오기
-    const userId = authStore.user?.id || authStore.user?.userId || 1;
-
-    console.log("AvatarShop 현재 포인트 데이터 가져오기 시작, userId:", userId);
-    const response = await getCurrentCoin(userId);
-    console.log("받아온 현재 포인트 데이터 (전체 응답):", response);
-    console.log("response.data:", response.data);
-    console.log("response.data.data:", response.data?.data);
-    console.log("response.status:", response.status);
-
-    if (response.status === 200 && response.data !== undefined) {
-      // 백엔드 응답 구조에 따라 coin 값 추출
-      let coinValue;
-
-      // 구조 1: { status: 200, data: 1500 }
-      if (typeof response.data === "number") {
-        coinValue = response.data;
-      }
-      // 구조 2: { status: 200, message: "...", data: 1500 }
-      else if (response.data.data !== undefined) {
-        coinValue = response.data.data;
-      }
-      // 구조 3: { data: 1500 }
-      else if (response.data !== undefined) {
-        coinValue = response.data;
-      }
-
-      console.log("추출된 현재 포인트 값:", coinValue);
-
-      if (coinValue !== undefined && typeof coinValue === "number") {
-        avatarStore.setCoin(coinValue);
-        console.log("AvatarShop 현재 포인트 업데이트 완료:", coinValue);
-        console.log("avatarStore.coin 값:", avatarStore.coin);
-      } else {
-        console.warn("유효한 현재 포인트 값을 찾을 수 없습니다:", response);
-        coinError.value = "현재 포인트 데이터를 가져오는데 실패했습니다.";
-      }
-    } else {
-      console.warn("현재 포인트 데이터 형식이 올바르지 않습니다:", response);
-      coinError.value = "현재 포인트 데이터를 가져오는데 실패했습니다.";
-    }
-  } catch (err) {
-    console.error("AvatarShop 현재 포인트 조회 에러:", err);
-    console.error("에러 상세 정보:", {
-      message: err.message,
-      status: err.response?.status,
-      data: err.response?.data,
-      config: err.config,
-    });
-
-    let errorMessage = "현재 포인트를 불러오는데 실패했습니다.";
-
-    if (err.response?.status === 401) {
-      errorMessage = "로그인이 필요합니다.";
-    } else if (err.response?.status === 404) {
-      errorMessage = "사용자 정보를 찾을 수 없습니다.";
-    } else if (err.response?.status === 500) {
-      errorMessage = "서버 오류가 발생했습니다.";
-    } else if (err.message) {
-      errorMessage = `연결 오류: ${err.message}`;
-    }
-
-    coinError.value = errorMessage;
-  } finally {
-    loadingCoin.value = false;
-  }
-};
 
 // 코인 상태 조회 (getMyCoinStatus API 사용 - API 명세에 맞게 수정)
 const fetchCoinStatus = async () => {
@@ -1103,18 +961,7 @@ const fetchCumulativePoints = async () => {
   }
 };
 
-// 이미지 에러 핸들링 함수
-const handleImageError = (event) => {
-  console.error("이미지 로드 실패:", event.target.src);
-  // fallback 이미지로 대체
-  if (event.target.src !== fallbackAvatar) {
-    event.target.src = fallbackAvatar;
-  }
-};
-
-const handleImageLoad = (event) => {
-  console.log("이미지 로드 성공:", event.target.src);
-};
+// 이미지 에러 핸들링 함수 (제거됨)
 
 // 컴포넌트 마운트 시 서버에서 데이터 가져오기 및 초기화
 onMounted(async () => {
@@ -1171,25 +1018,25 @@ const coffeeItems = ref([
     id: 1,
     name: "투썸플레이스 콜드브루 R",
     price: 8100,
-    image: twosomeColdBrew,
+    image: "",
   },
   {
     id: 2,
     name: "투썸플레이스 카페라떼 R",
     price: 8,
-    image: twosomeCafeLatte,
+    image: "",
   },
   {
     id: 3,
     name: "투썸플레이스 HOT 카페라떼 R",
     price: 80,
-    image: twosomeHotLatte,
+    image: "",
   },
   {
     id: 4,
     name: "투썸플레이스 아메리카노 L",
     price: 80,
-    image: twosomeAmericano,
+    image: "",
   },
 ]);
 
@@ -1198,7 +1045,7 @@ const megaboxItems = ref([
     id: 5,
     name: "메가박스 2인 패키지 (2D 일반관람권2+팝콘(L)+음료(R)2)",
     price: 54,
-    image: megaboxPopcorn,
+    image: "",
   },
 ]);
 
@@ -1207,7 +1054,7 @@ const artboxItems = ref([
     id: 6,
     name: "CGV 영화관람권 1인인",
     price: 8,
-    image: cgvTicket,
+    image: "",
   },
 ]);
 
@@ -1216,13 +1063,13 @@ const lotteItems = ref([
     id: 7,
     name: "롯데시네마 스위트콤보",
     price: 20000,
-    image: lotteCombo,
+    image: "",
   },
   {
     id: 8,
     name: "롯데시네마 2D 1인 영화관람권",
     price: 20,
-    image: cgvTicket,
+    image: "",
   },
 ]);
 
@@ -1627,79 +1474,18 @@ function goBack() {
 }
 
 async function handleBuyOrToggleShirt(item, skipModal = false) {
-  if (!item.purchased && !skipModal) {
-    openPurchaseModal(item, "shirt");
-    return;
-  }
-  if (!item.purchased && avatarStore.coin < item.price) {
-    showCoinError.value = true;
-    setTimeout(() => {
-      showCoinError.value = false;
-    }, 2000);
-    return;
-  }
+  // 보유하지 않은 아이템이면 구매
   if (!item.purchased) {
-    try {
-      const userId = authStore.user?.id || authStore.user?.userId || 1;
+    await purchaseItem(item, "top");
+    return;
+  }
 
-      // itemId 처리: 디버깅 및 안전한 파싱
-      console.log("구매 시도 아이템 정보:", item);
-      console.log("item.id 타입:", typeof item.id, "값:", item.id);
-
-      let itemId;
-      if (typeof item.id === "string" && item.id.includes("-")) {
-        const parts = item.id.split("-");
-        console.log("split 결과:", parts);
-        itemId = parseInt(parts[1]); // shirt-1 -> 1
-      } else if (typeof item.id === "number") {
-        itemId = item.id; // 이미 숫자인 경우
-      } else {
-        itemId = parseInt(item.id); // 문자열을 숫자로 변환
-      }
-
-      console.log("추출된 itemId:", itemId, "타입:", typeof itemId);
-
-      // itemId가 유효한 숫자인지 확인
-      if (isNaN(itemId)) {
-        console.error(
-          "유효하지 않은 itemId:",
-          itemId,
-          "원본 item.id:",
-          item.id
-        );
-        throw new Error("유효하지 않은 아이템 ID입니다.");
-      }
-
-      // 서버에 의상 구매 요청 (API 명세에 따른 필수 파라미터만)
-      const purchaseData = {
-        userId: userId,
-        itemId: itemId,
-      };
-
-      const response = await insertClothe(purchaseData);
-
-      // API 명세에 따른 응답 확인: { "data": "string", "message": "string", "status": 0 }
-      if (response.data && response.data.status === 0) {
-        // 구매 성공 시 로컬 상태 업데이트
-        item.purchased = true;
-        avatarStore.setItemState("shirts", item.id, true, false);
-
-        // 서버에서 업데이트된 포인트 가져오기
-        await fetchCoinStatus();
-
-        console.log(
-          "상의 구매 완료 (handleBuyOrToggle), 차감된 포인트:",
-          item.price
-        );
-      }
-    } catch (error) {
-      console.error("상의 구매 실패 (handleBuyOrToggle):", error);
-      showCoinError.value = true;
-      setTimeout(() => {
-        showCoinError.value = false;
-      }, 2000);
-      return;
-    }
+  // 이미 착용 중이면 착용 해제, 아니면 착용
+  if (item.wearing) {
+    // 착용 해제 로직 (필요시 구현)
+    console.log("착용 해제:", item.name);
+  } else {
+    await wearItem(item, "top");
   }
 
   // 임시 착용 상태 토글
@@ -1713,17 +1499,20 @@ async function handleBuyOrToggleShirt(item, skipModal = false) {
 }
 
 async function handleBuyOrToggleShoes(item, skipModal = false) {
-  if (!item.purchased && !skipModal) {
-    openPurchaseModal(item, "shoes");
+  // 보유하지 않은 아이템이면 구매
+  if (!item.purchased) {
+    await purchaseItem(item, "shoes");
     return;
   }
-  if (!item.purchased && avatarStore.coin < item.price) {
-    showCoinError.value = true;
-    setTimeout(() => {
-      showCoinError.value = false;
-    }, 2000);
-    return;
+
+  // 이미 착용 중이면 착용 해제, 아니면 착용
+  if (item.wearing) {
+    // 착용 해제 로직 (필요시 구현)
+    console.log("착용 해제:", item.name);
+  } else {
+    await wearItem(item, "shoes");
   }
+
   if (!item.purchased) {
     try {
       const userId = authStore.user?.id || authStore.user?.userId || 1;
@@ -1951,12 +1740,74 @@ async function handleBuyGifticon(item, skipModal = false) {
   }
 }
 
+// 아이템 구매
+const purchaseItem = async (item, type) => {
+  if (!authStore.user?.id) return;
+
+  try {
+    const purchaseData = {
+      userId: authStore.user.id,
+      itemId: item.id,
+      itemType: type,
+    };
+
+    const response = await insertClothe(purchaseData);
+
+    if (response.data && response.data.status === 0) {
+      // 구매 성공 시 포인트와 아이템 목록 갱신
+      await fetchCurrentCoin();
+      await fetchAvatarItems();
+      alert("구매가 완료되었습니다!");
+    }
+  } catch (error) {
+    console.error("구매 실패:", error);
+    alert("구매에 실패했습니다.");
+  }
+};
+
+// 아이템 착용
+const wearItem = async (item, type) => {
+  if (!authStore.user?.id) return;
+
+  try {
+    const wearData = {
+      userId: authStore.user.id,
+      items: [item.id],
+    };
+
+    const response = await updateAvatar(wearData);
+
+    if (response.data && response.data.status === 0) {
+      // 착용 성공 시 아이템 목록 갱신
+      await fetchAvatarItems();
+      alert("착용이 완료되었습니다!");
+    }
+  } catch (error) {
+    console.error("착용 실패:", error);
+    alert("착용에 실패했습니다.");
+  }
+};
+
 function handleTitleItemClick(item) {
   const status = getTitleItemStatus(item);
 
   // 비활성화된 아이템은 클릭 불가
   if (!status.isActive) {
     return;
+  }
+
+  // 보유하지 않은 아이템이면 구매
+  if (!item.purchased) {
+    purchaseItem(item, "level");
+    return;
+  }
+
+  // 이미 착용 중이면 착용 해제, 아니면 착용
+  if (item.wearing) {
+    // 착용 해제 로직 (필요시 구현)
+    console.log("착용 해제:", item.name);
+  } else {
+    wearItem(item, "level");
   }
 
   // 칭호는 무조건 하나는 장착되어야 하므로 착용 해제 불가
@@ -2355,6 +2206,72 @@ async function wearAvatar() {
   width: 35px;
   height: 35px;
   margin-bottom: 4px;
+}
+
+.item-image-placeholder {
+  width: 35px;
+  height: 35px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 4px;
+}
+
+.item-image-text {
+  font-size: 8px;
+  color: #6c757d;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1;
+}
+
+.avatar-placeholder,
+.title-placeholder,
+.shirt-placeholder,
+.shoes-placeholder,
+.glasses-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+}
+
+.avatar-text,
+.item-text {
+  font-size: 12px;
+  color: #6c757d;
+  font-weight: 500;
+  text-align: center;
+}
+
+.gifticon-item-image-placeholder {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  margin-right: 12px;
+}
+
+.gifticon-item-image-text {
+  font-size: 10px;
+  color: #6c757d;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .item-price {

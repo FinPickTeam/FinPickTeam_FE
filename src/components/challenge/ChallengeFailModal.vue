@@ -42,12 +42,7 @@ const props = defineProps({
   },
   challengeResult: {
     type: Object,
-    default: () => ({
-      resultType: 'FAIL',
-      actualRewardPoint: 0,
-      savedAmount: 0,
-      stockRecommendation: null,
-    }),
+    required: true,
   },
 });
 
@@ -132,7 +127,43 @@ const goToNextChallenge = () => {
   font-size: 14px;
   color: #666;
   line-height: 1.5;
+  margin: 0 0 16px 0;
+}
+
+.fail-info {
+  margin-bottom: 12px;
+}
+
+.fail-amount {
+  font-size: 14px;
+  color: #666;
   margin: 0;
+}
+
+.highlight-amount {
+  color: var(--color-main);
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.reward-info {
+  margin-top: 12px;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.reward-text {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.highlight-reward {
+  color: #ffd700;
+  font-weight: bold;
+  font-size: 16px;
 }
 
 .modal-actions {

@@ -4,7 +4,10 @@ import { useRouter } from 'vue-router';
 import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
 import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
 import ChallengeStatsSwiper from '@/components/challenge/ChallengeStatsSwiper.vue';
-import { getChallengeSummary, getChallengeList } from '@/api/challenge/challenge.js';
+import {
+  getChallengeSummary,
+  getChallengeList,
+} from '@/api/challenge/challenge.js';
 import { getMonthlyPoints } from '@/api/coin/coin.js';
 
 import { useAuthStore } from '@/stores/auth';
@@ -19,21 +22,25 @@ const loading = ref({
   participating: false,
   hot: false,
   points: false,
-  common: false,        // ✅ 충돌 해결: 공통 로딩 상태 추가
+  common: false, // ✅ 충돌 해결: 공통 로딩 상태 추가
 });
 const error = ref({
   summary: null,
   participating: null,
   hot: null,
   points: null,
-  common: null,         // ✅ 충돌 해결: 공통 에러 상태 추가
+  common: null, // ✅ 충돌 해결: 공통 에러 상태 추가
 });
 
-const summary = ref({ totalChallenges: 0, successCount: 0, achievementRate: 0 });
+const summary = ref({
+  totalChallenges: 0,
+  successCount: 0,
+  achievementRate: 0,
+});
 const participatingChallenges = ref([]);
 const hotChallenges = ref([]);
-const monthlyPoints = ref(null);      // StatsSwiper용(월누적)
-const commonHighlight = ref(null);    // ✅ 스와이프 3번 슬라이드용 공통 챌린지
+const monthlyPoints = ref(null); // StatsSwiper용(월누적)
+const commonHighlight = ref(null); // ✅ 스와이프 3번 슬라이드용 공통 챌린지
 
 const displayName = computed(() => {
   const u = auth.user || {};
@@ -46,11 +53,23 @@ const handleParticipate = (challenge) => {
 
 const goDetail = (challenge) => {
   if (challenge.type === 'COMMON') {
-    router.push({ name: 'ChallengeCommonDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+    router.push({
+      name: 'ChallengeCommonDetail',
+      params: { id: challenge.id },
+      state: { previousPage: '/challenge' },
+    });
   } else if (challenge.type === 'GROUP') {
-    router.push({ name: 'ChallengeGroupDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+    router.push({
+      name: 'ChallengeGroupDetail',
+      params: { id: challenge.id },
+      state: { previousPage: '/challenge' },
+    });
   } else if (challenge.type === 'PERSONAL') {
-    router.push({ name: 'ChallengePersonalDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
+    router.push({
+      name: 'ChallengePersonalDetail',
+      params: { id: challenge.id },
+      state: { previousPage: '/challenge' },
+    });
   }
 };
 
@@ -66,7 +85,8 @@ const fetchSummary = async () => {
     const data = await getChallengeSummary();
     summary.value = data || summary.value;
   } catch (e) {
-    error.value.summary = e?.response?.data?.message || e.message || '요약 조회 실패';
+    error.value.summary =
+      e?.response?.data?.message || e.message || '요약 조회 실패';
   } finally {
     loading.value.summary = false;
   }
@@ -75,7 +95,9 @@ const fetchSummary = async () => {
 const sortParticipating = (list) => {
   const toKey = (c) => {
     const unconfirmed = c?.status === 'COMPLETED' && !c?.isResultCheck;
-    const end = c?.endDate ? new Date(c.endDate).getTime() : Number.MAX_SAFE_INTEGER;
+    const end = c?.endDate
+      ? new Date(c.endDate).getTime()
+      : Number.MAX_SAFE_INTEGER;
     // 정렬 우선순위: 1) 미확인 먼저 (-1), 2) 종료일 빠른 순
     return [unconfirmed ? -1 : 0, end];
   };
@@ -98,7 +120,8 @@ const fetchParticipating = async () => {
     // 진행중 개수 갱신
     challengeStore.updateCountsFromList(participatingChallenges.value);
   } catch (e) {
-    error.value.participating = e?.response?.data?.message || e.message || '참여중 목록 조회 실패';
+    error.value.participating =
+      e?.response?.data?.message || e.message || '참여중 목록 조회 실패';
     participatingChallenges.value = [];
     challengeStore.resetCounts();
   } finally {
@@ -110,10 +133,14 @@ const fetchHot = async () => {
   loading.value.hot = true;
   error.value.hot = null;
   try {
-    const list = await getChallengeList({ status: 'RECRUITING', participating: false });
+    const list = await getChallengeList({
+      status: 'RECRUITING',
+      participating: false,
+    });
     hotChallenges.value = Array.isArray(list) ? list : [];
   } catch (e) {
-    error.value.hot = e?.response?.data?.message || e.message || 'HOT 목록 조회 실패';
+    error.value.hot =
+      e?.response?.data?.message || e.message || 'HOT 목록 조회 실패';
   } finally {
     loading.value.hot = false;
   }
@@ -129,7 +156,8 @@ const fetchMonthlyPoints = async () => {
     const res = await getMonthlyPoints({ year: y, month: m });
     monthlyPoints.value = res?.amount ?? null; // ← 월누적 카드용
   } catch (e) {
-    error.value.points = e?.response?.data?.message || e.message || '포인트 조회 실패';
+    error.value.points =
+      e?.response?.data?.message || e.message || '포인트 조회 실패';
     monthlyPoints.value = null;
   } finally {
     loading.value.points = false;
@@ -142,14 +170,14 @@ const fetchCommonHighlight = async () => {
   error.value.common = null;
 
   const pick = (item) =>
-      item && {
-        id: item.id,
-        title: item.title,
-        status: item.status,
-        startDate: item.startDate,
-        endDate: item.endDate,
-        participantsCount: item.participantsCount ?? 0,
-      };
+    item && {
+      id: item.id,
+      title: item.title,
+      status: item.status,
+      startDate: item.startDate,
+      endDate: item.endDate,
+      participantsCount: item.participantsCount ?? 0,
+    };
 
   try {
     // 1) 모집중 공통
@@ -162,7 +190,7 @@ const fetchCommonHighlight = async () => {
     // 2) 내가 참여 중인 공통
     const joined = await getChallengeList({ participating: true });
     const myCommon = (Array.isArray(joined) ? joined : []).find(
-        (c) => (c?.type || '').toUpperCase() === 'COMMON'
+      (c) => (c?.type || '').toUpperCase() === 'COMMON'
     );
     if (myCommon) {
       commonHighlight.value = pick(myCommon);
@@ -178,9 +206,11 @@ const fetchCommonHighlight = async () => {
 
     // 4) 어떤 공통이든 1개
     list = await getChallengeList({ type: 'COMMON' });
-    commonHighlight.value = Array.isArray(list) && list.length > 0 ? pick(list[0]) : null;
+    commonHighlight.value =
+      Array.isArray(list) && list.length > 0 ? pick(list[0]) : null;
   } catch (e) {
-    error.value.common = e?.response?.data?.message || e.message || '공통 챌린지 조회 실패';
+    error.value.common =
+      e?.response?.data?.message || e.message || '공통 챌린지 조회 실패';
     commonHighlight.value = null;
   } finally {
     loading.value.common = false;
@@ -191,8 +221,8 @@ const openCommonFromSwiper = () => {
   if (commonHighlight.value?.id) {
     router.push({
       name: 'ChallengeCommonDetail',
-      params: {id: commonHighlight.value.id},
-      state: {previousPage: '/challenge'},
+      params: { id: commonHighlight.value.id },
+      state: { previousPage: '/challenge' },
     });
   }
 };
@@ -203,7 +233,7 @@ onMounted(async () => {
     fetchParticipating(),
     fetchHot(),
     fetchMonthlyPoints(),
-    fetchCommonHighlight(),           // ✅ 항상 배너에 공통 1개
+    fetchCommonHighlight(), // ✅ 항상 배너에 공통 1개
     challengeStore.fetchCoinStatus(), // Pinia 스냅샷 적재
   ]);
 });
@@ -219,21 +249,30 @@ watch(participatingChallenges, (list) => {
     <div class="header-section">
       <div class="greeting-section">
         <div class="greeting">
-          안녕하세요, <span class="username">{{ displayName }}</span>님!
+          안녕하세요, <span class="username">{{ displayName }}</span
+          >님!
         </div>
       </div>
 
       <!-- ✅ 공통 챌린지 추가 슬라이드가 포함됨 -->
       <ChallengeStatsSwiper
-          :summary="summary"
-          :points="monthlyPoints"
-          :common="commonHighlight"
-          @open-common="openCommonFromSwiper"
+        :summary="summary"
+        :points="monthlyPoints"
+        :common="commonHighlight"
+        @open-common="openCommonFromSwiper"
       />
-      <div v-if="loading.summary" style="color: #fff; margin: 6px 20px 0">요약 로딩중…</div>
-      <div v-else-if="error.summary" style="color: #fff; margin: 6px 20px 0">{{ error.summary }}</div>
-      <div v-if="error.points" style="color: #fff; margin: 6px 20px 0">{{ error.points }}</div>
-      <div v-if="error.common" style="color: #fff; margin: 6px 20px 0">{{ error.common }}</div>
+      <div v-if="loading.summary" style="color: #fff; margin: 6px 20px 0">
+        요약 로딩중…
+      </div>
+      <div v-else-if="error.summary" style="color: #fff; margin: 6px 20px 0">
+        {{ error.summary }}
+      </div>
+      <div v-if="error.points" style="color: #fff; margin: 6px 20px 0">
+        {{ error.points }}
+      </div>
+      <div v-if="error.common" style="color: #fff; margin: 6px 20px 0">
+        {{ error.common }}
+      </div>
     </div>
 
     <!-- 참여중인 챌린지 -->
@@ -246,12 +285,14 @@ watch(participatingChallenges, (list) => {
       </div>
 
       <div v-if="loading.participating" class="challenges-scroll">로딩중…</div>
-      <div v-else-if="error.participating" class="challenges-scroll">{{ error.participating }}</div>
+      <div v-else-if="error.participating" class="challenges-scroll">
+        {{ error.participating }}
+      </div>
       <div v-else class="challenges-scroll">
         <ParticipatingChallengeCard
-            v-for="c in participatingChallenges"
-            :key="c.id"
-            :challenge="{
+          v-for="c in participatingChallenges"
+          :key="c.id"
+          :challenge="{
             id: c.id,
             title: c.title,
             type: c.type,
@@ -262,12 +303,15 @@ watch(participatingChallenges, (list) => {
             myProgressRate: c.myProgressRate ?? 0,
             participantsCount: c.participantsCount ?? 0,
             isResultCheck: c.isResultCheck ?? false,
-            status: c.status,                // ✅ HEAD 유지
-            usePassword: c.usePassword ?? false
+            isSuccess: c.isSuccess ?? null,
+            status: c.status, // ✅ HEAD 유지
+            usePassword: c.usePassword ?? false,
           }"
-            @cardClick="handleCardClick"
+          @cardClick="handleCardClick"
         />
-        <div v-if="participatingChallenges.length === 0" class="empty-message">참여중인 챌린지가 없어요.</div>
+        <div v-if="participatingChallenges.length === 0" class="empty-message">
+          참여중인 챌린지가 없어요.
+        </div>
       </div>
     </div>
 
@@ -284,9 +328,9 @@ watch(participatingChallenges, (list) => {
       <div v-else-if="error.hot" class="challenges-scroll">{{ error.hot }}</div>
       <div v-else class="challenges-scroll">
         <HotChallengeCard
-            v-for="c in hotChallenges"
-            :key="c.id"
-            :challenge="{
+          v-for="c in hotChallenges"
+          :key="c.id"
+          :challenge="{
             id: c.id,
             title: c.title,
             type: c.type,
@@ -298,12 +342,14 @@ watch(participatingChallenges, (list) => {
             myProgressRate: c.myProgressRate ?? null,
             participantsCount: c.participantsCount ?? 0,
             isResultCheck: c.isResultCheck ?? false,
-            usePassword: c.usePassword ?? false
+            usePassword: c.usePassword ?? false,
           }"
-            @participate="handleParticipate"
-            @click="handleCardClick"
+          @participate="handleParticipate"
+          @click="handleCardClick"
         />
-        <div v-if="hotChallenges.length === 0" class="empty-message">모집 중인 챌린지가 없어요.</div>
+        <div v-if="hotChallenges.length === 0" class="empty-message">
+          모집 중인 챌린지가 없어요.
+        </div>
       </div>
     </div>
   </div>
@@ -314,9 +360,9 @@ watch(participatingChallenges, (list) => {
   padding: 0;
   background: var(--color-bg-light);
   min-height: 100vh;
-  //height: 100dvh;
-  //overflow-y: auto;
-  //overflow-x: hidden;
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 /* 헤더 섹션 */
@@ -325,7 +371,11 @@ watch(participatingChallenges, (list) => {
   max-width: 390px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(to right, var(--color-main-light-2), var(--color-main-dark));
+  background: linear-gradient(
+    to right,
+    var(--color-main-light-2),
+    var(--color-main-dark)
+  );
   border-radius: 0;
   padding: 0px 16px 0px 16px;
   margin-bottom: 12px;

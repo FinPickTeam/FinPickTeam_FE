@@ -103,11 +103,12 @@ const testChallengeResult = ref({
   stockRecommendation: {
     stockName: '삼성전자',
     stockCode: '005930',
-    currentPrice: 75000,
-    priceChange: 2500,
-    priceChangeRate: 3.45,
-    recommendationReason:
+    stockPrice: 75000,
+    stockPredictedPrice: '+2500',
+    stockChangeRate: '+3.45',
+    stockSummary:
       'AI 반도체 시장 성장과 함께 삼성전자의 기술 경쟁력이 향상되고 있어 투자 가치가 높습니다.',
+    stockChartUrl: 'https://example.com/chart.png', // 선택사항
   },
 });
 const testFailChallengeResult = ref({
