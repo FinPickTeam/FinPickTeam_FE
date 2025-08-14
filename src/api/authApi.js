@@ -176,7 +176,7 @@ export const pinReset = async (pin) => {
 export const isPin = async () => {
   try {
     console.log("간편비밀번호 재설정 API 요청 시작");
-    const response = await api.get("/user/pin/isCreated",{});
+    const response = await api.get("/user/pin/isCreated");
 
     console.log("간편비밀번호 재설정 API 응답 데이터:", {
       status: response.data.status,
