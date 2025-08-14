@@ -18,3 +18,8 @@ export const checkCoinRankSnapshot = ({ month, userId }) =>
     api.patch('/challenge/rank/coin/snapshot/check', null, { params: { month, userId } })
         .then(res => res.data)
         .catch(err => { throw err; });
+
+// 산정 실행(현재 달): POST /api/challenge/rank/test/coin/calc
+export const runCoinRankCalculationNow = () =>
+    api.post('/challenge/rank/test/coin/calc').then(res => res.data);
+

@@ -156,12 +156,18 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
-import { getChallengeList, getCommonChallengeRank, refreshCommonChallengeRank } from '@/api/challenge/challenge';
-import { getCoinRankTop5WithMe } from '@/api/challenge/coinRank';
+import {
+  getChallengeDetail,
+  getChallengeList,
+  getCommonChallengeRank,
+  refreshCommonChallengeRank
+} from '@/api/challenge/challenge';
+import { getCoinRankTop5WithMe, runCoinRankCalculationNow } from '@/api/challenge/coinRank';
+
 
 const auth = useAuthStore();
 
-// ✅ auth.user 기반으로 안전하게 참조
+// auth.user 기반으로 안전하게 참조
 const nickname = computed(() =>
     auth?.user?.nickname || auth?.user?.nickName || '나'
 );
@@ -196,8 +202,10 @@ const commonProgressPercent = computed(() => {
 
 const isMe = (row) => {
   if (!row) return false;
-  // 닉네임 기준 (백엔드 공통랭킹엔 userId가 없으므로 닉네임 매칭)
-  return row.nickname === nickname.value;
+  if (row.userId != null && userId.value != null) {
+    return Number(row.userId) === Number(userId.value);
+  }
+  return row.nickname === nickname.value; // 보조
 };
 
 const findCurrentCommonChallenge = async () => {
@@ -207,10 +215,15 @@ const findCurrentCommonChallenge = async () => {
     if (!Array.isArray(list) || list.length === 0) return null;
 
     const c = list[0];
+
+    // 필요하면 상세로 확정값을 받기 (participant_count, goal_value 모두)
+    const detail = await getChallengeDetail(c.id);
+
     return {
       id: c?.id,
       title: c?.title,
-      goalValue: c?.goalValue ?? 0,
+      goalValue: detail?.goalValue ?? c?.goalValue ?? 0,
+      participantCount: detail?.participantsCount ?? c?.participantsCount ?? 0,
     };
   } catch {
     return null;
@@ -231,7 +244,9 @@ const loadCommonRank = async () => {
   try {
     const rows = await getCommonChallengeRank(commonChallenge.value.id); // List<ChallengeRankResponseDTO>
     commonRankList.value = Array.isArray(rows) ? rows : [];
-    totalParticipants.value = commonRankList.value.length;
+    // 화면 표시는 DB 기준으로
+    totalParticipants.value = Number(commonChallenge.value.participantCount ?? 0);
+
     myCommonRow.value = commonRankList.value.find((r) => isMe(r)) || null;
     participating.value = !!myCommonRow.value;
   } catch {
@@ -258,17 +273,19 @@ const coinRows = ref([]);  // [{ userId, nickname, rank, cumulativePoint, challe
 // Top5는 '랭크값' 기준으로 정확히 상위 5명만
 const coinTop5 = computed(() =>
     [...coinRows.value]
-        .filter((r) => Number.isInteger(r.rank) && r.rank <= 5)
-        .sort((a, b) => a.rank - b.rank)
+        .filter((r) => Number.isInteger(Number(r.rank)) && Number(r.rank) <= 5)
+        .sort((a, b) => Number(a.rank) - Number(b.rank))
 );
 
 // 내 랭킹은 userId 매칭(없으면 닉네임 보조)
 const myCoinRow = computed(() => {
   if (!coinRows.value?.length) return null;
-  const byId = coinRows.value.find((r) => r.userId === userId.value);
+  const uid = Number(userId.value ?? -1);
+  const byId = coinRows.value.find((r) => Number(r.userId) === uid);
   if (byId) return byId;
   return coinRows.value.find((r) => r.nickname === nickname.value) || null;
 });
+
 
 const loadCoinRank = async () => {
   const uid = userId.value;
@@ -317,9 +334,14 @@ const refreshData = async () => {
   isLoading.value = true;
   try {
     if (activeTab.value === 'common') {
-      await refreshCommon();
+      await refreshCommon(); // 기존: 서버 재계산 + 재조회
     } else {
-      // 코인 랭킹은 스케줄러가 매일 계산 → 클라에선 재조회만
+      // 변경: 코인 랭킹도 서버 산정 트리거 후 재조회
+      try {
+        await runCoinRankCalculationNow(); // 산정 실행 (테스트 엔드포인트)
+      } catch (_) {
+        // 산정 실패해도 재조회는 시도
+      }
       await loadCoinRank();
     }
     lastUpdated.value = new Date();

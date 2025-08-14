@@ -2,17 +2,21 @@ import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 
 const instance = axios.create({
-  baseURL: '/api', // Vite 프록시 경유
-  withCredentials: true, // ★ 쿠키 자동 저장/전송
+  baseURL: '/api',
+  withCredentials: true, // RT 쿠키 전송
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
 });
 
+// 중복 리프레시 방지용 간단한 락
+let refreshingPromise = null;
+
 // ===== 요청 인터셉터: 액세스 토큰 헤더 주입 =====
 instance.interceptors.request.use((config) => {
   const auth = useAuthStore();
+  if (!config.headers) config.headers = {};
   if (auth?.accessToken) {
     config.headers.Authorization = `Bearer ${auth.accessToken}`;
   }
@@ -21,46 +25,64 @@ instance.interceptors.request.use((config) => {
 
 // ===== 응답 인터셉터: 로그인/재발급 응답 헤더에서 AT 저장 =====
 instance.interceptors.response.use(
-  (res) => {
-    const authHeader = res.headers?.authorization;
-    if (authHeader?.startsWith('Bearer ')) {
-      const at = authHeader.slice(7);
+    (res) => {
       const auth = useAuthStore();
-      auth.setTokens({ accessToken: at }); // RT는 httpOnly 쿠키 → JS에서 다루지 않음
-    }
-    return res;
-  },
-  async (error) => {
-    const auth = useAuthStore();
-    const original = error.config;
-
-    // 로그인/리프레시 자체 실패는 패스
-    const isAuthCall =
-      original?.url?.includes('/auth/login') ||
-      original?.url?.includes('/auth/refresh');
-
-    // 401이면 리프레시 시도 → 성공 시 원요청 재시도
-    if (error.response?.status === 401 && !isAuthCall) {
-      try {
-        const r = await instance.post('/auth/refresh'); // 바디 없음, 쿠키 자동 전송
-        const authHeader = r.headers?.authorization;
-        if (!authHeader?.startsWith('Bearer ')) {
-          throw new Error('No Authorization header in refresh response');
-        }
-        const newAT = authHeader.slice(7);
-        auth.setTokens({ accessToken: newAT });
-
-        // 원 요청 토큰 갱신 후 재시도
-        original.headers = original.headers || {};
-        original.headers.Authorization = `Bearer ${newAT}`;
-        return instance(original);
-      } catch (e) {
-        auth.logout(false); // RT 만료/불일치 등 → 세션 종료 (리다이렉트 없이)
+      const authHeader =
+          res?.headers?.authorization ?? res?.headers?.Authorization;
+      if (authHeader?.startsWith('Bearer ')) {
+        auth.setTokens({ accessToken: authHeader.slice(7) });
       }
-    }
+      return res;
+    },
+    async (error) => {
+      const auth = useAuthStore();
+      const original = error?.config || {};
+      const status = error?.response?.status;
 
-    return Promise.reject(error);
-  }
+      // 로그인/리프레시 자체는 여기서 손대지 않음
+      const isAuthCall =
+          original?.url?.includes('/auth/login') ||
+          original?.url?.includes('/auth/refresh');
+
+      // 401이면: 리프레시 1회 시도 후 원요청 재시도
+      if (status === 401 && !isAuthCall && !original._retry) {
+        original._retry = true;
+
+        try {
+          // 이미 다른 요청이 리프레시 중이면 그걸 기다림
+          if (!refreshingPromise) {
+            // 글로벌 axios 사용 (인터셉터/오래된 AT 부착 방지)
+            refreshingPromise = axios.post('/api/auth/refresh', null, {
+              withCredentials: true,
+              headers: { Authorization: '' }, // 혹시 모를 오래된 AT 제거
+            });
+          }
+
+          const r = await refreshingPromise.finally(() => {
+            refreshingPromise = null;
+          });
+
+          const hdr = r?.headers?.authorization ?? r?.headers?.Authorization;
+          if (!hdr?.startsWith('Bearer ')) {
+            throw new Error('No Authorization header in refresh response');
+          }
+
+          const newAT = hdr.slice(7);
+          auth.setTokens({ accessToken: newAT });
+
+          // 원 요청 재시도 시 최신 AT 부착
+          original.headers = original.headers || {};
+          original.headers.Authorization = `Bearer ${newAT}`;
+          return instance(original);
+        } catch (e) {
+          // 리프레시 실패 → 세션 종료(리다이렉트는 라우터 가드에서)
+          auth.logout(false);
+        }
+      }
+
+      // 그 외 에러는 그대로 던짐
+      return Promise.reject(error);
+    }
 );
 
 export default instance;
