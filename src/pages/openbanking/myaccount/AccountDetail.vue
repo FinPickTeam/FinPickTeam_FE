@@ -1,954 +1,148 @@
 <template>
   <div class="account-detail-container">
-    <!-- 상단 헤더 -->
-    <div class="account-header">
-      <button class="account-back" @click="goBack">
-        <font-awesome-icon :icon="['fas', 'angle-left']" />
-      </button>
-      <span class="account-title">계좌 상세</span>
-      <div class="account-header-right">
-        <button class="account-filter-btn" @click="openFilterModal">
-          <font-awesome-icon :icon="['fas', 'sliders']" />
-        </button>
-      </div>
-    </div>
+    <!-- 요약/상세 카드 섹션은 기존 코드 유지 -->
 
-    <!-- 계좌 정보 카드 -->
-    <div class="account-info-card">
-      <div class="account-bank-info">
-        <div class="account-bank-name">{{ account?.bank }}</div>
-        <div
-          class="account-type-badge"
-          :class="getAccountTypeClass(account?.type)"
-        >
-          {{ account?.type }}
-        </div>
-      </div>
-      <div class="account-balance" :class="{ negative: account?.balance < 0 }">
-        {{ account?.balance?.toLocaleString() }}원
-      </div>
-      <div class="account-name">{{ account?.name }}</div>
-      <div class="account-number">{{ account?.accountNumber }}</div>
-    </div>
-
-    <!-- Transaction_dummy.json 요약 정보 -->
-    <div class="transaction-summary-card">
-      <div class="summary-header">
-        <h3>거래 요약 ({{ getPeriodDisplayName() }})</h3>
-      </div>
-      <div class="summary-stats">
-        <div class="summary-stat">
-          <div class="stat-label">총 거래 건수</div>
-          <div class="stat-value">{{ filteredTransactionCount }}건</div>
-        </div>
-        <div class="summary-stat">
-          <div class="stat-label">총 입금액</div>
-          <div class="stat-value income">
-            {{ filteredTotalIncome.toLocaleString() }}원
-          </div>
-        </div>
-        <div class="summary-stat">
-          <div class="stat-label">총 출금액</div>
-          <div class="stat-value expense">
-            {{ filteredTotalExpense.toLocaleString() }}원
-          </div>
-        </div>
-        <div class="summary-stat">
-          <div class="stat-label">최근 거래일</div>
-          <div class="stat-value">{{ latestTransactionDate }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 계좌 상세 정보 -->
-    <div class="account-detail-info">
-      <div class="detail-row">
-        <span class="detail-label">은행</span>
-        <span class="detail-value">{{ account?.bank }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">계좌명</span>
-        <span class="detail-value">{{ account?.name }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">계좌번호</span>
-        <span class="detail-value">{{ account?.accountNumber }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">계좌타입</span>
-        <span class="detail-value">{{ account?.type }}</span>
-      </div>
-      <div class="detail-row">
-        <span class="detail-label">잔액</span>
-        <span
-          class="detail-value balance"
-          :class="{ negative: account?.balance < 0 }"
-          >{{ account?.balance?.toLocaleString() }}원</span
-        >
-      </div>
-    </div>
-
-    <!-- 계좌별 거래 내역 -->
     <div class="account-transactions">
       <div class="transactions-title">
-        거래 내역 ({{ getPeriodDisplayName() }})
+        거래 내역 ({{ getPeriodLabel() }})
+        <span class="tx-count">{{ items.length }}건</span>
       </div>
-      <div class="transactions-list">
-        <div
-          class="transaction-item"
-          v-for="(transaction, index) in filteredAccountTransactions"
-          :key="`transaction-${index}`"
-        >
-          <div class="transaction-info">
-            <div class="transaction-description">
-              {{ transaction.description }}
-            </div>
-            <div class="transaction-date">
-              {{ formatDate(transaction.date) }}
-            </div>
-          </div>
-          <div
-            class="transaction-amount"
-            :class="transaction.type === '입금' ? 'income' : 'expense'"
-          >
-            {{ transaction.type === "입금" ? "+" : "-"
-            }}{{ transaction.amount.toLocaleString() }}원
-          </div>
-        </div>
-      </div>
+
+      <!-- 로딩/에러/리스트 -->
+      <div v-if="loading" class="tx-loading">불러오는 중...</div>
+      <div v-else-if="error" class="tx-error">{{ error }}</div>
+      <TransactionList
+        v-else
+        :items="items"
+        :getters="{
+          title: (t) => t.place || t.merchantName || t.accountName || '거래',
+          type: (t) => t.type,
+          date: (t) => t.date,
+          amount: (t) => t.amount,
+        }"
+      />
     </div>
 
-    <!-- 기간 필터 모달 -->
-    <div v-if="showFilterModal" class="modal-overlay" @click="closeFilterModal">
-      <div class="modal-content filter-modal" @click.stop>
-        <div class="modal-header">
-          <h3>기간 선택</h3>
-          <button class="modal-close-btn" @click="closeFilterModal">
-            <font-awesome-icon :icon="['fas', 'times']" />
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="filter-options">
-            <div class="filter-option">
-              <input
-                type="radio"
-                id="all"
-                name="period"
-                value="all"
-                v-model="selectedPeriod"
-                @change="applyFilter"
-              />
-              <label for="all">전체 기간</label>
-            </div>
-            <div class="filter-option">
-              <input
-                type="radio"
-                id="thisMonth"
-                name="period"
-                value="thisMonth"
-                v-model="selectedPeriod"
-                @change="applyFilter"
-              />
-              <label for="thisMonth">이번달</label>
-            </div>
-            <div class="filter-option">
-              <input
-                type="radio"
-                id="lastMonth"
-                name="period"
-                value="lastMonth"
-                v-model="selectedPeriod"
-                @change="applyFilter"
-              />
-              <label for="lastMonth">지난달</label>
-            </div>
-            <div class="filter-option">
-              <input
-                type="radio"
-                id="custom"
-                name="period"
-                value="custom"
-                v-model="selectedPeriod"
-                @change="applyFilter"
-              />
-              <label for="custom">직접 선택</label>
-            </div>
-          </div>
-
-          <div v-if="selectedPeriod === 'custom'" class="custom-date-inputs">
-            <div class="date-input-row">
-              <div class="date-input-group">
-                <label>시작일</label>
-                <input
-                  type="date"
-                  v-model="startDate"
-                  @change="applyFilter"
-                  class="date-input"
-                />
-              </div>
-              <div class="date-input-group">
-                <label>종료일</label>
-                <input
-                  type="date"
-                  v-model="endDate"
-                  @change="applyFilter"
-                  class="date-input"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="modal-btn cancel-btn" @click="closeFilterModal">
-            취소
-          </button>
-          <button class="modal-btn confirm-btn" @click="closeFilterModal">
-            확인
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- 하단 네비게이션 -->
-    <Navbar />
+    <BasePeriodFilterModal
+      v-model="showFilter"
+      v-model:period="period"
+      v-model:start="start"
+      v-model:end="end"
+    />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-  faAngleLeft,
-  faTimes,
-  faSliders,
-} from "@fortawesome/free-solid-svg-icons";
-import Navbar from "../../../components/Navbar.vue";
+import { ref, watch, onMounted, onUnmounted } from 'vue';
+import { useRoute } from 'vue-router';
+import BasePeriodFilterModal from '@/components/openbanking/BasePeriodFilterModal.vue';
+import TransactionList from '@/components/openbanking/TransactionList.vue';
+import { usePeriodFilter } from '@/components/openbanking/usePeriodFilter';
+import { getAccountTransactions } from '@/api/openbanking/accountsApi';
 
-// FontAwesome 아이콘 등록
-library.add(faAngleLeft, faTimes, faSliders);
-
-// Transaction 데이터 import
-import transactionData from "../Transaction_dummy.json";
-
-const router = useRouter();
 const route = useRoute();
+const accountId = route.params.accountId;
 
-const goBack = () => {
-  router.back();
+const period = ref('thisMonth');
+const start = ref('');
+const end = ref('');
+const showFilter = ref(false);
+
+const { getPeriodLabel, getRange } = usePeriodFilter(period, start, end);
+
+const items = ref([]);
+const loading = ref(false);
+const error = ref('');
+
+const handleOpenFilter = () => {
+  showFilter.value = true;
 };
 
-// 계좌 데이터
-const account = ref(null);
-
-// 기간 필터 상태
-const selectedPeriod = ref("thisMonth");
-const showFilterModal = ref(false);
-const startDate = ref("");
-const endDate = ref("");
-
-// 모달 열기
-const openFilterModal = () => {
-  showFilterModal.value = true;
-};
-
-// 모달 닫기
-const closeFilterModal = () => {
-  showFilterModal.value = false;
-};
-
-// 필터 적용
-const applyFilter = () => {
-  // 필터 로직은 이미 computed에서 처리됨
-};
-
-// 기간 표시 이름
-const getPeriodDisplayName = () => {
-  switch (selectedPeriod.value) {
-    case "thisMonth":
-      return "이번달";
-    case "lastMonth":
-      return "지난달";
-    case "all":
-      return "전체";
-    case "custom":
-      return "직접 선택";
-    default:
-      return "이번달";
-  }
-};
-
-// 선택된 기간에 따른 거래 내역 필터링
-const getFilteredTransactions = () => {
-  if (!account.value || !transactionData?.transactions) return [];
-
-  const today = new Date();
-  const currentYear = today.getFullYear();
-  const currentMonth = today.getMonth();
-
-  let startDateFilter, endDateFilter;
-
-  switch (selectedPeriod.value) {
-    case "thisMonth":
-      startDateFilter = new Date(currentYear, currentMonth, 1);
-      endDateFilter = new Date(currentYear, currentMonth + 1, 0);
-      break;
-    case "lastMonth":
-      startDateFilter = new Date(currentYear, currentMonth - 1, 1);
-      endDateFilter = new Date(currentYear, currentMonth, 0);
-      break;
-    case "all":
-      startDateFilter = new Date(0); // 1970년 1월 1일
-      endDateFilter = new Date();
-      break;
-    case "custom":
-      if (startDate.value && endDate.value) {
-        startDateFilter = new Date(startDate.value);
-        endDateFilter = new Date(endDate.value);
-      } else {
-        startDateFilter = new Date(currentYear, currentMonth, 1);
-        endDateFilter = new Date(currentYear, currentMonth + 1, 0);
-      }
-      break;
-    default:
-      startDateFilter = new Date(currentYear, currentMonth, 1);
-      endDateFilter = new Date(currentYear, currentMonth + 1, 0);
-  }
-
-  return transactionData.transactions
-    .filter((transaction) => {
-      // 계좌 필터링
-      const isAccountMatch =
-        transaction.bank === account.value.bank &&
-        transaction.account ===
-          account.value.name.replace(account.value.bank + " ", "");
-
-      if (!isAccountMatch) return false;
-
-      // 기간 필터링
-      const transactionDate = new Date(transaction.date);
-      return (
-        transactionDate >= startDateFilter && transactionDate <= endDateFilter
-      );
-    })
-    .sort((a, b) => new Date(b.date) - new Date(a.date));
-};
-
-// 필터링된 거래 내역
-const filteredAccountTransactions = computed(() => {
-  return getFilteredTransactions();
-});
-
-// 필터링된 거래 요약 정보
-const filteredTransactionCount = computed(() => {
-  return filteredAccountTransactions.value.length;
-});
-
-const filteredTotalIncome = computed(() => {
-  return filteredAccountTransactions.value
-    .filter((transaction) => transaction.type === "입금")
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
-});
-
-const filteredTotalExpense = computed(() => {
-  return filteredAccountTransactions.value
-    .filter((transaction) => transaction.type === "출금")
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
-});
-
-// Transaction_dummy.json 요약 정보 계산
-const totalTransactionCount = computed(() => {
-  if (!transactionData?.transactions) return 0;
-  return transactionData.transactions.length;
-});
-
-const totalIncome = computed(() => {
-  if (!transactionData?.transactions) return 0;
-  return transactionData.transactions
-    .filter((transaction) => transaction.type === "입금")
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
-});
-
-const totalExpense = computed(() => {
-  if (!transactionData?.transactions) return 0;
-  return transactionData.transactions
-    .filter((transaction) => transaction.type === "출금")
-    .reduce((sum, transaction) => sum + transaction.amount, 0);
-});
-
-const latestTransactionDate = computed(() => {
-  if (
-    !transactionData?.transactions ||
-    transactionData.transactions.length === 0
-  )
-    return "-";
-  const latestDate = new Date(
-    Math.max(...transactionData.transactions.map((t) => new Date(t.date)))
-  );
-  return `${latestDate.getFullYear()}.${String(
-    latestDate.getMonth() + 1
-  ).padStart(2, "0")}.${String(latestDate.getDate()).padStart(2, "0")}`;
-});
-
-// Transaction_dummy.json에서 계좌 정보 추출
-const extractAccountFromTransactions = (accountId) => {
-  if (!transactionData?.transactions) return null;
-
-  const accountMap = new Map();
-
-  // 초기 자산 설정
-  const initialBalance = transactionData.initialAssets || 0;
-
-  transactionData.transactions.forEach((transaction) => {
-    const accountKey = `${transaction.bank}-${transaction.account}`;
-
-    if (!accountMap.has(accountKey)) {
-      // 계좌 타입 판별
-      let accountType = "입출금";
-      if (transaction.account.includes("투자")) {
-        accountType = "투자";
-      } else if (
-        transaction.account.includes("저축") ||
-        transaction.account.includes("예금")
-      ) {
-        accountType = "저축";
-      }
-
-      // 초기 잔액 설정 (첫 번째 계좌에만)
-      const isFirstAccount = accountMap.size === 0;
-      const initialAccountBalance = isFirstAccount ? initialBalance : 0;
-
-      accountMap.set(accountKey, {
-        id: accountKey,
-        name: `${transaction.bank} ${transaction.account}`,
-        accountNumber: generateAccountNumber(),
-        balance: initialAccountBalance,
-        type: accountType,
-        bank: transaction.bank,
-        logo: transaction.logo,
-      });
+const fetchTransactions = async () => {
+  if (!accountId) return;
+  loading.value = true;
+  error.value = '';
+  try {
+    let from = start.value || undefined;
+    let to = end.value || undefined;
+    if (!from && !to && period.value !== 'all') {
+      const { start: sDate, end: eDate } = getRange();
+      const fmt = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const da = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${da}`;
+      };
+      from = fmt(sDate);
+      to = fmt(eDate);
     }
-
-    // 잔액 계산 (입금은 +, 출금은 -)
-    const currentAccount = accountMap.get(accountKey);
-    if (transaction.type === "입금") {
-      currentAccount.balance += transaction.amount;
-    } else {
-      currentAccount.balance -= transaction.amount;
-    }
-  });
-
-  return accountMap.get(accountId);
-};
-
-// 계좌번호 생성 (더미 데이터용)
-const generateAccountNumber = () => {
-  const numbers = Math.floor(Math.random() * 900000000) + 100000000;
-  return numbers.toString().replace(/(\d{3})(\d{3})(\d{3})/, "$1-$2-$3");
-};
-
-// 계좌 타입별 CSS 클래스
-const getAccountTypeClass = (type) => {
-  switch (type) {
-    case "입출금":
-      return "type-deposit";
-    case "저축":
-      return "type-savings";
-    case "투자":
-      return "type-investment";
-    default:
-      return "type-deposit";
+    const res = await getAccountTransactions(accountId, { from, to });
+    // 래퍼 반환: { status, message, data }
+    items.value = res?.data ?? [];
+  } catch (e) {
+    error.value =
+      e?.response?.data?.message ||
+      e?.message ||
+      '거래내역 조회에 실패했습니다.';
+    items.value = [];
+  } finally {
+    loading.value = false;
   }
 };
 
-// 날짜 포맷팅
-const formatDate = (dateString) => {
-  const date = new Date(dateString);
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  return `${month}.${day}`;
-};
-
-// 계좌 데이터 초기화
 onMounted(() => {
-  const accountId = route.params.accountId;
-  if (accountId) {
-    account.value = extractAccountFromTransactions(accountId);
-  }
+  fetchTransactions();
+  window.addEventListener('open-filter-modal', handleOpenFilter);
 });
+onUnmounted(() =>
+  window.removeEventListener('open-filter-modal', handleOpenFilter)
+);
+
+watch([period, start, end], fetchTransactions);
+watch(() => route.params.accountId, fetchTransactions);
 </script>
 
 <style scoped>
 .account-detail-container {
-  min-height: 100vh;
-  background: #f7f8fa;
-  padding-bottom: 100px;
-  padding-top: 56px;
+  padding: 16px;
+  background: var(--color-bg-light);
+  height: calc(
+    100dvh - 160px
+  ); /* 헤더(80px) + 네비게이션(80px) 높이만큼 빼기 */
   overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* Internet Explorer 10+ */
-  height: 100vh;
-}
-
-.account-detail-container::-webkit-scrollbar {
-  display: none;
-}
-
-.account-header {
-  width: 100%;
-  height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #f7f8fa;
-  position: fixed;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  max-width: 390px;
-  z-index: 100;
-  padding: 0 16px;
-  box-sizing: border-box;
-}
-
-.account-back {
-  background: none;
-  border: none;
-  font-size: 24px;
-  color: #222;
-  cursor: pointer;
-  padding: 4px 8px 4px 0;
-  border-radius: 8px;
-  transition: background 0.15s;
-}
-
-.account-back:hover {
-  background: #f3f3f3;
-}
-
-.account-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-}
-
-.account-header-right {
-  width: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.account-filter-btn {
-  background: none;
-  border: none;
-  font-size: 22px;
-  color: #4318d1;
-  cursor: pointer;
-  padding: 4px 4px;
-  border-radius: 8px;
-  transition: background 0.15s;
-}
-
-.account-filter-btn:hover {
-  background: #f3f3f3;
-}
-
-.account-info-card {
-  background: #fff;
-  margin: 16px;
-  padding: 24px 20px;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
-}
-
-.account-bank-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-}
-
-.account-bank-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-}
-
-.account-type-badge {
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #fff;
-}
-
-.account-type-badge.type-deposit {
-  background: #4318d1;
-}
-
-.account-type-badge.type-savings {
-  background: #059669;
-}
-
-.account-type-badge.type-investment {
-  background: #dc2626;
-}
-
-.transaction-summary-card {
-  background: #fff;
-  margin: 16px;
-  padding: 20px;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
-}
-
-.summary-header h3 {
-  margin: 0 0 16px 0;
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-}
-
-.summary-stats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.summary-stat {
-  text-align: center;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 12px;
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.stat-value {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-}
-
-.stat-value.income {
-  color: #059669;
-}
-
-.stat-value.expense {
-  color: #dc2626;
-}
-
-.account-balance {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #4318d1;
-  margin-bottom: 8px;
-}
-
-.account-balance.negative {
-  color: #e11d48;
-}
-
-.account-name {
-  font-size: 0.95rem;
-  color: #666;
-  margin-bottom: 4px;
-}
-
-.account-number {
-  font-size: 0.85rem;
-  color: #888;
-}
-
-.account-detail-info {
-  background: #fff;
-  margin: 16px;
-  padding: 20px;
-  border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
-}
-
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-.detail-label {
-  font-size: 0.95rem;
-  color: #666;
-  font-weight: 500;
-}
-
-.detail-value {
-  font-size: 0.95rem;
-  color: #222;
-  font-weight: 600;
-}
-
-.detail-value.balance {
-  color: #4318d1;
-  font-size: 1.1rem;
-}
-
-.detail-value.balance.negative {
-  color: #e11d48;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  min-height: 0;
 }
 
 .account-transactions {
   background: #fff;
-  margin: 16px;
-  padding: 20px;
   border-radius: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
+  padding: 20px;
+  margin-top: 16px;
 }
 
 .transactions-title {
-  font-size: 1rem;
+  font-size: 1.1rem;
   font-weight: 600;
   color: #222;
   margin-bottom: 16px;
 }
 
-.transactions-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.transaction-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-
-.transaction-item:last-child {
-  border-bottom: none;
-}
-
-.transaction-info {
-  flex: 1;
-}
-
-.transaction-description {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 4px;
-}
-
-.transaction-date {
-  font-size: 0.85rem;
+.tx-count {
+  margin-left: 0.4rem;
   color: #888;
-}
-
-.transaction-amount {
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.transaction-amount.income {
-  color: #059669;
-}
-
-.transaction-amount.expense {
-  color: #dc2626;
-}
-
-/* 모달 스타일 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: #fff;
-  border-radius: 16px;
-  width: 90%;
-  max-width: 400px;
-  overflow: hidden;
-}
-
-.filter-modal {
-  max-width: 350px;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 20px 16px 20px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #222;
-}
-
-.modal-close-btn {
-  background: none;
-  border: none;
-  color: #6b7280;
-  font-size: 18px;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  transition: background 0.15s;
-}
-
-.modal-close-btn:hover {
-  background: #f3f4f6;
-}
-
-.modal-body {
-  padding: 20px;
-}
-
-.filter-options {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.filter-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: 8px;
-  transition: background 0.15s;
-}
-
-.filter-option:hover {
-  background: #f9fafb;
-}
-
-.filter-option input[type="radio"] {
-  width: 18px;
-  height: 18px;
-  accent-color: #4318d1;
-}
-
-.filter-option label {
-  font-size: 1rem;
-  color: #222;
-  cursor: pointer;
-  flex: 1;
-}
-
-.custom-date-inputs {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.date-input-row {
-  display: flex;
-  gap: 12px;
-}
-
-.date-input-group {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.date-input-group label {
+  font-weight: 500;
   font-size: 0.9rem;
+}
+
+.tx-loading {
+  padding: 12px 0;
   color: #666;
-  font-weight: 500;
 }
 
-.date-input {
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  font-size: 0.9rem;
-  color: #222;
-  background: #fff;
-}
-
-.date-input:focus {
-  outline: none;
-  border-color: #4318d1;
-  box-shadow: 0 0 0 3px rgba(67, 24, 209, 0.1);
-}
-
-.modal-footer {
-  display: flex;
-  gap: 12px;
-  padding: 16px 20px 20px 20px;
-  border-top: 1px solid #e5e7eb;
-}
-
-.modal-btn {
-  flex: 1;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.15s;
-}
-
-.cancel-btn {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.cancel-btn:hover {
-  background: #e5e7eb;
-}
-
-.confirm-btn {
-  background: #4318d1;
-  color: #fff;
-}
-
-.confirm-btn:hover {
-  background: #3b16b8;
-}
-
-@media (max-width: 430px) {
-  .account-detail-container {
-    width: 100vw;
-  }
-
-  .modal-content {
-    width: 95%;
-    margin: 0 10px;
-  }
-
-  .date-input-row {
-    flex-direction: column;
-    gap: 16px;
-  }
+.tx-error {
+  padding: 12px 0;
+  color: #d33;
 }
 </style>
