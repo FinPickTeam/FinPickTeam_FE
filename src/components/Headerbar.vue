@@ -80,4 +80,9 @@ const goToDictionary = () => {
 .finance-header {
   background: var(--color-bg-light) !important;
 }
+
+.transparent-header {
+  background: transparent !important;
+  box-shadow: none;
+}
 </style>

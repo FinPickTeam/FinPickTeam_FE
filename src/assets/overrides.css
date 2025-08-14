@@ -1,0 +1,70 @@
+/* 이 페이지 전용 화이트 톤 + 헤더 경계선 제거 - 강력한 오버라이드 */
+body.ob-white-page .ob-header,
+body.ob-white-page .openbanking-header,
+body.ob-white-page .openbanking-layout .header,
+body.ob-white-page header.openbanking-header,
+body.ob-white-page .openbanking-layout header,
+body.ob-white-page .base-header,
+body.ob-white-page header,
+body.ob-white-page .header,
+body.ob-white-page .app-header,
+body.ob-white-page .main-header,
+body.ob-white-page .page-header {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+  background: #fff !important;
+  border: none !important;
+}
+
+/* 일부 레이아웃은 얇은 선을 ::after 로 그림 - 모든 가능한 ::after 제거 */
+body.ob-white-page .ob-header::after,
+body.ob-white-page .openbanking-header::after,
+body.ob-white-page .openbanking-layout .header::after,
+body.ob-white-page .base-header::after,
+body.ob-white-page header::after,
+body.ob-white-page .header::after,
+body.ob-white-page .app-header::after,
+body.ob-white-page .main-header::after,
+body.ob-white-page .page-header::after {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+}
+
+/* 헤더 내부 요소들도 흰색으로 */
+body.ob-white-page .base-header .title,
+body.ob-white-page header .title,
+body.ob-white-page .header .title {
+  color: #222 !important;
+  font-weight: 700 !important;
+}
+
+body.ob-white-page .base-header .icon,
+body.ob-white-page header .icon,
+body.ob-white-page .header .icon {
+  color: #4318d1 !important;
+}
+
+/* 추가 헤더 클래스들도 커버 */
+body.ob-white-page header,
+body.ob-white-page .header,
+body.ob-white-page .app-header {
+  background: #fff !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 전체 페이지 흰색 강제 */
+body.ob-white-page,
+body.ob-white-page #app,
+body.ob-white-page .app {
+  background: #fff !important;
+}
+
+/* v-calendar container global override */
+.custom-calendar.vc-container {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+}
