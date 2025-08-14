@@ -19,137 +19,69 @@
     <!-- 카테고리 그리드 -->
     <div class="category-grid">
       <div
-        v-for="category in categories"
-        :key="category.name"
+        v-for="c in categories"
+        :key="c.id"
         class="category-item"
-        @click="selectCategory(category)"
+        @click="selectCategory(c)"
       >
         <div class="category-icon">
-          <img :src="getCategoryLogo(category.logo)" :alt="category.name" />
+          <img :src="getLogo(c.name)" :alt="c.name" />
         </div>
-        <span class="category-name">{{ category.name }}</span>
+        <span class="category-name">{{ c.name }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
-import { patchLedgerCategory } from '@/api/openbanking/transactionApi';
+import { patchLedgerCategory } from '@/api/openbanking/ledgerApi.js';
+import { categoryToLogo } from '@/utils/categoryLogo.js';
 
 library.add(faAngleLeft);
 
 const router = useRouter();
 const route = useRoute();
 
-// 카테고리 데이터
+const getLogo = (name) => categoryToLogo(name);
+
+// DB 기준 카테고리 ID/라벨 (스크린샷 기준)
 const categories = [
-  {
-    name: '식비',
-    logo: '식비.png',
-  },
-  {
-    name: '교통, 자동차',
-    logo: '교통, 자동차.png',
-  },
-  {
-    name: '쇼핑, 미용',
-    logo: '쇼핑, 미용.png',
-  },
-  {
-    name: '카페, 간식',
-    logo: '카페, 간식.png',
-  },
-  {
-    name: '편의점, 마트, 잡화',
-    logo: '편의점, 마트, 잡화.png',
-  },
-  {
-    name: '주거, 통신',
-    logo: '주거, 통신.png',
-  },
-  {
-    name: '취미, 여가',
-    logo: '취미, 여가.png',
-  },
-  {
-    name: '보험, 기타 금융',
-    logo: '보험, 기타 금융.png',
-  },
-  {
-    name: '구독',
-    logo: '구독.png',
-  },
-  {
-    name: '이체',
-    logo: '이체.png',
-  },
-  {
-    name: '기타',
-    logo: '기타.png',
-  },
-  {
-    name: '카테고리 없음',
-    logo: '카테고리 없음.png',
-  },
+  { id: 1, name: '식비' },
+  { id: 2, name: '카페, 간식' }, // DB: 카페/간식
+  { id: 3, name: '쇼핑, 미용' }, // DB: 쇼핑/미용
+  { id: 4, name: '편의점, 마트, 잡화' }, // DB: 편의점/마트/잡화
+  { id: 5, name: '주거, 통신' }, // DB: 주거/통신
+  { id: 6, name: '취미, 여가' }, // DB: 취미/여가
+  { id: 7, name: '교통, 자동차' }, // DB: 교통/자동차
+  { id: 8, name: '보험, 기타 금융' }, // DB: 보험 및 기타 금융
+  { id: 9, name: '구독' },
+  { id: 10, name: '이체' },
+  { id: 11, name: '기타' },
+  { id: 12, name: '카테고리 없음' },
 ];
 
-// 카테고리 로고 이미지를 동적으로 import하기 위한 함수
-const getCategoryLogo = (logoFileName) => {
+const goBack = () => router.back();
+
+const selectCategory = async (c) => {
+  const ledgerId = route.query.transactionId;
+  if (!ledgerId) return;
   try {
-    return new URL(`/src/assets/spending_logo/${logoFileName}`, import.meta.url)
-      .href;
-  } catch (error) {
-    // 로고 파일을 찾을 수 없는 경우 기본 로고 반환
-    return new URL(
-      `/src/assets/spending_logo/카테고리 없음.png`,
-      import.meta.url
-    ).href;
+    await patchLedgerCategory(ledgerId, c.id); // body: {categoryId: number}
+    // 상세화면 onActivated에서 바로 반영되도록 저장
+    sessionStorage.setItem(`transaction_${ledgerId}_category`, c.name);
+  } catch (e) {
+    console.error('카테고리 수정 실패:', e);
+  } finally {
+    router.back();
   }
-};
-
-// 뒤로가기 함수
-const goBack = () => {
-  router.back();
-};
-
-// 카테고리 이름 → 서버 카테고리 코드/ID 매핑 (백엔드 정의에 맞게 수정 가능)
-const categoryMap = {
-  식비: 'FOOD',
-  '교통, 자동차': 'TRANSPORT',
-  '쇼핑, 미용': 'SHOPPING',
-  '카페, 간식': 'CAFE',
-  '편의점, 마트, 잡화': 'MART',
-  '주거, 통신': 'HOUSING',
-  '취미, 여가': 'LEISURE',
-  '보험, 기타 금융': 'INSURANCE',
-  구독: 'SUBSCRIPTION',
-  이체: 'TRANSFER',
-  기타: 'ETC',
-  '카테고리 없음': 'UNCATEGORIZED',
-};
-
-// 카테고리 선택 함수
-const selectCategory = async (category) => {
-  console.log('선택된 카테고리:', category);
-  const transactionId = route.query.transactionId;
-
-  if (transactionId) {
-    try {
-      const mapped = categoryMap[category.name] || category.name;
-      await patchLedgerCategory(transactionId, mapped);
-    } catch (e) {
-      console.error('카테고리 수정 실패:', e);
-    }
-  }
-
-  router.back();
 };
 </script>
+
+<!-- 스타일은 네가 준 그대로 유지 -->
 
 <style scoped>
 .category-select-container {

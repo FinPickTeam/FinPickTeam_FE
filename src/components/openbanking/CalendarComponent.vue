@@ -96,7 +96,7 @@
           @dayclick="onDayClick"
         >
           <template #day-content="{ day }">
-            <div class="day-box">
+            <div class="day-box" @click="onDayClick(day)">
               <div
                 class="day-number"
                 :class="{
@@ -116,7 +116,7 @@
     </Transition>
 
     <div class="expand-toggle">
-      <button class="toggle-btn" @click="emit('toggle-expanded', !isExpanded)">
+      <button class="toggle-btn" @click="onToggleClick">
         <FontAwesomeIcon :icon="isExpanded ? faChevronUp : faChevronDown" />
       </button>
     </div>
@@ -225,7 +225,12 @@ const scrollToDateKey = async (key) => {
   const el = document.getElementById(id);
   const container = document.querySelector(props.scrollContainerSelector);
   if (el && container) {
-    container.scrollTop = el.offsetTop - (props.scrollOffset || 0);
+    const top = el.offsetTop - (props.scrollOffset || 0);
+    if (typeof container.scrollTo === 'function') {
+      container.scrollTo({ top, behavior: 'smooth' });
+    } else {
+      container.scrollTop = top;
+    }
   }
 };
 
@@ -333,6 +338,23 @@ const monthOnly = computed(() => {
     props.currentMonth.split('-')[1] ?? String(new Date().getMonth() + 1);
   return `${parseInt(m)}월`;
 });
+
+const onToggleClick = async () => {
+  if (props.isExpanded) {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    selectedDate.value = now;
+    emit('date-selected', now);
+    emit('month-changed', {
+      year: now.getFullYear(),
+      month: now.getMonth() + 1,
+    });
+    await nextTick();
+    emit('toggle-expanded', false);
+  } else {
+    emit('toggle-expanded', true);
+  }
+};
 </script>
 
 <style scoped>
@@ -554,6 +576,7 @@ const monthOnly = computed(() => {
   align-items: center;
   gap: 4px;
   padding-bottom: 6px;
+  cursor: pointer;
 }
 .day-number {
   display: inline-flex;

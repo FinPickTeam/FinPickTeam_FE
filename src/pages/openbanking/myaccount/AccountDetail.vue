@@ -38,43 +38,47 @@ import { useRoute } from 'vue-router';
 import BasePeriodFilterModal from '@/components/openbanking/BasePeriodFilterModal.vue';
 import TransactionList from '@/components/openbanking/TransactionList.vue';
 import { usePeriodFilter } from '@/components/openbanking/usePeriodFilter';
-import { getLedger } from '@/api/openbanking/ledgerApi';
+import { getAccountTransactions } from '@/api/openbanking/accountsApi';
 
 const route = useRoute();
-const accountId = route.params.accountId; // 라우트에 따라 조정
+const accountId = route.params.accountId;
 
 const period = ref('thisMonth');
-const start = ref(''); // yyyy-MM-dd
-const end = ref(''); // yyyy-MM-dd
+const start = ref('');
+const end = ref('');
 const showFilter = ref(false);
 
-const { getPeriodLabel } = usePeriodFilter(period, start, end);
+const { getPeriodLabel, getRange } = usePeriodFilter(period, start, end);
 
-// 서버 데이터
 const items = ref([]);
 const loading = ref(false);
 const error = ref('');
 
-// 필터 모달 열기 이벤트 리스너
 const handleOpenFilter = () => {
   showFilter.value = true;
 };
 
-// 거래내역 조회
 const fetchTransactions = async () => {
   if (!accountId) return;
   loading.value = true;
   error.value = '';
   try {
-    const from = start.value || undefined;
-    const to = end.value || undefined;
-    const res = await getLedger({ from, to });
-    // API 응답 구조: { status, message, data }
-    const allTransactions = res?.data?.data ?? [];
-    // 계좌 거래만 필터링 (sourceType이 BANK이고 accountId가 일치하는 것)
-    items.value = allTransactions.filter(
-      (t) => t.sourceType === 'BANK' && t.accountId === parseInt(accountId)
-    );
+    let from = start.value || undefined;
+    let to = end.value || undefined;
+    if (!from && !to && period.value !== 'all') {
+      const { start: sDate, end: eDate } = getRange();
+      const fmt = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const da = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${da}`;
+      };
+      from = fmt(sDate);
+      to = fmt(eDate);
+    }
+    const res = await getAccountTransactions(accountId, { from, to });
+    // 래퍼 반환: { status, message, data }
+    items.value = res?.data ?? [];
   } catch (e) {
     error.value =
       e?.response?.data?.message ||
@@ -86,35 +90,22 @@ const fetchTransactions = async () => {
   }
 };
 
-// 최초 로드
 onMounted(() => {
   fetchTransactions();
-  // 필터 모달 열기 이벤트 리스너 등록
   window.addEventListener('open-filter-modal', handleOpenFilter);
 });
-
-onUnmounted(() => {
-  // 이벤트 리스너 제거
-  window.removeEventListener('open-filter-modal', handleOpenFilter);
-});
-
-// 기간 변경 시 재조회 (period 변경으로 start/end가 바뀜)
-watch([period, start, end], fetchTransactions);
-
-// 라우트가 바뀌는 경우 대비
-watch(
-  () => route.params.accountId,
-  () => {
-    // accountId가 바뀌면 목록 재조회
-    fetchTransactions();
-  }
+onUnmounted(() =>
+  window.removeEventListener('open-filter-modal', handleOpenFilter)
 );
+
+watch([period, start, end], fetchTransactions);
+watch(() => route.params.accountId, fetchTransactions);
 </script>
 
 <style scoped>
 .account-detail-container {
   padding: 16px;
-  background: #f7f8fa;
+  background: var(--color-bg-light);
   height: calc(
     100dvh - 160px
   ); /* 헤더(80px) + 네비게이션(80px) 높이만큼 빼기 */

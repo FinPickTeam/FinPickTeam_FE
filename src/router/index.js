@@ -77,12 +77,19 @@ import AccountAgreement from '../pages/openbanking/openAuth/AccountAgreement.vue
 // 핀픽 인증서 관련 컴포넌트들
 import CreateCertificate from '../pages/openbanking/openAuth/CertificateCreate.vue';
 import SetCertificatePassword from '../pages/openbanking/openAuth/CertificateSetPassword.vue';
-import ConfirmCertificatePassword from '../pages/openbanking/openAuth/CertificateConfirmPass.vue'; // ✅ 오탈자 수정
+import ConfirmCertificatePassword from '../pages/openbanking/openAuth/CertificateConfirmPass.vue';
 import CertificateComplete from '../pages/openbanking/openAuth/CertificateComplete.vue';
 
 import AccountList from '../pages/openbanking/myaccount/AccountList.vue';
 import AccountDetail from '../pages/openbanking/myaccount/AccountDetail.vue';
 import CardList from '../pages/openbanking/myaccount/CardList.vue';
+import CardDetail from '../pages/openbanking/myaccount/CardDetail.vue';
+import OpenbankingMonthlyReport from '../pages/openbanking/Report/OpenbankingMonthlyReport.vue';
+import OpenbankingCalendar from '../pages/openbanking/Report/OpenbankingCalendar.vue';
+import CalendarSelect from '../pages/openbanking/Report/CalendarSelect.vue';
+import CalendarDetail from '../pages/openbanking/Report/CalendarDetail.vue';
+
+// 챌린지
 import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
 import ChallengeJoinedList from '../pages/challenge/ChallengeJoinedList.vue';
 import ChallengeRecruitingList from '../pages/challenge/ChallengeRecruitingList.vue';
@@ -91,14 +98,6 @@ import ChallengeRanking from '../pages/challenge/ChallengeRanking.vue';
 import ChallengeCommonDetail from '../pages/challenge/ChallengeCommonDetail.vue';
 import ChallengeGroupDetail from '../pages/challenge/ChallengeGroupDetail.vue';
 import ChallengePersonalDetail from '../pages/challenge/ChallengePersonalDetail.vue';
-import OpenbankingDailyReport from '../pages/openbanking/Report/OpenbankingDailyReport.vue';
-import OpenbankingMonthlyReport from '../pages/openbanking/Report/OpenbankingMonthlyReport.vue';
-import OpenbankingCalendar from '../pages/openbanking/Report/OpenbankingCalendar.vue';
-import CalendarSelect from '../pages/openbanking/Report/CalendarSelect.vue';
-import CalendarDetail from '../pages/openbanking/Report/CalendarDetail.vue';
-
-//챌린지
-import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -149,6 +148,11 @@ const router = createRouter({
       name: 'ProductCardInstallment',
       component: ProductCard_installment,
     },
+    {
+      path: '/finance/favorite-products',
+      name: 'FavoriteProducts',
+      component: FavoriteProducts,
+    },
 
     // 로그인/회원가입/ARS (레이아웃 없이)
     { path: '/login', name: 'Login', component: Login },
@@ -167,6 +171,33 @@ const router = createRouter({
       path: '/profile-complete',
       name: 'ProfileComplete',
       component: ProfileComplete,
+    },
+
+    // 마이페이지 finance test ProfileStep6~10
+    {
+      path: '/mypage/financetest/profile-step-6',
+      name: 'ProfileStep6',
+      component: ProfileStep6,
+    },
+    {
+      path: '/mypage/financetest/profile-step-7',
+      name: 'ProfileStep7',
+      component: ProfileStep7,
+    },
+    {
+      path: '/mypage/financetest/profile-step-8',
+      name: 'ProfileStep8',
+      component: ProfileStep8,
+    },
+    {
+      path: '/mypage/financetest/profile-step-9',
+      name: 'ProfileStep9',
+      component: ProfileStep9,
+    },
+    {
+      path: '/mypage/financetest/profile-step-10',
+      name: 'ProfileStep10',
+      component: ProfileStep10,
     },
 
     { path: '/ars-auth', name: 'ARSAuth', component: ArsAuth },
@@ -234,7 +265,7 @@ const router = createRouter({
         { path: 'quiz', name: 'Quiz', component: Quiz },
         { path: 'finance', name: 'FinanceHome', component: FinanceHome },
 
-        // 오픈뱅킹 (MainLayout 하위)
+        // 오픈뱅킹 (MainLayout 하위 엔트리)
         {
           path: 'openbanking',
           name: 'OpenBankingHome',
@@ -317,11 +348,7 @@ const router = createRouter({
           name: 'ChallengeRecruitingList',
           component: ChallengeRecruitingList,
         },
-        {
-          path: 'create',
-          name: 'ChallengeCreate',
-          component: ChallengeCreate,
-        },
+        { path: 'create', name: 'ChallengeCreate', component: ChallengeCreate },
         {
           path: 'ranking',
           name: 'ChallengeRanking',
@@ -355,22 +382,14 @@ const router = createRouter({
           name: 'OpenBankingMyHome',
           component: () => import('../pages/openbanking/OpenBankingMyHome.vue'),
         },
-        {
-          path: 'account-list',
-          name: 'AccountList',
-          component: AccountList,
-        },
+        { path: 'account-list', name: 'AccountList', component: AccountList },
         {
           path: 'account-detail/:accountId',
           name: 'AccountDetail',
           component: AccountDetail,
           props: true,
         },
-        {
-          path: 'card-list',
-          name: 'CardList',
-          component: CardList,
-        },
+        { path: 'card-list', name: 'CardList', component: CardList },
         {
           path: 'card-detail/:cardId',
           name: 'CardDetail',
@@ -400,6 +419,7 @@ const router = createRouter({
         },
       ],
     },
+
     // 404 Not Found catch-all
     {
       path: '/:pathMatch(.*)*',
@@ -410,6 +430,71 @@ const router = createRouter({
 });
 
 import { useAuthStore } from '@/stores/auth';
+import { getAccountsWithTotal } from '@/api/openbanking/accountsApi';
+import { getCardsWithTotal } from '@/api/openbanking/cardsApi';
+
+/** 안전하게 배열 꺼내기 */
+function deepGet(obj, path) {
+  return path.reduce(
+    (acc, k) => (acc && typeof acc === 'object' ? acc[k] : undefined),
+    obj
+  );
+}
+function pickArray(
+  res,
+  primary = ['data', 'data', 'accounts'],
+  alt = ['data', 'accounts']
+) {
+  const a = deepGet(res, primary);
+  if (Array.isArray(a)) return a;
+  const b = deepGet(res, alt);
+  return Array.isArray(b) ? b : [];
+}
+function pickCards(res) {
+  return pickArray(res, ['data', 'data', 'cards'], ['data', 'cards']);
+}
+function obCacheKey(userId) {
+  return `ob:linked:${userId ?? 'anon'}`;
+}
+
+/**
+ * 오픈뱅킹 연동 데이터 존재 여부 확인
+ * - 캐시가 'true'면 재검증
+ * - 캐시가 'false'면 그대로 신뢰
+ */
+async function ensureHasOpenBankingData(auth) {
+  const uid = auth?.user?.id ?? auth?.id ?? auth?.userId ?? null;
+  const key = obCacheKey(uid);
+  const cached = sessionStorage.getItem(key);
+
+  // 재검증 or 최초검증
+  try {
+    const [accRes, cardRes] = await Promise.allSettled([
+      getAccountsWithTotal(),
+      getCardsWithTotal(),
+    ]);
+
+    const accounts =
+      accRes.status === 'fulfilled'
+        ? pickArray(
+            accRes.value,
+            ['data', 'data', 'accounts'],
+            ['data', 'accounts']
+          )
+        : [];
+    const cards =
+      cardRes.status === 'fulfilled' ? pickCards(cardRes.value) : [];
+
+    const has = (accounts?.length || 0) > 0 || (cards?.length || 0) > 0;
+
+    sessionStorage.setItem(key, has ? 'true' : 'false');
+    return has;
+  } catch {
+    // 오류면 안전하게 false로 보고, 다음 진입 시 다시 시도
+    sessionStorage.setItem(key, 'false');
+    return false;
+  }
+}
 
 router.beforeEach(async (to) => {
   const publicPages = new Set([
@@ -439,14 +524,26 @@ router.beforeEach(async (to) => {
 
   const auth = useAuthStore();
 
-  // 보호 라우트면 인증 체크
+  // 보호 라우트 인증 체크
   if (!publicPages.has(to.name)) {
-    // 이미 인증된 상태라면 bootstrap 호출하지 않음
     if (!auth.isAuthenticated) {
       await auth.bootstrap();
       if (!auth.isAuthenticated) {
         return { name: 'Login', query: { redirect: to.fullPath } };
       }
+    }
+  }
+
+  // 오픈뱅킹 엔트리('/openbanking') 접근 시: 연동 데이터 있으면 MyHome으로
+  if (to.name === 'OpenBankingHome') {
+    try {
+      const has = await ensureHasOpenBankingData(auth);
+      if (has) {
+        return { name: 'OpenBankingMyHome', replace: true };
+      }
+      // 없으면 그대로 OpenBankingHome 머무르게(온보딩/연동 유도)
+    } catch (e) {
+      console.error('오픈뱅킹 데이터 확인 중 오류', e);
     }
   }
 });

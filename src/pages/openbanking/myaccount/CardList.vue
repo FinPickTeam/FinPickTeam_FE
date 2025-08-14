@@ -48,10 +48,6 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import BaseHeader from '@/components/openbanking/BaseHeader.vue';
 import ListItemCard from '@/components/openbanking/ListItemCard.vue';
 import ConfirmModal from '@/components/openbanking/ConfirmModal.vue';
 import DeleteModeFooter from '@/components/openbanking/DeleteModeFooter.vue';
@@ -61,9 +57,6 @@ import { useSelectDelete } from '@/components/openbanking/useSelectDelete.js';
 import { useLogos } from '@/components/openbanking/useLogos.js';
 import { useRouter } from 'vue-router';
 import { getCardsWithTotal } from '@/api/openbanking/cardsApi';
-
-// FontAwesome 아이콘 등록
-library.add(faTrash);
 
 const router = useRouter();
 const { cardLogo } = useLogos();
@@ -84,38 +77,26 @@ const loading = ref(false);
 const fetchCards = async () => {
   try {
     loading.value = true;
-    const response = await getCardsWithTotal();
-    console.log('카드 데이터:', response.data);
+    const r = await getCardsWithTotal(); // {status, message, data}
+    const apiCards = Array.isArray(r?.data) ? r.data : [];
 
-    if (response.data.status === 200) {
-      // API 응답이 바로 배열로 오는 경우
-      const apiCards = Array.isArray(response.data.data)
-        ? response.data.data
-        : [];
-      console.log('카드 배열:', apiCards);
+    // 매핑: spec -> { id, bankName, cardName, cardType, cardMaskednum, monthlySpent }
+    cards.value = apiCards.map((c) => ({
+      id: c.id,
+      bank: c.bankName || c.cardName?.split(' ')[0] || '카드',
+      type: c.cardType === 'CREDIT' ? '신용' : '체크',
+      name: c.cardName || '카드',
+      amount: Number(c.monthlySpent ?? 0),
+      cardNumber: c.cardMaskednum?.split('-').pop() || '****',
+    }));
 
-      // API 응답 구조에 맞게 데이터 변환
-      cards.value = apiCards.map((card) => ({
-        id: card.id,
-        bank: card.cardName?.split(' ')[0] || '카드',
-        type: card.cardType === 'CREDIT' ? '신용' : '체크',
-        name: card.cardName || '카드',
-        amount: 250000, // API에서 제공하지 않는 경우 기본값
-        cardNumber: card.cardMaskednum?.split('-').pop() || '****',
-      }));
-
-      // 총액 계산
-      cardTotalAmount.value = cards.value.reduce(
-        (sum, card) => sum + card.amount,
-        0
-      );
-    } else {
-      console.error('카드 데이터 로드 실패:', response.data.message);
-      throw new Error(response.data.message);
-    }
+    cardTotalAmount.value = cards.value.reduce(
+      (sum, card) => sum + (card.amount || 0),
+      0
+    );
   } catch (error) {
     console.error('카드 API 호출 에러:', error);
-    // 에러 시 더미 데이터로 폴백
+    // 폴백
     cards.value = [
       {
         id: 1,
@@ -125,24 +106,8 @@ const fetchCards = async () => {
         amount: 250000,
         cardNumber: '3456',
       },
-      {
-        id: 2,
-        bank: 'KB국민은행',
-        type: '신용',
-        name: "KB IT's Your Life 6기 신용",
-        amount: 250000,
-        cardNumber: '3456',
-      },
-      {
-        id: 3,
-        bank: 'KB국민은행',
-        type: '카드',
-        name: "KB IT's Your Life 6기 카드",
-        amount: 250000,
-        cardNumber: '3456',
-      },
     ];
-    cardTotalAmount.value = 750000;
+    cardTotalAmount.value = cards.value.reduce((s, c) => s + c.amount, 0);
   } finally {
     loading.value = false;
   }
@@ -150,8 +115,6 @@ const fetchCards = async () => {
 
 const onClick = (c) => {
   if (isDeleteMode.value) return toggleSelect(c);
-  console.log('카드 클릭 데이터:', c);
-  console.log('카드 ID:', c.id);
   router.push({
     name: 'CardDetail',
     params: { cardId: c.id, cardData: JSON.stringify(c) },
@@ -165,9 +128,7 @@ const confirmDelete = () => {
   selected.value = [];
 };
 
-onMounted(() => {
-  fetchCards();
-});
+onMounted(fetchCards);
 </script>
 
 <style scoped>

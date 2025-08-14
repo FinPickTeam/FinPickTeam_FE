@@ -60,7 +60,6 @@ import { computed, ref, onMounted } from 'vue';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import BaseHeader from '@/components/openbanking/BaseHeader.vue';
 import ListItemCard from '@/components/openbanking/ListItemCard.vue';
 import ConfirmModal from '@/components/openbanking/ConfirmModal.vue';
 import DeleteModeFooter from '@/components/openbanking/DeleteModeFooter.vue';
@@ -79,46 +78,44 @@ const router = useRouter();
 const accounts = ref([]);
 const loading = ref(false);
 const { bankLogo } = useLogos();
+const apiAccountTotal = ref(null);
 
-// 삭제 모드/선택 상태 (Set 기반)
+// 삭제 모드/선택
 const isDeleteMode = ref(false);
 const selectedIds = ref(new Set());
-
-// 모달 상태
 const showModal = ref(false);
 const openConfirm = () => {
-  if (selectedIds.value.size === 0) return;
-  showModal.value = true;
+  if (selectedIds.value.size) showModal.value = true;
 };
 const closeConfirm = () => {
   showModal.value = false;
 };
-
 const toggleMode = () => {
   isDeleteMode.value = !isDeleteMode.value;
   selectedIds.value = new Set();
 };
 const toggleSelect = (item) => {
   const id = item.id;
-  if (selectedIds.value.has(id)) selectedIds.value.delete(id);
-  else selectedIds.value.add(id);
+  selectedIds.value.has(id)
+    ? selectedIds.value.delete(id)
+    : selectedIds.value.add(id);
 };
 const isSelected = (item) => selectedIds.value.has(item.id);
 const selectedCount = computed(() => selectedIds.value.size);
 
-// 합계
+// 총액(서버 total 우선)
 const totalAssets = computed(() => {
-  if (!accounts.value || accounts.value.length === 0) return 0;
+  if (typeof apiAccountTotal.value === 'number') return apiAccountTotal.value;
+  if (!accounts.value?.length) return 0;
   return accounts.value.reduce((t, a) => t + (a.balance || 0), 0);
 });
 
 // 섹션 분리
 const sections = computed(() => {
-  if (!accounts.value || accounts.value.length === 0) return [];
+  if (!accounts.value?.length) return [];
   const depositAccounts = accounts.value.filter((a) => a.type === '입출금');
   const savingsAccounts = accounts.value.filter((a) => a.type === '저축');
   const investAccounts = accounts.value.filter((a) => a.type === '투자');
-
   const out = [];
   if (depositAccounts.length)
     out.push({ key: 'deposit', title: '입출금 계좌', items: depositAccounts });
@@ -150,29 +147,28 @@ const confirmDelete = async () => {
 onMounted(async () => {
   try {
     loading.value = true;
-    const res = await getAccountsWithTotal();
-    if (res.data.status === 200) {
-      const apiData = res.data.data;
-      const apiAccounts = apiData?.accounts || [];
-      accounts.value = apiAccounts.map((account) => ({
-        id: account.id,
-        bank: account.productName?.split(' ')[0] || '은행',
-        type:
-          account.accountType === 'DEPOSIT'
-            ? '입출금'
-            : account.accountType === 'SAVINGS'
-            ? '저축'
-            : '투자',
-        name: account.productName || '계좌',
-        balance: account.balance || 0,
-        accountNumber: account.accountNumber || '****',
-      }));
-    } else {
-      console.error('계좌 데이터 로드 실패:', res.data.message);
-    }
+    const r = await getAccountsWithTotal(); // {status, message, data}
+    const apiData = r?.data || {};
+    const apiAccounts = apiData?.accounts || [];
+    apiAccountTotal.value =
+      typeof apiData?.accountTotal === 'number' ? apiData.accountTotal : null;
+
+    accounts.value = apiAccounts.map((account) => ({
+      id: account.id,
+      bank: account.productName?.split(' ')[0] || '은행',
+      type:
+        account.accountType === 'DEPOSIT'
+          ? '입출금'
+          : account.accountType === 'SAVINGS'
+          ? '저축'
+          : '투자',
+      name: account.productName || '계좌',
+      balance: Number(account.balance || 0),
+      accountNumber: account.accountNumber || '****',
+    }));
   } catch (error) {
     console.error('계좌 API 호출 에러:', error);
-    // 폴백 더미
+    // 폴백
     accounts.value = [
       {
         id: 1,
@@ -183,6 +179,7 @@ onMounted(async () => {
         accountNumber: '3020-****-3748',
       },
     ];
+    apiAccountTotal.value = null;
   } finally {
     loading.value = false;
   }

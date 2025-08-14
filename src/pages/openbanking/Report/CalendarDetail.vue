@@ -12,20 +12,15 @@
     <div class="transaction-summary">
       <div class="merchant-info">
         <div class="merchant-icon">
-          <img
-            :src="getCategoryLogo(transaction.category)"
-            :alt="transaction.category"
-          />
+          <img :src="logoSrc" :alt="transaction.category + ' 로고'" />
         </div>
         <div class="merchant-details">
-          <div class="merchant-name">{{ transaction.merchant }}</div>
-          <div class="transaction-date">
-            {{ transaction.date }} {{ transaction.time }}
-          </div>
+          <div class="merchant-name">{{ transaction.merchantName }}</div>
+          <div class="transaction-date">{{ dateText }} {{ timeText }}</div>
         </div>
       </div>
       <div class="transaction-amount">
-        -{{ transaction.amount.toLocaleString() }}원
+        {{ amountSign }}{{ Number(transaction.amount || 0).toLocaleString() }}원
       </div>
     </div>
 
@@ -33,7 +28,7 @@
     <div class="transaction-details">
       <div class="detail-item">
         <span class="detail-label">결제수단</span>
-        <span class="detail-value">{{ transaction.paymentMethod }}</span>
+        <span class="detail-value">{{ paymentMethod }}</span>
       </div>
       <div class="detail-item">
         <span class="detail-label">카테고리</span>
@@ -65,8 +60,7 @@
         </div>
       </div>
       <div class="feedback-content">
-        <p>{{ transaction.feedback.line1 }}</p>
-        <p>{{ transaction.feedback.line2 }}</p>
+        <p>{{ transaction.analysis || '분석 데이터가 아직 없어요.' }}</p>
       </div>
     </div>
 
@@ -97,124 +91,77 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onActivated } from 'vue';
+import { ref, computed, onMounted, onActivated } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { patchLedgerMemo } from '@/api/openbanking/transactionApi';
+import {
+  getLedgerDetail,
+  patchLedgerMemo,
+} from '@/api/openbanking/ledgerApi.js';
+import { categoryToLogo } from '@/utils/categoryLogo.js';
 
 const router = useRouter();
 const route = useRoute();
 
-// 모달 관련 상태
+// 모달
 const showMemoModal = ref(false);
 const memoText = ref('');
 
-// 거래 데이터
+// 거래 데이터 (백엔드 스펙에 맞춘 키)
 const transaction = ref({
-  merchant: '',
-  date: '',
-  time: '',
+  id: null,
+  type: '', // INCOME | EXPENSE
   amount: 0,
-  paymentMethod: '',
-  category: '',
-  bankLogo: '', // 은행 로고 필드 추가
+  date: '', // ISO
+  merchantName: '',
+  place: '',
+  sourceType: '', // ACCOUNT | CARD
+  sourceName: '',
+  category: '', // 라벨 문자열
   memo: '',
-  feedback: {
-    line1: '',
-    line2: '',
-  },
+  analysis: '',
 });
 
-// 서버 데이터(ledger/{id})를 사용한다면 여기에 API 호출을 추가하면 됩니다.
-// 현재는 라우터 param만 반영하고, 메모 저장은 API로 반영.
+// 표시용 파생값
+const amountSign = computed(() =>
+  transaction.value.type === 'INCOME' ? '+' : '-'
+);
+const dateObj = computed(() =>
+  transaction.value.date ? new Date(transaction.value.date) : null
+);
+const dateText = computed(() =>
+  dateObj.value ? dateObj.value.toISOString().slice(0, 10) : ''
+);
+const timeText = computed(() =>
+  dateObj.value ? dateObj.value.toTimeString().slice(0, 5) : ''
+);
+const paymentMethod = computed(() => {
+  const t = transaction.value.sourceType || '';
+  const n = transaction.value.sourceName || '';
+  return [t, n].filter(Boolean).join(' · ');
+});
+const logoSrc = computed(() => categoryToLogo(transaction.value.category));
 
-// 카테고리 로고 가져오기 함수
-const getCategoryLogo = (categoryName) => {
-  // 카테고리에 따른 로고 매핑
-  const categoryMapping = {
-    식비: '식비.png',
-    '카페, 간식': '카페, 간식.png',
-    '쇼핑, 미용': '쇼핑, 미용.png',
-    '편의점, 마트, 잡화': '편의점, 마트, 잡화.png',
-    '교통, 자동차': '교통, 자동차.png',
-    '주거, 통신': '주거, 통신.png',
-    '취미, 여가': '취미, 여가.png',
-    '보험, 기타 금융': '보험, 기타 금융.png',
-    구독: '구독.png',
-    이체: '이체.png',
-    기타: '기타.png',
-    '카테고리 없음': '카테고리 없음.png',
-  };
-
-  // 정확한 카테고리 매칭
-  if (categoryMapping[categoryName]) {
-    try {
-      return new URL(
-        `/src/assets/spending_logo/${categoryMapping[categoryName]}`,
-        import.meta.url
-      ).href;
-    } catch (error) {
-      console.error('카테고리 로고 로드 실패:', error);
-    }
-  }
-
-  // 부분 매칭 (기존 호환성을 위해)
-  for (const [category, logo] of Object.entries(categoryMapping)) {
-    if (categoryName.includes(category) || category.includes(categoryName)) {
-      try {
-        return new URL(`/src/assets/spending_logo/${logo}`, import.meta.url)
-          .href;
-      } catch (error) {
-        console.error('카테고리 로고 로드 실패:', error);
-      }
-    }
-  }
-
-  // 기본 로고 반환
-  try {
-    return new URL('/src/assets/spending_logo/기타.png', import.meta.url).href;
-  } catch (error) {
-    return new URL(
-      '/src/assets/spending_logo/카테고리 없음.png',
-      import.meta.url
-    ).href;
-  }
-};
-
-// 뒤로가기 함수
-const goBack = () => {
-  router.back();
-};
-
-// 사전 페이지로 이동
-const goToDictionary = () => {
-  router.push('/dictionary');
-};
-
-// 카테고리 선택 페이지로 이동
+// 라우팅
+const goBack = () => router.back();
+const goToDictionary = () => router.push('/dictionary');
 const goToCategorySelect = () => {
-  const transactionId = route.params.id;
-  router.push(
-    `/openbanking/daily-report-select?transactionId=${transactionId}`
-  );
+  const id = route.params.id;
+  router.push(`/openbanking/daily-report-select?transactionId=${id}`);
 };
 
-// 메모 모달 열기
+// 메모
 const openMemoModal = () => {
-  memoText.value = transaction.value.memo;
+  memoText.value = transaction.value.memo || '';
   showMemoModal.value = true;
 };
-
-// 메모 모달 닫기
 const closeMemoModal = () => {
   showMemoModal.value = false;
   memoText.value = '';
 };
-
-// 메모 저장 (서버 반영)
 const saveMemo = async () => {
-  const transactionId = route.params.id;
+  const id = route.params.id;
   try {
-    await patchLedgerMemo(transactionId, memoText.value);
+    await patchLedgerMemo(id, memoText.value); // body: {memo}, 200/204
     transaction.value.memo = memoText.value;
   } catch (e) {
     console.error('메모 저장 실패:', e);
@@ -223,38 +170,42 @@ const saveMemo = async () => {
   }
 };
 
-onMounted(() => {
-  const transactionId = route.params.id;
-  console.log('전체 route.params:', route.params);
-  console.log('거래 ID:', transactionId);
+// 데이터 로드
+const loadDetail = async () => {
+  const id = route.params.id;
+  if (!id) return;
+  try {
+    const res = await getLedgerDetail(id); // {status, message, data}
+    const d = res?.data || {};
+    transaction.value = {
+      id: d.id ?? id,
+      type: d.type || '',
+      amount: Number(d.amount || 0),
+      date: d.date || '',
+      merchantName: d.merchantName || '',
+      place: d.place || '',
+      sourceType: d.sourceType || '',
+      sourceName: d.sourceName || '',
+      category: d.category || '기타',
+      memo: d.memo || '',
+      analysis: d.analysis || '',
+    };
+  } catch (e) {
+    console.error('거래 상세 로드 실패:', e);
+  }
+};
 
-  if (transactionId === undefined || transactionId === null) return;
-  // TODO: 필요 시 getLedgerDetail(transactionId) 호출해 상세 채우기
-});
+onMounted(loadDetail);
 
-// 페이지가 다시 활성화될 때 카테고리 변경사항 확인
+// 카테고리 선택 후 복귀 시 반영
 onActivated(() => {
-  const transactionId = route.params.id;
-  if (transactionId) {
-    // localStorage와 sessionStorage에서 선택된 카테고리 확인
-    let selectedCategory = localStorage.getItem(
-      `transaction_${transactionId}_category`
-    );
-    if (!selectedCategory) {
-      selectedCategory = sessionStorage.getItem(
-        `transaction_${transactionId}_category`
-      );
-    }
-    if (!selectedCategory) {
-      selectedCategory = sessionStorage.getItem(
-        `selectedCategory_${transactionId}`
-      );
-    }
-
-    if (selectedCategory && selectedCategory !== transaction.value.category) {
-      transaction.value.category = selectedCategory;
-      console.log('카테고리가 활성화 시 업데이트되었습니다:', selectedCategory);
-    }
+  const id = route.params.id;
+  const picked =
+    localStorage.getItem(`transaction_${id}_category`) ||
+    sessionStorage.getItem(`transaction_${id}_category`) ||
+    sessionStorage.getItem(`selectedCategory_${id}`);
+  if (picked && picked !== transaction.value.category) {
+    transaction.value.category = picked;
   }
 });
 </script>

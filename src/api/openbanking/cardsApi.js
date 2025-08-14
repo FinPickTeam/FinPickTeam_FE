@@ -1,22 +1,24 @@
 import api from '../instance';
 
-// 카드 목록 + 총합 (month 옵셔널)
+// 카드 목록(+월별 사용액)
 export const getCardsWithTotal = ({ month } = {}) => {
-  console.log('GET /cards/list 요청:', { month });
+  const params = { month };
+  console.log('GET /cards/list 요청:', params);
   return api
-    .get('/cards/list', { params: { month } })
-    .then((response) => {
+    .get('/cards/list', { params })
+    .then((res) => {
+      const r = res.data;
       console.log('GET /cards/list 응답:', {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
+        status: r.status,
+        message: r.message,
+        data: r.data,
       });
-      return response;
+      return r;
     })
     .catch((error) => {
       console.log('GET /cards/list 에러:', {
-        status: error.response?.data?.status,
-        message: error.response?.data?.message,
+        status: error.response?.data?.status ?? error.response?.status,
+        message: error.response?.data?.message ?? error.message,
         data: error.response?.data?.data,
       });
       throw error;
@@ -28,41 +30,43 @@ export const registerCard = (payload) => {
   console.log('POST /cards/register 요청:', payload);
   return api
     .post('/cards/register', payload)
-    .then((response) => {
+    .then((res) => {
+      const r = res.data;
       console.log('POST /cards/register 응답:', {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
+        status: r.status,
+        message: r.message,
+        data: r.data,
       });
-      return response;
+      return r;
     })
     .catch((error) => {
       console.log('POST /cards/register 에러:', {
-        status: error.response?.data?.status,
-        message: error.response?.data?.message,
+        status: error.response?.data?.status ?? error.response?.status,
+        message: error.response?.data?.message ?? error.message,
         data: error.response?.data?.data,
       });
       throw error;
     });
 };
 
-// 카드 삭제
+// 카드 삭제 (204 대비)
 export const deleteCard = (cardId) => {
   console.log('DELETE /cards/{cardId} 요청:', { cardId });
   return api
     .delete(`/cards/${cardId}`)
-    .then((response) => {
-      console.log('DELETE /cards/{cardId} 응답:', {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
-      });
-      return response;
+    .then((res) => {
+      const body = res.data ?? {
+        status: res.status,
+        message: 'NO_CONTENT',
+        data: null,
+      };
+      console.log('DELETE /cards/{cardId} 응답:', body);
+      return body;
     })
     .catch((error) => {
       console.log('DELETE /cards/{cardId} 에러:', {
-        status: error.response?.data?.status,
-        message: error.response?.data?.message,
+        status: error.response?.data?.status ?? error.response?.status,
+        message: error.response?.data?.message ?? error.message,
         data: error.response?.data?.data,
       });
       throw error;
@@ -74,18 +78,19 @@ export const syncAllCards = () => {
   console.log('POST /cards/sync-all 요청');
   return api
     .post('/cards/sync-all')
-    .then((response) => {
+    .then((res) => {
+      const r = res.data;
       console.log('POST /cards/sync-all 응답:', {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
+        status: r.status,
+        message: r.message,
+        data: r.data,
       });
-      return response;
+      return r;
     })
     .catch((error) => {
       console.log('POST /cards/sync-all 에러:', {
-        status: error.response?.data?.status,
-        message: error.response?.data?.message,
+        status: error.response?.data?.status ?? error.response?.status,
+        message: error.response?.data?.message ?? error.message,
         data: error.response?.data?.data,
       });
       throw error;
@@ -97,44 +102,44 @@ export const syncCardData = (cardId) => {
   console.log('POST /cards/{cardId}/sync 요청:', { cardId });
   return api
     .post(`/cards/${cardId}/sync`)
-    .then((response) => {
+    .then((res) => {
+      const r = res.data;
       console.log('POST /cards/{cardId}/sync 응답:', {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
+        status: r.status,
+        message: r.message,
+        data: r.data,
       });
-      return response;
+      return r;
     })
     .catch((error) => {
       console.log('POST /cards/{cardId}/sync 에러:', {
-        status: error.response?.data?.status,
-        message: error.response?.data?.message,
+        status: error.response?.data?.status ?? error.response?.status,
+        message: error.response?.data?.message ?? error.message,
         data: error.response?.data?.data,
       });
       throw error;
     });
 };
 
-// 카드 거래내역 조회
+// 카드 거래내역
 export const getCardTransactions = (cardId, { from, to, page, size } = {}) => {
-  console.log('GET /cards/{cardId}/transactions 요청:', {
-    cardId,
-    params: { from, to, page, size },
-  });
+  const params = { from, to, page, size };
+  console.log('GET /cards/{cardId}/transactions 요청:', { cardId, params });
   return api
-    .get(`/cards/${cardId}/transactions`, { params: { from, to, page, size } })
-    .then((response) => {
+    .get(`/cards/${cardId}/transactions`, { params })
+    .then((res) => {
+      const r = res.data;
       console.log('GET /cards/{cardId}/transactions 응답:', {
-        status: response.data.status,
-        message: response.data.message,
-        data: response.data.data,
+        status: r.status,
+        message: r.message,
+        data: r.data,
       });
-      return response;
+      return r;
     })
     .catch((error) => {
       console.log('GET /cards/{cardId}/transactions 에러:', {
-        status: error.response?.data?.status,
-        message: error.response?.data?.message,
+        status: error.response?.data?.status ?? error.response?.status,
+        message: error.response?.data?.message ?? error.message,
         data: error.response?.data?.data,
       });
       throw error;

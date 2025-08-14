@@ -3,7 +3,10 @@
     <!-- dictionary, notification 경로에서는 헤더 숨김 -->
     <HeaderBar
       v-if="shouldHideHeader"
-      :class="{ 'finance-header': route.name === 'FinanceHome' }"
+      :class="{
+        'finance-header': route.name === 'FinanceHome',
+        'transparent-header': route.name === 'Home',
+      }"
     />
     <main
       :class="[
@@ -19,40 +22,40 @@
 </template>
 
 <script setup>
-import HeaderBar from "@/components/Headerbar.vue";
-import Navbar from "@/components/Navbar.vue";
-import { useRoute } from "vue-router";
-import { computed } from "vue";
-import WithdrawSuccess from "@/pages/mypage/WithdrawSuccess.vue";
+import HeaderBar from '@/components/Headerbar.vue';
+import Navbar from '@/components/Navbar.vue';
+import { useRoute } from 'vue-router';
+import { computed } from 'vue';
+import WithdrawSuccess from '@/pages/mypage/WithdrawSuccess.vue';
 
 const route = useRoute();
 // HeaderBar를 숨길 라우트 이름 목록
 // (이 배열에 포함된 name의 페이지에서는 HeaderBar가 표시되지 않음)
 const hideHeaderNames = [
-  "dictionary",
-  "Notification",
-  "OpenbankingDailyReport",
-  "profile",
-  "my-history",
-  "withdraw",
-  "WithdrawSuccess",
-  "avatar-shop",
-  "ChallengeHome",
-  "OpenBankingMyHome",
-  "OpenbankingMonthlyReport",
-  "mycertificate",
-  "AccountAgreement",
-  "AccountLinkSelect",
-  "customer-support",
-  "DailyReportSelect",
-  "DailyReportDetail",
-  "CardList",
-  "AccountList",
-  "AccountDetail",
-  "CardDetail",
-  "ObAgreement",
-  "OpenBankingAgreement",
-  "ObArsAgreement",
+  'dictionary',
+  'Notification',
+  'OpenbankingDailyReport',
+  'profile',
+  'my-history',
+  'withdraw',
+  'WithdrawSuccess',
+  'avatar-shop',
+  'ChallengeHome',
+  'OpenBankingMyHome',
+  'OpenbankingMonthlyReport',
+  'mycertificate',
+  'AccountAgreement',
+  'AccountLinkSelect',
+  'customer-support',
+  'DailyReportSelect',
+  'DailyReportDetail',
+  'CardList',
+  'AccountList',
+  'AccountDetail',
+  'CardDetail',
+  'ObAgreement',
+  'OpenBankingAgreement',
+  'ObArsAgreement',
 ];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);

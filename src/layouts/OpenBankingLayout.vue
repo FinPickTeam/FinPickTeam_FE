@@ -72,12 +72,6 @@ const hideHeaderRoutes = [];
 
 // 네비게이션을 숨길 라우트들
 const hideNavbarRoutes = [
-  'OpenbankingCalendar',
-  'CalendarSelect',
-  'CalendarDetail',
-  'OpenbankingMonthlyReport',
-  'AccountDetail',
-  'CardDetail',
   'AccountAgreement',
   'AccountLinkSelect',
   'ObAgreement',
@@ -174,6 +168,7 @@ const downloadPdf = () => {
 .openbanking-content {
   flex: 1 1 auto;
   min-height: 0;
+  overflow: hidden;
   padding-top: 80px;
   padding-bottom: 80px;
 }
