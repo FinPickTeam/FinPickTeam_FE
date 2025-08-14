@@ -145,35 +145,38 @@
 
     <Quiz v-if="showQuiz" @close="closeQuiz" />
     <Newsletter v-if="showNewsletter" @close="closeNewsletter" />
+    <WelcomePointModal v-if="showWelcomeModal" @close="closeWelcomeModal" />
   </div>
 </template>
 
 <script setup>
-import Quiz from "./Quiz.vue";
-import Newsletter from "./Newsletter.vue";
-import { ref, computed } from "vue";
-import { useAvatarStore } from "../../stores/avatar.js";
-import { getCumulativeCoin, getMyCoinStatus } from "@/api/mypage/avatar";
-import { getBubbleText } from "@/api/home/bubbleApi";
-import { useAuthStore } from "@/stores/auth";
-import baseAvatar from "../mypage/avatar/avatarimg/avatar-base.png";
-import textballonImage from "./homeimg/textballon.png";
+import Quiz from './Quiz.vue';
+import Newsletter from './Newsletter.vue';
+import WelcomePointModal from '../../components/WelcomePointModal.vue';
+import { ref, computed } from 'vue';
+import { useAvatarStore } from '../../stores/avatar.js';
+import { getCumulativeCoin, getMyCoinStatus } from '@/api/mypage/avatar';
+import { getBubbleText } from '@/api/home/bubbleApi';
+import { useAuthStore } from '@/stores/auth';
+import baseAvatar from '../mypage/avatar/avatarimg/avatar-base.png';
+import textballonImage from './homeimg/textballon.png';
 // import bubbleApi from "@/api/home/bubbleApi.js";
-import { storeToRefs } from "pinia";
-import { useRouter } from "vue-router";
-import { onMounted } from "vue";
+import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
+import { onMounted } from 'vue';
 
 const router = useRouter();
 
 const showQuiz = ref(false);
 const showNewsletter = ref(false);
+const showWelcomeModal = ref(false);
 
 // 누적 포인트 API 상태 관리
 const loadingCumulative = ref(false);
 const cumulativeError = ref(null);
 
 // 말풍선 텍스트 상태 관리
-const bubbleText = ref("오늘의 퀴즈를 풀어보세요.");
+const bubbleText = ref('오늘의 퀴즈를 풀어보세요.');
 const loadingBubble = ref(false);
 const bubbleError = ref(null);
 
@@ -192,8 +195,12 @@ function closeNewsletter() {
   showNewsletter.value = false;
 }
 
+function closeWelcomeModal() {
+  showWelcomeModal.value = false;
+}
+
 function goToAvatarShop() {
-  router.push("/avatar-shop");
+  router.push('/avatar-shop');
 }
 
 const avatarStore = useAvatarStore();
@@ -201,44 +208,44 @@ const authStore = useAuthStore();
 
 // 착용 중인 아이템 확인
 const wearingTitle = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("titles");
+  const wearingItem = avatarStore.getWearingItem('titles');
   return wearingItem ? wearingItem.id : null;
 });
 
 const wearingShirt = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("shirts");
+  const wearingItem = avatarStore.getWearingItem('shirts');
   return wearingItem ? wearingItem.id : null;
 });
 
 const wearingShoes = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("shoes");
+  const wearingItem = avatarStore.getWearingItem('shoes');
   return wearingItem ? wearingItem.id : null;
 });
 
 // 여러 액세서리를 동시에 착용할 수 있도록 수정
 const wearingGlasses = computed(() => {
-  const wearingItems = avatarStore.getWearingItems("glasses");
+  const wearingItems = avatarStore.getWearingItems('glasses');
   return wearingItems.map((item) => item.id);
 });
 
 // 착용 중인 아이템 이미지 가져오기
 const getTitleImage = computed(() => {
-  if (wearingTitle.value === "hat-1sprout") return hatSprout;
-  if (wearingTitle.value === "hat-2beginner") return hatBeginner;
-  if (wearingTitle.value === "hat-3wizardhat") return hatWizardhat;
-  if (wearingTitle.value === "hat-4dosa") return hatDosa;
+  if (wearingTitle.value === 'hat-1sprout') return hatSprout;
+  if (wearingTitle.value === 'hat-2beginner') return hatBeginner;
+  if (wearingTitle.value === 'hat-3wizardhat') return hatWizardhat;
+  if (wearingTitle.value === 'hat-4dosa') return hatDosa;
   return null;
 });
 
 const getShirtImage = computed(() => {
-  if (wearingShirt.value === "shirt-blue") return shirtBlue;
-  if (wearingShirt.value === "shirt-red") return shirtRed;
+  if (wearingShirt.value === 'shirt-blue') return shirtBlue;
+  if (wearingShirt.value === 'shirt-red') return shirtRed;
   return null;
 });
 
 const getShoesImage = computed(() => {
-  if (wearingShoes.value === "shoes-brown") return shoesBrown;
-  if (wearingShoes.value === "shoes") return shoes;
+  if (wearingShoes.value === 'shoes-brown') return shoesBrown;
+  if (wearingShoes.value === 'shoes') return shoes;
   return null;
 });
 
@@ -246,9 +253,9 @@ const getShoesImage = computed(() => {
 const getGlassesImages = computed(() => {
   const images = [];
   wearingGlasses.value.forEach((glassesId) => {
-    if (glassesId === "sport-glasses") images.push(sportGlasses);
-    if (glassesId === "etc-sunglasses") images.push(sunGlasses);
-    if (glassesId === "etc-blush") images.push(blush);
+    if (glassesId === 'sport-glasses') images.push(sportGlasses);
+    if (glassesId === 'etc-sunglasses') images.push(sunGlasses);
+    if (glassesId === 'etc-blush') images.push(blush);
   });
   return images;
 });
@@ -257,9 +264,9 @@ const getGlassesImages = computed(() => {
 const totalEarnedPoints = computed(() => {
   const points = avatarStore.cumulativePoints || 0;
   console.log(
-    "totalEarnedPoints 계산:",
+    'totalEarnedPoints 계산:',
     points,
-    "avatarStore.cumulativePoints:",
+    'avatarStore.cumulativePoints:',
     avatarStore.cumulativePoints
   );
   return points;
@@ -273,16 +280,16 @@ const fetchCumulativePoints = async () => {
 
     // 인증 상태 확인
     if (!authStore.isAuthenticated) {
-      console.warn("로그인이 필요합니다.");
+      console.warn('로그인이 필요합니다.');
       return;
     }
 
-    console.log("Home 누적 포인트 데이터 가져오기 시작 (새로운 API 사용)");
-    console.log("인증 상태:", authStore.isAuthenticated);
-    console.log("사용자 정보:", authStore.user);
+    console.log('Home 누적 포인트 데이터 가져오기 시작 (새로운 API 사용)');
+    console.log('인증 상태:', authStore.isAuthenticated);
+    console.log('사용자 정보:', authStore.user);
 
     const response = await getMyCoinStatus();
-    console.log("받아온 코인 상태 데이터:", response);
+    console.log('받아온 코인 상태 데이터:', response);
 
     if (
       response.status === 200 &&
@@ -290,31 +297,31 @@ const fetchCumulativePoints = async () => {
       response.data.status === 200
     ) {
       const coinData = response.data.data;
-      if (coinData && typeof coinData.cumulativeAmount === "number") {
+      if (coinData && typeof coinData.cumulativeAmount === 'number') {
         avatarStore.setCumulativePoints(coinData.cumulativeAmount);
         console.log(
-          "Home 누적 포인트 업데이트 완료:",
+          'Home 누적 포인트 업데이트 완료:',
           coinData.cumulativeAmount
         );
       } else {
-        console.warn("유효한 누적 포인트 값을 찾을 수 없습니다:", response);
-        cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
+        console.warn('유효한 누적 포인트 값을 찾을 수 없습니다:', response);
+        cumulativeError.value = '누적 포인트 데이터를 가져오는데 실패했습니다.';
       }
     } else {
-      console.warn("코인 상태 데이터 형식이 올바르지 않습니다:", response);
-      cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
+      console.warn('코인 상태 데이터 형식이 올바르지 않습니다:', response);
+      cumulativeError.value = '누적 포인트 데이터를 가져오는데 실패했습니다.';
     }
   } catch (err) {
-    console.error("Home 누적 포인트 조회 에러:", err);
+    console.error('Home 누적 포인트 조회 에러:', err);
 
-    let errorMessage = "누적 포인트를 불러오는데 실패했습니다.";
+    let errorMessage = '누적 포인트를 불러오는데 실패했습니다.';
 
     if (err.response?.status === 401) {
-      errorMessage = "로그인이 필요합니다.";
+      errorMessage = '로그인이 필요합니다.';
     } else if (err.response?.status === 404) {
-      errorMessage = "사용자 정보를 찾을 수 없습니다.";
+      errorMessage = '사용자 정보를 찾을 수 없습니다.';
     } else if (err.response?.status === 500) {
-      errorMessage = "서버 오류가 발생했습니다.";
+      errorMessage = '서버 오류가 발생했습니다.';
     } else if (err.message) {
       errorMessage = `연결 오류: ${err.message}`;
     }
@@ -338,32 +345,32 @@ const fetchBubbleText = async () => {
       let textValue;
 
       // 백엔드 응답이 `{"message": "텍스트"}` 형태일 경우
-      if (typeof response.data.message === "string") {
+      if (typeof response.data.message === 'string') {
         textValue = response.data.data.message;
       }
       // 백엔드 응답이 `{"data": "텍스트"}` 형태일 경우
-      else if (typeof response.data.data.message === "string") {
+      else if (typeof response.data.data.message === 'string') {
         textValue = response.data.data.message;
       }
       // 백엔드 응답이 ` "텍스트" ` 형태일 경우
-      else if (typeof response.data.message === "string") {
+      else if (typeof response.data.message === 'string') {
         textValue = response.data.data.message;
       }
 
       if (textValue) {
         bubbleText.value = textValue;
-        console.log("말풍선 텍스트 업데이트 완료:", textValue);
+        console.log('말풍선 텍스트 업데이트 완료:', textValue);
       } else {
-        console.warn("유효한 말풍선 텍스트를 찾을 수 없습니다.");
-        bubbleText.value = "오늘의 퀴즈를 풀어보세요.";
+        console.warn('유효한 말풍선 텍스트를 찾을 수 없습니다.');
+        bubbleText.value = '오늘의 퀴즈를 풀어보세요.';
       }
     } else {
-      console.warn("말풍선 텍스트 데이터가 없습니다.");
-      bubbleText.value = "오늘의 퀴즈를 풀어보세요.";
+      console.warn('말풍선 텍스트 데이터가 없습니다.');
+      bubbleText.value = '오늘의 퀴즈를 풀어보세요.';
     }
   } catch (err) {
-    console.error("말풍선 텍스트 조회 에러:", err);
-    bubbleError.value = "말풍선 텍스트를 불러오는데 실패했습니다.";
+    console.error('말풍선 텍스트 조회 에러:', err);
+    bubbleError.value = '말풍선 텍스트를 불러오는데 실패했습니다.';
   } finally {
     loadingBubble.value = false;
   }
@@ -379,10 +386,10 @@ const progressPercentage = computed(() => {
 
 const nextTargetPoints = computed(() => {
   const current = totalEarnedPoints.value;
-  if (current >= 60000) return "완료!";
-  if (current >= 40000) return "60,000";
-  if (current >= 20000) return "40,000";
-  return "20,000";
+  if (current >= 60000) return '완료!';
+  if (current >= 40000) return '60,000';
+  if (current >= 20000) return '40,000';
+  return '20,000';
 });
 
 // 컴포넌트 마운트 시 저장된 아바타 정보 불러오기
@@ -390,7 +397,49 @@ onMounted(() => {
   avatarStore.loadAvatar();
   fetchCumulativePoints(); // 컴포넌트 마운트 시 누적 포인트 데이터 가져오기
   fetchBubbleText(); // 컴포넌트 마운트 시 말풍선 텍스트 가져오기
+
+  // 회원가입 후 첫 방문 확인
+  checkFirstVisit();
 });
+
+// 회원가입 후 첫 방문 확인 함수
+const checkFirstVisit = () => {
+  // URL 쿼리 파라미터에서 투자성향 분석 완료 여부 확인
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromProfileComplete = urlParams.get('from') === 'profile-complete';
+
+  // 로컬 스토리지에서 첫 방문 여부 확인
+  const hasVisited = localStorage.getItem('hasVisitedHome');
+
+  // 투자성향 분석 완료 후 홈으로 이동하거나, 첫 방문인 경우 모달 표시
+  if ((fromProfileComplete || !hasVisited) && authStore.isAuthenticated) {
+    // 모달 표시
+    showWelcomeModal.value = true;
+
+    // 로컬 스토리지에 방문 기록 저장
+    localStorage.setItem('hasVisitedHome', 'true');
+
+    // URL에서 쿼리 파라미터 제거
+    if (fromProfileComplete) {
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+
+    // 여기서 실제 포인트 지급 API 호출
+    // giveWelcomePoints();
+  }
+};
+
+// 가입 축하 포인트 지급 함수 (실제 API 연동 시 사용)
+const giveWelcomePoints = async () => {
+  try {
+    // TODO: 실제 포인트 지급 API 호출
+    // const response = await giveWelcomeBonus();
+    console.log('가입 축하 포인트 지급 완료');
+  } catch (error) {
+    console.error('포인트 지급 실패:', error);
+  }
+};
 
 // 목표 포인트 계산
 const getTargetPoints = computed(() => {
@@ -409,10 +458,10 @@ function formatNumber(num) {
 // 진행 상태 메시지 함수
 function getProgressMessage() {
   const current = totalEarnedPoints.value;
-  if (current >= 60000) return "🎉 모든 목표 달성!";
-  if (current >= 40000) return "🔥 40,000P 달성!";
-  if (current >= 20000) return "💪 20,000P 달성!";
-  return "🚀 목표 달성 중...";
+  if (current >= 60000) return '🎉 모든 목표 달성!';
+  if (current >= 40000) return '🔥 40,000P 달성!';
+  if (current >= 20000) return '💪 20,000P 달성!';
+  return '🚀 목표 달성 중...';
 }
 
 // 현재 레벨 계산
@@ -427,28 +476,28 @@ const getCurrentLevel = computed(() => {
 // 현재 레벨 제목
 const getCurrentLevelTitle = computed(() => {
   const points = totalEarnedPoints.value;
-  if (points >= 60000) return "금융도사";
-  if (points >= 40000) return "금융법사";
-  if (points >= 20000) return "금융견습";
-  return "금융새싹";
+  if (points >= 60000) return '금융도사';
+  if (points >= 40000) return '금융법사';
+  if (points >= 20000) return '금융견습';
+  return '금융새싹';
 });
 
 // 다음 레벨 제목
 const getNextLevelTitle = computed(() => {
   const points = totalEarnedPoints.value;
-  if (points >= 60000) return "완료";
-  if (points >= 40000) return "금융도사";
-  if (points >= 20000) return "금융법사";
-  return "금융견습";
+  if (points >= 60000) return '완료';
+  if (points >= 40000) return '금융도사';
+  if (points >= 20000) return '금융법사';
+  return '금융견습';
 });
 
 // 진행률 계산 (현재 레벨 내에서의 진행률)
 const getProgressPercentage = computed(() => {
   const current = totalEarnedPoints.value;
-  console.log("진행률 계산 - 현재 포인트:", current);
+  console.log('진행률 계산 - 현재 포인트:', current);
 
   if (current >= 60000) {
-    console.log("진행률: 100% (최고 레벨)");
+    console.log('진행률: 100% (최고 레벨)');
     return 100;
   }
   if (current >= 40000) {
@@ -457,7 +506,7 @@ const getProgressPercentage = computed(() => {
       100,
       Math.round(((current - 40000) / 20000) * 100)
     );
-    console.log("진행률 계산 (40000-59999):", percentage + "%");
+    console.log('진행률 계산 (40000-59999):', percentage + '%');
     return percentage;
   }
   if (current >= 20000) {
@@ -466,13 +515,13 @@ const getProgressPercentage = computed(() => {
       100,
       Math.round(((current - 20000) / 20000) * 100)
     );
-    console.log("진행률 계산 (20000-39999):", percentage + "%");
+    console.log('진행률 계산 (20000-39999):', percentage + '%');
     return percentage;
   }
   // 0-19999 구간에서 0-100%
   const percentage = Math.min(100, Math.round((current / 20000) * 100));
-  console.log("진행률 계산 (0-19999):", percentage + "%");
-  console.log("상세 계산:", {
+  console.log('진행률 계산 (0-19999):', percentage + '%');
+  console.log('상세 계산:', {
     current: current,
     division: current / 20000,
     percentage: (current / 20000) * 100,
@@ -526,7 +575,7 @@ const getProgressPercentage = computed(() => {
 
 /* 캐릭터 뒤에 스카이-블루(하늘) + 그린(잔디) 배경 */
 .main-content::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
   background: linear-gradient(#b9ddee 0% 70%, #5ea152 70% 100%);
