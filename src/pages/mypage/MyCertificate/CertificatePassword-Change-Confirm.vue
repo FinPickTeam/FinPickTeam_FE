@@ -3,7 +3,7 @@
     <!-- 상단 헤더 -->
     <div class="password-header">
       <button class="password-back" @click="goBack">
-        <font-awesome-icon :icon="['fas', 'angle-left']" />
+        <font-awesome-icon :icon="['fas', 'angle-left']"/>
       </button>
       <span class="password-title center-title">비밀번호 변경</span>
     </div>
@@ -28,10 +28,10 @@
           <div class="password-display">
             <div class="password-dots">
               <div
-                v-for="i in 6"
-                :key="i"
-                class="password-dot"
-                :class="{
+                  v-for="i in 6"
+                  :key="i"
+                  class="password-dot"
+                  :class="{
                   filled: i <= confirmPassword.length,
                   correct: i <= confirmPassword.length && isPasswordMatch,
                   incorrect:
@@ -44,22 +44,22 @@
           </div>
           <div class="password-match" v-if="confirmPassword.length > 0">
             <font-awesome-icon
-              :icon="['fas', isPasswordMatch ? 'check' : 'times']"
-              :class="{
+                :icon="['fas', isPasswordMatch ? 'check' : 'times']"
+                :class="{
                 'text-success': isPasswordMatch,
                 'text-error': !isPasswordMatch,
               }"
             />
             <span
-              :class="{
+                :class="{
                 'text-success': isPasswordMatch,
                 'text-error': !isPasswordMatch,
               }"
             >
               {{
                 isPasswordMatch
-                  ? "비밀번호가 일치합니다"
-                  : "비밀번호가 일치하지 않습니다"
+                    ? "비밀번호가 성공적으로 변경되었습니다"
+                    : "비밀번호가 일치하지 않습니다"
               }}
             </span>
           </div>
@@ -69,11 +69,11 @@
         <div class="number-pad">
           <div class="number-row" v-for="row in numberPad" :key="row.join('')">
             <button
-              v-for="number in row"
-              :key="number"
-              class="number-btn"
-              @click="addNumber(number)"
-              :disabled="confirmPassword.length >= 6"
+                v-for="number in row"
+                :key="number"
+                class="number-btn"
+                @click="addNumber(number)"
+                :disabled="confirmPassword.length >= 6"
             >
               {{ number }}
             </button>
@@ -83,14 +83,14 @@
               전체삭제
             </button>
             <button
-              class="number-btn"
-              @click="addNumber(3)"
-              :disabled="confirmPassword.length >= 6"
+                class="number-btn"
+                @click="addNumber(3)"
+                :disabled="confirmPassword.length >= 6"
             >
               3
             </button>
             <button class="number-btn delete-btn" @click="deleteNumber">
-              <font-awesome-icon :icon="['fas', 'backspace']" />
+              <font-awesome-icon :icon="['fas', 'backspace']"/>
             </button>
           </div>
         </div>
@@ -100,16 +100,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
+import {ref, computed, onMounted} from "vue";
+import {useRouter, useRoute} from "vue-router";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {library} from "@fortawesome/fontawesome-svg-core";
 import {
   faAngleLeft,
   faCheck,
   faTimes,
   faBackspace,
 } from "@fortawesome/free-solid-svg-icons";
+import {pinReset} from "@/api/authApi.js";
 
 library.add(faAngleLeft, faCheck, faTimes, faBackspace);
 
@@ -119,6 +120,9 @@ const route = useRoute();
 const confirmPassword = ref("");
 const currentPassword = ref("");
 const newPassword = ref("");
+const isLoading = ref(false);
+const errorMessage = ref("");
+const shakeError = ref(false);
 
 // 숫자 패드 배열을 이미지와 동일하게 고정
 const numberPad = ref([
@@ -135,6 +139,10 @@ const isPasswordMatch = computed(() => {
 onMounted(() => {
   currentPassword.value = route.query.currentPassword || "";
   newPassword.value = route.query.newPassword || "";
+  if (!newPassword.value) {
+    alert("비밀번호 정보가 없습니다. 이전 단계로 돌아갑니다.");
+    router.go(-2); // 정보 없으면 1단계로
+  }
 });
 
 const addNumber = (number) => {
@@ -147,7 +155,7 @@ const addNumber = (number) => {
         if (isPasswordMatch.value) {
           completePasswordChange();
         }
-      }, 300); // 0.3초 후 자동 완료
+      }, 1000); // 0.3초 후 자동 완료
     }
   }
 };
@@ -166,14 +174,35 @@ const goBack = () => {
   router.back();
 };
 
-const completePasswordChange = () => {
-  if (isPasswordMatch.value && confirmPassword.value.length > 0) {
-    // 비밀번호 변경 완료 처리
-    // 여기서 실제 비밀번호 변경 로직을 구현할 수 있습니다
+const completePasswordChange = async () => {
+  if (!isPasswordMatch.value || isLoading.value) return;
 
-    // 완료 페이지로 이동
-    router.push("/mypage");
+  isLoading.value = true;
+  try {
+    await pinReset(parseInt(newPassword.value, 10));
+
+    // 성공 시 사용자에게 알림 후 페이지 이동
+    await router.push("/mypage");
+
+  } catch (error) {
+    // API 호출 실패 시 에러 처리
+    const message = error.response?.data?.message || "비밀번호 변경에 실패했습니다.";
+    triggerShakeError(message);
+  } finally {
+    isLoading.value = false;
   }
+  // 완료 페이지로 이동
+  await router.push("/mypage");
+
+};
+
+const triggerShakeError = (message) => {
+  errorMessage.value = message;
+  shakeError.value = true;
+  setTimeout(() => {
+    shakeError.value = false;
+    clearPassword();
+  }, 500);
 };
 </script>
 
@@ -232,7 +261,6 @@ const completePasswordChange = () => {
   display: flex;
   flex-direction: column;
 }
-
 
 
 .main-title {
