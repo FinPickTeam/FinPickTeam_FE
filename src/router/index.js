@@ -99,6 +99,12 @@ import ChallengeCommonDetail from '../pages/challenge/ChallengeCommonDetail.vue'
 import ChallengeGroupDetail from '../pages/challenge/ChallengeGroupDetail.vue';
 import ChallengePersonalDetail from '../pages/challenge/ChallengePersonalDetail.vue';
 
+// admin
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import AdminHome from '@/pages/admin/AdminHome.vue';
+import AdminCommonChallenge from '@/pages/admin/AdminCommonChallenge.vue';
+import AdminTickets from '@/pages/admin/AdminTickets.vue';
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -414,6 +420,27 @@ const router = createRouter({
       ],
     },
 
+    // 관리자 레이아웃
+    {
+      path: '/admin',
+      component: AdminLayout,
+      meta: { requiresAuth: true, requiresAdmin: true },
+      children: [
+        { path: '', name: 'AdminHome', component: AdminHome },
+        {
+          path: 'challenges/common',
+          name: 'AdminCommonChallenge',
+          component: AdminCommonChallenge,
+        },
+        {
+          path: 'tickets',
+          name: 'AdminTickets',
+          component: AdminTickets,
+        },
+      ],
+    },
+
+
     // 404 Not Found catch-all
     {
       path: '/:pathMatch(.*)*',
@@ -525,6 +552,27 @@ router.beforeEach(async (to) => {
         return { name: 'Login', query: { redirect: to.fullPath } };
       }
     }
+  }
+
+  // 관리자 판별 유틸(여러 형태 대비)
+  const role = auth?.user?.role || auth?.role;
+  const authorities = auth?.user?.authorities || auth?.authorities || [];
+  const isAdmin =
+      role === 'ADMIN' ||
+      authorities.includes('ADMIN') ||
+      authorities.includes('ROLE_ADMIN');
+
+  // 1) /admin 이하 접근은 관리자만
+  if (to.matched.some((r) => r.meta?.requiresAdmin)) {
+    if (!isAdmin) {
+      return { name: 'Home' }; // 권한 없으면 홈으로
+    }
+  }
+
+  // 2) 로그인 직후 관리자면 홈으로 들어오더라도 관리자 홈으로 돌리기
+  //    (원치 않으면 이 블록은 주석 처리)
+  if ((to.name === 'Home' || to.path === '/') && isAdmin) {
+    return { name: 'AdminHome', replace: true };
   }
 
   // 오픈뱅킹 엔트리('/openbanking') 접근 시: 연동 데이터 있으면 MyHome으로
