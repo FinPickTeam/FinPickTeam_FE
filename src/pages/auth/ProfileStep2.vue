@@ -12,8 +12,7 @@
     </div>
     <!-- 질문 -->
     <div class="question-section">
-      <div class="question-title">[문항 2] 금융투자상품 취득 및 처분목적</div>
-      <!-- <div class="question-desc">금융투자상품 취득 및 처분목적</div> -->
+      <div class="question-title">[문항 2] 투자 목적</div>
       <div class="options">
         <div
           v-for="(option, idx) in options"
@@ -33,7 +32,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
@@ -49,21 +48,23 @@ const options = [
 ];
 const selected = ref(null);
 
-// 동적 progress-bar 설정
-const totalSteps = ref(4); // 기본값
-
-// 라우터 쿼리에서 from 파라미터 확인하여 단계 수 결정
-if (route.query.from === 'mypage') {
-  totalSteps.value = 10; // 투자성향 재검사는 9단계
-} else {
-  totalSteps.value = 5; // 회원가입은 4단계
-}
+// 동적 progress-bar 설정 (computed로 변경)
+const totalSteps = computed(() => {
+  const from = route.query.from;
+  if (from === 'mypage' || from === 'fund') {
+    return 10; // 투자성향 재검사는 10단계
+  } else {
+    return 5; // 회원가입은 5단계
+  }
+});
 
 const goNext = () => {
   if (selected.value !== null) {
     const from = route.query.from || 'signup';
     if (from === 'mypage') {
-      router.push(`/mypage/financetest/profile-step-3?from=mypage`);
+      router.push(`/mypage/financetest/profile-step-3?from=${from}`);
+    } else if (from === 'fund') {
+      router.push(`/mypage/financetest/profile-step-6?from=${from}`);
     } else {
       router.push('/profile-step-3');
     }

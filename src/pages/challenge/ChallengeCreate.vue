@@ -5,9 +5,10 @@
       <div class="form-group">
         <label for="challenge-category">챌린지 카테고리</label>
         <select
-          id="challenge-category"
-          v-model="categoryId"
-          class="category-select"
+            id="challenge-category"
+            v-model="categoryId"
+            class="category-select"
+            :class="{ error: errors.categoryId }"
         >
           <option :value="1">전체 소비 줄이기</option>
           <option :value="2">식비 줄이기</option>
@@ -15,55 +16,66 @@
           <option :value="4">교통비 줄이기</option>
           <option :value="5">미용·쇼핑 줄이기</option>
         </select>
+        <span v-if="errors.categoryId" class="error-message">{{ errors.categoryId }}</span>
       </div>
+
       <div class="form-group">
         <label for="challenge-title">챌린지 제목</label>
         <input
-          type="text"
-          id="challenge-title"
-          v-model="title"
-          placeholder="챌린지 제목을 입력하세요"
+            type="text"
+            id="challenge-title"
+            v-model="title"
+            placeholder="챌린지 제목을 입력하세요"
+            :class="{ error: errors.title }"
         />
+        <span v-if="errors.title" class="error-message">{{ errors.title }}</span>
       </div>
 
       <div class="form-group">
         <label for="challenge-description">챌린지 설명</label>
         <textarea
-          id="challenge-description"
-          v-model="description"
-          placeholder="챌린지에 대한 설명을 입력하세요"
-          rows="4"
+            id="challenge-description"
+            v-model="description"
+            placeholder="챌린지에 대한 설명을 입력하세요"
+            rows="4"
+            :class="{ error: errors.description }"
         ></textarea>
+        <span v-if="errors.description" class="error-message">{{ errors.description }}</span>
       </div>
 
       <div class="form-group">
         <label for="challenge-period">챌린지 기간</label>
         <div class="date-inputs">
-          <input type="date" id="start-date" v-model="startDate" />
+          <input type="date" id="start-date" v-model="startDate" :class="{ error: errors.startDate }" />
           <span>~</span>
-          <input type="date" id="end-date" v-model="endDate" />
+          <input type="date" id="end-date" v-model="endDate" :class="{ error: errors.endDate }" />
         </div>
+        <span v-if="errors.startDate || errors.endDate" class="error-message">
+          {{ errors.startDate || errors.endDate }}
+        </span>
       </div>
 
       <div class="form-group">
         <label for="target-amount">목표 금액</label>
         <div class="amount-input-wrapper">
           <input
-            type="text"
-            id="target-amount"
-            :value="formatAmount(goalValue)"
-            @input="handleAmountInput"
-            placeholder="목표 금액을 입력하세요"
+              type="text"
+              id="target-amount"
+              :value="formatAmount(goalValue)"
+              @input="handleAmountInput"
+              placeholder="목표 금액을 입력하세요"
+              :class="{ error: errors.goalValue }"
           />
           <span class="amount-unit">원</span>
         </div>
+        <span v-if="errors.goalValue" class="error-message">{{ errors.goalValue }}</span>
         <div class="amount-buttons">
           <button
-            v-for="unit in [10000, 100000, 1000000]"
-            :key="unit"
-            type="button"
-            class="btn custom-amount-btn"
-            @click="addAmount(unit)"
+              v-for="unit in [10000, 100000, 1000000]"
+              :key="unit"
+              type="button"
+              class="btn custom-amount-btn"
+              @click="addAmount(unit)"
           >
             +{{ unit.toLocaleString() }}
           </button>
@@ -73,21 +85,27 @@
       <div class="form-group">
         <label>챌린지 유형</label>
         <div class="challenge-type-options">
-          <label
-            class="challenge-type-option"
-            :class="{ active: type === 'PERSONAL' }"
-          >
+          <label class="challenge-type-option" :class="{ active: type === 'PERSONAL' }">
             <input type="radio" v-model="type" value="PERSONAL" />
             <span>개인 챌린지</span>
           </label>
-          <label
-            class="challenge-type-option"
-            :class="{ active: type === 'GROUP' }"
-          >
+          <label class="challenge-type-option" :class="{ active: type === 'GROUP' }">
             <input type="radio" v-model="type" value="GROUP" />
             <span>소그룹 챌린지</span>
           </label>
         </div>
+        <span v-if="errors.type" class="error-message">{{ errors.type }}</span>
+
+        <!-- 타입 풀일 때 즉시 안내 -->
+        <p v-if="isSelectedTypeFull" class="warning-text">
+          {{ warningTextForType }}
+        </p>
+
+        <!-- 그룹 선택 시 필요한 포인트 안내 -->
+        <p v-if="type === 'GROUP'" class="points-info">
+          생성 필요 포인트: {{ requiredPoints.toLocaleString() }}P / 보유: {{ userPoints.toLocaleString() }}P
+          <span v-if="userPoints < requiredPoints" class="points-lack"> ({{ lackAmount.toLocaleString() }}P 부족) </span>
+        </p>
       </div>
 
       <div class="form-group" v-if="type === 'GROUP'">
@@ -105,122 +123,298 @@
           </div>
           <div v-if="usePassword" class="password-input">
             <input
-              type="password"
-              v-model="roomPassword"
-              placeholder="비밀번호를 입력하세요"
-              maxlength="20"
+                type="password"
+                v-model="roomPassword"
+                placeholder="비밀번호를 입력하세요(숫자 4자리)"
+                maxlength="4"
+                :class="{ error: errors.roomPassword }"
             />
+            <span v-if="errors.roomPassword" class="error-message">{{ errors.roomPassword }}</span>
           </div>
         </div>
       </div>
 
       <div class="form-actions">
-        <button class="btn-cancel" @click="goBack">취소</button>
+        <button class="btn-cancel" @click="routerBack">취소</button>
         <button class="btn-create" @click="createChallenge">챌린지 생성</button>
       </div>
     </div>
 
-    <!-- 성공 모달 -->
+    <!-- 성공 모달: 생성한 챌린지로 이동 -->
     <ChallengeCreateSuccessModal
-      :isVisible="showSuccessModal"
-      @close="closeSuccessModal"
+        :isVisible="showSuccessModal"
+        :challengeId="createdChallengeId"
+        :challengeType="createdChallengeType"
+        @close="closeSuccessModal"
+        @view="handleViewCreatedChallenge"
     />
 
     <!-- 포인트 부족 모달 -->
     <ChallengeInsufficientPointsModal
-      :isVisible="showInsufficientPointsModal"
-      :currentPoints="userPoints"
-      :requiredPoints="requiredPoints"
-      @close="closeInsufficientPointsModal"
-      @charge="handleChargePoints"
+        :isVisible="showInsufficientPointsModal"
+        :currentPoints="userPoints"
+        :requiredPoints="requiredPoints"
+        @close="closeInsufficientPointsModal"
+        @charge="handleChargePoints"
     />
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+import { useChallengeStore } from '@/stores/challenge';
+import { getChallengeList } from '@/api/challenge/challenge.js';
 import ChallengeCreateSuccessModal from '@/components/challenge/ChallengeCreateSuccessModal.vue';
 import ChallengeInsufficientPointsModal from '@/components/challenge/ChallengeInsufficientPointsModal.vue';
 
 const router = useRouter();
+const auth = useAuthStore();
+const challengeStore = useChallengeStore();
 
 // 폼 데이터
-const title = ref(''); // 챌린지 제목
-const description = ref(''); // 챌린지 설명
-const startDate = ref(''); // 챌린지 시작일
-const endDate = ref(''); // 챌린지 종료일
-const goalValue = ref(100000); // 목표 금액
-const type = ref('PERSONAL'); // 챌린지 유형
-const categoryId = ref(1); // 카테고리 ID   (1: 전체 소비 줄이기, 2: 식비 줄이기, 3: 카페·간식 줄이기, 4: 교통비 줄이기, 5: 미용·쇼핑 줄이기)
-const usePassword = ref(false); // 비밀번호 사용 여부
-const roomPassword = ref(''); // 비밀번호
+const title = ref('');
+const description = ref('');
+const startDate = ref('');
+const endDate = ref('');
+const goalValue = ref(100000);
+const type = ref('PERSONAL');
+const categoryId = ref(1);
+const usePassword = ref(false);
+const roomPassword = ref('');
+const loading = ref(false);
 
-// 모달 상태
+// 에러 메시지 관리
+const errors = reactive({
+  title: '',
+  description: '',
+  startDate: '',
+  endDate: '',
+  goalValue: '',
+  categoryId: '',
+  type: '',
+  roomPassword: '',
+});
+
+// 모달 상태 + 생성 결과
 const showSuccessModal = ref(false);
 const showInsufficientPointsModal = ref(false);
+const createdChallengeId = ref(null);
+const createdChallengeType = ref(null);
 
-// 포인트 관련
-const userPoints = ref(0); // 사용자 보유 포인트 (실제로는 API에서 가져와야 함)
-const requiredPoints = ref(100); // 챌린지 생성에 필요한 포인트
+// 포인트/제한 관련 (Pinia)
+const userPoints = computed(() => challengeStore.points.userPoints);
+const requiredPoints = computed(() => challengeStore.points.required[type.value] ?? 0);
+const isSelectedTypeFull = computed(() => challengeStore.isTypeFull(type.value));
+const canCreateSelectedType = computed(() => challengeStore.canCreateByType(type.value));
+const lackAmount = computed(() => challengeStore.lackPointsAmountForType(type.value));
 
-const goBack = () => {
-  router.back();
-};
+const warningTextForType = computed(() => {
+  if (!isSelectedTypeFull.value) return '';
+  if (type.value === 'GROUP') return '소그룹 챌린지는 최대 3개까지 참여할 수 있어요.';
+  if (type.value === 'PERSONAL') return '개인 챌린지는 최대 3개까지 참여할 수 있어요.';
+  return '';
+});
+
+// 직진입 대비: 정책 포인트 세팅 + 코인 스냅샷 보장 + 참여중 목록 로드
+onMounted(async () => {
+  challengeStore.setRequiredPoints({ GROUP: 100, PERSONAL: 0, COMMON: 0 });
+  if (!challengeStore.points.updatedAt) {
+    await challengeStore.fetchCoinStatus();
+  }
+  try {
+    const list = await getChallengeList({ participating: true });
+    challengeStore.updateCountsFromList(Array.isArray(list) ? list : []);
+  } catch (e) {
+    console.warn('[Create] failed to load participating list:', e?.message || e);
+    challengeStore.resetCounts();
+  }
+});
+
+const routerBack = () => router.back();
 
 const addAmount = (amount) => {
   goalValue.value += amount;
+  if (errors.goalValue) errors.goalValue = '';
 };
 
-const formatAmount = (value) => {
-  return value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-};
+const formatAmount = (value) => value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 
 const handleAmountInput = (event) => {
-  // 콤마 제거 후 숫자만 추출
   const numericValue = event.target.value.replace(/,/g, '');
   goalValue.value = parseInt(numericValue) || 0;
+  if (errors.goalValue) errors.goalValue = '';
 };
 
-const createChallenge = () => {
-  // 소그룹 챌린지일 경우에만 포인트 검증
-  if (type.value === 'GROUP' && userPoints.value < requiredPoints.value) {
+const validateForm = () => {
+  Object.keys(errors).forEach((k) => (errors[k] = ''));
+  let isValid = true;
+
+  if (!title.value.trim()) {
+    errors.title = '챌린지 제목을 입력해주세요.';
+    isValid = false;
+  } else if (title.value.trim().length < 2) {
+    errors.title = '챌린지 제목은 2자 이상 입력해주세요.';
+    isValid = false;
+  }
+
+  if (!description.value.trim()) {
+    errors.description = '챌린지 설명을 입력해주세요.';
+    isValid = false;
+  } else if (description.value.trim().length < 10) {
+    errors.description = '챌린지 설명은 10자 이상 입력해주세요.';
+    isValid = false;
+  }
+
+  if (!startDate.value) {
+    errors.startDate = '시작일을 선택해주세요.';
+    isValid = false;
+  } else {
+    const startDiff = Math.floor((new Date(startDate.value) - new Date()) / 86400000);
+    if (startDiff > 7) {
+      errors.startDate = '챌린지 시작일은 생성일 기준 일주일 이내여야 합니다.';
+      isValid = false;
+    }
+  }
+
+  if (!endDate.value) {
+    errors.endDate = '종료일을 선택해주세요.';
+    isValid = false;
+  } else if (startDate.value && endDate.value && startDate.value >= endDate.value) {
+    errors.endDate = '종료일은 시작일보다 늦어야 합니다.';
+    isValid = false;
+  } else if (startDate.value && endDate.value) {
+    const diffDays = Math.floor((new Date(endDate.value) - new Date(startDate.value)) / 86400000) + 1;
+    if (diffDays < 3) {
+      errors.endDate = '챌린지 기간은 최소 3일 이상이어야 합니다.';
+      isValid = false;
+    } else if (diffDays > 30) {
+      errors.endDate = '챌린지 기간은 최대 30일까지 가능합니다.';
+      isValid = false;
+    }
+  }
+
+  if (goalValue.value <= 0) {
+    errors.goalValue = '목표 금액을 입력해주세요.';
+    isValid = false;
+  } else if (goalValue.value < 1000) {
+    errors.goalValue = '목표 금액은 1,000원 이상 입력해주세요.';
+    isValid = false;
+  }
+
+  if (type.value === 'GROUP' && usePassword.value) {
+    if (!roomPassword.value.trim()) {
+      errors.roomPassword = '비밀번호를 입력해주세요.';
+      isValid = false;
+    } else if (!/^\d{4}$/.test(roomPassword.value)) {
+      errors.roomPassword = '비밀번호는 숫자 4자리여야 합니다.';
+      isValid = false;
+    }
+  }
+
+  return isValid;
+};
+
+const createChallenge = async () => {
+  // 0) 선택 타입 제한
+  if (!canCreateSelectedType.value) {
+    alert(warningTextForType.value || '해당 유형은 현재 생성할 수 없습니다.');
+    return;
+  }
+
+  // 1) 폼 유효성 검사
+  if (!validateForm()) return;
+
+  // 2) 포인트 확인
+  if (requiredPoints.value > 0 && userPoints.value < requiredPoints.value) {
     showInsufficientPointsModal.value = true;
     return;
   }
 
-  // 챌린지 생성 로직
-  const challengeData = {
+  // 3) 페이로드
+  const payload = {
     title: title.value,
     description: description.value,
     startDate: startDate.value,
     endDate: endDate.value,
     goalValue: goalValue.value,
     type: type.value,
-    categoryId: categoryId.value,
+    categoryId: Number(categoryId.value),
     usePassword: usePassword.value,
-    roomPassword: usePassword.value ? roomPassword.value : '',
+    password: usePassword.value ? Number(roomPassword.value) : null,
   };
-  console.log('챌린지 생성 요청:', challengeData);
 
-  // 성공 모달 표시
-  showSuccessModal.value = true;
+  try {
+    loading.value = true;
+    const token = auth.accessToken;
+
+    const response = await axios.post('/api/challenge/create', payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    // CommonResponseDTO<ChallengeCreateResponseDTO> 에서 추출
+    const created = response?.data?.data;
+    const challengeId = created?.challengeId ?? response?.data?.challengeId ?? null;
+
+    createdChallengeId.value = challengeId;
+    createdChallengeType.value = type.value;
+
+    showSuccessModal.value = true;
+
+    console.log('[Create] createdChallengeId:', createdChallengeId.value);
+    console.log('[Create] createdChallengeType:', createdChallengeType.value);
+  } catch (e) {
+    const serverMessage = e?.response?.data?.message || '';
+
+    if (serverMessage.includes('시작일은 종료일보다 이후일 수 없습니다')) {
+      errors.endDate = '종료일은 시작일보다 늦어야 합니다.';
+    } else if (serverMessage.includes('챌린지 기간은 최소 3일 이상이어야 합니다')) {
+      errors.endDate = '챌린지 기간은 최소 3일 이상이어야 합니다.';
+    } else if (serverMessage.includes('챌린지 기간은 최대 30일까지 가능합니다')) {
+      errors.endDate = '챌린지 기간은 최대 30일까지 가능합니다.';
+    } else if (serverMessage.includes('챌린지 시작일은 생성일 기준 일주일 이내여야 합니다')) {
+      errors.startDate = '챌린지 시작일은 생성일 기준 일주일 이내여야 합니다.';
+    } else if (serverMessage.includes('챌린지 목표 금액은 최소 1,000원 이상이어야 합니다')) {
+      errors.goalValue = '챌린지 목표 금액은 최소 1,000원 이상이어야 합니다.';
+    } else if (serverMessage.includes('비밀번호 사용 여부가 true일 때는 비밀번호가 필수입니다')) {
+      errors.roomPassword = '비밀번호를 입력해주세요.';
+    } else if (serverMessage.includes('비밀번호는 숫자 4자리여야 합니다')) {
+      errors.roomPassword = '비밀번호는 숫자 4자리여야 합니다.';
+    } else {
+      const msg = serverMessage || e?.message || '챌린지 생성 중 오류가 발생했어요.';
+      alert(msg);
+    }
+  } finally {
+    loading.value = false;
+  }
 };
 
 const closeSuccessModal = () => {
   showSuccessModal.value = false;
-  router.back();
+  router.push('/challenge'); // 홈/목록으로
 };
 
-const closeInsufficientPointsModal = () => {
-  showInsufficientPointsModal.value = false;
+const handleViewCreatedChallenge = () => {
+  const id = createdChallengeId.value;
+  const t = (createdChallengeType.value || '').toUpperCase();
+  showSuccessModal.value = false;
+
+  const path = t === 'PERSONAL'
+      ? `/challenge/personal-detail/${id}`
+      : t === 'GROUP'
+          ? `/challenge/group-detail/${id}`
+          : `/challenge/common-detail/${id}`;
+
+  router.push(path);
 };
 
+const closeInsufficientPointsModal = () => (showSuccessModal.value = false);
 const handleChargePoints = () => {
-  // 포인트 충전 페이지로 이동 (실제 구현 필요)
   console.log('포인트 충전 페이지로 이동');
   closeInsufficientPointsModal();
-  // router.push('/points/charge'); // 포인트 충전 페이지 경로
+  // router.push('/points/charge');
 };
 </script>
 
@@ -274,6 +468,21 @@ const handleChargePoints = () => {
   outline: none;
   border-color: var(--color-main);
   background: white;
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.category-select.error {
+  border-color: #ff4757;
+  background: #fff5f5;
+}
+
+.error-message {
+  display: block;
+  color: #ff4757;
+  font-size: 12px;
+  margin-top: 4px;
+  font-family: var(--font-main);
 }
 
 .date-inputs {
@@ -496,5 +705,25 @@ const handleChargePoints = () => {
 .btn-cancel:hover,
 .btn-create:hover {
   transform: translateY(-1px);
+}
+
+.warning-text {
+  margin-top: 4px;
+  color: #ff4757;
+  font-size: 12px;
+  font-family: var(--font-main);
+}
+
+.points-info {
+  margin-top: 4px;
+  color: #555;
+  font-size: 12px;
+  font-family: var(--font-main);
+}
+
+.points-lack {
+  color: #ff4757;
+  font-size: 12px;
+  font-family: var(--font-main);
 }
 </style>

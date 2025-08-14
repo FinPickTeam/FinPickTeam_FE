@@ -73,7 +73,31 @@ export const getStockRecommendedList = (limit, priceLimit) => {
     params.priceLimit = priceLimit;
   }
   return api
-    .get('/v1/stock/recommend', { params })
+    .get('/v1/stock/recommend/', { params })
+    .then((res) => res.data)
+    .catch((err) => {
+      throw err;
+    });
+};
+/**
+ *
+ * @param {Object} params
+ * @returns
+ */
+export const getStockReturns = (params = {}) => {
+  if (params.stockCode == null) {
+    throw new Error('주식 코드가 존재하지 않습니다.');
+  } else if (params.startDate == null || params.endDate == null) {
+    throw new Error('조회 날짜가 존재하지 않습니다.');
+  }
+  return api
+    .get('/v1/stock/stockReturns', {
+      params: {
+        stockCode: params.stockCode,
+        startDate: params.startDate,
+        endDate: params.endDate,
+      },
+    })
     .then((res) => res.data)
     .catch((err) => {
       throw err;

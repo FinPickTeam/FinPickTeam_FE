@@ -47,7 +47,7 @@
         <div class="coin-line">
           <span v-if="loadingCoin" class="coin-value loading">...</span>
           <span v-else-if="coinError" class="coin-value error">-</span>
-          <span v-else class="coin-value">{{ currentCoin }}</span>
+          <span v-else class="coin-value">{{ currentCoinDisplay }}</span>
           <span class="coin-icon">🪙</span>
         </div>
         <div class="coin-label">포인트</div>
@@ -124,7 +124,7 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAvatarStore } from "../../stores/avatar.js";
-import { getCurrentCoin, getCumulativeCoin } from "@/api/mypage/avatar";
+import { getCurrentCoin } from "@/api/mypage/avatar";
 import { useAuthStore } from "@/stores/auth";
 import baseAvatar from "./avatar/avatarimg/avatar-base.png";
 import hatWizardhat from "./avatar/avatarimg/hat-3wizardhat.png";
@@ -148,30 +148,22 @@ library.add(faAngleRight);
 const router = useRouter();
 const avatarStore = useAvatarStore();
 const authStore = useAuthStore();
-const { coin, cumulativePoints } = storeToRefs(avatarStore);
+const { coin } = storeToRefs(avatarStore);
 
-// 레벨 텍스트 계산
+// 레벨 텍스트 계산 (기본값으로 설정)
 const levelText = computed(() => {
-  const points = cumulativePoints.value;
-  if (points >= 0 && points <= 19999) {
-    return "금융 새싹";
-  } else if (points >= 20000 && points <= 39999) {
-    return "금융 견습";
-  } else if (points >= 40000 && points <= 59999) {
-    return "금융 법사";
-  } else if (points >= 60000) {
-    return "금융 도사";
-  } else {
-    return "금융 새싹"; // 기본값
-  }
+  return "금융 새싹"; // 기본값
 });
 
 // 포인트 상태 관리
 const currentCoin = ref(0);
 const loadingCoin = ref(false);
 const coinError = ref(null);
-const loadingCumulative = ref(false);
-const cumulativeError = ref(null);
+
+// 현재 포인트를 store와 동기화
+const currentCoinDisplay = computed(() => {
+  return coin.value || currentCoin.value;
+});
 
 // 착용 중인 아이템 확인
 const wearingTitle = computed(() => {
@@ -231,9 +223,15 @@ function goToMyHistory() {
   router.push("/my-history");
 }
 
-function handleLogout() {
-  // 로그아웃 후 로그인 페이지로 이동
-  router.push("/login");
+async function handleLogout() {
+  try {
+    // auth store의 logout 함수 호출 (API 호출 + 상태 정리 + 페이지 이동)
+    await authStore.logout();
+  } catch (error) {
+    console.error("로그아웃 처리 중 오류 발생:", error);
+    // 오류가 발생해도 로그인 페이지로 이동
+    router.push("/login");
+  }
 }
 
 function goToInvestmentTest() {
@@ -263,9 +261,9 @@ const fetchCurrentCoin = async () => {
     // 사용자 ID 가져오기
     const userId = authStore.user?.id || authStore.user?.userId || 1; // user 객체에서 id 또는 userId 필드 확인
 
-    console.log("포인트 데이터 가져오기 시작, userId:", userId);
+    console.log("MyPage 현재 포인트 데이터 가져오기 시작, userId:", userId);
     const response = await getCurrentCoin(userId);
-    console.log("받아온 포인트 데이터:", response);
+    console.log("받아온 현재 포인트 데이터:", response);
 
     if (response.status === 200 && response.data !== undefined) {
       // 백엔드 응답 구조에 따라 coin 값 추출
@@ -284,24 +282,24 @@ const fetchCurrentCoin = async () => {
         coinValue = response.data;
       }
 
-      console.log("Mypage 추출된 코인 값:", coinValue);
+      console.log("MyPage 추출된 현재 포인트 값:", coinValue);
 
       if (coinValue !== undefined && typeof coinValue === "number") {
         currentCoin.value = coinValue;
         avatarStore.setCoin(coinValue);
-        console.log("Mypage 포인트 업데이트 완료:", currentCoin.value);
+        console.log("MyPage 현재 포인트 업데이트 완료:", currentCoin.value);
       } else {
-        console.warn("유효한 코인 값을 찾을 수 없습니다:", response);
-        coinError.value = "포인트 데이터를 가져오는데 실패했습니다.";
+        console.warn("유효한 현재 포인트 값을 찾을 수 없습니다:", response);
+        coinError.value = "현재 포인트 데이터를 가져오는데 실패했습니다.";
       }
     } else {
-      console.warn("포인트 데이터 형식이 올바르지 않습니다:", response);
-      coinError.value = "포인트 데이터를 가져오는데 실패했습니다.";
+      console.warn("현재 포인트 데이터 형식이 올바르지 않습니다:", response);
+      coinError.value = "현재 포인트 데이터를 가져오는데 실패했습니다.";
     }
   } catch (err) {
-    console.error("포인트 조회 에러:", err);
+    console.error("MyPage 현재 포인트 조회 에러:", err);
 
-    let errorMessage = "포인트를 불러오는데 실패했습니다.";
+    let errorMessage = "현재 포인트를 불러오는데 실패했습니다.";
 
     if (err.response?.status === 401) {
       errorMessage = "로그인이 필요합니다.";
@@ -319,84 +317,10 @@ const fetchCurrentCoin = async () => {
   }
 };
 
-// 누적 포인트 데이터 가져오기
-const fetchCumulativePoints = async () => {
-  try {
-    loadingCumulative.value = true;
-    cumulativeError.value = null;
-
-    // 인증 상태 확인
-    if (!authStore.isAuthenticated) {
-      console.warn("로그인이 필요합니다.");
-      return;
-    }
-
-    // 사용자 ID 가져오기
-    const userId = authStore.user?.id || authStore.user?.userId || 1;
-
-    console.log("Mypage 누적 포인트 데이터 가져오기 시작, userId:", userId);
-    const response = await getCumulativeCoin(userId);
-    console.log("받아온 누적 포인트 데이터:", response);
-
-    if (response.status === 200 && response.data !== undefined) {
-      // 백엔드 응답 구조에 따라 누적 포인트 값 추출
-      let cumulativeValue;
-
-      // 구조 1: { status: 200, data: 1500 }
-      if (typeof response.data === "number") {
-        cumulativeValue = response.data;
-      }
-      // 구조 2: { status: 200, message: "...", data: 1500 }
-      else if (response.data.data !== undefined) {
-        cumulativeValue = response.data.data;
-      }
-      // 구조 3: { data: 1500 }
-      else if (response.data !== undefined) {
-        cumulativeValue = response.data;
-      }
-
-      console.log("Mypage 추출된 누적 포인트 값:", cumulativeValue);
-
-      if (
-        cumulativeValue !== undefined &&
-        typeof cumulativeValue === "number"
-      ) {
-        avatarStore.setCumulativePoints(cumulativeValue);
-        console.log("Mypage 누적 포인트 업데이트 완료:", cumulativeValue);
-      } else {
-        console.warn("유효한 누적 포인트 값을 찾을 수 없습니다:", response);
-        cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
-      }
-    } else {
-      console.warn("누적 포인트 데이터 형식이 올바르지 않습니다:", response);
-      cumulativeError.value = "누적 포인트 데이터를 가져오는데 실패했습니다.";
-    }
-  } catch (err) {
-    console.error("Mypage 누적 포인트 조회 에러:", err);
-
-    let errorMessage = "누적 포인트를 불러오는데 실패했습니다.";
-
-    if (err.response?.status === 401) {
-      errorMessage = "로그인이 필요합니다.";
-    } else if (err.response?.status === 404) {
-      errorMessage = "사용자 정보를 찾을 수 없습니다.";
-    } else if (err.response?.status === 500) {
-      errorMessage = "서버 오류가 발생했습니다.";
-    } else if (err.message) {
-      errorMessage = `연결 오류: ${err.message}`;
-    }
-
-    cumulativeError.value = errorMessage;
-  } finally {
-    loadingCumulative.value = false;
-  }
-};
-
 // 컴포넌트 마운트 시 저장된 아바타 정보와 포인트 불러오기
 onMounted(() => {
   avatarStore.loadAvatar();
   fetchCurrentCoin();
-  fetchCumulativePoints();
 });
 </script>
 

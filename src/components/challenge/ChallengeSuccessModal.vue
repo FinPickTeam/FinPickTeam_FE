@@ -1,19 +1,17 @@
 <template>
   <div v-if="isVisible" class="modal-overlay" @click="handleOverlayClick">
     <div class="modal-content" @click.stop>
-      <!-- 제목 -->
       <h2 class="modal-title">챌린지 성공🎉</h2>
-      <!-- 성공 아이콘 -->
+
       <div class="success-icon">
         <i class="fas fa-trophy"></i>
       </div>
 
-      <!-- 챌린지 정보 -->
       <div class="challenge-info">
         <h3 class="challenge-title">
-          <span class="highlight-amount"
-            >{{ challengeResult.savedAmount.toLocaleString() }}원</span
-          >을 아꼈어요
+          <span class="highlight-amount">
+            {{ Number(challengeResult?.savedAmount || 0).toLocaleString() }}원
+          </span>을 아꼈어요
         </h3>
         <p class="success-description">
           축하합니다! 챌린지 목표를 달성했습니다.<br />
@@ -21,53 +19,33 @@
         </p>
       </div>
 
-      <!-- 보상 정보 -->
-
-      <div class="stock-card">
+      <!-- 추천 주식 (있을 때만) -->
+      <div v-if="challengeResult?.stockRecommendation" class="stock-card">
         <div class="stock-header">
           <div class="stock-info">
-            <h5 class="stock-name">
-              {{ challengeResult.stockRecommendation.stockName }}
-            </h5>
-            <p class="stock-code">
-              {{ challengeResult.stockRecommendation.stockCode }}
-            </p>
+            <h5 class="stock-name">{{ challengeResult.stockRecommendation.stockName }}</h5>
+            <p class="stock-code">{{ challengeResult.stockRecommendation.stockCode }}</p>
           </div>
           <div class="stock-price">
-            <span class="current-price"
-              >{{
-                challengeResult.stockRecommendation.currentPrice.toLocaleString()
-              }}원</span
-            >
-            <span
-              class="price-change"
-              :class="{
-                positive: challengeResult.stockRecommendation.priceChange > 0,
-                negative: challengeResult.stockRecommendation.priceChange < 0,
-              }"
-            >
-              {{ challengeResult.stockRecommendation.priceChange > 0 ? '+' : ''
-              }}{{
-                challengeResult.stockRecommendation.priceChange.toLocaleString()
-              }}원 ({{
-                challengeResult.stockRecommendation.priceChangeRate > 0
-                  ? '+'
-                  : ''
-              }}{{
-                challengeResult.stockRecommendation.priceChangeRate.toFixed(2)
-              }}%)
+            <span class="current-price">
+              {{ Number(challengeResult.stockRecommendation.stockPrice || 0).toLocaleString() }}원
+            </span>
+            <span v-if="challengeResult.stockRecommendation.stockChangeRate" class="price-change">
+              {{ challengeResult.stockRecommendation.stockChangeRate }}
             </span>
           </div>
         </div>
+        <p v-if="challengeResult.stockRecommendation.stockSummary" class="stock-summary">
+          {{ challengeResult.stockRecommendation.stockSummary }}
+        </p>
       </div>
-      <!-- 보상 정보 -->
 
+      <!-- 보상 정보 -->
       <div class="reward-card">
         <i class="fas fa-coins"></i>
-        <span>{{ challengeResult.actualRewardPoint }} 포인트 보상</span>
+        <span>{{ Number(challengeResult?.actualRewardPoint || 0).toLocaleString() }} 포인트 보상</span>
       </div>
 
-      <!-- 액션 버튼들 -->
       <div class="modal-actions">
         <button class="btn btn-secondary" @click="closeModal">
           <i class="fas fa-times"></i>
@@ -83,45 +61,21 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
-
 const router = useRouter();
 
 const props = defineProps({
-  isVisible: {
-    type: Boolean,
-    default: false,
-  },
-  challenge: {
-    type: Object,
-    default: () => ({
-      title: '매일 5천원 저축하기',
-      description: '매일 5천원씩 저축하여 30일 동안 15만원 모으기',
-      targetAmount: 150000,
-      currentAmount: 150000,
-      duration: 30,
-    }),
-  },
-  challengeResult: {
-    type: Object,
-    default: () => ({
-      resultType: 'SUCCESS_WIN',
-      actualRewardPoint: 110,
-      savedAmount: 450000,
-      stockRecommendation: null,
-    }),
-  },
+  isVisible: { type: Boolean, default: false },
+  // ✅ 예시 기본값 제거, 실제 API 결과만 받도록 강제
+  challengeResult: { type: Object, required: true },
 });
 
 const emit = defineEmits(['close']);
-
-const closeModal = () => {
-  emit('close');
-};
-
+const closeModal = () => emit('close');
 const goToNextChallenge = () => {
   closeModal();
   router.push('/challenge/recruiting-list');
 };
+const handleOverlayClick = () => closeModal();
 </script>
 
 <style scoped>
@@ -283,6 +237,10 @@ const goToNextChallenge = () => {
 .price-change.negative {
   color: var(--color-danger);
 }
+
+.stock-summary { margin-top: 8px; color: #666; font-size: 13px; }
+.price-change { font-size: 14px; font-weight: 500; }
+.current-price { font-size: 20px; font-weight: bold; color: var(--color-main); }
 
 .modal-actions {
   display: flex;

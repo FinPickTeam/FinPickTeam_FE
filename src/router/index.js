@@ -38,6 +38,7 @@ import Installment from '../pages/finance/Installment.vue';
 import Fund from '../pages/finance/Fund.vue';
 import Stock from '../pages/finance/Stock.vue';
 import FavoriteProducts from '../pages/finance/FavoriteProducts.vue';
+import StockCompare from '@/pages/finance/StockCompare.vue';
 
 // finance components (test routes)
 import ProductInputForm from '../components/finance/deposit/ProductInputForm_deposit.vue';
@@ -72,6 +73,8 @@ import AvatarShop from '../pages/mypage/avatar/AvatarShop.vue';
 import OpenBankingHome from '../pages/openbanking/OpenBankingHome.vue';
 import AccountLinkSelect from '../pages/openbanking/openAuth/AccountLinkSelect.vue';
 import AccountAgreement from '../pages/openbanking/openAuth/AccountAgreement.vue';
+
+// 핀픽 인증서 관련 컴포넌트들
 import CreateCertificate from '../pages/openbanking/openAuth/CertificateCreate.vue';
 import SetCertificatePassword from '../pages/openbanking/openAuth/CertificateSetPassword.vue';
 import ConfirmCertificatePassword from '../pages/openbanking/openAuth/CertificateConfirmPass.vue'; // ✅ 오탈자 수정
@@ -80,9 +83,15 @@ import CertificateComplete from '../pages/openbanking/openAuth/CertificateComple
 import AccountList from '../pages/openbanking/myaccount/AccountList.vue';
 import AccountDetail from '../pages/openbanking/myaccount/AccountDetail.vue';
 import CardList from '../pages/openbanking/myaccount/CardList.vue';
-import CardDetail from '../pages/openbanking/myaccount/CardDetail.vue';
-
-// 보고서/캘린더
+import ChallengeHome from '../pages/challenge/ChallengeHome.vue';
+import ChallengeJoinedList from '../pages/challenge/ChallengeJoinedList.vue';
+import ChallengeRecruitingList from '../pages/challenge/ChallengeRecruitingList.vue';
+import ChallengeCreate from '../pages/challenge/ChallengeCreate.vue';
+import ChallengeRanking from '../pages/challenge/ChallengeRanking.vue';
+import ChallengeCommonDetail from '../pages/challenge/ChallengeCommonDetail.vue';
+import ChallengeGroupDetail from '../pages/challenge/ChallengeGroupDetail.vue';
+import ChallengePersonalDetail from '../pages/challenge/ChallengePersonalDetail.vue';
+import OpenbankingDailyReport from '../pages/openbanking/Report/OpenbankingDailyReport.vue';
 import OpenbankingMonthlyReport from '../pages/openbanking/Report/OpenbankingMonthlyReport.vue';
 import OpenbankingCalendar from '../pages/openbanking/Report/OpenbankingCalendar.vue';
 import CalendarSelect from '../pages/openbanking/Report/CalendarSelect.vue';
@@ -284,6 +293,11 @@ const router = createRouter({
           name: 'StockDetail',
           component: () => import('../pages/finance/StockDetail.vue'),
         },
+        {
+          path: 'stock/compare/:id',
+          name: 'StockCompare',
+          component: StockCompare,
+        },
       ],
     },
 
@@ -296,41 +310,37 @@ const router = createRouter({
         {
           path: 'joined-list',
           name: 'ChallengeJoinedList',
-          component: () => import('../pages/challenge/ChallengeJoinedList.vue'),
+          component: ChallengeJoinedList,
         },
         {
           path: 'recruiting-list',
           name: 'ChallengeRecruitingList',
-          component: () =>
-            import('../pages/challenge/ChallengeRecruitingList.vue'),
+          component: ChallengeRecruitingList,
         },
         {
           path: 'create',
           name: 'ChallengeCreate',
-          component: () => import('../pages/challenge/ChallengeCreate.vue'),
+          component: ChallengeCreate,
         },
         {
           path: 'ranking',
           name: 'ChallengeRanking',
-          component: () => import('../pages/challenge/ChallengeRanking.vue'),
+          component: ChallengeRanking,
         },
         {
           path: 'common-detail/:id',
           name: 'ChallengeCommonDetail',
-          component: () =>
-            import('../pages/challenge/ChallengeCommonDetail.vue'),
+          component: ChallengeCommonDetail,
         },
         {
           path: 'group-detail/:id',
           name: 'ChallengeGroupDetail',
-          component: () =>
-            import('../pages/challenge/ChallengeGroupDetail.vue'),
+          component: ChallengeGroupDetail,
         },
         {
           path: 'personal-detail/:id',
           name: 'ChallengePersonalDetail',
-          component: () =>
-            import('../pages/challenge/ChallengePersonalDetail.vue'),
+          component: ChallengePersonalDetail,
         },
       ],
     },
@@ -390,8 +400,7 @@ const router = createRouter({
         },
       ],
     },
-
-    // 404
+    // 404 Not Found catch-all
     {
       path: '/:pathMatch(.*)*',
       name: 'NotFound',
@@ -429,11 +438,15 @@ router.beforeEach(async (to) => {
   ]);
 
   const auth = useAuthStore();
-  const isPublic = to.name && publicPages.has(String(to.name));
-  if (!isPublic) {
-    await auth.bootstrap();
+
+  // 보호 라우트면 인증 체크
+  if (!publicPages.has(to.name)) {
+    // 이미 인증된 상태라면 bootstrap 호출하지 않음
     if (!auth.isAuthenticated) {
-      return { name: 'Login', query: { redirect: to.fullPath } };
+      await auth.bootstrap();
+      if (!auth.isAuthenticated) {
+        return { name: 'Login', query: { redirect: to.fullPath } };
+      }
     }
   }
 });

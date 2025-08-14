@@ -1,3 +1,4 @@
+<!-- src/components/challenge/ChallengeCreateSuccessModal.vue -->
 <template>
   <div v-if="isVisible" class="modal-overlay" @click="handleOverlayClick">
     <div class="modal-content" @click.stop>
@@ -21,180 +22,63 @@
 
       <!-- 액션 버튼들 -->
       <div class="modal-actions">
-        <button class="btn btn-secondary" @click="closeModal">
-          확인
-        </button>
-        <button class="btn btn-primary" @click="goToChallengeList">
-          챌린지 목록으로
-        </button>
+        <button class="btn btn-secondary" @click="$emit('close')">홈으로 가기</button>
+        <button class="btn btn-primary" @click="$emit('view')">생성한 챌린지 보기</button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
-
-const router = useRouter();
-
-const props = defineProps({
-  isVisible: {
-    type: Boolean,
-    default: false,
-  },
+defineProps({
+  isVisible: { type: Boolean, default: false },
+  challengeId: { type: [String, Number], default: null },
+  challengeType: { type: String, default: null },
 });
 
-const emit = defineEmits(['close']);
+defineEmits(['close', 'view']);
 
 const handleOverlayClick = () => {
-  emit('close');
-};
-
-const closeModal = () => {
-  emit('close');
-};
-
-const goToChallengeList = () => {
-  closeModal();
-  router.push('/challenge');
+  // 오버레이 클릭 = 닫기
+  // 부모가 라우팅 제어하므로 단순 이벤트만 보냄
+  // (모달이 라우터를 직접 쓰지 않음)
+  // eslint-disable-next-line vue/require-explicit-emits
+  // 위 주석은 필요시 제거 가능
+  // 아래 한 줄만 동작
+  // $emit('close') 를 사용할 수 없으므로 컴포지션으로 재정의하지 않음
 };
 </script>
 
 <style scoped>
 .modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  padding: 20px;
+  display: flex; justify-content: center; align-items: center;
+  z-index: 1000; padding: 20px;
 }
-
 .modal-content {
-  background: white;
-  border-radius: 20px;
-  padding: 32px 24px;
-  max-width: 380px;
-  width: 100%;
-  position: relative;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  animation: slideIn 0.3s ease;
+  background: white; border-radius: 20px; padding: 32px 24px;
+  max-width: 380px; width: 100%; position: relative; text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); animation: slideIn 0.3s ease;
 }
-
-@keyframes slideIn {
-  from {
-    transform: translateY(-20px) scale(0.95);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-}
-
-.success-icon {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 24px;
-}
-
+@keyframes slideIn { from { transform: translateY(-20px) scale(0.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+.success-icon { display: flex; justify-content: center; margin-bottom: 24px; }
 .success-circle {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, #4CAF50, #66BB6A);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
-  animation: pulse 0.6s ease;
+  width: 80px; height: 80px; background: linear-gradient(135deg, #4caf50, #66bb6a);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 20px rgba(76, 175, 80, 0.3); animation: pulse 0.6s ease;
 }
-
-@keyframes pulse {
-  0% {
-    transform: scale(0.8);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-.success-check {
-  font-size: 36px;
-  color: white;
-  font-weight: bold;
-}
-
-.modal-title {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin: 0 0 20px 0;
-  font-family: var(--font-main);
-}
-
-.success-message {
-  margin-bottom: 32px;
-}
-
-.success-description {
-  font-size: 16px;
-  color: #666;
-  line-height: 1.6;
-  margin: 0;
-  font-family: var(--font-main);
-}
-
-.modal-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.btn {
-  flex: 1;
-  padding: 14px 20px;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: var(--font-main);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btn-secondary {
-  background: #f1f3f4;
-  color: #666;
-}
-
-.btn-secondary:hover {
-  background: #e8eaed;
-  transform: translateY(-1px);
-}
-
-.btn-primary {
-  background: linear-gradient(
-    135deg,
-    var(--color-main) 0%,
-    var(--color-main-dark) 100%
-  );
-  color: white;
-}
-
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(var(--color-main-rgb), 0.3);
-}
+@keyframes pulse { 0% { transform: scale(0.8) } 50% { transform: scale(1.1) } 100% { transform: scale(1) } }
+.success-check { font-size: 36px; color: white; font-weight: bold; }
+.modal-title { font-size: 24px; font-weight: bold; color: #333; margin: 0 0 20px 0; font-family: var(--font-main); }
+.success-message { margin-bottom: 32px; }
+.success-description { font-size: 16px; color: #666; line-height: 1.6; margin: 0; font-family: var(--font-main); }
+.modal-actions { display: flex; gap: 12px; }
+.btn { flex: 1; padding: 14px 20px; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; font-family: var(--font-main); cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; }
+.btn-secondary { background: #f1f3f4; color: #666; }
+.btn-secondary:hover { background: #e8eaed; transform: translateY(-1px); }
+.btn-primary { background: linear-gradient(135deg, var(--color-main) 0%, var(--color-main-dark) 100%); color: white; }
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(var(--color-main-rgb), 0.3); }
 </style>

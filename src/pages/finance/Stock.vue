@@ -33,8 +33,16 @@
         </button>
       </div>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingRecommend">
+        <LoadingSpinner message="추천 상품을 불러오는 중..." />
+      </div>
+
       <!-- 주식 상품 리스트 -->
-      <div v-if="showProducts" class="products-container">
+      <div
+        v-if="showProducts && !isLoadingRecommend"
+        class="products-container"
+      >
         <ProductCardList_stock :products="stockRecommendData.data" />
       </div>
     </div>
@@ -126,9 +134,14 @@
         </div>
       </div>
 
+      <!-- 로딩 상태 -->
+      <div v-if="isLoadingAll">
+        <LoadingSpinner message="상품 목록을 불러오는 중..." />
+      </div>
+
       <!-- 전체 상품 리스트 -->
       <div
-        v-if="filteredAllProducts && filteredAllProducts.length > 0"
+        v-else-if="filteredAllProducts && filteredAllProducts.length > 0"
         class="products-list-container"
       >
         <ProductCardList_stock :products="filteredAllProducts" />
@@ -145,11 +158,14 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import ProductCardList_stock from '@/components/finance/stock/ProductCardList_stock.vue';
+import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { getStockList, getStockRecommendedList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
 
 const router = useRouter();
 const showProducts = ref(false);
+const isLoadingRecommend = ref(false);
+const isLoadingAll = ref(false);
 const stockAllData = ref([]);
 const stockRecommendData = ref([]);
 const fav = useFavoriteStore();
@@ -160,16 +176,20 @@ onMounted(async () => {
 });
 
 const fetchStockList = async () => {
+  isLoadingAll.value = true;
   try {
     const res = await getStockList();
     stockAllData.value = res.data ?? [];
   } catch (error) {
     console.log(error);
     stockAllData.value = [];
+  } finally {
+    isLoadingAll.value = false;
   }
 };
 
 const fetchStockRecommend = async () => {
+  isLoadingRecommend.value = true;
   try {
     console.log('투자 성향에 맞는 상품 확인하기 클릭됨');
     const res = await getStockRecommendedList(5);
@@ -177,6 +197,8 @@ const fetchStockRecommend = async () => {
     showProducts.value = true;
   } catch (error) {
     console.log(error);
+  } finally {
+    isLoadingRecommend.value = false;
   }
 };
 

@@ -34,10 +34,11 @@
 
 <script setup>
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
+const route = useRoute();
 const options = [
   '1억원 미만',
   '1억원 이상 ~ 5억원 미만',
@@ -52,8 +53,9 @@ const totalSteps = ref(10);
 
 const goNext = () => {
   if (selected.value !== null) {
+    const from = route.query.from || 'mypage';
     // 투자성향 분석 완료 후 ProfileComplete로 이동
-    router.push('/profile-complete?from=mypage');
+    router.push(`/profile-complete?from=${from}`);
   }
 };
 </script>

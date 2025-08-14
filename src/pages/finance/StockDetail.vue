@@ -1,13 +1,13 @@
 <template>
   <div class="detail-container">
     <!-- 로딩 상태 -->
-    <div v-if="isLoading" class="loading-section">
+    <div v-show="isLoading" class="loading-section">
       <div class="loading-spinner"></div>
       <p class="loading-text">상품 정보를 불러오는 중...</p>
     </div>
 
     <!-- 제목과 찜하기 -->
-    <div v-else class="title-section">
+    <div v-show="!isLoading" class="title-section">
       <div class="title-with-heart">
         <h1 class="product-title">{{ product.stockName }}</h1>
         <i
@@ -17,7 +17,7 @@
         ></i>
       </div>
       <!-- 용어 하이라이팅 토글 버튼 -->
-      <div v-if="!isLoading" class="toggle-section">
+      <div class="toggle-section">
         <label class="toggle-label">
           <input
             type="checkbox"
@@ -42,19 +42,19 @@
       </div>
 
       <!-- 투자 시뮬레이션 섹션 -->
-      <div class="stock-simulation">
+      <div v-show="!isLoading" class="stock-simulation">
         <div class="simulation-container">
           <div class="simulation-title">
             <span class="s-title">투자 시뮬레이션 </span>
             <!-- 시작/로딩 아이콘 버튼 -->
             <img
               :src="currentIcon"
-              :class="['start-icon', { spinning: isLoading }]"
+              :class="['start-icon', { spinning: simulationLoading }]"
               alt="시작"
               role="button"
               tabindex="0"
-              @click="runSimulation"
-              @keydown.enter.space.prevent="runSimulation"
+              @click="getSimulationReturns"
+              @keydown.enter.space.prevent="getSimulationReturns"
             />
           </div>
           <div class="select-date-panel">
@@ -67,10 +67,24 @@
             </div>
           </div>
           <div class="result-content">
-            <span class="reuslt-text"
+            <span v-if="!simulationLoading && !hasResult" class="reuslt-text"
               >시작·종료 날짜를 입력 후 검색 아이콘을 누르면 <br />투자 결과를
               볼 수 있습니다.</span
             >
+            <span v-if="!simulationLoading && hasResult" class="result-text">
+              {{ formattedStartDate }}부터 {{ formattedEndDate }}까지
+              <br />100만원을 투자했다면
+              <span
+                class="result-value"
+                :class="{ red: isProfit, blue: isLoss, gray: isFlat }"
+              >
+                {{ formattedAbsAmount }}원</span
+              >의 <span v-if="isProfit">수익</span
+              ><span v-if="!isProfit">손실</span>이 발생했습니다.
+            </span>
+            <span v-if="simulationLoading" class="result-text">
+              {{ product.stockName }}의 수익률을 계산중입니다.
+            </span>
           </div>
         </div>
       </div>
@@ -203,6 +217,20 @@
           </div>
         </div>
       </div>
+      <!-- 이동하기 버튼 -->
+      <div class="action-section" v-if="!isLoading">
+        <p class="action-text">
+          찜한 주식과 나의 종목, 지금 바로 비교해 보세요!
+        </p>
+        <p class="action-subtext">아래 버튼을 눌러 비교 페이지로 이동합니다</p>
+        <button class="action-btn" @click="openBottomSheet">주식 선택</button>
+      </div>
+      <!-- 바텀시트 -->
+      <StockBottomSheet
+        v-model:open="bottomSheetOpen"
+        :base-id="String(route.params.id)"
+        @confirm="goCompare"
+      />
     </div>
   </div>
 </template>
@@ -212,10 +240,11 @@ import { ref, computed, onMounted, unref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
 import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
-import { getStockDetail } from '@/api';
+import { getStockDetail, getStockReturns } from '@/api';
 import StockChart from '@/components/finance/stock/StockChart.vue';
 import loadingImg from '@/assets/stock_logo/loading.png';
 import startImg from '@/assets/stock_logo/start.png';
+import StockBottomSheet from '@/components/finance/stock/StockBottomSheet.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -232,21 +261,93 @@ const financialTerms = ref([]);
 // 투자 시뮬레이션
 const startDate = ref('');
 const endDate = ref('');
+const simulationResult = ref('');
 const simulationLoading = ref(false);
+const hasResult = computed(() => !!String(simulationResult.value ?? '').trim());
+const profitNumber = computed(() => {
+  const v = simulationResult.value;
+  const n =
+    typeof v === 'number' ? v : Number(String(v).replace(/[^\d.-]/g, '')); // 기호/문자 제거
+  return Number.isNaN(n) ? 0 : n;
+});
 
+const isProfit = computed(() => profitNumber.value > 0);
+const isLoss = computed(() => profitNumber.value < 0);
+const isFlat = computed(() => profitNumber.value === 0);
 const currentIcon = computed(() =>
   simulationLoading.value ? loadingImg : startImg
 );
 
+// 모달달 상태관리
+const bottomSheetOpen = ref(false);
+
+// "+27,182" 같은 문자열/숫자 모두 처리 → "27,182"로 반환
+const formattedAbsAmount = computed(() => {
+  const s = String(simulationResult.value ?? '').trim();
+  if (!s) return '';
+  // 숫자와 음수 기호만 남기고 나머지(+, 콤마, 공백 등) 제거
+  const n = Number(s.replace(/[^0-9-]/g, ''));
+  if (Number.isNaN(n)) return '';
+  return Math.abs(n).toLocaleString('ko-KR'); // 3자리마다 쉼표
+});
+
 onMounted(async () => {
-  console.log('상품 ID:', route.params.id);
+  isLoading.value = true;
   try {
-    isLoading.value = true;
-    await Promise.all([+fetchStockDetail(), +loadFinancialTerms()]);
+    await favoriteStore.syncAllIdSets();
+    await Promise.all([fetchStockDetail(), loadFinancialTerms()]);
   } finally {
     isLoading.value = false;
   }
 });
+
+// 날짜 포맷 (yyyy년 mm월 dd일)
+const formattedStartDate = computed(() => {
+  if (!startDate.value) return '';
+  const [y, m, d] = startDate.value.split('-');
+  return `${y}년 ${m}월 ${d}일`;
+});
+
+const formattedEndDate = computed(() => {
+  if (!endDate.value) return '';
+  const [y, m, d] = endDate.value.split('-');
+  return `${y}년 ${m}월 ${d}일`;
+});
+
+// 수익률 얻기
+const getSimulationReturns = async () => {
+  // 1) 입력 검증
+  if (!startDate.value || !endDate.value) {
+    console.warn('날짜를 선택하세요.');
+    return;
+  }
+  if (startDate.value > endDate.value) {
+    console.warn('시작일이 종료일보다 늦습니다.');
+    return;
+  }
+
+  simulationLoading.value = true;
+  try {
+    // 2) 날짜 포맷: YYYYMMDD
+    const apiStartDate = startDate.value.replace(/-/g, '');
+    const apiEndDate = endDate.value.replace(/-/g, '');
+
+    // 3) 종목코드(필요 시 6자리 보장)
+    const stockCode = String(route.params.id).padStart(6, '0');
+
+    const params = { stockCode, startDate: apiStartDate, endDate: apiEndDate };
+
+    // 4) 비동기 호출 (await 필수)
+    const res = await getStockReturns(params); // { status, message, data: "+27,182" }
+    simulationResult.value = res?.data ?? '';
+    // isProfit은 computed가 자동 계산
+  } catch (err) {
+    console.error(err);
+    simulationResult.value = ''; // 실패 시 결과 비우기
+  } finally {
+    simulationLoading.value = false;
+  }
+};
 
 // 금융 용어 사전 로드
 const loadFinancialTerms = async () => {
@@ -294,6 +395,21 @@ function toggleFavorite() {
   } else {
     favoriteStore.addFavorite(product.value);
   }
+}
+//모달창 열기
+function openBottomSheet() {
+  bottomSheetOpen.value = true;
+  console.log(bottomSheetOpen.value);
+}
+
+function goCompare(ids) {
+  bottomSheetOpen.value = false;
+  const withParam = (ids || []).slice(0, 2).join(',');
+  router.push({
+    name: 'StockCompare',
+    params: { id: String(route.params.id) },
+    query: { with: withParam },
+  });
 }
 </script>
 
@@ -543,6 +659,7 @@ function toggleFavorite() {
 }
 .stock-simulation {
   width: 100%;
+  height: 180px;
   background-color: white;
   border-radius: 12px;
   margin-bottom: 20px;
@@ -635,5 +752,15 @@ function toggleFavorite() {
 .action-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.result-value.red {
+  color: red;
+}
+.result-value.blue {
+  color: blue;
+}
+.result-value.gray {
+  color: #6b7280;
 }
 </style>

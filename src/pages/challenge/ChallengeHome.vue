@@ -1,74 +1,56 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import HotChallengeCard from '@/components/challenge/HotChallengeCard.vue';
 import ParticipatingChallengeCard from '@/components/challenge/ParticipatingChallengeCard.vue';
 import ChallengeStatsSwiper from '@/components/challenge/ChallengeStatsSwiper.vue';
-import {
-  getChallengeSummary,
-  getChallengeList,
-} from '@/api/challenge/challenge.js';
+import { getChallengeSummary, getChallengeList } from '@/api/challenge/challenge.js';
 import { getMonthlyPoints } from '@/api/coin/coin.js';
-import { useUserStore } from '@/stores/user';
+
+import { useAuthStore } from '@/stores/auth';
+import { useChallengeStore } from '@/stores/challenge';
 
 const router = useRouter();
-const userStore = useUserStore();
+const auth = useAuthStore();
+const challengeStore = useChallengeStore();
 
-// 로딩/에러 상태
 const loading = ref({
   summary: false,
   participating: false,
   hot: false,
   points: false,
+  common: false,        // ✅ 충돌 해결: 공통 로딩 상태 추가
 });
 const error = ref({
   summary: null,
   participating: null,
   hot: null,
   points: null,
+  common: null,         // ✅ 충돌 해결: 공통 에러 상태 추가
 });
 
-// 데이터
-const summary = ref({
-  totalChallenges: 0,
-  successCount: 0,
-  achievementRate: 0,
-});
+const summary = ref({ totalChallenges: 0, successCount: 0, achievementRate: 0 });
 const participatingChallenges = ref([]);
 const hotChallenges = ref([]);
-const monthlyPoints = ref(null); // ★ 월별 누적 포인트
+const monthlyPoints = ref(null);      // StatsSwiper용(월누적)
+const commonHighlight = ref(null);    // ✅ 스와이프 3번 슬라이드용 공통 챌린지
 
-// 유저명 표시 (없으면 '사용자')
-const displayName = computed(() => userStore.userName || '사용자');
+const displayName = computed(() => {
+  const u = auth.user || {};
+  return u.nickname || u.NickName || u.userName || '사용자';
+});
 
-// 이동 핸들러
 const handleParticipate = (challenge) => {
-  router.push({
-    name: 'ChallengeCommonDetail',
-    params: { id: challenge.id },
-    state: { previousPage: '/challenge' },
-  });
+  goDetail(challenge);
 };
 
 const goDetail = (challenge) => {
   if (challenge.type === 'COMMON') {
-    router.push({
-      name: 'ChallengeCommonDetail',
-      params: { id: challenge.id },
-      state: { previousPage: '/challenge' },
-    });
+    router.push({ name: 'ChallengeCommonDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
   } else if (challenge.type === 'GROUP') {
-    router.push({
-      name: 'ChallengeGroupDetail',
-      params: { id: challenge.id },
-      state: { previousPage: '/challenge' },
-    });
+    router.push({ name: 'ChallengeGroupDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
   } else if (challenge.type === 'PERSONAL') {
-    router.push({
-      name: 'ChallengePersonalDetail',
-      params: { id: challenge.id },
-      state: { previousPage: '/challenge' },
-    });
+    router.push({ name: 'ChallengePersonalDetail', params: { id: challenge.id }, state: { previousPage: '/challenge' } });
   }
 };
 
@@ -77,23 +59,32 @@ const handleCardClick = (payload) => {
   goDetail(challenge);
 };
 
-// 초기 데이터 로드
 const fetchSummary = async () => {
   loading.value.summary = true;
   error.value.summary = null;
   try {
     const data = await getChallengeSummary();
-    summary.value = data || {
-      totalChallenges: 0,
-      successCount: 0,
-      achievementRate: 0,
-    };
+    summary.value = data || summary.value;
   } catch (e) {
-    error.value.summary =
-      e?.response?.data?.message || e.message || '요약 조회 실패';
+    error.value.summary = e?.response?.data?.message || e.message || '요약 조회 실패';
   } finally {
     loading.value.summary = false;
   }
+};
+
+const sortParticipating = (list) => {
+  const toKey = (c) => {
+    const unconfirmed = c?.status === 'COMPLETED' && !c?.isResultCheck;
+    const end = c?.endDate ? new Date(c.endDate).getTime() : Number.MAX_SAFE_INTEGER;
+    // 정렬 우선순위: 1) 미확인 먼저 (-1), 2) 종료일 빠른 순
+    return [unconfirmed ? -1 : 0, end];
+  };
+  return [...list].sort((a, b) => {
+    const [ua, ea] = toKey(a);
+    const [ub, eb] = toKey(b);
+    if (ua !== ub) return ua - ub;
+    return ea - eb;
+  });
 };
 
 const fetchParticipating = async () => {
@@ -101,10 +92,15 @@ const fetchParticipating = async () => {
   error.value.participating = null;
   try {
     const list = await getChallengeList({ participating: true });
-    participatingChallenges.value = Array.isArray(list) ? list : [];
+    const safe = Array.isArray(list) ? list : [];
+    // ✅ “완료+미확인”을 맨 앞으로 정렬
+    participatingChallenges.value = sortParticipating(safe);
+    // 진행중 개수 갱신
+    challengeStore.updateCountsFromList(participatingChallenges.value);
   } catch (e) {
-    error.value.participating =
-      e?.response?.data?.message || e.message || '참여중 목록 조회 실패';
+    error.value.participating = e?.response?.data?.message || e.message || '참여중 목록 조회 실패';
+    participatingChallenges.value = [];
+    challengeStore.resetCounts();
   } finally {
     loading.value.participating = false;
   }
@@ -114,14 +110,10 @@ const fetchHot = async () => {
   loading.value.hot = true;
   error.value.hot = null;
   try {
-    const list = await getChallengeList({
-      status: 'RECRUITING',
-      participating: false,
-    });
+    const list = await getChallengeList({ status: 'RECRUITING', participating: false });
     hotChallenges.value = Array.isArray(list) ? list : [];
   } catch (e) {
-    error.value.hot =
-      e?.response?.data?.message || e.message || 'HOT 목록 조회 실패';
+    error.value.hot = e?.response?.data?.message || e.message || 'HOT 목록 조회 실패';
   } finally {
     loading.value.hot = false;
   }
@@ -133,16 +125,75 @@ const fetchMonthlyPoints = async () => {
   try {
     const now = new Date();
     const y = now.getFullYear();
-    const m = now.getMonth() + 1; // 1~12
+    const m = now.getMonth() + 1;
     const res = await getMonthlyPoints({ year: y, month: m });
-    // 백엔드 응답 키 이름에 맞춰서 사용
-    monthlyPoints.value = res?.monthlyCumulativeAmount ?? 0;
+    monthlyPoints.value = res?.amount ?? null; // ← 월누적 카드용
   } catch (e) {
-    error.value.points =
-      e?.response?.data?.message || e.message || '포인트 조회 실패';
-    monthlyPoints.value = null; // 슬라이드 숨김
+    error.value.points = e?.response?.data?.message || e.message || '포인트 조회 실패';
+    monthlyPoints.value = null;
   } finally {
     loading.value.points = false;
+  }
+};
+
+// ✅ 공통 챌린지 하이라이트 (참여 여부와 무관하게 1개 노출: RECRUITING → 내가 참여중 → IN_PROGRESS → 아무 공통)
+const fetchCommonHighlight = async () => {
+  loading.value.common = true;
+  error.value.common = null;
+
+  const pick = (item) =>
+      item && {
+        id: item.id,
+        title: item.title,
+        status: item.status,
+        startDate: item.startDate,
+        endDate: item.endDate,
+        participantsCount: item.participantsCount ?? 0,
+      };
+
+  try {
+    // 1) 모집중 공통
+    let list = await getChallengeList({ type: 'COMMON', status: 'RECRUITING' });
+    if (Array.isArray(list) && list.length > 0) {
+      commonHighlight.value = pick(list[0]);
+      return;
+    }
+
+    // 2) 내가 참여 중인 공통
+    const joined = await getChallengeList({ participating: true });
+    const myCommon = (Array.isArray(joined) ? joined : []).find(
+        (c) => (c?.type || '').toUpperCase() === 'COMMON'
+    );
+    if (myCommon) {
+      commonHighlight.value = pick(myCommon);
+      return;
+    }
+
+    // 3) 진행중 공통
+    list = await getChallengeList({ type: 'COMMON', status: 'IN_PROGRESS' });
+    if (Array.isArray(list) && list.length > 0) {
+      commonHighlight.value = pick(list[0]);
+      return;
+    }
+
+    // 4) 어떤 공통이든 1개
+    list = await getChallengeList({ type: 'COMMON' });
+    commonHighlight.value = Array.isArray(list) && list.length > 0 ? pick(list[0]) : null;
+  } catch (e) {
+    error.value.common = e?.response?.data?.message || e.message || '공통 챌린지 조회 실패';
+    commonHighlight.value = null;
+  } finally {
+    loading.value.common = false;
+  }
+};
+
+const openCommonFromSwiper = () => {
+  if (commonHighlight.value?.id) {
+    router.push({
+      name: 'ChallengeCommonDetail',
+      params: {id: commonHighlight.value.id},
+      state: {previousPage: '/challenge'},
+    });
   }
 };
 
@@ -151,8 +202,15 @@ onMounted(async () => {
     fetchSummary(),
     fetchParticipating(),
     fetchHot(),
-    fetchMonthlyPoints(), // ★ 포인트도 병렬로 불러오기
+    fetchMonthlyPoints(),
+    fetchCommonHighlight(),           // ✅ 항상 배너에 공통 1개
+    challengeStore.fetchCoinStatus(), // Pinia 스냅샷 적재
   ]);
+});
+
+// 참여중 목록 바뀌면 개수 재계산
+watch(participatingChallenges, (list) => {
+  challengeStore.updateCountsFromList(list || []);
 });
 </script>
 
@@ -161,21 +219,21 @@ onMounted(async () => {
     <div class="header-section">
       <div class="greeting-section">
         <div class="greeting">
-          안녕하세요, <span class="username">{{ displayName }}님</span>!
+          안녕하세요, <span class="username">{{ displayName }}</span>님!
         </div>
       </div>
 
-      <!-- 스와이퍼 -->
-      <ChallengeStatsSwiper :summary="summary" :points="monthlyPoints" />
-      <div v-if="loading.summary" style="color: #fff; margin: 6px 20px 0">
-        요약 로딩중…
-      </div>
-      <div v-else-if="error.summary" style="color: #fff; margin: 6px 20px 0">
-        {{ error.summary }}
-      </div>
-      <div v-if="error.points" style="color: #fff; margin: 6px 20px 0">
-        {{ error.points }}
-      </div>
+      <!-- ✅ 공통 챌린지 추가 슬라이드가 포함됨 -->
+      <ChallengeStatsSwiper
+          :summary="summary"
+          :points="monthlyPoints"
+          :common="commonHighlight"
+          @open-common="openCommonFromSwiper"
+      />
+      <div v-if="loading.summary" style="color: #fff; margin: 6px 20px 0">요약 로딩중…</div>
+      <div v-else-if="error.summary" style="color: #fff; margin: 6px 20px 0">{{ error.summary }}</div>
+      <div v-if="error.points" style="color: #fff; margin: 6px 20px 0">{{ error.points }}</div>
+      <div v-if="error.common" style="color: #fff; margin: 6px 20px 0">{{ error.common }}</div>
     </div>
 
     <!-- 참여중인 챌린지 -->
@@ -188,14 +246,12 @@ onMounted(async () => {
       </div>
 
       <div v-if="loading.participating" class="challenges-scroll">로딩중…</div>
-      <div v-else-if="error.participating" class="challenges-scroll">
-        {{ error.participating }}
-      </div>
+      <div v-else-if="error.participating" class="challenges-scroll">{{ error.participating }}</div>
       <div v-else class="challenges-scroll">
         <ParticipatingChallengeCard
-          v-for="c in participatingChallenges"
-          :key="c.id"
-          :challenge="{
+            v-for="c in participatingChallenges"
+            :key="c.id"
+            :challenge="{
             id: c.id,
             title: c.title,
             type: c.type,
@@ -206,12 +262,12 @@ onMounted(async () => {
             myProgressRate: c.myProgressRate ?? 0,
             participantsCount: c.participantsCount ?? 0,
             isResultCheck: c.isResultCheck ?? false,
+            status: c.status,                // ✅ HEAD 유지
+            usePassword: c.usePassword ?? false
           }"
-          @cardClick="handleCardClick"
+            @cardClick="handleCardClick"
         />
-        <div v-if="participatingChallenges.length === 0" class="empty-message">
-          참여중인 챌린지가 없어요.
-        </div>
+        <div v-if="participatingChallenges.length === 0" class="empty-message">참여중인 챌린지가 없어요.</div>
       </div>
     </div>
 
@@ -228,9 +284,9 @@ onMounted(async () => {
       <div v-else-if="error.hot" class="challenges-scroll">{{ error.hot }}</div>
       <div v-else class="challenges-scroll">
         <HotChallengeCard
-          v-for="c in hotChallenges"
-          :key="c.id"
-          :challenge="{
+            v-for="c in hotChallenges"
+            :key="c.id"
+            :challenge="{
             id: c.id,
             title: c.title,
             type: c.type,
@@ -242,13 +298,12 @@ onMounted(async () => {
             myProgressRate: c.myProgressRate ?? null,
             participantsCount: c.participantsCount ?? 0,
             isResultCheck: c.isResultCheck ?? false,
+            usePassword: c.usePassword ?? false
           }"
-          @participate="handleParticipate"
-          @click="handleCardClick"
+            @participate="handleParticipate"
+            @click="handleCardClick"
         />
-        <div v-if="hotChallenges.length === 0" class="empty-message">
-          모집 중인 챌린지가 없어요.
-        </div>
+        <div v-if="hotChallenges.length === 0" class="empty-message">모집 중인 챌린지가 없어요.</div>
       </div>
     </div>
   </div>
@@ -259,6 +314,9 @@ onMounted(async () => {
   padding: 0;
   background: var(--color-bg-light);
   min-height: 100vh;
+  //height: 100dvh;
+  //overflow-y: auto;
+  //overflow-x: hidden;
 }
 
 /* 헤더 섹션 */
@@ -267,15 +325,10 @@ onMounted(async () => {
   max-width: 390px;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(
-    to right,
-    var(--color-main-light-2),
-    var(--color-main-dark)
-  );
+  background: linear-gradient(to right, var(--color-main-light-2), var(--color-main-dark));
   border-radius: 0;
   padding: 0px 16px 0px 16px;
   margin-bottom: 12px;
-
   margin-left: auto;
   margin-right: auto;
 }
@@ -312,7 +365,6 @@ onMounted(async () => {
 .greeting {
   color: #fff;
   font-size: var(--font-size-title-sub);
-
   margin-bottom: 12px;
   margin-left: 19px;
 }
@@ -320,73 +372,6 @@ onMounted(async () => {
 .username {
   font-weight: var(--font-weight-bold);
   font-size: var(--font-size-title-main);
-}
-
-/* 통계 섹션 */
-.stats-section {
-  background: transparent;
-  border-radius: 16px;
-  margin-bottom: 24px;
-}
-
-.stats-container {
-  display: flex;
-  background: #fff;
-  border-radius: 18px;
-  padding: 30px 30px;
-  width: 90%;
-  max-width: 320px;
-  justify-content: space-around;
-  align-items: center;
-  margin-bottom: 10px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.stat-item {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  gap: 10px;
-}
-
-.stat-number {
-  font-family: 'JalnanGothic', var(--font-main);
-  font-size: 1.5rem;
-  font-weight: 900;
-  letter-spacing: 1px;
-  color: #222;
-  margin-bottom: 2px;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #666;
-}
-
-.stat-divider {
-  width: 1px;
-  height: 40px;
-  background: #e0e0e0;
-}
-
-.pagination-dots {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ddd;
-}
-
-.dot.active {
-  background: #6b46c1;
 }
 
 /* 섹션 공통 스타일 */
@@ -423,14 +408,14 @@ onMounted(async () => {
 .participating-section {
   margin-bottom: 24px;
   padding: 0 16px;
-  min-height: 170px; /* 섹션 제목 위치 고정을 위한 최소 높이 */
+  min-height: 170px;
 }
 
 /* HOT 챌린지 */
 .hot-challenges-section {
   margin-bottom: 24px;
   padding: 0 16px;
-  min-height: 120px; /* 섹션 제목 위치 고정을 위한 최소 높이 */
+  min-height: 120px;
 }
 
 .challenges-scroll {
@@ -440,7 +425,6 @@ onMounted(async () => {
   padding-bottom: 8px;
 }
 
-/* 스크롤바 스타일링 */
 .challenges-scroll::-webkit-scrollbar {
   height: 4px;
 }
@@ -459,7 +443,7 @@ onMounted(async () => {
   background: #5a3d9e;
 }
 
-/* 빈 상태 메시지 스타일 */
+/* 빈 상태 메시지 */
 .empty-message {
   color: #666;
   text-align: center;
