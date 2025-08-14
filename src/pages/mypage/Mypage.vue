@@ -5,32 +5,23 @@
       <div class="avatar-container">
         <div class="avatar-pixel">
           <img :src="baseAvatar" class="avatar-img" alt="아바타" />
-          <img
-            v-if="wearingTitle"
-            :src="getTitleImage"
-            class="title-img"
-            alt="칭호"
-          />
-          <img
-            v-if="wearingShirt"
-            :src="getShirtImage"
-            class="shirt-img"
-            alt="상의"
-          />
-          <img
-            v-if="wearingShoes"
-            :src="getShoesImage"
-            class="shoes-img"
-            alt="신발"
-          />
+          <div v-if="wearingTitle" class="title-placeholder">
+            <span class="item-text">칭호</span>
+          </div>
+          <div v-if="wearingShirt" class="shirt-placeholder">
+            <span class="item-text">상의</span>
+          </div>
+          <div v-if="wearingShoes" class="shoes-placeholder">
+            <span class="item-text">신발</span>
+          </div>
           <!-- 여러 액세서리를 동시에 표시 -->
-          <img
-            v-for="(image, index) in getGlassesImages"
+          <div
+            v-for="(glassesId, index) in wearingGlasses"
             :key="index"
-            :src="image"
-            class="glasses-img"
-            alt="액세서리"
-          />
+            class="glasses-placeholder"
+          >
+            <span class="item-text">액세서리</span>
+          </div>
         </div>
       </div>
     </div>
@@ -124,20 +115,9 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAvatarStore } from "../../stores/avatar.js";
-import { getCurrentCoin } from "@/api/mypage/avatar";
+import { getCurrentCoin, getMyCoinStatus } from "@/api/mypage/avatar";
 import { useAuthStore } from "@/stores/auth";
 import baseAvatar from "./avatar/avatarimg/avatar-base.png";
-import hatWizardhat from "./avatar/avatarimg/hat-3wizardhat.png";
-import hatSprout from "./avatar/avatarimg/hat-1sprout.png";
-import hatDosa from "./avatar/avatarimg/hat-4dosa.png";
-import hatBeginner from "./avatar/avatarimg/hat-2beginner.png";
-import shirtBlue from "./avatar/avatarimg/shirts-blue.png";
-import shirtRed from "./avatar/avatarimg/shirt-red.png";
-import shoesBrown from "./avatar/avatarimg/shoese-brown.png";
-import shoes from "./avatar/avatarimg/shoese.png";
-import sportGlasses from "./avatar/avatarimg/sporglasses.png";
-import sunGlasses from "./avatar/avatarimg/etc-sunglasses.png";
-import blush from "./avatar/avatarimg/etc-blush.png";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
@@ -156,13 +136,18 @@ const levelText = computed(() => {
 });
 
 // 포인트 상태 관리
-const currentCoin = ref(0);
+const coinStatus = ref({
+  amount: 0,
+  cumulativeAmount: 0,
+  monthlyCumulativeAmount: 0,
+  updatedAt: null,
+});
 const loadingCoin = ref(false);
 const coinError = ref(null);
 
 // 현재 포인트를 store와 동기화
 const currentCoinDisplay = computed(() => {
-  return coin.value || currentCoin.value;
+  return coin.value || coinStatus.value.amount;
 });
 
 // 착용 중인 아이템 확인
@@ -187,36 +172,22 @@ const wearingGlasses = computed(() => {
   return wearingItems.map((item) => item.id);
 });
 
-// 착용 중인 아이템 이미지 가져오기
+// 착용 중인 아이템 이미지 가져오기 (placeholder로 처리)
 const getTitleImage = computed(() => {
-  if (wearingTitle.value === "hat-1sprout") return hatSprout;
-  if (wearingTitle.value === "hat-2beginner") return hatBeginner;
-  if (wearingTitle.value === "hat-3wizardhat") return hatWizardhat;
-  if (wearingTitle.value === "hat-4dosa") return hatDosa;
-  return null;
+  return null; // placeholder 처리
 });
 
 const getShirtImage = computed(() => {
-  if (wearingShirt.value === "shirt-blue") return shirtBlue;
-  if (wearingShirt.value === "shirt-red") return shirtRed;
-  return null;
+  return null; // placeholder 처리
 });
 
 const getShoesImage = computed(() => {
-  if (wearingShoes.value === "shoes-brown") return shoesBrown;
-  if (wearingShoes.value === "shoes") return shoes;
-  return null;
+  return null; // placeholder 처리
 });
 
-// 여러 액세서리 이미지를 반환하는 함수
+// 여러 액세서리 이미지를 반환하는 함수 (placeholder로 처리)
 const getGlassesImages = computed(() => {
-  const images = [];
-  wearingGlasses.value.forEach((glassesId) => {
-    if (glassesId === "sport-glasses") images.push(sportGlasses);
-    if (glassesId === "etc-sunglasses") images.push(sunGlasses);
-    if (glassesId === "etc-blush") images.push(blush);
-  });
-  return images;
+  return []; // placeholder 처리
 });
 
 function goToMyHistory() {
@@ -258,53 +229,40 @@ const fetchCurrentCoin = async () => {
       return;
     }
 
-    // 사용자 ID 가져오기
-    const userId = authStore.user?.id || authStore.user?.userId || 1; // user 객체에서 id 또는 userId 필드 확인
+    console.log("MyPage 코인 상태 데이터 가져오기 시작");
+    const response = await getMyCoinStatus();
+    console.log("받아온 코인 상태 데이터:", response);
 
-    console.log("MyPage 현재 포인트 데이터 가져오기 시작, userId:", userId);
-    const response = await getCurrentCoin(userId);
-    console.log("받아온 현재 포인트 데이터:", response);
+    if (response.status === 200 && response.data && response.data.data) {
+      const coinData = response.data.data;
 
-    if (response.status === 200 && response.data !== undefined) {
-      // 백엔드 응답 구조에 따라 coin 값 추출
-      let coinValue;
+      // 새로운 API 응답 구조에 맞게 데이터 설정
+      coinStatus.value = {
+        amount: coinData.amount || 0,
+        cumulativeAmount: coinData.cumulativeAmount || 0,
+        monthlyCumulativeAmount: coinData.monthlyCumulativeAmount || 0,
+        updatedAt: coinData.updatedAt || null,
+      };
 
-      // 구조 1: { status: 200, data: 1500 }
-      if (typeof response.data === "number") {
-        coinValue = response.data;
-      }
-      // 구조 2: { status: 200, message: "...", data: 1500 }
-      else if (response.data.data !== undefined) {
-        coinValue = response.data.data;
-      }
-      // 구조 3: { data: 1500 }
-      else if (response.data !== undefined) {
-        coinValue = response.data;
-      }
+      // store에도 현재 포인트 업데이트
+      avatarStore.setCoin(coinStatus.value.amount);
 
-      console.log("MyPage 추출된 현재 포인트 값:", coinValue);
-
-      if (coinValue !== undefined && typeof coinValue === "number") {
-        currentCoin.value = coinValue;
-        avatarStore.setCoin(coinValue);
-        console.log("MyPage 현재 포인트 업데이트 완료:", currentCoin.value);
-      } else {
-        console.warn("유효한 현재 포인트 값을 찾을 수 없습니다:", response);
-        coinError.value = "현재 포인트 데이터를 가져오는데 실패했습니다.";
-      }
+      console.log("MyPage 코인 상태 업데이트 완료:", coinStatus.value);
     } else {
-      console.warn("현재 포인트 데이터 형식이 올바르지 않습니다:", response);
-      coinError.value = "현재 포인트 데이터를 가져오는데 실패했습니다.";
+      console.warn("코인 상태 데이터 형식이 올바르지 않습니다:", response);
+      coinError.value = "코인 상태 데이터를 가져오는데 실패했습니다.";
     }
   } catch (err) {
-    console.error("MyPage 현재 포인트 조회 에러:", err);
+    console.error("MyPage 코인 상태 조회 에러:", err);
 
-    let errorMessage = "현재 포인트를 불러오는데 실패했습니다.";
+    let errorMessage = "코인 상태를 불러오는데 실패했습니다.";
 
     if (err.response?.status === 401) {
       errorMessage = "로그인이 필요합니다.";
+    } else if (err.response?.status === 403) {
+      errorMessage = "접근 권한이 없습니다.";
     } else if (err.response?.status === 404) {
-      errorMessage = "사용자 정보를 찾을 수 없습니다.";
+      errorMessage = "코인 정보를 찾을 수 없습니다.";
     } else if (err.response?.status === 500) {
       errorMessage = "서버 오류가 발생했습니다.";
     } else if (err.message) {
@@ -413,6 +371,44 @@ onMounted(() => {
 
 .glasses-img {
   z-index: 3;
+}
+
+.title-placeholder,
+.shirt-placeholder,
+.shoes-placeholder,
+.glasses-placeholder {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(67, 24, 209, 0.1);
+  border: 1px solid #4318d1;
+  border-radius: 4px;
+  padding: 4px 8px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.title-placeholder {
+  z-index: 2;
+}
+
+.shirt-placeholder {
+  z-index: 2;
+}
+
+.shoes-placeholder {
+  z-index: 2;
+}
+
+.glasses-placeholder {
+  z-index: 3;
+}
+
+.item-text {
+  font-size: 10px;
+  color: #4318d1;
+  font-weight: bold;
 }
 .profile-circle.avatar-profile {
   margin: 0 auto;
