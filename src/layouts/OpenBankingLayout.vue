@@ -170,7 +170,6 @@ const downloadPdf = () => {
   min-height: 0;
   overflow: hidden;
   padding-top: 80px;
-  padding-bottom: 80px;
 }
 
 /* 반응형 디자인 */

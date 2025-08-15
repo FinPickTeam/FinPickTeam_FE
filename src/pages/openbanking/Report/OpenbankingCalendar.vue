@@ -2,6 +2,7 @@
   <div class="obcal-container">
     <div class="obcal-month-card">
       <CalendarComponent
+        v-model:pages="calendarPage"
         :is-expanded="isExpanded"
         :selected-date="selectedDate"
         :current-month="currentMonthStr"
@@ -9,7 +10,6 @@
         :total-consumption="totalConsumption"
         :last-month-diff-text="lastMonthDiffText"
         :daily-expenses="dailyExpensesObject"
-        scroll-row-id-prefix="d-"
         @date-selected="onDateSelected"
         @month-changed="onMonthChanged"
         @toggle-expanded="onToggleExpanded"
@@ -17,7 +17,6 @@
       />
     </div>
 
-    <!-- 거래 내역 리스트 -->
     <div class="obcal-list-section">
       <!-- 주간(접힘) -->
       <div v-if="!isExpanded" class="transaction-section">
@@ -49,9 +48,8 @@
             </div>
             <div class="obcal-list-arrow">›</div>
           </div>
-
           <div
-            v-if="(selectedDateOnly || []).length === 0"
+            v-if="!selectedDateOnly || selectedDateOnly.length === 0"
             class="obcal-no-data"
           >
             해당 날짜의 거래 내역이 없습니다.
@@ -60,12 +58,7 @@
       </div>
 
       <!-- 월간(펼침) -->
-      <div
-        v-else
-        class="monthly-transactions"
-        ref="monthlyListRef"
-        aria-label="월간 거래 내역 목록"
-      >
+      <div v-else class="monthly-transactions" ref="monthlyListRef">
         <div
           v-for="(dateGroup, dateKey) in monthlyTransactionGroups"
           :key="dateKey"
@@ -81,10 +74,7 @@
               @click="goToTransactionDetail(transaction.id)"
             >
               <div class="obcal-bank-logo">
-                <img
-                  :src="getLogo(transaction)"
-                  :alt="transaction.category + ' 로고'"
-                />
+                <img :src="getLogo(transaction)" :alt="getAlt(transaction)" />
               </div>
               <div class="obcal-list-info">
                 <div
@@ -105,7 +95,6 @@
             </div>
           </div>
         </div>
-
         <div
           v-if="Object.keys(monthlyTransactionGroups).length === 0"
           class="obcal-no-data"
@@ -118,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, nextTick, onUnmounted } from 'vue';
+import { ref, computed, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import CalendarComponent from '@/components/openbanking/CalendarComponent.vue';
 import { getLedger } from '@/api/openbanking/ledgerApi.js';
@@ -127,67 +116,48 @@ import { categoryToLogo, categoryAlt } from '@/utils/categoryLogo.js';
 
 const router = useRouter();
 
-/* 로고/alt */
 const getLogo = (tx) => categoryToLogo(tx?.category);
 const getAlt = (tx) => categoryAlt(tx?.category);
 
-/* 상태 */
+// --- 상태 ---
 const isExpanded = ref(false);
 const selectedDate = ref(new Date());
-const currentYear = ref(new Date().getFullYear());
-const currentMonth = ref(new Date().getMonth() + 1);
+const calendarPage = ref([
+  { year: new Date().getFullYear(), month: new Date().getMonth() + 1 },
+]);
 
-const selectedYM = computed(
-  () => `${currentYear.value}-${String(currentMonth.value).padStart(2, '0')}`
-);
-
-/* 현재/전월 거래 & 합계 */
-const monthTx = ref([]);
-const monthTotal = ref(0);
-const prevMonthTotal = ref(0);
-
-/* 지출 합계(지출만) */
-const sumExpense = (list) =>
-  (list || [])
-    .filter((t) => t.type === 'EXPENSE')
-    .reduce((a, b) => a + Number(b.amount || 0), 0);
-
-/* “지난달보다 n만원 더/덜” */
-const formatDiffText = (current, prev) => {
-  if (!isFinite(current) || !isFinite(prev)) return '같이';
-  const diff = current - prev;
-  if (Math.abs(diff) < 1000) return '같이';
-  const man = Math.round(Math.abs(diff) / 10000);
-  return `${man.toLocaleString()}만원 ${diff > 0 ? '더' : '덜'}`;
-};
-const lastMonthDiffText = computed(() =>
-  formatDiffText(monthTotal.value ?? 0, prevMonthTotal.value ?? 0)
-);
-
-/* 캘린더 prop */
+// --- 계산값 ---
+const currentYear = computed(() => calendarPage.value[0].year);
+const currentMonth = computed(() => calendarPage.value[0].month);
 const currentMonthStr = computed(
   () => `${currentYear.value}-${String(currentMonth.value).padStart(2, '0')}`
 );
 
-/* 상단 금액(현재월 지출 합) */
-const totalConsumption = computed(() => monthTotal.value || 0);
+// --- 데이터 상태 ---
+const monthTx = ref([]);
+const prevMonthTotal = ref(0);
 
-/* 날짜별 지출 합계 */
+// --- UI 데이터 ---
+const totalConsumption = computed(() => sumExpense(monthTx.value));
+const lastMonthDiffText = computed(() =>
+  formatDiffText(totalConsumption.value, prevMonthTotal.value)
+);
+
 const dailyExpensesObject = computed(() => {
   const o = {};
-  (monthTx.value || []).forEach((t) => {
-    if (t.type !== 'EXPENSE') return;
-    const k = formatDateKey(t.date);
-    o[k] = (o[k] || 0) + Number(t.amount || 0);
+  monthTx.value.forEach((t) => {
+    if (t.type === 'EXPENSE') {
+      const k = formatDateKey(new Date(t.date));
+      o[k] = (o[k] || 0) + Number(t.amount);
+    }
   });
   return o;
 });
 
-/* 일자별 그룹 (최신일자 우선 정렬) */
 const monthlyTransactionGroups = computed(() => {
   const g = {};
-  (monthTx.value || []).forEach((t) => {
-    const k = formatDateKey(t.date);
+  monthTx.value.forEach((t) => {
+    const k = formatDateKey(new Date(t.date));
     (g[k] ||= []).push(t);
   });
   return Object.fromEntries(
@@ -195,109 +165,135 @@ const monthlyTransactionGroups = computed(() => {
   );
 });
 
-const selectedDateOnly = computed(() => {
-  const key = formatDateKey(selectedDate.value);
-  return (monthTx.value || []).filter((t) => formatDateKey(t.date) === key);
-});
+const selectedDateOnly = computed(
+  () => monthlyTransactionGroups.value[formatDateKey(selectedDate.value)] || []
+);
 
-/* 기간 도우미 */
-const monthRange = (y, m) => {
-  const mm = String(m).padStart(2, '0');
-  const from = `${y}-${mm}-01`;
-  const to = `${y}-${mm}-${String(new Date(y, m, 0).getDate()).padStart(
-    2,
-    '0'
-  )}`;
-  return { from, to };
+// --- 헬퍼 ---
+const sumExpense = (list) =>
+  list.reduce(
+    (acc, t) => acc + (t.type === 'EXPENSE' ? Number(t.amount) : 0),
+    0
+  );
+
+const formatDiffText = (current, prev) => {
+  if (prev === 0 && current > 0) return '새롭게';
+  if (prev === 0) return '변동 없이';
+  const diff = current - prev;
+  if (Math.abs(diff) < 1000) return '비슷하게';
+  const man = Math.round(Math.abs(diff) / 10000);
+  return `${man.toLocaleString()}만원 ${diff > 0 ? '더' : '덜'}`;
 };
 
-/* 월 변경 시: ledger 두 번 호출해서 정확 비교 */
+const monthRange = (y, m) => {
+  const start = new Date(y, m - 1, 1);
+  const end = new Date(y, m, 0);
+  return { from: formatDateKey(start), to: formatDateKey(end) };
+};
+
+// --- 스크롤 오프셋 유틸 ---
+const SCROLL_OFFSET = 12; // 스티키 헤더 높이(+여유)
+function scrollToKeyWithOffset(key, offset = SCROLL_OFFSET) {
+  nextTick(() => {
+    const container = monthlyListRef.value;
+    const target = document.getElementById(`d-${key}`);
+    if (!target) return;
+
+    if (container) {
+      const cTop = container.getBoundingClientRect().top;
+      const tTop = target.getBoundingClientRect().top;
+      const to = container.scrollTop + (tTop - cTop) + offset;
+      container.scrollTo({ top: Math.max(0, to), behavior: 'smooth' });
+    } else {
+      const tTop = target.getBoundingClientRect().top + window.pageYOffset;
+      const to = tTop + offset;
+      window.scrollTo({ top: Math.max(0, to), behavior: 'smooth' });
+    }
+  });
+}
+
+// --- 이벤트 핸들러 ---
+const onDateSelected = (date) => {
+  selectedDate.value = new Date(date);
+  if (isExpanded.value) {
+    const key = formatDateKey(selectedDate.value);
+    scrollToKeyWithOffset(key);
+  }
+};
+
+const onScrollToDate = ({ key, date, offset }) => {
+  if (date) selectedDate.value = new Date(date);
+  scrollToKeyWithOffset(key, offset ?? SCROLL_OFFSET);
+};
+const onMonthChanged = ({ year, month }) => {
+  calendarPage.value = [{ year, month }];
+
+  const cur = new Date(selectedDate.value);
+  const sameMonth = cur.getFullYear() === year && cur.getMonth() + 1 === month;
+
+  if (!sameMonth) {
+    const keepDay = cur.getDate?.() ?? 1;
+    const lastDay = new Date(year, month, 0).getDate();
+    const day = Math.min(keepDay, lastDay);
+    const d = new Date(year, month - 1, day);
+    d.setHours(0, 0, 0, 0);
+    selectedDate.value = d;
+  }
+};
+
+const onToggleExpanded = (expanded) => {
+  isExpanded.value = expanded;
+  if (!expanded) {
+    const now = new Date();
+    selectedDate.value = now;
+    calendarPage.value = [
+      { year: now.getFullYear(), month: now.getMonth() + 1 },
+    ];
+  } else {
+    ensureSelectedInMonth();
+  }
+};
+
+const goToTransactionDetail = (id) =>
+  router.push({ name: 'CalendarDetail', params: { id } });
+
+const monthlyListRef = ref(null);
+const ensureSelectedInMonth = () => {
+  if (!isExpanded.value) return;
+  const key = formatDateKey(selectedDate.value);
+  scrollToKeyWithOffset(key);
+};
+
+// --- 데이터 로드 ---
 watch(
-  selectedYM,
+  currentMonthStr,
   async (ym) => {
     try {
       const [y, m] = ym.split('-').map(Number);
 
-      // 현재월
-      const { from, to } = monthRange(y, m);
-      const curRes = await getLedger({ from, to }); // {status, message, data}
-      const cur = curRes?.data ?? [];
-      monthTx.value = cur;
-      monthTotal.value = sumExpense(cur);
+      // 현재 월
+      const range = monthRange(y, m);
+      const res = await getLedger({ from: range.from, to: range.to });
+      monthTx.value = res.data ?? [];
 
-      // 지난달
-      const prev = new Date(y, m - 1, 1);
-      const py = prev.getFullYear();
-      const pm = prev.getMonth() + 1;
-      const { from: pFrom, to: pTo } = monthRange(py, pm);
-      const prvRes = await getLedger({ from: pFrom, to: pTo });
-      const prv = prvRes?.data ?? [];
-      prevMonthTotal.value = sumExpense(prv);
-    } catch (e) {
-      console.error('Failed to load month data:', e);
+      // 이전 월
+      const prevM = new Date(y, m - 2, 1);
+      const pRange = monthRange(prevM.getFullYear(), prevM.getMonth() + 1);
+      const prevRes = await getLedger({ from: pRange.from, to: pRange.to });
+      prevMonthTotal.value = sumExpense(prevRes.data ?? []);
+
+      ensureSelectedInMonth();
+    } catch (error) {
+      console.error('데이터 로드 실패:', error);
       monthTx.value = [];
-      monthTotal.value = 0;
       prevMonthTotal.value = 0;
     }
   },
   { immediate: true }
 );
-
-/* 월간 리스트 스크롤 */
-const monthlyListRef = ref(null);
-const scrollToDate = async (date) => {
-  await nextTick();
-  const key = formatDateKey(date);
-  const el = document.getElementById('d-' + key);
-  const container = monthlyListRef.value;
-  if (el && container) {
-    scrollWithin(container, el, 24); // ← 위 여백 확실히
-  }
-};
-const onScrollToDate = async ({ key, date }) => {
-  if (!isExpanded.value) return;
-  await nextTick();
-  selectedDate.value = new Date(date);
-};
-
-const scrollWithin = (container, el, extra = 24) => {
-  // extra: 위 여백(24~28 추천)
-  const c = container.getBoundingClientRect();
-  const e = el.getBoundingClientRect();
-  const top = container.scrollTop + (e.top - c.top) + extra; // + 여백
-  container.scrollTo?.({ top: Math.max(top, 0), behavior: 'smooth' }) ??
-    (container.scrollTop = Math.max(top, 0));
-};
-
-/* 이벤트 */
-const onDateSelected = (date) => {
-  selectedDate.value = new Date(date);
-};
-const onMonthChanged = ({ year, month }) => {
-  currentYear.value = year;
-  currentMonth.value = month;
-};
-const onToggleExpanded = (expanded) => {
-  isExpanded.value = expanded;
-  if (expanded) requestAnimationFrame(() => scrollToDate(selectedDate.value));
-};
-
-/* 네비게이션 */
-const goToTransactionDetail = (transactionId) => {
-  router.push({ name: 'CalendarDetail', params: { id: transactionId } });
-};
-
-/* 정리 */
-const cleanupSessionStorage = () => {
-  Object.keys(sessionStorage).forEach((key) => {
-    if (key.startsWith('selectedCategory_')) sessionStorage.removeItem(key);
-  });
-};
-onUnmounted(() => cleanupSessionStorage());
 </script>
 
 <style scoped>
-/* ===== 페이지 레이아웃 ===== */
 .obcal-container {
   height: 100%;
   min-height: 0;
@@ -307,8 +303,6 @@ onUnmounted(() => cleanupSessionStorage());
 }
 .obcal-month-card {
   background: transparent;
-  border-radius: 0;
-  box-shadow: none;
   padding: 0 16px 8px;
   margin: 0;
 }
@@ -317,17 +311,11 @@ onUnmounted(() => cleanupSessionStorage());
   min-height: 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
   background: #fff;
 }
-
-/* 날짜 섹션 */
 .transaction-section {
-  background: #fff;
-  border-radius: 0;
-  box-shadow: none;
-  border: none;
-  scroll-margin-top: 24px;
+  /* JS로 오프셋 처리하지만 보조로 margin도 줌 */
+  scroll-margin-top: 56px;
 }
 .obcal-list-title {
   position: sticky;
@@ -338,89 +326,51 @@ onUnmounted(() => cleanupSessionStorage());
   border-bottom: 1px solid #f0f0f0;
   font: 600 15px/1.2 'Noto Sans KR', sans-serif;
   color: #111;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }
-
-/* 주간: 리스트 스크롤 */
 .obcal-list-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  background: #fff;
   padding: 16px;
-  max-height: 60vh;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* 월간: 부모가 스크롤 */
-.monthly-transactions .obcal-list-container {
-  max-height: none;
-  overflow: visible;
-  padding: 12px 16px 0;
 }
 .monthly-transactions {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior-y: contain;
-  background: #fff;
-  scroll-margin-top: 12px;
 }
-
-/* 아이템 */
 .obcal-list-item {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
+  padding: 12px 0;
   border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
-  min-height: 44px;
-}
-.obcal-list-item:hover {
-  background: #f8f9fa;
 }
 .obcal-list-item:last-child {
   border-bottom: none;
 }
-
 .obcal-bank-logo {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   border: 1px solid #ececec;
   overflow: hidden;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .obcal-bank-logo img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 50%;
 }
-
 .obcal-list-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
   flex: 1;
   min-width: 0;
 }
 .obcal-list-amount {
   font-size: 0.95rem;
-  color: #4318d1;
   font-weight: 700;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .obcal-list-amount.income {
   color: #4318d1;
@@ -431,45 +381,18 @@ onUnmounted(() => cleanupSessionStorage());
 .obcal-list-name {
   font-size: 0.9rem;
   color: #666;
-  font-weight: 400;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 .obcal-list-arrow {
   font-size: 18px;
-  color: #4318d1;
-  flex-shrink: 0;
-  min-width: 44px;
-  min-height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  color: #aaa;
 }
-
 .obcal-no-data {
   font-size: 0.95rem;
   color: #888;
   text-align: center;
   padding: 20px 0;
-}
-
-/* 반응형 */
-@media (max-width: 430px) {
-  .obcal-container {
-    width: 100vw;
-    min-width: 100vw;
-    max-width: 100vw;
-  }
-  .obcal-month-card {
-    padding: 0 16px;
-  }
-  .obcal-list-container {
-    padding: 12px;
-  }
-  .obcal-list-item {
-    padding: 10px 12px;
-  }
 }
 </style>
