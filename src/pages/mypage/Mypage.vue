@@ -58,7 +58,11 @@
   <!-- User Info Card -->
   <div class="user-info-card">
     <div class="info-item">
-      <div class="info-label">안정자산 추구</div>
+      <div class="info-label">
+        <span v-if="loadingPropensity" class="loading-text">로딩 중...</span>
+        <span v-else-if="propensityError" class="error-text">-</span>
+        <span v-else>{{ propensityType || "안정자산 추구" }}</span>
+      </div>
       <div class="info-subtitle">나의 투자성향</div>
     </div>
     <div class="info-item">
@@ -143,14 +147,9 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAvatarStore } from "../../stores/avatar.js";
-import {
-  getCurrentCoin,
-  getMyCoinStatus,
-} from "@/api/mypage/avatar";
-import {
-  getAvatarStatus,
-  getClothes,
-} from "@/api/mypage/avatar/avatarApi.js";
+import { getCurrentCoin, getMyCoinStatus } from "@/api/mypage/avatar";
+import { getAvatarStatus, getClothes } from "@/api/mypage/avatar/avatarApi.js";
+import { getInvestmentPropensity } from "@/api/mypage/profile.js";
 import { useAuthStore } from "@/stores/auth";
 import baseAvatar from "./avatar/avatarimg/avatar-base.png";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -181,6 +180,11 @@ const coinStatus = ref({
 });
 const loadingCoin = ref(false);
 const coinError = ref(null);
+
+// 투자성향 상태 관리
+const propensityType = ref("");
+const loadingPropensity = ref(false);
+const propensityError = ref(false);
 
 // 현재 포인트를 store와 동기화
 const currentCoinDisplay = computed(() => {
@@ -231,6 +235,25 @@ const wearingGlasses = computed(() => {
   );
   return items.map((item) => item.itemId);
 });
+
+// 투자성향 조회 함수
+const fetchInvestmentPropensity = async () => {
+  loadingPropensity.value = true;
+  propensityError.value = false;
+
+  try {
+    const response = await getInvestmentPropensity();
+    if (response.data && response.data.data) {
+      propensityType.value = response.data.data.propensityType;
+      console.log("투자성향 조회 성공:", propensityType.value);
+    }
+  } catch (error) {
+    console.error("투자성향 조회 실패:", error);
+    propensityError.value = true;
+  } finally {
+    loadingPropensity.value = false;
+  }
+};
 
 function goToMyHistory() {
   profileStore.resetAnswers();
@@ -386,6 +409,7 @@ const fetchCurrentCoin = async () => {
 onMounted(() => {
   fetchAvatarAndItemData(); // 아바타 데이터 조회 (AvatarShop2.vue와 동일한 방식)
   fetchCurrentCoin();
+  fetchInvestmentPropensity(); // 투자성향 조회
 });
 </script>
 
@@ -793,5 +817,16 @@ onMounted(() => {
 }
 .danger-chevron {
   color: var(--color-accent);
+}
+
+/* 투자성향 로딩 및 에러 상태 스타일 */
+.loading-text {
+  color: #999;
+  font-style: italic;
+}
+
+.error-text {
+  color: #ff4444;
+  font-weight: 600;
 }
 </style>
