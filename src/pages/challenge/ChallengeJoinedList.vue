@@ -17,20 +17,39 @@ onMounted(async () => {
   loading.value = true;
   error.value = '';
   try {
-    const list = await getChallengeList({ participating: true }); // ✅ 상태 필터 제거
-    // 백엔드 JSON 키 보정: isParticipating → participating
-    const normalized = (list || []).map((c) => ({
+    // 참여중인 챌린지와 공통 챌린지를 모두 가져오기
+    const [participatingList, commonList] = await Promise.all([
+      getChallengeList({ participating: true }),
+      getChallengeList({ type: 'COMMON' }),
+    ]);
+
+    // 참여중인 챌린지 처리
+    const participating = (participatingList || []).map((c) => ({
       ...c,
       participating:
         typeof c.participating === 'boolean'
           ? c.participating
           : !!c.isParticipating,
-      // participantsCount 기본값 케어
       participantsCount: c.participantsCount ?? 0,
     }));
 
-    // (선택) 결과확인 필요 항목 우선 정렬: COMPLETED && participating && !isResultCheck
-    normalized.sort((a, b) => {
+    // 공통 챌린지 처리 (참여 여부와 관계없이)
+    const common = (commonList || []).map((c) => ({
+      ...c,
+      participating: c.participating || c.isParticipating || false,
+      participantsCount: c.participantsCount ?? 0,
+    }));
+
+    // 중복 제거 (ID 기준)
+    const allChallenges = [...participating];
+    common.forEach((commonChallenge) => {
+      if (!allChallenges.find((c) => c.id === commonChallenge.id)) {
+        allChallenges.push(commonChallenge);
+      }
+    });
+
+    // 결과확인 필요 항목 우선 정렬
+    allChallenges.sort((a, b) => {
       const needA =
         a.participating && a.status === 'COMPLETED' && !a.isResultCheck;
       const needB =
@@ -38,7 +57,7 @@ onMounted(async () => {
       return Number(needB) - Number(needA);
     });
 
-    allJoined.value = normalized;
+    allJoined.value = allChallenges;
   } catch (e) {
     console.error(e);
     error.value = '챌린지 목록을 불러오지 못했습니다.';
@@ -106,8 +125,7 @@ const testChallengeResult = ref({
     stockPrice: 75000,
     stockPredictedPrice: '+2500',
     stockChangeRate: '+3.45',
-    stockSummary:
-      'AI 반도체 시장 성장과 함께 삼성전자의 기술 경쟁력이 향상되고 있어 투자 가치가 높습니다.',
+    stockSummary: '삼성전자',
     stockChartUrl: 'https://example.com/chart.png', // 선택사항
   },
 });

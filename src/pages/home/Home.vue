@@ -663,7 +663,7 @@ const getProgressPercentage = computed(() => {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(#b9ddee 0% 70%, #5ea152 70% 100%);
+  background: linear-gradient(#b3e5fc 0% 70%, #77b255 70% 100%);
   z-index: 0;
 }
 

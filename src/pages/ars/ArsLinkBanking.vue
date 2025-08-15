@@ -82,8 +82,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
 const percent = ref(0);
@@ -91,11 +91,11 @@ const visibleSteps = ref([false, false, false, false]);
 const isButtonActive = ref(false);
 
 function goToOpenBanking() {
-  router.push("/openbanking/myhome");
+  router.push('/openbanking/myhome');
 }
 
 function goToCustomerSupport() {
-  router.push("/customer-support");
+  router.push('/customer-support');
 }
 
 onMounted(() => {
@@ -213,7 +213,7 @@ onMounted(() => {
 
 .envelope_icon {
   font-size: 48px;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: white;
   border-radius: 50%;
   width: 80px;
@@ -241,7 +241,7 @@ onMounted(() => {
 }
 
 .progress_container {
-  border: 1px solid #8e74e3;
+  border: 1px solid var(--color-main-dark);
   border-radius: 8px;
   padding: 20px;
   margin-bottom: 24px;
@@ -259,7 +259,7 @@ onMounted(() => {
 
 .progress_fill {
   height: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   transition: width 0.1s linear;
 }
 
@@ -305,7 +305,7 @@ onMounted(() => {
 .step_icon {
   width: 20px;
   height: 20px;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: white;
   border-radius: 50%;
   display: flex;
@@ -355,13 +355,13 @@ onMounted(() => {
 }
 
 .next_step_btn.active {
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   cursor: pointer;
 }
 
 .next_step_btn.active:hover {
-  background: #6c4cf1;
+  background: var(--color-main-dark);
 }
 
 .support_section {
@@ -379,7 +379,7 @@ onMounted(() => {
 }
 
 .support_link {
-  color: #8e74e3;
+  color: var(--color-main-dark);
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;

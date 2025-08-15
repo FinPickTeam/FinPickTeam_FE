@@ -78,15 +78,19 @@ const formatDate = (dateString) => {
 
 // 카테고리 이름 반환 함수
 const getCategoryName = (categoryId) => {
-  if (props.challenge?.categoryName) return props.challenge.categoryName;
-  const categories = {
-    1: '전체 소비',
-    2: '식비',
-    3: '카페·간식',
-    4: '교통비',
-    5: '미용·쇼핑',
+  // categoryName을 한글로 매핑
+  const categoryMapping = {
+    total: '전체 소비',
+    food: '식비',
+    snack: '카페·간식',
+    transport: '교통비',
+    shopping: '미용·쇼핑',
   };
-  return categories[categoryId] || '기타';
+  return (
+    categoryMapping[props.challenge.categoryName] ||
+    props.challenge.categoryName ||
+    '기타'
+  );
 };
 
 const handleParticipate = () => {
