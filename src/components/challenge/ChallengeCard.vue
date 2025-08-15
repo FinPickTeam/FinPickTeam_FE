@@ -1,5 +1,12 @@
 <template>
   <div class="challenge-card" @click="handleCardClick">
+    <!-- 공통 챌린지 어두운 레이어 처리 -->
+    <div v-if="isCommon && shouldShowOverlay" class="card-overlay">
+      <div class="overlay-message">
+        {{ overlayMessage }}
+      </div>
+    </div>
+
     <div class="card-header">
       <h3 class="challenge-title">{{ challenge.title || '제목 없음' }}</h3>
 
@@ -54,28 +61,36 @@
         <span class="progress-text">0% 완료</span>
       </div>
 
+      <!-- 공통 챌린지 참여자 수 표시 (참여중인 리스트에서) -->
+      <div
+        v-if="isCommon && !isRecruitingPage && !isParticipating"
+        class="common-participants-container"
+      >
+        <span class="common-participants">{{ curParticipants }}명 참여중</span>
+      </div>
+
       <!-- 모집 카드(참여중 아님) -->
       <div class="participants-info" v-else-if="isRecruitingPage">
-        <div class="participants-text">
-          <!-- ✅ 공통: 참여자 수만 표기 -->
-          <template v-if="isCommon">
-            <span>{{ curParticipants }}명 참여중</span>
-          </template>
+        <!-- ✅ 공통: 참여자 수를 오른쪽 하단에 배치 -->
+        <div v-if="isCommon" class="common-participants-container">
+          <span class="common-participants"
+            >{{ curParticipants }}명 참여중</span
+          >
+        </div>
 
-          <!-- 그룹/개인: 정원 및 진행바 표시 -->
-          <template v-else>
+        <!-- 그룹/개인: 기존 레이아웃 유지 -->
+        <template v-else>
+          <div class="participants-text">
             <span>{{ curParticipants }}명 참여중</span>
             <span class="max-participants">/ {{ maxParticipants }}명</span>
-          </template>
-        </div>
-
-        <!-- ✅ 공통은 정원 개념 없으므로 진행바 숨김 -->
-        <div class="progress-bar" v-if="!isCommon">
-          <div
-            class="progress-fill"
-            :style="{ width: `${progressRecruiting}%` }"
-          ></div>
-        </div>
+          </div>
+          <div class="progress-bar">
+            <div
+              class="progress-fill"
+              :style="{ width: `${progressRecruiting}%` }"
+            ></div>
+          </div>
+        </template>
       </div>
 
       <div class="challenge-stats">
@@ -242,6 +257,37 @@ const getCategoryName = (categoryId) => {
   );
 };
 
+// 공통 챌린지 오버레이 관련 computed
+const shouldShowOverlay = computed(() => {
+  if (!isCommon.value) return false;
+
+  if (props.isRecruitingPage) {
+    // 모집중인 챌린지 리스트 페이지: 모집 기간이 아닌 경우
+    return getRecruitingRemainingDays() <= 0;
+  } else {
+    // 참여중인 챌린지 리스트 페이지: 참여하지 않은 경우
+    return !isParticipating.value;
+  }
+});
+
+const overlayMessage = computed(() => {
+  if (!isCommon.value) return '';
+
+  if (props.isRecruitingPage) {
+    // 모집 기간이 아닌 경우
+    const nextMonth = new Date();
+    nextMonth.setMonth(nextMonth.getMonth() + 1);
+    nextMonth.setDate(1);
+    const nextDate = `${nextMonth.getFullYear()}.${String(
+      nextMonth.getMonth() + 1
+    ).padStart(2, '0')}.${String(nextMonth.getDate()).padStart(2, '0')}`;
+    return `이번 모집은 종료되었습니다.\n다음 공통 챌린지는 ${nextDate} 00:00에 신청 가능합니다!`;
+  } else {
+    // 참여하지 않은 경우
+    return '현재 공통 챌린지에 참여하고 있지 않습니다.';
+  }
+});
+
 const emit = defineEmits(['cardClick']);
 const handleCardClick = () =>
   emit('cardClick', {
@@ -260,6 +306,31 @@ const handleCardClick = () =>
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   position: relative;
+}
+
+.card-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  cursor: not-allowed;
+}
+
+.overlay-message {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.4;
+  white-space: pre-line;
+  padding: 0 16px;
 }
 .challenge-card:hover {
   transform: translateY(-2px);
@@ -389,6 +460,27 @@ const handleCardClick = () =>
   gap: 4px;
   font-size: 12px;
   color: #666;
+}
+
+.common-participants-container {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  z-index: 5;
+}
+
+.common-participants {
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    var(--color-main-dark) 0%,
+    var(--color-main-light) 100%
+  );
+  padding: 6px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(107, 70, 193, 0.2);
 }
 .max-participants {
   color: #999;

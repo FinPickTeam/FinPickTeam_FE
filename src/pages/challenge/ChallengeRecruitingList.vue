@@ -1,19 +1,14 @@
 <template>
   <div class="challenge-recruiting-list">
     <div class="content">
-      <!-- 공통 챌린지 섹션 (공지 박스는 섹션 내부에 표시) -->
+      <!-- 공통 챌린지 섹션 -->
       <ChallengeSection
         title="공통 챌린지"
         :challenges="commonChallenges"
         type="common"
         icon-class="fas fa-users"
         :isRecruitingPage="true"
-        :notice="!isFirstDay ? noticeText : ''"
-        :emptyMessage="
-          isFirstDay
-            ? '현재 모집 중인 공통 챌린지가 없습니다.'
-            : '이번 모집은 종료되었습니다.'
-        "
+        emptyMessage="현재 모집 중인 공통 챌린지가 없습니다."
         @cardClick="handleCardClick"
       />
 
@@ -44,31 +39,31 @@ const loading = ref(false);
 const error = ref('');
 const allRecruiting = ref([]);
 
-// 월 1일 체크
-const isFirstDay = computed(() => new Date().getDate() === 1);
-
-// 다음달 1일 포맷
-const nextRecruitDate = computed(() => {
-  const now = new Date();
-  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-  const yyyy = next.getFullYear();
-  const mm = String(next.getMonth() + 1).padStart(2, '0');
-  const dd = String(next.getDate()).padStart(2, '0');
-  return `${yyyy}.${mm}.${dd}`;
-});
-
-// 공지 문구
-const noticeText = computed(
-  () =>
-    `이번 모집은 종료되었어요. 다음 공통 챌린지는 ${nextRecruitDate.value} 00:00에 신청 가능!`
-);
-
 // 데이터 로드
 onMounted(async () => {
   loading.value = true;
   try {
-    const list = await getChallengeList({ status: 'RECRUITING' });
-    allRecruiting.value = Array.isArray(list) ? list : [];
+    // 모집중인 챌린지와 공통 챌린지를 모두 가져오기
+    const [recruitingList, commonList] = await Promise.all([
+      getChallengeList({ status: 'RECRUITING' }),
+      getChallengeList({ type: 'COMMON' }),
+    ]);
+
+    // 모집중인 챌린지
+    const recruiting = Array.isArray(recruitingList) ? recruitingList : [];
+
+    // 공통 챌린지 (모집 상태와 관계없이)
+    const common = Array.isArray(commonList) ? commonList : [];
+
+    // 중복 제거 (ID 기준)
+    const allChallenges = [...recruiting];
+    common.forEach((commonChallenge) => {
+      if (!allChallenges.find((c) => c.id === commonChallenge.id)) {
+        allChallenges.push(commonChallenge);
+      }
+    });
+
+    allRecruiting.value = allChallenges;
   } catch (e) {
     error.value = e?.response?.data?.message || e?.message || '목록 조회 실패';
     allRecruiting.value = [];
@@ -77,19 +72,12 @@ onMounted(async () => {
   }
 });
 
-// 필터링 (참여중 제외)
-const recruitingBase = computed(() => {
-  return allRecruiting.value.filter(
-    (c) => !c?.isParticipating && !c?.participating
-  );
-});
-
 // 타입 분리
 const commonChallenges = computed(() =>
-  recruitingBase.value.filter((c) => (c?.type || '').toUpperCase() === 'COMMON')
+  allRecruiting.value.filter((c) => (c?.type || '').toUpperCase() === 'COMMON')
 );
 const groupChallenges = computed(() =>
-  recruitingBase.value.filter((c) => (c?.type || '').toUpperCase() === 'GROUP')
+  allRecruiting.value.filter((c) => (c?.type || '').toUpperCase() === 'GROUP')
 );
 
 // 카드 클릭
