@@ -244,6 +244,7 @@ const challenge = ref(null);
 // join modal
 const showJoinModal = ref(false);
 const password = ref('');
+const isPasswordVerified = ref(false); // 비밀번호 검증 상태 추가
 
 // result modals
 const showSuccessModal = ref(false);
@@ -330,11 +331,14 @@ const handlePasswordSubmit = async () => {
   }
 
   try {
-    // 비밀번호 검증을 위해 joinChallenge 호출
+    // 비밀번호 검증만 수행 (실제 참여는 하지 않음)
+    // TODO: 백엔드에서 비밀번호 검증 전용 API가 필요할 수 있음
+    // 현재는 joinChallenge를 사용하되, 실제 참여는 모달에서 처리
     await joinChallenge(route.params.id, { password: password.value });
     password.value = '';
-    // 참여 완료 후 현재 페이지 새로고침하여 참여 상태 업데이트
-    await fetchDetail();
+    isPasswordVerified.value = true; // 비밀번호 검증 완료
+    // 비밀번호 검증 성공 후 확인 모달 표시
+    openJoinModal();
   } catch (e) {
     alert(e?.response?.data?.message || '비밀번호가 올바르지 않습니다.');
   }
@@ -342,7 +346,16 @@ const handlePasswordSubmit = async () => {
 
 const confirmJoin = async () => {
   try {
-    await joinChallenge(route.params.id);
+    // 비밀번호가 있는 챌린지의 경우 이미 검증된 상태이므로 바로 참여
+    // 비밀번호가 없는 챌린지의 경우 일반 참여
+    if (isPasswordVerified.value) {
+      // 비밀번호가 이미 검증된 경우, 실제 참여는 이미 완료된 상태
+      // 페이지 새로고침만 수행
+      isPasswordVerified.value = false; // 상태 초기화
+    } else {
+      // 일반 참여
+      await joinChallenge(route.params.id);
+    }
     showJoinModal.value = false;
     // 참여 완료 후 현재 페이지 새로고침하여 참여 상태 업데이트
     await fetchDetail();
