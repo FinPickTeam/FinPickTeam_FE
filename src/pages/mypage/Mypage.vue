@@ -5,23 +5,51 @@
       <div class="avatar-container">
         <div class="avatar-pixel">
           <img :src="baseAvatar" class="avatar-img" alt="아바타" />
-          <div v-if="wearingTitle" class="title-placeholder">
-            <span class="item-text">칭호</span>
-          </div>
-          <div v-if="wearingShirt" class="shirt-placeholder">
-            <span class="item-text">상의</span>
-          </div>
-          <div v-if="wearingShoes" class="shoes-placeholder">
-            <span class="item-text">신발</span>
-          </div>
+          <img
+            v-if="wearingTitle"
+            :src="
+              convertS3Url(
+                avatarItems.find((item) => item.itemId === wearingTitle)
+                  ?.imageUrl
+              )
+            "
+            class="title-img"
+            alt="칭호"
+          />
+          <img
+            v-if="wearingShirt"
+            :src="
+              convertS3Url(
+                avatarItems.find((item) => item.itemId === wearingShirt)
+                  ?.imageUrl
+              )
+            "
+            class="shirt-img"
+            alt="상의"
+          />
+          <img
+            v-if="wearingShoes"
+            :src="
+              convertS3Url(
+                avatarItems.find((item) => item.itemId === wearingShoes)
+                  ?.imageUrl
+              )
+            "
+            class="shoes-img"
+            alt="신발"
+          />
           <!-- 여러 액세서리를 동시에 표시 -->
-          <div
+          <img
             v-for="(glassesId, index) in wearingGlasses"
             :key="index"
-            class="glasses-placeholder"
-          >
-            <span class="item-text">액세서리</span>
-          </div>
+            :src="
+              convertS3Url(
+                avatarItems.find((item) => item.itemId === glassesId)?.imageUrl
+              )
+            "
+            class="glasses-img"
+            alt="액세서리"
+          />
         </div>
       </div>
     </div>
@@ -115,14 +143,21 @@ import { ref, computed } from "vue";
 import { useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { useAvatarStore } from "../../stores/avatar.js";
-import { getCurrentCoin, getMyCoinStatus } from "@/api/mypage/avatar";
+import {
+  getCurrentCoin,
+  getMyCoinStatus,
+} from "@/api/mypage/avatar";
+import {
+  getAvatarStatus,
+  getClothes,
+} from "@/api/mypage/avatar/avatarApi.js";
 import { useAuthStore } from "@/stores/auth";
 import baseAvatar from "./avatar/avatarimg/avatar-base.png";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import { onMounted } from "vue";
-import {useProfileStore} from "@/stores/profile.js";
+import { useProfileStore } from "@/stores/profile.js";
 
 library.add(faAngleRight);
 
@@ -130,7 +165,7 @@ const router = useRouter();
 const avatarStore = useAvatarStore();
 const authStore = useAuthStore();
 const { coin } = storeToRefs(avatarStore);
-const profileStore=useProfileStore();
+const profileStore = useProfileStore();
 
 // 레벨 텍스트 계산 (기본값으로 설정)
 const levelText = computed(() => {
@@ -152,44 +187,49 @@ const currentCoinDisplay = computed(() => {
   return coin.value || coinStatus.value.amount;
 });
 
-// 착용 중인 아이템 확인
+// 아바타 상태 관리 (AvatarShop2.vue와 동일한 방식)
+const avatarItems = ref([]); // API에서 받아온 모든 아이템 데이터
+const avatar = ref(null); // 아바타 데이터를 저장할 변수
+
+// S3 URL을 HTTPS URL로 변환하는 함수
+const convertS3Url = (s3Url) => {
+  if (!s3Url) return "";
+  if (s3Url.startsWith("s3://")) {
+    return s3Url.replace(
+      "s3://finpickbucket/",
+      "https://finpickbucket.s3.ap-northeast-2.amazonaws.com/"
+    );
+  }
+  return s3Url;
+};
+
+// 착용 중인 아이템 확인 (AvatarShop2.vue와 동일한 방식)
 const wearingTitle = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("titles");
-  return wearingItem ? wearingItem.id : null;
+  const item = avatarItems.value.find(
+    (item) => item.type === "level" && item.wearing
+  );
+  return item ? item.itemId : null;
 });
 
 const wearingShirt = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("shirts");
-  return wearingItem ? wearingItem.id : null;
+  const item = avatarItems.value.find(
+    (item) => item.type === "top" && item.wearing
+  );
+  return item ? item.itemId : null;
 });
 
 const wearingShoes = computed(() => {
-  const wearingItem = avatarStore.getWearingItem("shoes");
-  return wearingItem ? wearingItem.id : null;
+  const item = avatarItems.value.find(
+    (item) => item.type === "shoes" && item.wearing
+  );
+  return item ? item.itemId : null;
 });
 
-// 여러 액세서리를 동시에 착용할 수 있도록 수정
 const wearingGlasses = computed(() => {
-  const wearingItems = avatarStore.getWearingItems("glasses");
-  return wearingItems.map((item) => item.id);
-});
-
-// 착용 중인 아이템 이미지 가져오기 (placeholder로 처리)
-const getTitleImage = computed(() => {
-  return null; // placeholder 처리
-});
-
-const getShirtImage = computed(() => {
-  return null; // placeholder 처리
-});
-
-const getShoesImage = computed(() => {
-  return null; // placeholder 처리
-});
-
-// 여러 액세서리 이미지를 반환하는 함수 (placeholder로 처리)
-const getGlassesImages = computed(() => {
-  return []; // placeholder 처리
+  const items = avatarItems.value.filter(
+    (item) => item.type === "accessory" && item.wearing
+  );
+  return items.map((item) => item.itemId);
 });
 
 function goToMyHistory() {
@@ -220,6 +260,69 @@ function goToPinpickCertificate() {
 function goToCustomerService() {
   router.push("/customer-support");
 }
+
+// 아바타 상태 조회 (AvatarShop2.vue와 동일한 방식)
+const fetchAvatarAndItemData = async () => {
+  try {
+    console.log("아바타 데이터 조회 시작");
+
+    // 아바타 상태 조회
+    const avatarResponse = await getAvatarStatus();
+    console.log("아바타 상태 응답:", avatarResponse);
+
+    if (avatarResponse.data && avatarResponse.data.data) {
+      avatar.value = avatarResponse.data.data;
+      console.log("아바타 상태 저장:", avatar.value);
+    }
+
+    // 모든 아이템 조회
+    const itemsResponse = await getClothes();
+    console.log("아이템 목록 응답:", itemsResponse);
+
+    if (itemsResponse.data && itemsResponse.data.data) {
+      const allItems = itemsResponse.data.data;
+
+      // 착용 상태 설정
+      const itemsWithWearingStatus = allItems.map((item) => ({
+        ...item,
+        wearing: false, // 기본값은 착용하지 않음
+      }));
+
+      // 아바타 상태에 따라 착용 상태 설정
+      if (avatar.value) {
+        if (avatar.value.levelId) {
+          const levelItem = itemsWithWearingStatus.find(
+            (item) => item.itemId === avatar.value.levelId
+          );
+          if (levelItem) levelItem.wearing = true;
+        }
+        if (avatar.value.topId) {
+          const topItem = itemsWithWearingStatus.find(
+            (item) => item.itemId === avatar.value.topId
+          );
+          if (topItem) topItem.wearing = true;
+        }
+        if (avatar.value.shoesId) {
+          const shoesItem = itemsWithWearingStatus.find(
+            (item) => item.itemId === avatar.value.shoesId
+          );
+          if (shoesItem) shoesItem.wearing = true;
+        }
+        if (avatar.value.accessoryId) {
+          const accessoryItem = itemsWithWearingStatus.find(
+            (item) => item.itemId === avatar.value.accessoryId
+          );
+          if (accessoryItem) accessoryItem.wearing = true;
+        }
+      }
+
+      avatarItems.value = itemsWithWearingStatus;
+      console.log("아이템 목록 저장:", avatarItems.value);
+    }
+  } catch (error) {
+    console.error("아바타 데이터 조회 실패:", error);
+  }
+};
 
 // 포인트 데이터 가져오기
 const fetchCurrentCoin = async () => {
@@ -281,7 +384,7 @@ const fetchCurrentCoin = async () => {
 
 // 컴포넌트 마운트 시 저장된 아바타 정보와 포인트 불러오기
 onMounted(() => {
-  avatarStore.loadAvatar();
+  fetchAvatarAndItemData(); // 아바타 데이터 조회 (AvatarShop2.vue와 동일한 방식)
   fetchCurrentCoin();
 });
 </script>
@@ -441,6 +544,35 @@ onMounted(() => {
   width: 140px;
   height: 218px;
   z-index: 1;
+}
+
+.title-img,
+.shirt-img,
+.shoes-img,
+.glasses-img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 140px;
+  height: 218px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.title-img {
+  z-index: 2;
+}
+
+.shirt-img {
+  z-index: 2;
+}
+
+.shoes-img {
+  z-index: 2;
+}
+
+.glasses-img {
+  z-index: 3;
 }
 .shirt-img,
 .pants-img,

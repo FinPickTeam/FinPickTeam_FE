@@ -36,7 +36,6 @@ import CertificatePasswordChangeNew from "../pages/mypage/MyCertificate/Certific
 import CertificatePasswordChangeConfirm from "../pages/mypage/MyCertificate/CertificatePassword-Change-Confirm.vue";
 import CustomerSupport from "../pages/mypage/CustomerSupport.vue";
 import Dictionary from "../pages/home/Dictionary.vue";
-import AvatarShop from "../pages/mypage/avatar/AvatarShop.vue";
 import AvatarShop2 from "../pages/mypage/avatar/AvatarShop2.vue";
 
 // home
@@ -429,7 +428,7 @@ const router = createRouter({
           component: CustomerSupport,
         },
 
-        { path: "avatar-shop", name: "avatar-shop", component: AvatarShop },
+        { path: "avatar-shop", name: "avatar-shop", component: AvatarShop2 },
         { path: "avatar-shop2", name: "avatar-shop2", component: AvatarShop2 },
       ],
     },

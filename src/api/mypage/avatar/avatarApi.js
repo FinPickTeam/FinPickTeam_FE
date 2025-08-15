@@ -1,11 +1,11 @@
 import instance from "../../instance.js";
 
-// 현재 포인트 조회
+// 현재 포인트 조회 (coin/status API 사용)
 export const getCurrentCoin = async (userId) => {
   try {
     console.log("현재 포인트 조회 시작, userId:", userId);
-    // 백엔드에서 @AuthenticationPrincipal을 사용하므로 userId 파라미터 없이 호출
-    const response = await instance.get(`/avatar/getCurCoin`);
+    // coin/status API에서 amount 필드를 현재 포인트로 사용
+    const response = await instance.get(`/coin/status`);
     console.log("현재 포인트 조회 결과:", response);
     return response;
   } catch (error) {
@@ -16,26 +16,12 @@ export const getCurrentCoin = async (userId) => {
   }
 };
 
-// 누적 포인트 조회
-export const getMyCoinStatus = async () => {
+// 아바타 상태 조회 (PUT 후 수정된 상태 조회용)
+export const getAvatarStatus = async () => {
   try {
-    console.log("누적 포인트 조회 시작");
-    const response = await instance.get(`/coin/status`);
-    console.log("누적 포인트 조회 결과:", response);
-    return response;
-  } catch (error) {
-    console.error("누적 포인트 조회 에러:", error);
-    console.error("에러 응답:", error.response?.data);
-    console.error("에러 상태:", error.response?.status);
-    throw error;
-  }
-};
-
-// 아바타 상태 조회
-export const getAvatarStatus = async (userId) => {
-  try {
-    console.log("아바타 상태 조회 시작, userId:", userId);
-    const response = await instance.get(`/avatar/userId=${userId}`);
+    console.log("아바타 상태 조회 시작");
+    // 백엔드에서 @AuthenticationPrincipal을 사용하므로 userId 파라미터 없이 호출
+    const response = await instance.get(`/avatar/userId=1`); // 경로 패턴을 맞추기 위해 임의의 값 사용
     console.log("아바타 상태 조회 결과:", response);
     return response;
   } catch (error) {
@@ -43,8 +29,6 @@ export const getAvatarStatus = async (userId) => {
     throw error;
   }
 };
-
-// 의상 전체 조회
 
 // 의상 전체 조회
 export const getClothes = async () => {
@@ -62,22 +46,6 @@ export const getClothes = async () => {
     throw error;
   }
 };
-// export const getClothes = async () => {
-//   // userId는 사용하지 않으므로 제거해도 좋습니다.
-//   try {
-//     console.log("의상 전체 조회 시작");
-
-//     // 백엔드 컨트롤러에 명시된 정확한 URL로 수정해야 합니다.
-//     // 예: "/clothes", "/list" 등
-//     const response = await instance.get(`/avatar/clothes`); // ◀◀◀ 이 부분을 백엔드와 동일하게 수정
-
-//     console.log("의상 전체 조회 결과:", response);
-//     return response;
-//   } catch (error) {
-//     console.error("의상 전체 조회 에러:", error);
-//     throw error;
-//   }
-// };
 // 의상 구매
 export const insertClothe = async (clotheData) => {
   try {
@@ -160,45 +128,49 @@ export const insertGifticon = async (gifticonData) => {
   }
 };
 
-// 아바타 수정
-// export const updateAvatar = async (avatarData) => {
-//   try {
-//     console.log("아바타 수정 시작, 데이터:", avatarData);
-
-//     // 새로운 API 명세에 맞게 items 배열을 query parameter로 전송
-//     const params = {
-//       userId: avatarData.userId,
-//       items: avatarData.items || [], // 배열로 전송
-//     };
-
-//     console.log("전송할 파라미터:", params);
-
-//     const response = await instance.put(`/avatar/updateAvatar`, null, {
-//       params: params,
-//     });
-//     console.log("아바타 수정 결과:", response);
-//     return response;
-//   } catch (error) {
-//     console.error("아바타 수정 에러:", error);
-//     console.error("에러 응답 데이터:", error.response?.data);
-//     console.error("에러 상태:", error.response?.status);
-//     throw error;
-//   }
-// };
-export const updateAvatar = async (avatarData) => {
+// 아바타 수정 (PUT /api/avatar/updateAvatar)
+export const updateAvatar = async (items = []) => {
   try {
-    console.log("아바타 수정 시작, 데이터:", avatarData);
-    const itemsString = (avatarData.items || []).join(","); // [1, 2] -> "1,2"
+    console.log("아바타 수정 시작, items:", items);
 
-    const response = await instance.put(
-      `/avatar/updateAvatar?items=${itemsString}`
-    );
-    console.log("아바타 수정 결과:", response);
+    // items=4&items=31 형태로 만들기
+    const qs = new URLSearchParams();
+    items.forEach((id) => qs.append("items", id));
+
+    const url = `/avatar/updateAvatar?${qs.toString()}`;
+    console.log("요청 URL:", url);
+
+    // 본문 없이 쿼리스트링만 전달 (PUT)
+    const res = await instance.put(url);
+    console.log("아바타 수정 성공:", res);
+    return res;
+  } catch (error) {
+    console.error("아바타 수정 에러:", error.response?.data || error);
+    throw error;
+  }
+};
+// 아바타 조회 (GET /api/avatar/userId={userId})
+export const getAvatar = async (userId) => {
+  try {
+    console.log("아바타 조회 시작, userId:", userId);
+    const response = await instance.get(`/avatar/userId=${userId}`);
+    console.log("아바타 조회 결과:", response);
     return response;
   } catch (error) {
-    console.error("아바타 수정 에러:", error);
-    console.error("에러 응답:", error.response?.data);
-    console.error("에러 상태:", error.response?.status);
+    console.error("아바타 조회 에러:", error);
+    throw error;
+  }
+};
+
+// 아바타 생성 (POST /api/avatar/userId={userId})
+export const createAvatar = async (userId) => {
+  try {
+    console.log("아바타 생성 시작, userId:", userId);
+    const response = await instance.post(`/avatar/userId=${userId}`);
+    console.log("아바타 생성 결과:", response);
+    return response;
+  } catch (error) {
+    console.error("아바타 생성 에러:", error);
     throw error;
   }
 };
