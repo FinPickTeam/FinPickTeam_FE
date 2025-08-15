@@ -125,8 +125,7 @@ const testChallengeResult = ref({
     stockPrice: 75000,
     stockPredictedPrice: '+2500',
     stockChangeRate: '+3.45',
-    stockSummary:
-      'AI 반도체 시장 성장과 함께 삼성전자의 기술 경쟁력이 향상되고 있어 투자 가치가 높습니다.',
+    stockSummary: '삼성전자',
     stockChartUrl: 'https://example.com/chart.png', // 선택사항
   },
 });
