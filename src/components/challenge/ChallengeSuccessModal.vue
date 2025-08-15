@@ -293,7 +293,6 @@ watch(
   padding: 12px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-top: 16px;
   border: 2px solid #ffd700;
 }
@@ -326,8 +325,8 @@ watch(
   align-items: center;
   background: var(--color-bg);
   border-radius: 16px;
-  box-shadow: 0 2px 8px 0 #0002;
-  padding: 10px 18px;
+  border: 2px solid #f5f5f5;
+  padding: 10px 12px;
   width: 100%;
   font-family: var(--font-main);
   position: relative;
