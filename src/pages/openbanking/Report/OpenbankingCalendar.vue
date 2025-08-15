@@ -372,10 +372,10 @@ watch(
   white-space: nowrap;
 }
 .obcal-list-amount.income {
-  color: #4318d1;
+  color: var(--color-main);
 }
 .obcal-list-amount.expense {
-  color: #ef4444;
+  color: var(--color-accent);
 }
 .obcal-list-name {
   font-size: 0.9rem;

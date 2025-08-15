@@ -200,7 +200,7 @@ onMounted(async () => {
   background: none;
   border: none;
   font-size: 16px;
-  color: #4318d1;
+  color: var(--color-main);
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
@@ -223,7 +223,7 @@ onMounted(async () => {
 }
 
 .bg-deposit {
-  background: #4318d1;
+  background: var(--color-main);
 }
 .bg-savings {
   background: #059669;
@@ -244,7 +244,7 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   border: 3cm solid #f3f3f3;
-  border-top: 4px solid #4318d1;
+  border-top: 4px solid var(--color-main);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;

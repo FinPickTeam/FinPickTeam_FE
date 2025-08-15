@@ -23,55 +23,58 @@
       </div>
     </section>
 
-    <!-- ───── 계좌 섹션 ───── -->
-    <div class="obmyhome-section-card">
-      <div class="obmyhome-section-title-row">
-        <span class="obmyhome-section-title">계좌</span>
-        <button class="obmyhome-section-more" @click="goToAccountList">
-          ▶
+    <!-- ───── 계좌 섹션 (리뉴얼) ───── -->
+    <section class="content-card" v-if="accounts.length > 0">
+      <div class="card-title-row" @click="goToAccountList">
+        <h2 class="card-title">계좌</h2>
+        <button class="card-more-btn">
+          <font-awesome-icon :icon="['fas', 'chevron-right']" />
         </button>
       </div>
-      <div class="obmyhome-account-list">
-        <ListItemCard
-          v-for="a in accounts.slice(0, 2)"
+      <div class="item-list">
+        <div
+          class="list-item"
+          v-for="a in accounts.slice(0, 3)"
           :key="a.id"
-          :logo="a.logo"
-          :bank="a.bank"
-          :badge="a.type"
-          :badgeClass="badgeClass(a.type)"
-          :amount="a.balance"
-          :isNegative="a.balance < 0"
-          :name="a.name"
-          :sub="a.accountNumber"
           @click="onClickAccount(a)"
-        />
+        >
+          <img :src="a.logo" alt="" class="item-logo" />
+          <div class="item-text-content">
+            <span class="item-name">{{ a.name }}</span>
+            <span class="item-amount" :class="{ negative: a.balance < 0 }"
+              >{{ formatCurrency(a.balance) }}원</span
+            >
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <!-- ───── 카드 섹션 ───── -->
-    <div class="obmyhome-section-card">
-      <div class="obmyhome-section-title-row">
-        <span class="obmyhome-section-title">카드</span>
-        <button class="obmyhome-section-more" @click="goToCardList">▶</button>
+    <!-- ───── 카드 섹션 (리뉴얼) ───── -->
+    <section class="content-card" v-if="cards.length > 0">
+      <div class="card-title-row" @click="goToCardList">
+        <h2 class="card-title">카드</h2>
+        <button class="card-more-btn">
+          <font-awesome-icon :icon="['fas', 'chevron-right']" />
+        </button>
       </div>
-      <div class="obmyhome-section-subtitle-row">
-        <span class="obmyhome-section-subtitle">이번달 소비금액</span>
-      </div>
-      <div class="obmyhome-card-list">
-        <ListItemCard
+      <div class="item-list">
+        <div
+          class="list-item"
           v-for="c in cards.slice(0, 2)"
           :key="c.id"
-          :logo="c.logo"
-          :bank="c.bank"
-          :badge="c.type"
-          badgeClass="bg-card"
-          :amount="c.amount"
-          :isNegative="c.amount < 0"
-          :name="c.name"
-          :sub="c.cardMaskednum"
           @click="onClickCard(c)"
-        />
+        >
+          <img :src="c.logo" alt="" class="item-logo" />
+          <div class="item-text-content">
+            <span class="item-name">{{ c.name }}</span>
+            <span class="item-amount" :class="{ negative: c.amount < 0 }"
+              >{{ formatCurrency(c.amount) }}원</span
+            >
+          </div>
+        </div>
       </div>
+
+      <!-- 기존 소비 리포트 버튼 유지 -->
       <div class="obmyhome-report-buttons">
         <button class="obmyhome-report-btn daily" @click="goToDailyReport">
           이번 달 소비 내역
@@ -80,7 +83,7 @@
           월간 소비 리포트
         </button>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -94,6 +97,7 @@ import {
   faPlus,
   faRotateRight,
   faClock,
+  faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 
 import ListItemCard from '@/components/openbanking/ListItemCard.vue';
@@ -102,7 +106,7 @@ import { getAccountsWithTotal } from '@/api/openbanking/accountsApi';
 import { getCardsWithTotal } from '@/api/openbanking/cardsApi';
 import { getAssetSummaryCompare } from '@/api/openbanking/assetSummaryApi';
 
-library.add(faSearch, faPlus, faRotateRight, faClock);
+library.add(faSearch, faPlus, faRotateRight, faClock, faChevronRight);
 
 const router = useRouter();
 const { bankLogo, cardLogo } = useLogos();
@@ -263,7 +267,7 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   display: grid;
   place-items: center;
   font-size: 18px;
-  color: #4318d1;
+  color: var(--color-main);
   border-radius: 10px;
 }
 .icon-btn.back {
@@ -273,13 +277,13 @@ const onAdd = () => router.push('/openbanking/account-link-select');
 /* ===== Asset hero ===== */
 .asset-hero {
   border-radius: 18px;
-  margin: 0 16px 12px 16px;
+  margin: 0 16px 20px 16px; /* increase bottom spacing */
   padding: 14px 20px 16px 20px;
 }
 .asset-hero-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
 }
 .hero-title {
   font-size: 0.98rem;
@@ -306,8 +310,11 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   margin-top: 6px;
   font-size: 2rem;
   font-weight: 900;
-  color: #4318d1;
+  color: var(--color-main);
   letter-spacing: 0.5px;
+  white-space: nowrap; /* keep on one line */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .hero-delta {
   margin-top: 6px;
@@ -327,10 +334,89 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   font-weight: 700;
 }
 
+/* ===== Content card (리뉴얼) ===== */
+.content-card {
+  background: #fff;
+  border-radius: 18px;
+  margin: 0 16px 12px 16px;
+  padding: 16px 20px 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.card-more-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: #bdbdbd;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 6px;
+  transition: background 0.15s;
+}
+.card-more-btn:hover {
+  background: #f3f3f3;
+}
+
+.item-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  cursor: pointer;
+}
+
+.item-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+.item-text-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.item-name {
+  color: #666;
+  white-space: nowrap;
+}
+
+.item-amount {
+  font-weight: 700;
+  color: var(--color-main);
+  white-space: nowrap;
+}
+.item-amount.negative {
+  color: #e11d48;
+}
+
 /* ===== Rest (기존) ===== */
 .bg-card {
   background: #ece9fd;
-  color: #4318d1;
+  color: var(--color-main);
 }
 
 .myhome-container {
@@ -340,8 +426,6 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   padding: 8px 0 16px;
   box-sizing: border-box;
   height: calc(100dvh - 160px);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
   padding-bottom: max(16px, env(safe-area-inset-bottom));
   min-height: 0;
 }
@@ -358,7 +442,6 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
 }
 .obmyhome-section-title {
   font-size: 1.1rem;
@@ -403,7 +486,7 @@ const onAdd = () => router.push('/openbanking/account-link-select');
 .obmyhome-report-btn {
   flex: 1;
   background: #ece9fd;
-  color: #4318d1;
+  color: var(--color-main);
   border: none;
   border-radius: 8px;
   padding: 10px 0;
@@ -424,7 +507,7 @@ const onAdd = () => router.push('/openbanking/account-link-select');
 }
 .obmyhome-report-btn.monthly {
   background: #ece9fd;
-  color: #4318d1;
+  color: var(--color-main);
 }
 .obmyhome-report-btn.monthly:hover {
   background: #e0d7fa;

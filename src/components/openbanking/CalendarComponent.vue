@@ -223,7 +223,7 @@ const attrsForCurrentMonth = computed(() => {
   background: transparent;
   border: 0;
   cursor: pointer;
-  color: #4318d1;
+  color: var(--color-main);
   border-radius: 8px;
   width: 28px;
   height: 28px;
@@ -246,7 +246,7 @@ const attrsForCurrentMonth = computed(() => {
 .summary .amount {
   font-size: 30px;
   font-weight: 800;
-  color: #4318d1;
+  color: var(--color-main);
   line-height: 1.05;
 }
 .summary .currency {
@@ -259,7 +259,7 @@ const attrsForCurrentMonth = computed(() => {
   color: #8a8a8a;
 }
 .summary .diff {
-  color: #e11d48;
+  color: var(--color-accent);
   font-weight: 700;
 }
 
@@ -306,7 +306,7 @@ const attrsForCurrentMonth = computed(() => {
   color: #111;
 }
 .day-number.is-selected {
-  color: #4318d1;
+  color: var(--color-main);
   font-weight: 800;
 }
 .day-number.is-today:not(.is-selected) {

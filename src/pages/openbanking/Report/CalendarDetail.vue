@@ -262,7 +262,7 @@ onActivated(() => {
   background: none;
   border: none;
   font-size: 22px;
-  color: #4318d1;
+  color: var(--color-main);
   cursor: pointer;
   padding: 4px 4px;
   border-radius: 8px;

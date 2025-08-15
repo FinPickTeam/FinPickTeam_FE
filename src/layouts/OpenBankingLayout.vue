@@ -185,7 +185,7 @@ const downloadPdf = () => {
   background: none;
   border: none;
   font-size: 24px;
-  color: #4318d1;
+  color: var(--color-main);
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;

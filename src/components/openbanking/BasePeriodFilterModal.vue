@@ -298,7 +298,7 @@ watch(
 }
 
 .modal-btn.primary {
-  background: linear-gradient(135deg, #5a35f0, #4318d1);
+  background: linear-gradient(135deg, #5a35f0, var(--color-main));
   color: #fff;
 }
 
@@ -337,7 +337,7 @@ watch(
   transform: translateY(-1px);
 }
 .option-card.active {
-  border-color: rgba(67, 24, 209, 0.55);
+  border-color: rgba(67, 24, 209, 0.55); /* keep semi-transparent */
   background: linear-gradient(
     0deg,
     rgba(67, 24, 209, 0.05),
@@ -359,8 +359,8 @@ watch(
   transition: border-color 0.12s ease, background 0.12s ease;
 }
 .option-card.active .dot {
-  border-color: #4318d1;
-  background: #4318d1;
+  border-color: var(--color-main);
+  background: var(--color-main);
 }
 .option-card .label {
   font-weight: 700;
@@ -372,7 +372,7 @@ watch(
   width: 20px;
   height: 20px;
   opacity: 0;
-  color: #4318d1;
+  color: var(--color-main);
   transition: opacity 0.12s ease, transform 0.12s ease;
 }
 .option-card.active .check {

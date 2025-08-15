@@ -40,7 +40,7 @@ defineProps({
 
 <style scoped>
 .item {
-  background: #fff;
+  background: var(--color-bg);
   border-radius: 16px;
   padding: 20px;
   transition: 0.15s;
@@ -83,10 +83,11 @@ defineProps({
 }
 .right-amount {
   font-weight: 700;
-  color: #4318d1;
+  color: var(--color-main);
+  white-space: nowrap; /* keep amount on one line */
 }
 .right-amount.negative {
-  color: #e11d48;
+  color: var(--color-accent);
 }
 .bottom {
   display: flex;
