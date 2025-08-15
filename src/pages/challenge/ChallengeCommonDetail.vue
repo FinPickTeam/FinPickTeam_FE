@@ -22,6 +22,14 @@
       @confirm="confirmJoin"
     />
 
+    <!-- 포인트 부족 모달 -->
+    <ChallengeInsufficientPointsModal
+      :isVisible="showInsufficientPointsModal"
+      :currentPoints="challengeStore.points.userPoints"
+      :requiredPoints="challengeStore.points.required.COMMON"
+      @close="showInsufficientPointsModal = false"
+    />
+
     <!-- 로딩 -->
     <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
@@ -127,14 +135,20 @@ import {
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
 import ChallengeJoinConfirmModal from '@/components/challenge/ChallengeJoinConfirmModal.vue';
+import ChallengeInsufficientPointsModal from '@/components/challenge/ChallengeInsufficientPointsModal.vue';
+import { useChallengeStore } from '@/stores/challenge';
 
 const route = useRoute();
+const challengeStore = useChallengeStore();
 
 const loading = ref(true);
 const challenge = ref(null);
 
 // join modal
 const showJoinModal = ref(false);
+
+// insufficient points modal
+const showInsufficientPointsModal = ref(false);
 
 // result modals
 const showSuccessModal = ref(false);
@@ -147,6 +161,13 @@ const fetchDetail = async () => {
     const id = route.params.id;
     const data = await getChallengeDetail(id);
     challenge.value = data;
+
+    // 포인트 정보 업데이트
+    try {
+      await challengeStore.fetchCoinStatus();
+    } catch (e) {
+      console.error('포인트 정보 조회 실패:', e);
+    }
 
     // 완료 + 미확인 → 결과 모달 표시
     if (
@@ -192,7 +213,20 @@ const fetchDetail = async () => {
 
 onMounted(fetchDetail);
 
+const checkPoints = () => {
+  // 포인트 부족 체크
+  if (!challengeStore.hasEnoughPointsForType('COMMON')) {
+    showInsufficientPointsModal.value = true;
+    return false;
+  }
+  return true;
+};
+
 const openJoinModal = () => {
+  // 포인트 부족 체크
+  if (!checkPoints()) {
+    return;
+  }
   showJoinModal.value = true;
 };
 
