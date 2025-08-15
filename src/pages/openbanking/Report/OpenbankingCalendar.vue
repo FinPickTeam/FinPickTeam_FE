@@ -223,8 +223,11 @@ const onDateSelected = (date) => {
 
 const onScrollToDate = ({ key, date, offset }) => {
   if (date) selectedDate.value = new Date(date);
-  scrollToKeyWithOffset(key, offset ?? SCROLL_OFFSET);
+  if (isExpanded.value) {
+    scrollToKeyWithOffset(key, offset ?? SCROLL_OFFSET);
+  }
 };
+
 const onMonthChanged = ({ year, month }) => {
   calendarPage.value = [{ year, month }];
 
@@ -240,15 +243,11 @@ const onMonthChanged = ({ year, month }) => {
     selectedDate.value = d;
   }
 };
-
 const onToggleExpanded = (expanded) => {
   isExpanded.value = expanded;
   if (!expanded) {
-    const now = new Date();
-    selectedDate.value = now;
-    calendarPage.value = [
-      { year: now.getFullYear(), month: now.getMonth() + 1 },
-    ];
+    const s = new Date(selectedDate.value);
+    calendarPage.value = [{ year: s.getFullYear(), month: s.getMonth() + 1 }];
   } else {
     ensureSelectedInMonth();
   }

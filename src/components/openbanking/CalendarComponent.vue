@@ -143,8 +143,26 @@ const navTo = (delta) => {
     year++;
   }
 
+  const sel =
+    delta < 0 ? new Date(year, month, 0) : new Date(year, month - 1, 1);
+  sel.setHours(0, 0, 0, 0);
+
+  innerSelected.value = sel;
+  emit('date-selected', sel);
+  emit('scroll-to-date', { key: formatDateKey(sel), date: sel });
+
   calendarRef.value.move({ year, month });
 };
+
+watch(
+  () => props.pages?.[0],
+  (p, prev) => {
+    if (!p) return;
+    if (!prev || prev.year !== p.year || prev.month !== p.month) {
+      emit('month-changed', { year: p.year, month: p.month });
+    }
+  }
+);
 
 const goPrevMonth = () => navTo(-1);
 const goNextMonth = () => navTo(+1);
