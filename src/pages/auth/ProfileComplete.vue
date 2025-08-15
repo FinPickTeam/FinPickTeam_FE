@@ -29,7 +29,10 @@
               <div class="progress-bar">
                 <div
                   class="progress-fill"
-                  :style="{ width: item.value + '%' }"
+                  :style="{
+                    '--target-width': item.value + '%',
+                    'animation-delay': $index * 0.1 + 's',
+                  }"
                 ></div>
               </div>
               <div class="progress-value">{{ item.value }}%</div>
@@ -55,15 +58,19 @@
 </template>
 
 <script setup>
-import {  computed } from 'vue';
+import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import {useProfileStore} from "@/stores/profile.js";
+import { useProfileStore } from '@/stores/profile.js';
 
 const router = useRouter();
 const route = useRoute();
 const profileStore = useProfileStore();
-const investmentType = computed(() => profileStore.resultType || '분석 결과 없음');
-const investmentDescription = computed(() => profileStore.resultExplain || '결과를 불러오는 데 실패했습니다.');
+const investmentType = computed(
+  () => profileStore.resultType || '분석 결과 없음'
+);
+const investmentDescription = computed(
+  () => profileStore.resultExplain || '결과를 불러오는 데 실패했습니다.'
+);
 const buttonText = computed(() => {
   const from = route.query.from;
   if (from === 'fund') {
@@ -77,10 +84,30 @@ const buttonText = computed(() => {
 
 const investmentTypeData = {
   안정형: { riskTolerance: 17, experience: 14, period: 30, expectedReturn: 16 },
-  안정추구형: { riskTolerance: 35, experience: 25, period: 45, expectedReturn: 30 },
-  위험중립형: { riskTolerance: 55, experience: 50, period: 65, expectedReturn: 55 },
-  적극투자형: { riskTolerance: 86, experience: 76, period: 90, expectedReturn: 80 },
-  공격투자형: { riskTolerance: 95, experience: 90, period: 95, expectedReturn: 95 },
+  안정추구형: {
+    riskTolerance: 35,
+    experience: 25,
+    period: 45,
+    expectedReturn: 30,
+  },
+  위험중립형: {
+    riskTolerance: 55,
+    experience: 50,
+    period: 65,
+    expectedReturn: 55,
+  },
+  적극투자형: {
+    riskTolerance: 86,
+    experience: 76,
+    period: 90,
+    expectedReturn: 80,
+  },
+  공격투자형: {
+    riskTolerance: 95,
+    experience: 90,
+    period: 95,
+    expectedReturn: 95,
+  },
 };
 
 const detailedAnalysis = computed(() => {
@@ -93,7 +120,6 @@ const detailedAnalysis = computed(() => {
     { label: '수익 기대치', value: data.expectedReturn },
   ];
 });
-
 
 // 홈으로 이동
 const goToHome = () => {
@@ -244,10 +270,37 @@ const goToHome = () => {
 
 .analysis-item {
   margin-bottom: 16px;
+  animation: slideInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.analysis-item:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.analysis-item:nth-child(2) {
+  animation-delay: 0.3s;
+}
+.analysis-item:nth-child(3) {
+  animation-delay: 0.5s;
+}
+.analysis-item:nth-child(4) {
+  animation-delay: 0.7s;
 }
 
 .analysis-item:last-child {
   margin-bottom: 0;
+}
+
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .analysis-label {
@@ -267,20 +320,122 @@ const goToHome = () => {
 .progress-bar {
   flex: 1;
   height: 8px;
-  background-color: #e2e8f0;
+  background: linear-gradient(90deg, #f1f5f9 0%, #e2e8f0 50%, #cbd5e1 100%);
   border-radius: 4px;
   overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  animation: barGlow 2s ease-in-out infinite;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 100%
+  );
+  border-radius: 4px;
+  pointer-events: none;
+  animation: barShine 3s ease-in-out infinite;
+}
+
+@keyframes barGlow {
+  0%,
+  100% {
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1),
+      0 0 8px rgba(107, 70, 193, 0.2);
+  }
+}
+
+@keyframes barShine {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
 }
 
 .progress-fill {
   height: 100%;
   background: linear-gradient(
-    to right,
-    var(--color-main-light-2),
-    var(--color-main-dark)
+    90deg,
+    var(--color-main-light-2) 0%,
+    var(--color-main) 50%,
+    var(--color-main-dark) 100%
   );
   border-radius: 4px;
-  transition: width 0.8s ease-in-out;
+  width: 0%;
+  animation: progressFill 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  transform-origin: left;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 1.5s ease-in-out infinite;
+  animation-delay: 0.8s;
+}
+
+@keyframes progressFill {
+  0% {
+    width: 0%;
+    opacity: 0;
+    transform: scaleX(0.3) translateX(-10px);
+  }
+  15% {
+    opacity: 1;
+    transform: scaleX(1.1) translateX(0);
+  }
+  30% {
+    transform: scaleX(0.95) translateX(0);
+  }
+  50% {
+    transform: scaleX(1.02) translateX(0);
+  }
+  70% {
+    transform: scaleX(0.98) translateX(0);
+  }
+  85% {
+    transform: scaleX(1.01) translateX(0);
+  }
+  100% {
+    width: var(--target-width);
+    opacity: 1;
+    transform: scaleX(1) translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 .progress-value {
@@ -289,6 +444,21 @@ const goToHome = () => {
   font-weight: 600;
   min-width: 32px;
   text-align: right;
+  animation: fadeInScale 0.8s ease-out forwards;
+  opacity: 0;
+  transform: scale(0.8);
+  animation-delay: 1.5s;
+}
+
+@keyframes fadeInScale {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 /* 요약 섹션 */
