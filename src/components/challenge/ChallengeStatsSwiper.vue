@@ -75,7 +75,7 @@ const openCommon = (s) => {
     :slides-per-view="1"
     :space-between="20"
     :pagination="{ clickable: true }"
-    :loop="false"
+    :loop="true"
     :autoplay="{ delay: 3000, disableOnInteraction: false }"
     class="stats-swiper"
   >
