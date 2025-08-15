@@ -64,23 +64,23 @@
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
-import { ref, onMounted } from "vue";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from 'vue-router';
+import { ref, onMounted } from 'vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faAngleLeft);
 
 const router = useRouter();
-const currentTime = ref("");
+const currentTime = ref('');
 
 function retryArs() {
-  router.push("/ars/verification");
+  router.push('/ars/verification');
 }
 
 function goToCustomerSupport() {
-  router.push("/customer-support");
+  router.push('/customer-support');
 }
 
 function goBack() {
@@ -90,11 +90,11 @@ function goBack() {
 function updateCurrentTime() {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
 
   currentTime.value = `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
 }
@@ -379,7 +379,7 @@ onMounted(() => {
 }
 
 .ars_fail_retry_btn:hover {
-  background: #7c4dff;
+  background: var(--color-main-dark);
 }
 
 .ars_fail_help_group {
@@ -399,7 +399,7 @@ onMounted(() => {
 }
 
 .ars_fail_help_link {
-  color: #7c4dff;
+  color: var(--color-main-dark);
   text-decoration: underline;
   font-weight: 600;
   font-size: 13px;

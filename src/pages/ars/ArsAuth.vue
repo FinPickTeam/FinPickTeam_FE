@@ -8,7 +8,10 @@
     </div>
 
     <header>
-      <div class="ars_message">ARS 인증 진행 중</div>
+      <div class="finpick-logo">
+        <h1>FinPick</h1>
+        <div class="ars_message">ARS 인증 진행 중</div>
+      </div>
     </header>
     <div class="container">
       <div class="content">
@@ -114,14 +117,14 @@
 <script setup>
 // 전화번호 자동 하이픈 포맷팅
 function formatPhoneNumber(event) {
-  let value = event.target.value.replace(/[^0-9]/g, "");
+  let value = event.target.value.replace(/[^0-9]/g, '');
   if (value.length > 11) value = value.slice(0, 11);
   let formatted = value;
   if (value.length >= 3 && value.length <= 7) {
-    formatted = value.slice(0, 3) + "-" + value.slice(3);
+    formatted = value.slice(0, 3) + '-' + value.slice(3);
   } else if (value.length > 7) {
     formatted =
-      value.slice(0, 3) + "-" + value.slice(3, 7) + "-" + value.slice(7);
+      value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7);
   }
   phoneNumber.value = formatted;
 }
@@ -131,37 +134,37 @@ function filterName(event) {
   if (isComposing) return;
   // 한글, 영문만 허용 (공백, 숫자, 특수문자 불가)
   const value = event.target.value;
-  userName.value = value.replace(/[^a-zA-Z가-힣]/g, "");
+  userName.value = value.replace(/[^a-zA-Z가-힣]/g, '');
 }
 function handleComposition(e) {
-  if (e.type === "compositionstart") isComposing = true;
-  if (e.type === "compositionend") {
+  if (e.type === 'compositionstart') isComposing = true;
+  if (e.type === 'compositionend') {
     isComposing = false;
     filterName(e);
   }
 }
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { useUserStore } from "../../stores/user.js";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '../../stores/user.js';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faAngleLeft);
 
 const router = useRouter();
 const userStore = useUserStore();
-const phoneNumber = ref("");
-const birthDate = ref("");
-const selectedCarrier = ref("");
-const userName = ref("");
+const phoneNumber = ref('');
+const birthDate = ref('');
+const selectedCarrier = ref('');
+const userName = ref('');
 const showErrors = ref(false);
 
 // 모든 필수 필드가 입력되었는지 확인
 const isFormValid = computed(() => {
   // 휴대폰 번호: 11자리(하이픈 제외), 생년월일: 8자리(YYYYMMDD)
-  const phoneDigits = phoneNumber.value.replace(/[^0-9]/g, "");
-  const birthDigits = birthDate.value.replace(/[^0-9]/g, "");
+  const phoneDigits = phoneNumber.value.replace(/[^0-9]/g, '');
+  const birthDigits = birthDate.value.replace(/[^0-9]/g, '');
   return (
     phoneDigits.length === 11 &&
     selectedCarrier.value &&
@@ -179,7 +182,7 @@ function validateAndSubmit() {
     // 사용자 이름을 스토어에 저장
     userStore.setUserName(userName.value);
     // ArsVerification.vue로 라우팅
-    router.push("/ars/verification");
+    router.push('/ars/verification');
   }
 }
 
@@ -190,13 +193,13 @@ function goBack() {
 function filterNumbers(event) {
   // 숫자와 점(.)만 허용 (생년월일용)
   const value = event.target.value;
-  const filtered = value.replace(/[^0-9.]/g, "");
+  const filtered = value.replace(/[^0-9.]/g, '');
 
   // 입력 필드에 따라 다른 처리
-  if (event.target.id === "phone") {
+  if (event.target.id === 'phone') {
     // 휴대폰 번호는 숫자만
-    phoneNumber.value = value.replace(/[^0-9]/g, "");
-  } else if (event.target.id === "birthday") {
+    phoneNumber.value = value.replace(/[^0-9]/g, '');
+  } else if (event.target.id === 'birthday') {
     // 생년월일은 숫자와 점만
     birthDate.value = filtered;
   }
@@ -204,7 +207,7 @@ function filterNumbers(event) {
 
 function formatBirthDate(event) {
   // 숫자만 입력받기
-  let value = event.target.value.replace(/[^0-9]/g, "");
+  let value = event.target.value.replace(/[^0-9]/g, '');
 
   // 8자리로 제한
   if (value.length > 8) {
@@ -212,15 +215,15 @@ function formatBirthDate(event) {
   }
 
   // YYYY.MM.DD 형식으로 포맷팅
-  let formatted = "";
+  let formatted = '';
   if (value.length >= 1) {
     formatted = value.slice(0, 4);
   }
   if (value.length >= 5) {
-    formatted += "." + value.slice(4, 6);
+    formatted += '.' + value.slice(4, 6);
   }
   if (value.length >= 7) {
-    formatted += "." + value.slice(6, 8);
+    formatted += '.' + value.slice(6, 8);
   }
 
   birthDate.value = formatted;
@@ -342,6 +345,34 @@ body {
   background-clip: text;
   color: transparent;
 }
+.finpick-logo {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-top: 20px;
+}
+
+.finpick-logo h1 {
+  font-family: 'JalnanGothic', sans-serif !important;
+  font-size: 32px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  background: var(--color-main);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.finpick-logo p {
+  color: #888;
+  font-size: 15px;
+  text-align: center;
+  font-weight: 400;
+  margin-top: 4px;
+  margin-bottom: 0;
+  letter-spacing: 0;
+}
+
 .ars_message {
   color: #666666;
   margin-bottom: clamp(1rem, 4vh, 2.5rem);
@@ -397,16 +428,16 @@ input {
   transition: all 0.2s ease;
 }
 .carrier_options button.selected {
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
-  border-color: #8e74e3;
 }
 .confirm_button {
   width: 100%;
   height: clamp(52px, 7vh, 64px);
   border: none;
   border-radius: clamp(8px, 1.5vw, 12px);
-  background: #8e74e3;
+  background: var(--color-main-dark);
+
   color: #fff;
   font-size: clamp(1rem, 2.8vw, 1.3rem);
   font-weight: 700;
