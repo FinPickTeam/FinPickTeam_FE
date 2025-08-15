@@ -26,7 +26,7 @@ const goBack = () => {
     if (previousStep < 1) {
       // 1단계 이전으로 가면 'from'에 따라 분기
       if (from === 'fund') {
-        router.push('/finance/fund');
+        router.push('/finance');
       } else if (from === 'mypage') {
         router.push('/mypage');
       } else {
@@ -35,7 +35,7 @@ const goBack = () => {
     } else {
       // 이전 단계로 이동 (from 유지)
       router.push(
-        `/mypage/financetest/profile-step-${previousStep}?from=${from}`
+        `/profile-step-${previousStep}?from=${from}`
       );
     }
   } else {

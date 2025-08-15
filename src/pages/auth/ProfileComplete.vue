@@ -65,12 +65,14 @@ import { useProfileStore } from '@/stores/profile.js';
 const router = useRouter();
 const route = useRoute();
 const profileStore = useProfileStore();
+
 const investmentType = computed(
   () => profileStore.resultType || '분석 결과 없음'
 );
 const investmentDescription = computed(
   () => profileStore.resultExplain || '결과를 불러오는 데 실패했습니다.'
 );
+
 const buttonText = computed(() => {
   const from = route.query.from;
   if (from === 'fund') {
@@ -124,6 +126,7 @@ const detailedAnalysis = computed(() => {
 // 홈으로 이동
 const goToHome = () => {
   const from = route.query.from || 'signup';
+  profileStore.resetAnswers();
   if (from === 'mypage') {
     router.push('/mypage');
   } else if (from === 'fund') {
