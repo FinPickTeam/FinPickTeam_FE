@@ -25,17 +25,12 @@ import ProfileStep8 from "../pages/mypage/financetest/ProfileStep8.vue";
 import ProfileStep9 from "../pages/mypage/financetest/ProfileStep9.vue";
 import ProfileStep10 from "../pages/mypage/financetest/ProfileStep10.vue";
 
-import CertificatePasswordChange from "../pages/mypage/MyCertificate/CertificatePasswordChange.vue";
-import CertificatePasswordChangeNew from "../pages/mypage/MyCertificate/CertificatePassword-Change-New.vue";
-import CertificatePasswordChangeConfirm from "../pages/mypage/MyCertificate/CertificatePassword-Change-Confirm.vue";
-import CustomerSupport from "../pages/mypage/CustomerSupport.vue";
-import Dictionary from "../pages/home/Dictionary.vue";
-
-// ARS 관련 컴포넌트들
+// ARS
 import ArsAuth from "../pages/ars/ArsAuth.vue";
 import ArsVerification from "../pages/ars/ArsVerification.vue";
 import ArsComplete from "../pages/ars/ArsComplete.vue";
 import ArsFail from "../pages/ars/ArsFail.vue";
+
 // finance pages
 import FinanceHome from "../pages/finance/FinanceHome.vue";
 import Deposit from "../pages/finance/Deposit.vue";
@@ -60,6 +55,7 @@ import ProductCard_installment from "../components/finance/installment/ProductCa
 import Home from "../pages/home/Home.vue";
 import Notification from "../pages/home/Notification.vue";
 import Quiz from "../pages/home/Quiz.vue";
+import Dictionary from "../pages/home/Dictionary.vue";
 import Mypage from "../pages/mypage/Mypage.vue";
 import Withdraw from "../pages/mypage/Withdraw.vue";
 import WithdrawSuccess from "../pages/mypage/WithdrawSuccess.vue";
@@ -67,7 +63,11 @@ import Profile from "../pages/mypage/Profile.vue";
 import MyHistory from "../pages/mypage/MyHistory.vue";
 import MyCertificates from "../pages/mypage/MyCertificate/MyCertificates.vue";
 import CertificateDetail from "../pages/mypage/MyCertificate/CertificateDetail.vue";
-import AvatarShop2 from "../pages/mypage/avatar/AvatarShop2.vue";
+import CertificatePasswordChange from "../pages/mypage/MyCertificate/CertificatePasswordChange.vue";
+import CertificatePasswordChangeNew from "../pages/mypage/MyCertificate/CertificatePassword-Change-New.vue";
+import CertificatePasswordChangeConfirm from "../pages/mypage/MyCertificate/CertificatePassword-Change-Confirm.vue";
+import CustomerSupport from "../pages/mypage/CustomerSupport.vue";
+import AvatarShop from "../pages/mypage/avatar/AvatarShop2.vue";
 
 // openbanking
 import OpenBankingHome from "../pages/openbanking/OpenBankingHome.vue";
@@ -271,6 +271,13 @@ const router = createRouter({
         { path: "quiz", name: "Quiz", component: Quiz },
         { path: "finance", name: "FinanceHome", component: FinanceHome },
 
+        // 오픈뱅킹 (MainLayout 하위 엔트리)
+        {
+          path: "openbanking",
+          name: "OpenBankingHome",
+          component: OpenBankingHome,
+        },
+
         // 마이페이지
         { path: "mypage", name: "mypage", component: Mypage },
         { path: "profile", name: "profile", component: Profile },
@@ -290,7 +297,7 @@ const router = createRouter({
           name: "customer-support",
           component: CustomerSupport,
         },
-        { path: "avatar-shop", name: "avatar-shop", component: AvatarShop2 },
+        { path: "avatar-shop", name: "avatar-shop", component: AvatarShop },
       ],
     },
 
@@ -381,7 +388,6 @@ const router = createRouter({
           name: "OpenBankingMyHome",
           component: () => import("../pages/openbanking/OpenBankingMyHome.vue"),
         },
-        { path: "", name: "OpenBankingHome", component: OpenBankingHome },
         { path: "account-list", name: "AccountList", component: AccountList },
         {
           path: "account-detail/:accountId",
@@ -419,7 +425,6 @@ const router = createRouter({
         },
       ],
     },
-
     // 관리자 레이아웃
     {
       path: "/admin",
@@ -439,7 +444,6 @@ const router = createRouter({
         },
       ],
     },
-
     // 404 Not Found catch-all
     {
       path: "/:pathMatch(.*)*",
@@ -485,6 +489,7 @@ function obCacheKey(userId) {
 async function ensureHasOpenBankingData(auth) {
   const uid = auth?.user?.id ?? auth?.id ?? auth?.userId ?? null;
   const key = obCacheKey(uid);
+  const cached = sessionStorage.getItem(key);
 
   // 재검증 or 최초검증
   try {
