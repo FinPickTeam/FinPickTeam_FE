@@ -56,25 +56,25 @@
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
-import { ref, onMounted, onUnmounted } from "vue";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { useRouter } from 'vue-router';
+import { ref, onMounted, onUnmounted } from 'vue';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faAngleLeft);
 
 const router = useRouter();
-const timerDisplay = ref("3:00");
+const timerDisplay = ref('3:00');
 let timerInterval = null;
 let totalSeconds = 180; // 3분 = 180초
 
 function goToComplete() {
-  router.push("/ars/complete");
+  router.push('/ars/complete');
 }
 
 function goToCustomerSupport() {
-  router.push("/customer-support");
+  router.push('/customer-support');
 }
 
 function goBack() {
@@ -85,13 +85,13 @@ function updateTimer() {
   if (totalSeconds <= 0) {
     // 시간이 다 되면 ARS fail 페이지로 이동
     clearInterval(timerInterval);
-    router.push("/ars/fail");
+    router.push('/ars/fail');
     return;
   }
 
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
-  timerDisplay.value = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  timerDisplay.value = `${minutes}:${seconds.toString().padStart(2, '0')}`;
   totalSeconds--;
 }
 
@@ -255,10 +255,10 @@ onUnmounted(() => {
   box-sizing: border-box;
 }
 .ars_card {
-  background: #fff;
+  /* background: #fff;
   border: 1.5px solid #e5e6ea;
   border-radius: 12px;
-  box-shadow: none;
+  box-shadow: none; */
   padding: 36px 24px 24px 24px;
   margin-bottom: 24px;
 }
@@ -277,7 +277,7 @@ onUnmounted(() => {
   margin-bottom: 20px;
 }
 .ars_code_box {
-  border: 2px solid #a084e8;
+  border: 2px solid var(--color-main-dark);
   border-radius: 10px;
   padding: 18px 0 10px 0;
   margin-bottom: 18px;
@@ -293,7 +293,7 @@ onUnmounted(() => {
 .ars_code {
   font-size: 38px;
   font-weight: bold;
-  color: #7c4dff;
+  color: var(--color-main-dark);
   letter-spacing: 16px;
   margin-bottom: 8px;
 }
@@ -315,7 +315,7 @@ onUnmounted(() => {
   margin-right: 2px;
 }
 .waiting_label {
-  color: #7c4dff;
+  color: var(--color-main-dark);
   font-weight: 600;
 }
 .waiting_timer {
@@ -331,7 +331,7 @@ onUnmounted(() => {
   line-height: 1.7;
 }
 .ars_next_btn {
-  background: #a084e8;
+  background: var(--color-main-dark);
   color: #fff;
   font-size: 17px;
   font-weight: 700;
@@ -345,7 +345,7 @@ onUnmounted(() => {
   display: block;
 }
 .ars_next_btn:hover {
-  background: #7c4dff;
+  background: var(--color-main);
 }
 .ars_warning_box {
   background: #fffbe7;
@@ -398,7 +398,7 @@ onUnmounted(() => {
   color: #888;
 }
 .ars_help_link {
-  color: #7c4dff;
+  color: var(--color-main-dark);
   margin-left: 4px;
   text-decoration: underline;
   font-weight: 600;
