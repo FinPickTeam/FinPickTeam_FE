@@ -1,38 +1,49 @@
-<!-- src/views/openbanking/AccountList.vue -->
 <template>
-  <div class="page">
-    <AssetSummaryCard
-      title="총 자산"
-      :amount="totalAssets"
-      :subtitle="`${accounts.length || 0}개 계좌`"
-    />
+  <div class="account-list-page">
+    <section class="summary-card">
+      <h2 class="summary-title">총 자산</h2>
+      <div class="summary-right">
+        <div
+          class="hero-delta"
+          :class="{ up: assetDiff > 0, down: assetDiff < 0 }"
+        >
+          <span class="delta-icon">
+            {{ assetDiff > 0 ? '▲' : assetDiff < 0 ? '▼' : '–' }}
+          </span>
+          전월 대비 {{ Math.abs(assetChangePercent).toFixed(1) }}%
+        </div>
+        <div class="summary-amount">{{ totalAssets.toLocaleString() }}원</div>
+      </div>
+    </section>
 
-    <div v-if="loading" class="loading">
+    <div v-if="loading" class="loading-container">
       <div class="loading-spinner"></div>
       <p>계좌 정보를 불러오는 중...</p>
     </div>
 
     <template v-else>
-      <template v-for="(sec, index) in sections" :key="sec.key || index">
-        <section v-if="sec.items && sec.items.length" class="group">
-          <h4 class="group-title">{{ sec.title }}</h4>
-          <ListItemCard
-            v-for="a in sec.items"
-            :key="a.id"
-            :logo="bankLogo(a.bank)"
-            :bank="a.bank"
-            :badge="a.type"
-            :badgeClass="badgeClass(a.type)"
-            :amount="a.balance"
-            :isNegative="a.balance < 0"
-            :name="a.name"
-            :sub="a.accountNumber"
-            :selected="isSelected(a)"
-            :disabled="a.type === '투자' && !isDeleteMode"
-            @click="onClick(a)"
-          />
+      <div class="category-wrap">
+        <section
+          v-for="sec in sections"
+          :key="sec.key"
+          class="account-group-card"
+        >
+          <h3 class="group-title">{{ sec.title }}</h3>
+          <div class="account-list">
+            <ListItemCard
+              v-for="a in sec.items"
+              :key="a.id"
+              :logo="bankLogo(a.bank)"
+              :name="a.name"
+              :sub="a.accountNumber"
+              :amount="a.balance"
+              :selected="isDeleteMode && isSelected(a)"
+              @click="onClick(a)"
+              class="account-item"
+            />
+          </div>
         </section>
-      </template>
+      </div>
     </template>
 
     <ConfirmModal
@@ -43,42 +54,47 @@
     >
       {{ selectedCount }}개의 계좌를 삭제하시겠습니까?
     </ConfirmModal>
-
     <DeleteModeFooter
       :is-delete-mode="isDeleteMode"
       :selected-count="selectedCount"
       item-type="계좌"
       @delete="openConfirm"
+      @toggle-mode="toggleMode"
     />
-
-    <Navbar />
   </div>
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref, onMounted, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import {
+  faArrowLeft,
+  faSearch,
+  faPlus,
+} from '@fortawesome/free-solid-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
-import ListItemCard from '@/components/openbanking/ListItemCard.vue';
 import ConfirmModal from '@/components/openbanking/ConfirmModal.vue';
 import DeleteModeFooter from '@/components/openbanking/DeleteModeFooter.vue';
-import AssetSummaryCard from '@/components/openbanking/AssetSummaryCard.vue';
-import Navbar from '@/components/Navbar.vue';
 import { useLogos } from '@/components/openbanking/useLogos.js';
 import {
   getAccountsWithTotal,
   deleteAccount,
 } from '@/api/openbanking/accountsApi';
-import { useRouter } from 'vue-router';
+import { getAssetSummaryCompare } from '@/api/openbanking/assetSummaryApi.js';
+import ListItemCard from '@/components/openbanking/ListItemCard.vue';
 
-library.add(faTrash);
+library.add(faArrowLeft, faSearch, faPlus);
 
 const router = useRouter();
 const accounts = ref([]);
 const loading = ref(false);
-const { bankLogo } = useLogos();
+const { bankLogo, resolveBank } = useLogos();
 const apiAccountTotal = ref(null);
+
+// 전월 대비
+const assetDiff = ref(0);
+const assetChangePercent = ref(0);
 
 // 삭제 모드/선택
 const isDeleteMode = ref(false);
@@ -92,9 +108,11 @@ const closeConfirm = () => {
 };
 const toggleMode = () => {
   isDeleteMode.value = !isDeleteMode.value;
-  selectedIds.value = new Set();
+  selectedIds.value.clear();
 };
+const handleToggleDelete = () => toggleMode();
 const toggleSelect = (item) => {
+  if (item.type === '투자') return; // 투자는 삭제 불가
   const id = item.id;
   selectedIds.value.has(id)
     ? selectedIds.value.delete(id)
@@ -116,22 +134,19 @@ const sections = computed(() => {
   const depositAccounts = accounts.value.filter((a) => a.type === '입출금');
   const savingsAccounts = accounts.value.filter((a) => a.type === '저축');
   const investAccounts = accounts.value.filter((a) => a.type === '투자');
-  const out = [];
-  if (depositAccounts.length)
-    out.push({ key: 'deposit', title: '입출금 계좌', items: depositAccounts });
-  if (savingsAccounts.length)
-    out.push({ key: 'savings', title: '저축 계좌', items: savingsAccounts });
-  if (investAccounts.length)
-    out.push({ key: 'invest', title: '투자 계좌', items: investAccounts });
-  return out;
+  return [
+    { key: 'deposit', title: '입출금', items: depositAccounts },
+    { key: 'savings', title: '저축', items: savingsAccounts },
+    { key: 'invest', title: '투자', items: investAccounts },
+  ].filter((sec) => sec.items.length > 0);
 });
 
-const badgeClass = (t) =>
-  t === '입출금' ? 'bg-deposit' : t === '저축' ? 'bg-savings' : 'bg-invest';
-
 const onClick = (a) => {
-  if (isDeleteMode.value) return toggleSelect(a);
-  if (a.type !== '투자') router.push(`/openbanking/account-detail/${a.id}`);
+  if (isDeleteMode.value) {
+    toggleSelect(a);
+  } else {
+    router.push(`/openbanking/account-detail/${a.id}`);
+  }
 };
 
 const confirmDelete = async () => {
@@ -145,6 +160,7 @@ const confirmDelete = async () => {
 };
 
 onMounted(async () => {
+  window.addEventListener('toggle-delete-mode', handleToggleDelete);
   try {
     loading.value = true;
     const r = await getAccountsWithTotal(); // {status, message, data}
@@ -155,7 +171,7 @@ onMounted(async () => {
 
     accounts.value = apiAccounts.map((account) => ({
       id: account.id,
-      bank: account.productName?.split(' ')[0] || '은행',
+      bank: resolveBank(account.productName || ''),
       type:
         account.accountType === 'DEPOSIT'
           ? '입출금'
@@ -166,9 +182,27 @@ onMounted(async () => {
       balance: Number(account.balance || 0),
       accountNumber: account.accountNumber || '****',
     }));
+
+    // 전월 대비 자산 비교 호출
+    try {
+      const now = new Date();
+      const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+        2,
+        '0'
+      )}`;
+      const cmp = await getAssetSummaryCompare({ month: ym });
+      const d = cmp?.data || {};
+      const cur = Number(d.currentAssetTotal ?? totalAssets.value);
+      const prev = Number(d.prevAssetTotal ?? 0);
+      assetDiff.value = Number(d.assetDiff ?? cur - prev);
+      assetChangePercent.value = prev ? (assetDiff.value / prev) * 100 : 0;
+    } catch (e) {
+      assetDiff.value = 0;
+      assetChangePercent.value = 0;
+    }
   } catch (error) {
     console.error('계좌 API 호출 에러:', error);
-    // 폴백
+    // 폴백 데이터 (에러 발생 시 예시)
     accounts.value = [
       {
         id: 1,
@@ -184,77 +218,180 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+onUnmounted(() => {
+  window.removeEventListener('toggle-delete-mode', handleToggleDelete);
+});
 </script>
 
 <style scoped>
-.page {
-  height: calc(100dvh - 160px);
-  background: var(--color-bg-light);
-  padding: 16px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
-  min-height: 0;
-}
-.header-icon-btn {
-  background: none;
-  border: none;
-  font-size: 16px;
-  color: var(--color-main);
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-}
-.header-icon-btn:hover {
-  background: #f3f3f3;
+.account-list-page {
+  background-color: #f6f7f8;
+  min-height: 100vh;
+  padding: 0 16px 100px; /* 하단 여백 확보 */
+  box-sizing: border-box;
 }
 
-.group {
-  margin: 0 16px 24px;
+.category-wrap {
+  background: #fff;
+  margin: 0 -16px; /* 좌우 꽉 차게 */
+  padding: 8px 16px 24px; /* 내부 패딩만 유지 */
+  border-radius: 0;
+}
+
+/* 총 자산 카드 스타일 */
+.summary-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+.summary-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+}
+.summary-delta {
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.summary-delta.up {
+  color: #ef4444;
+}
+.summary-delta.down {
+  color: #3b82f6;
+}
+.summary-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #4318d1;
+}
+
+.account-group-card {
+  background: transparent;
+  border-radius: 0;
+  padding: 16px 0;
+  margin: 0;
+  box-shadow: none;
+  border-top: 1px solid #f1f2f4;
 }
 .group-title {
-  font-weight: 600;
-  margin: 16px 0;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-left: 16px;
+  color: #222;
 }
-
-.bg-deposit {
-  background: var(--color-main);
-}
-.bg-savings {
-  background: #059669;
-}
-.bg-invest {
-  background: #dc2626;
-}
-
-.loading {
+.account-list {
   display: flex;
   flex-direction: column;
+  gap: 16px;
+}
+
+/* 계좌 아이템 스타일 */
+.account-item {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  color: #666;
+  cursor: pointer;
+  padding: 16px;
+  transition: background-color 0.2s;
+}
+.account-item:hover {
+  background-color: #f9f9fa;
+}
+.account-item.selected {
+  background-color: #eef2ff;
+  border: 1px solid #c7d2fe;
+}
+.item-logo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  margin-right: 12px;
+}
+.item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.item-name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.item-sub {
+  font-size: 0.75rem;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.item-balance {
+  margin-left: auto;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222;
+  letter-spacing: -0.5px;
+  white-space: nowrap;
+  align-self: flex-end; /* 위치를 이름보다 살짝 아래로 */
+  padding-top: 6px;
+}
+
+/* 로딩 스타일 */
+.loading-container {
+  text-align: center;
+  padding: 40px 0;
 }
 .loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3cm solid #f3f3f3;
-  border-top: 4px solid var(--color-main);
+  width: 32px;
+  height: 32px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #4318d1;
   border-radius: 50%;
   animation: spin 1s linear infinite;
-  margin-bottom: 16px;
+  margin: 0 auto 16px;
 }
 @keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
+}
+
+/* 전월 대비 표시 */
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.summary-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 4px;
+}
+.hero-delta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #666;
+}
+.hero-delta.up {
+  color: #ef4444;
+}
+.hero-delta.down {
+  color: #3b82f6;
+}
+.delta-icon {
+  font-weight: 700;
 }
 </style>

@@ -20,6 +20,13 @@
           <font-awesome-icon :icon="['fas', 'sync-alt']" />
         </button>
         <button
+          v-if="showDeleteButton"
+          class="obmyhome-icon-btn"
+          @click="toggleDeleteMode"
+        >
+          <font-awesome-icon :icon="['fas', 'trash']" />
+        </button>
+        <button
           v-if="showAddButton"
           class="obmyhome-icon-btn"
           @click="goToAddAccount"
@@ -47,7 +54,7 @@
 </template>
 
 <script setup>
-import { computed, provide } from 'vue';
+import { ref, computed, watch, onUnmounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import {
@@ -55,22 +62,34 @@ import {
   faPlus,
   faSliders,
   faFilePdf,
+  faTrash,
 } from '@fortawesome/free-solid-svg-icons';
+import { library } from '@fortawesome/fontawesome-svg-core';
+library.add(faSyncAlt, faPlus, faSliders, faFilePdf, faTrash);
 import BaseHeader from '@/components/openbanking/BaseHeader.vue';
 import Navbar from '@/components/Navbar.vue';
-import { watch, onMounted, onUnmounted } from 'vue';
 
-// FontAwesome 아이콘 등록
-import { library } from '@fortawesome/fontawesome-svg-core';
-library.add(faSyncAlt, faPlus, faSliders, faFilePdf);
+import { exportMonthReportPdf } from '@/api/openbanking/monthReportApi.js';
+import { syncAllAccounts } from '@/api/openbanking/accountsApi';
+import { syncAllCards } from '@/api/openbanking/cardsApi';
+import { getAccountsWithTotal } from '@/api/openbanking/accountsApi';
+import { getCardsWithTotal } from '@/api/openbanking/cardsApi';
+import {
+  getAssetTotal,
+  getAssetSummaryCompare,
+  getMonthlySpending,
+} from '@/api/openbanking/assetSummaryApi.js';
 
 const route = useRoute();
 const router = useRouter();
 
-// 헤더를 숨길 라우트들
-const hideHeaderRoutes = [];
+const ym = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 
-// 네비게이션을 숨길 라우트들
+const currentMonth = computed(() => String(route.query.month ?? ym()));
+
+// ----- UI 표시 로직 그대로 -----
+const hideHeaderRoutes = [];
 const hideNavbarRoutes = [
   'AccountAgreement',
   'AccountLinkSelect',
@@ -82,7 +101,33 @@ const hideNavbarRoutes = [
   'ConfirmCertificatePassword',
   'CertificateComplete',
 ];
+const showHeader = computed(() => !hideHeaderRoutes.includes(route.name));
+const showNavbar = computed(() => !hideNavbarRoutes.includes(route.name));
+const showFilterButton = computed(() =>
+  ['AccountDetail', 'CardDetail'].includes(route.name)
+);
+const showDeleteButton = computed(() =>
+  ['AccountList', 'CardList'].includes(route.name)
+);
+const showRefreshButton = computed(() =>
+  ['OpenBankingMyHome', 'OpenbankingCalendar', 'CalendarDetail'].includes(
+    route.name
+  )
+);
+const showAddButton = computed(() =>
+  [
+    'OpenBankingMyHome',
+    'AccountList',
+    'CardList',
+    'AccountDetail',
+    'CardDetail',
+    'OpenbankingCalendar',
+    'CalendarDetail',
+  ].includes(route.name)
+);
+const showPdfButton = computed(() => route.name === 'OpenbankingMonthlyReport');
 
+// 배경 흰 화면 토글 유지
 watch(
   () => route.name,
   (name) => {
@@ -100,59 +145,60 @@ watch(
 );
 onUnmounted(() => document.body.classList.remove('ob-white-page'));
 
-// 헤더 표시 여부
-const showHeader = computed(() => {
-  return !hideHeaderRoutes.includes(route.name);
-});
-
-// 네비게이션 표시 여부
-const showNavbar = computed(() => {
-  return !hideNavbarRoutes.includes(route.name);
-});
-
-// 필터 버튼 표시 여부
-const showFilterButton = computed(() => {
-  return ['AccountDetail', 'CardDetail'].includes(route.name);
-});
-
-// 새로고침 버튼 표시 여부
-const showRefreshButton = computed(() => {
-  return route.name === 'OpenBankingMyHome';
-});
-
-// 추가 버튼 표시 여부
-const showAddButton = computed(() => {
-  return route.name === 'OpenBankingMyHome';
-});
-
-// PDF 다운로드 버튼 표시 여부
-const showPdfButton = computed(() => {
-  return route.name === 'OpenbankingMonthlyReport';
-});
-
-// 필터 열기
+// ----- 액션들 교체 -----
 const openFilter = () => {
   window.dispatchEvent(new CustomEvent('open-filter-modal'));
-  console.log('필터 모달 열기');
 };
 
-// 새로고침 기능
-const refreshData = () => {
-  // 이벤트를 emit하여 자식 컴포넌트에서 처리
-  window.dispatchEvent(new CustomEvent('refresh-openbanking-data'));
-  console.log('오픈뱅킹 데이터 새로고침');
+const downloading = ref(false);
+const downloadPdf = async () => {
+  if (downloading.value) return;
+  downloading.value = true;
+  try {
+    const { blob, filename } = await exportMonthReportPdf({
+      month: currentMonth.value, // 없으면 서버 default 쓰게 하고 싶으면 제거
+      format: 'pdf',
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename || `monthreport-${currentMonth.value}.pdf`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  } catch (e) {
+    console.error('PDF 다운로드 실패', e);
+    alert('PDF 다운로드에 실패했어요.');
+  } finally {
+    downloading.value = false;
+  }
 };
 
-// 계좌 추가 페이지로 이동
-const goToAddAccount = () => {
-  router.push('/openbanking/account-link-select');
+const refreshing = ref(false);
+const refreshData = async () => {
+  if (refreshing.value) return;
+  refreshing.value = true;
+  try {
+    // 1) 싱크를 병렬로 싹 돌림
+    await Promise.allSettled([syncAllAccounts(), syncAllCards()]);
+
+    // 2A) 각 페이지가 자기 데이터 다시 불러오도록 기존 이벤트 한번 쏘고 끝 (가장 적은 수정)
+    window.dispatchEvent(new CustomEvent('refresh-openbanking-data'));
+  } catch (e) {
+    console.error('새로고침 실패', e);
+    alert('데이터 동기화에 실패했어요.');
+  } finally {
+    refreshing.value = false;
+  }
 };
 
-// PDF 다운로드 기능
-const downloadPdf = () => {
-  window.dispatchEvent(new CustomEvent('download-monthly-pdf'));
-  console.log('월간 리포트 PDF 다운로드');
+// delete-mode toggle
+const toggleDeleteMode = () => {
+  window.dispatchEvent(new CustomEvent('toggle-delete-mode'));
 };
+
+const goToAddAccount = () => router.push('/openbanking/account-link-select');
 </script>
 
 <style scoped>

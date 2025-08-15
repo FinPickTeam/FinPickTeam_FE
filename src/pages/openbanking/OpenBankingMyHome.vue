@@ -495,23 +495,6 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   cursor: pointer;
   transition: background 0.15s;
 }
-.obmyhome-report-btn:hover {
-  background: #e0d7fa;
-}
-.obmyhome-report-btn.daily {
-  background: #f0f9ff;
-  color: #0369a1;
-}
-.obmyhome-report-btn.daily:hover {
-  background: #e0f2fe;
-}
-.obmyhome-report-btn.monthly {
-  background: #ece9fd;
-  color: var(--color-main);
-}
-.obmyhome-report-btn.monthly:hover {
-  background: #e0d7fa;
-}
 
 @media (max-width: 430px) {
   .myhome-container {

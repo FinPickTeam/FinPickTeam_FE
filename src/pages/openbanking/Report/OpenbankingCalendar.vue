@@ -111,8 +111,14 @@ import { ref, computed, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import CalendarComponent from '@/components/openbanking/CalendarComponent.vue';
 import { getLedger } from '@/api/openbanking/ledgerApi.js';
-import { formatDay, formatDateKey } from '@/utils/dateUtils.js';
-import { categoryToLogo, categoryAlt } from '@/utils/categoryLogo.js';
+import {
+  formatDay,
+  formatDateKey,
+} from '@/components/openbanking/dateUtils.js';
+import {
+  categoryToLogo,
+  categoryAlt,
+} from '@/components/openbanking/categoryLogo.js';
 
 const router = useRouter();
 

@@ -39,7 +39,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import { patchLedgerCategory } from '@/api/openbanking/ledgerApi.js';
-import { categoryToLogo } from '@/utils/categoryLogo.js';
+import { categoryToLogo } from '@/components/openbanking/categoryLogo.js';
 
 library.add(faAngleLeft);
 

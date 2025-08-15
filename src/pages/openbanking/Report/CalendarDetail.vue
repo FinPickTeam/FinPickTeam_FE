@@ -1,13 +1,5 @@
 <template>
   <div class="transaction-detail-container">
-    <!-- 상단 헤더 -->
-    <div class="obcal-header">
-      <button class="obcal-back" @click="goBack">←</button>
-      <div class="obcal-header-icons">
-        <button class="obcal-icon-btn" @click="goToDictionary">🔎</button>
-      </div>
-    </div>
-
     <!-- 거래 요약 섹션 -->
     <div class="transaction-summary">
       <div class="merchant-info">
@@ -97,7 +89,7 @@ import {
   getLedgerDetail,
   patchLedgerMemo,
 } from '@/api/openbanking/ledgerApi.js';
-import { categoryToLogo } from '@/utils/categoryLogo.js';
+import { categoryToLogo } from '@/components/openbanking/categoryLogo.js';
 
 const router = useRouter();
 const route = useRoute();

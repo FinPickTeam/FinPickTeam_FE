@@ -70,7 +70,7 @@
 import { ref, computed, watch } from 'vue';
 import { Calendar } from 'v-calendar';
 import 'v-calendar/style.css';
-import { formatDateKey } from '@/utils/dateUtils.js';
+import { formatDateKey } from '@/components/openbanking/dateUtils.js';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import {
   faChevronUp,
