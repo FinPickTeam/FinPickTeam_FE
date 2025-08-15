@@ -159,11 +159,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import { getTodayQuiz, submitQuiz } from "@/api/home";
+import { submitQuiz } from "@/api/home";
 import { useAuthStore } from "@/stores/auth";
 import { useAvatarStore } from "@/stores/avatar.js";
 import { addQuizPoints } from "@/api/mypage/avatar";
 // import { getMyCoinStatus } from "@/api/mypage/avatar/coinApi";
+import { getTodaysQuiz } from "@/api/home/quizApi.js";
 
 const answer = ref("");
 const showResult = ref(false);
@@ -260,34 +261,41 @@ const isCorrect = computed(() => {
 
 // 퀴즈 데이터 가져오기
 const fetchQuiz = async () => {
-  try {
-    loading.value = true;
-    error.value = null;
+  loading.value = true;
+  error.value = null;
 
-    // 인증 상태 확인
-    if (!authStore.isAuthenticated) {
-      console.warn("퀴즈를 보려면 로그인이 필요합니다.");
-      error.value = "퀴즈를 보려면 로그인이 필요합니다.";
-      loading.value = false;
+  // 인증 상태 확인
+  if (!authStore.isAuthenticated) {
+    console.warn("퀴즈를 보려면 로그인이 필요합니다.");
+    error.value = "퀴즈를 보려면 로그인이 필요합니다.";
+    loading.value = false;
+    return;
+  }
+
+  try {
+    console.log("퀴즈 데이터 가져오기 시작");
+    const res = await getTodaysQuiz();
+
+    // CommonResponseDTO 가정: { success:true, message:"", data: {...} }
+    const dto = res?.data ?? res;
+    const payload = res?.data ?? res; // 두 경우 모두 대비
+    if (!payload) {
+      error.value = "오늘은 응시할 수 있는 퀴즈가 없습니다.";
       return;
     }
 
-    console.log("퀴즈 데이터 가져오기 시작");
-
-    // 임시로 하드코딩된 오류 메시지 (API가 구현되지 않음)
-    error.value = "오늘은 응시할 수 있는 퀴즈가 없습니다.";
-    loading.value = false;
-    return;
+    quizData.value = payload; // 필요 시 필드 매핑
   } catch (err) {
     console.error("퀴즈 조회 에러:", err);
 
     let errorMessage = "퀴즈를 불러오는데 실패했습니다.";
+    const status = err.response?.status;
 
-    if (err.response?.status === 401) {
+    if (status === 401) {
       errorMessage = "로그인이 필요합니다.";
-    } else if (err.response?.status === 404) {
+    } else if (status === 404) {
       errorMessage = "퀴즈를 찾을 수 없습니다.";
-    } else if (err.response?.status === 500) {
+    } else if (status === 500) {
       errorMessage = "서버 오류가 발생했습니다.";
     } else if (err.message) {
       errorMessage = `연결 오류: ${err.message}`;
@@ -299,7 +307,7 @@ const fetchQuiz = async () => {
   }
 };
 
-async function checkAnswer() {
+const checkAnswer = async () => {
   if (!answer.value || !quizData.value) return;
 
   console.log("정답 확인 시작:", {
@@ -344,7 +352,7 @@ async function checkAnswer() {
       pointsEarned.value = true; // 오답인 경우에도 포인트 표시를 위해 true로 설정
     }
   }
-}
+};
 
 function close() {
   // 상태 초기화

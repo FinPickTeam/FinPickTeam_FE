@@ -26,29 +26,62 @@
           <div v-if="avatarImageError" class="avatar-error">
             <span>아바타 이미지를 불러올 수 없습니다</span>
           </div>
-          <div v-if="wearingLevel" class="title-placeholder">
-            <span class="item-text">{{ wearingLevel.name }}</span>
+          <div v-if="previewLevel || wearingLevel" class="title-placeholder">
+            <img
+              :src="
+                previewLevel ? previewLevel.imageUrl : wearingLevel.imageUrl
+              "
+              :alt="previewLevel ? previewLevel.name : wearingLevel.name"
+              class="wearing-item-img"
+              @error="onWearingItemImageError"
+            />
           </div>
           <div v-else class="title-placeholder">
-            <span class="item-text">칭호 없음</span>
+            <span class="item-text"></span>
           </div>
-          <div v-if="wearingTop" class="shirt-placeholder">
-            <span class="item-text">{{ wearingTop.name }}</span>
+          <div v-if="previewTop || wearingTop" class="shirt-placeholder">
+            <img
+              :src="previewTop ? previewTop.imageUrl : wearingTop.imageUrl"
+              :alt="previewTop ? previewTop.name : wearingTop.name"
+              class="wearing-item-img"
+              @error="onWearingItemImageError"
+            />
           </div>
           <div v-else class="shirt-placeholder">
-            <span class="item-text">상의 없음</span>
+            <span class="item-text"></span>
           </div>
-          <div v-if="wearingShoes" class="shoes-placeholder">
-            <span class="item-text">{{ wearingShoes.name }}</span>
+          <div v-if="previewShoes || wearingShoes" class="shoes-placeholder">
+            <img
+              :src="
+                previewShoes ? previewShoes.imageUrl : wearingShoes.imageUrl
+              "
+              :alt="previewShoes ? previewShoes.name : wearingShoes.name"
+              class="wearing-item-img"
+              @error="onWearingItemImageError"
+            />
           </div>
           <div v-else class="shoes-placeholder">
-            <span class="item-text">신발 없음</span>
+            <span class="item-text"></span>
           </div>
-          <div v-if="wearingAccessory" class="glasses-placeholder">
-            <span class="item-text">{{ wearingAccessory.name }}</span>
+          <div
+            v-if="previewAccessory || wearingAccessory"
+            class="glasses-placeholder"
+          >
+            <img
+              :src="
+                previewAccessory
+                  ? previewAccessory.imageUrl
+                  : wearingAccessory.imageUrl
+              "
+              :alt="
+                previewAccessory ? previewAccessory.name : wearingAccessory.name
+              "
+              class="wearing-item-img"
+              @error="onWearingItemImageError"
+            />
           </div>
           <div v-else class="glasses-placeholder">
-            <span class="item-text">액세서리 없음</span>
+            <span class="item-text"></span>
           </div>
         </div>
       </div>
@@ -108,10 +141,10 @@
             :class="{ 'disabled-image': !item.isAvailable }"
           >
             <img
-              :src="item.imageUrl"
+              :src="resolveImage(item)"
               :alt="item.name"
               class="item-img"
-              @error="onItemImageError"
+              @error="onImgError"
             />
             <div v-if="!item.isAvailable" class="level-requirement-overlay">
               <span class="requirement-text">{{ item.requirementText }}</span>
@@ -123,23 +156,18 @@
               :class="{ 'disabled-text': !item.isAvailable }"
               >{{ item.name }}</span
             >
-            <span
-              class="item-price"
-              :class="{ 'disabled-text': !item.isAvailable }"
-              >🪙 {{ item.cost }}</span
-            >
+            <span v-if="!item.isAvailable" class="item-requirement">
+              {{ item.requirementText }}
+            </span>
           </div>
           <div class="item-status">
             <span v-if="!item.isAvailable" class="disabled-badge">잠김</span>
-            <span v-else-if="isOwned(item.itemId, 'level')" class="owned-badge"
-              >보유</span
-            >
             <span
               v-else-if="isWearing(item.itemId, 'level')"
               class="wearing-badge"
               >착용중</span
             >
-            <span v-else class="buy-badge">구매</span>
+            <span v-else class="owned-badge">선택가능</span>
           </div>
         </div>
       </div>
@@ -159,8 +187,13 @@
           }"
           @click="handleItemClick(item, 'top')"
         >
-          <div v-if="item.imageUrl" class="item-image">
-            <img :src="item.imageUrl" :alt="item.name" class="item-img" />
+          <div v-if="resolveImage(item)" class="item-image">
+            <img
+              :src="resolveImage(item)"
+              :alt="item.name"
+              class="item-img"
+              @error="onImgError"
+            />
           </div>
           <div v-else class="item-image-placeholder">
             <span class="item-image-text">{{ item.name }}</span>
@@ -198,8 +231,13 @@
           }"
           @click="handleItemClick(item, 'shoes')"
         >
-          <div v-if="item.imageUrl" class="item-image">
-            <img :src="item.imageUrl" :alt="item.name" class="item-img" />
+          <div v-if="resolveImage(item)" class="item-image">
+            <img
+              :src="resolveImage(item)"
+              :alt="item.name"
+              class="item-img"
+              @error="onImgError"
+            />
           </div>
           <div v-else class="item-image-placeholder">
             <span class="item-image-text">{{ item.name }}</span>
@@ -237,8 +275,13 @@
           }"
           @click="handleItemClick(item, 'accessory')"
         >
-          <div v-if="item.imageUrl" class="item-image">
-            <img :src="item.imageUrl" :alt="item.name" class="item-img" />
+          <div v-if="resolveImage(item)" class="item-image">
+            <img
+              :src="resolveImage(item)"
+              :alt="item.name"
+              class="item-img"
+              @error="onImgError"
+            />
           </div>
           <div v-else class="item-image-placeholder">
             <span class="item-image-text">{{ item.name }}</span>
@@ -318,29 +361,28 @@
       </div>
     </div>
 
-    <!-- 착용 확인 모달 -->
-    <div v-if="showWearModal" class="modal-overlay" @click="closeWearModal">
-      <div class="modal-content" @click.stop>
-        <h3>아이템 착용</h3>
-        <p>{{ selectedItem?.name }}을(를) 착용하시겠습니까?</p>
-        <div class="modal-buttons">
-          <button @click="confirmWear">착용하기</button>
-          <button @click="closeWearModal">취소</button>
-        </div>
-      </div>
-    </div>
-
     <!-- 아바타 착용 버튼 -->
     <div class="avatar-wear-section">
       <button
         class="avatar-wear-btn"
-        @click="wearAllAvatarItems"
-        :disabled="!hasOwnedItems"
+        :disabled="!selectedItemForWear || wearLoading"
+        @click="wearSelectedItem"
       >
-        <span class="wear-btn-icon">👕</span>
-        <span class="wear-btn-text">아바타 착용하기</span>
+        <span v-if="wearLoading" class="wear-loading">
+          <font-awesome-icon :icon="['fas', 'spinner']" spin />
+          착용 중...
+        </span>
+        <span v-else class="wear-btn-content">
+          <font-awesome-icon :icon="['fas', 'tshirt']" class="wear-btn-icon" />
+          <span class="wear-btn-text">
+            {{
+              selectedItemForWear
+                ? `${selectedItemForWear.name} 착용하기`
+                : "아이템을 선택해주세요"
+            }}
+          </span>
+        </span>
       </button>
-      <div v-if="wearLoading" class="wear-loading">착용 중...</div>
     </div>
   </div>
 </template>
@@ -351,17 +393,22 @@ import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 import {
   getCurrentCoin,
-  getMyCoinStatus,
   getClothes,
   insertClothe,
+  getAvatarStatus,
   updateAvatar,
+  getAvatar,
 } from "@/api/mypage/avatar/avatarApi.js";
 import baseAvatar from "./avatarimg/avatar-base.png";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import {
+  faAngleLeft,
+  faTshirt,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 
-library.add(faAngleLeft);
+library.add(faAngleLeft, faTshirt, faSpinner);
 
 export default {
   name: "AvatarShop2",
@@ -392,18 +439,20 @@ export default {
 
     // 모달 상태
     const showPurchaseModal = ref(false);
-    const showWearModal = ref(false);
     const selectedItem = ref(null);
     const selectedItemType = ref("");
 
     // 착용 관련 상태
+    const selectedItemForWear = ref(null);
     const wearLoading = ref(false);
-    const selectedItems = ref({
-      title: null,
-      shirt: null,
-      shoes: null,
-      accessory: null,
-    });
+    const avatar = ref(null); // 아바타 데이터를 저장할 변수
+    const userId = ref(1); // 실제 userId로 변경 필요
+
+    // 미리보기 관련 상태
+    const previewLevel = ref(null);
+    const previewTop = ref(null);
+    const previewShoes = ref(null);
+    const previewAccessory = ref(null);
 
     // 아바타 기본 이미지
     const avatarBase = ref(baseAvatar);
@@ -424,6 +473,12 @@ export default {
       const item = avatarItems.value.find(
         (item) => item.type === "level" && item.wearing
       );
+      if (item) {
+        return {
+          ...item,
+          imageUrl: convertS3Url(item.imageUrl),
+        };
+      }
       console.log("착용 중인 칭호:", item);
       return item;
     });
@@ -431,6 +486,12 @@ export default {
       const item = avatarItems.value.find(
         (item) => item.type === "top" && item.wearing
       );
+      if (item) {
+        return {
+          ...item,
+          imageUrl: convertS3Url(item.imageUrl),
+        };
+      }
       console.log("착용 중인 상의:", item);
       return item;
     });
@@ -438,6 +499,12 @@ export default {
       const item = avatarItems.value.find(
         (item) => item.type === "shoes" && item.wearing
       );
+      if (item) {
+        return {
+          ...item,
+          imageUrl: convertS3Url(item.imageUrl),
+        };
+      }
       console.log("착용 중인 신발:", item);
       return item;
     });
@@ -445,11 +512,17 @@ export default {
       const item = avatarItems.value.find(
         (item) => item.type === "accessory" && item.wearing
       );
+      if (item) {
+        return {
+          ...item,
+          imageUrl: convertS3Url(item.imageUrl),
+        };
+      }
       console.log("착용 중인 액세서리:", item);
       return item;
     });
 
-    // 포인트 조회
+    // 포인트 조회 (현재 포인트 + 누적 포인트)
     const fetchCurrentCoin = async () => {
       loadingCoin.value = true;
       coinError.value = false;
@@ -457,7 +530,11 @@ export default {
       try {
         const response = await getCurrentCoin();
         if (response.data && response.data.data) {
-          currentCoin.value = response.data.data;
+          // amount: 현재 포인트, cumulativeAmount: 누적 포인트
+          currentCoin.value = response.data.data.amount || 0;
+          cumulativeAmount.value = response.data.data.cumulativeAmount || 0;
+          console.log("현재 포인트:", currentCoin.value);
+          console.log("누적 포인트:", cumulativeAmount.value);
         }
       } catch (error) {
         console.error("포인트 조회 실패:", error);
@@ -467,33 +544,62 @@ export default {
       }
     };
 
-    // 누적 포인트 조회
-    const fetchCumulativeCoin = async () => {
-      loadingCumulativeCoin.value = true;
-      cumulativeCoinError.value = false;
-
-      try {
-        const response = await getMyCoinStatus();
-        if (response.data && response.data.data) {
-          cumulativeAmount.value = response.data.data.cumulativeAmount || 0;
-          console.log("누적 포인트:", cumulativeAmount.value);
-        }
-      } catch (error) {
-        console.error("누적 포인트 조회 실패:", error);
-        cumulativeCoinError.value = true;
-      } finally {
-        loadingCumulativeCoin.value = false;
-      }
-    };
-
+    // 아바타 상태 조회
     // 아바타 상태 조회
     const fetchAvatarAndItemData = async () => {
       try {
-        const response = await getClothes(); // API 한 번만 호출
-        if (response.data && response.data.data) {
-          // avatarItems 와 ownedItems 는 동일한 데이터를 사용하는 것으로 보이므로 하나로 관리
-          avatarItems.value = response.data.data;
-          ownedItems.value = response.data.data; // 필요하다면 유지, 아니면 avatarItems.value 만 사용
+        // 사용자 ID 가져오기 (authStore에서)
+        const userId = authStore.user?.id || 1; // 기본값 1
+
+        // 아바타 조회 API 호출
+        const avatarResponse = await getAvatar(userId);
+        console.log("아바타 조회 응답:", avatarResponse);
+
+        // 의상 목록 조회 API 호출
+        const clothesResponse = await getClothes();
+        console.log("의상 목록 응답:", clothesResponse);
+
+        if (clothesResponse.data && clothesResponse.data.data) {
+          const allItems = clothesResponse.data.data;
+
+          if (avatarResponse.data && avatarResponse.data.data) {
+            const avatarData = avatarResponse.data.data;
+            avatar.value = avatarData;
+            console.log("아바타 데이터 로드 성공:", avatar.value);
+
+            const updatedItems = allItems.map((item) => {
+              let wearing = false;
+
+              switch (item.type) {
+                case "level":
+                  wearing = avatarData.levelId === item.itemId;
+                  break;
+                case "top":
+                  wearing = avatarData.topId === item.itemId;
+                  break;
+                case "shoes":
+                  wearing = avatarData.shoesId === item.itemId;
+                  break;
+                case "accessory":
+                  wearing = avatarData.accessoryId === item.itemId;
+                  break;
+                case "giftCard":
+                  wearing = avatarData.giftCardId === item.itemId;
+                  break;
+              }
+
+              return {
+                ...item,
+                wearing: wearing,
+              };
+            });
+
+            avatarItems.value = updatedItems;
+            ownedItems.value = updatedItems;
+          } else {
+            avatarItems.value = allItems;
+            ownedItems.value = allItems;
+          }
           console.log("아바타 및 아이템 데이터 로드 완료:", avatarItems.value);
         } else {
           avatarItems.value = [];
@@ -501,6 +607,18 @@ export default {
         }
       } catch (error) {
         console.error("아바타 및 아이템 데이터 조회 실패:", error);
+      }
+    };
+    // 아바타 상태 조회 (PUT 후 수정된 상태 조회용)
+    const fetchAvatarStatus = async () => {
+      try {
+        const response = await getAvatarStatus();
+        if (response.data && response.data.data) {
+          console.log("수정된 아바타 상태:", response.data.data);
+          // 여기서 필요한 경우 아바타 상태를 업데이트할 수 있습니다
+        }
+      } catch (error) {
+        console.error("아바타 상태 조회 실패:", error);
       }
     };
 
@@ -518,6 +636,10 @@ export default {
 
     // 아이템 보유 여부 확인
     const isOwned = (itemId, type) => {
+      // 칭호(level) 타입은 항상 보유한 것으로 처리
+      if (type === "level") {
+        return true;
+      }
       return avatarItems.value.some(
         (item) => item.itemId === itemId && item.type === type && item.owned
       );
@@ -607,14 +729,26 @@ export default {
 
     // 아이템 클릭 처리
     const handleItemClick = (item, type) => {
-      selectedItem.value = item;
-      selectedItemType.value = type;
+      console.log("아이템 클릭:", item, type);
 
-      if (isOwned(item.itemId, type)) {
-        // 보유 중인 아이템이면 착용 모달 표시
-        showWearModal.value = true;
-      } else {
-        // 미보유 아이템이면 구매 모달 표시
+      // 미리보기 설정
+      setPreviewItem(item, type);
+
+      // 칭호(level) 타입은 구매 로직 없이 바로 착용 선택
+      if (type === "level") {
+        if (item.isAvailable) {
+          selectedItemForWear.value = { ...item, type };
+          console.log("칭호 아이템 선택됨:", selectedItemForWear.value);
+        }
+        return;
+      }
+
+      // 미보유 아이템이면 구매 모달 표시
+      if (!isOwned(item.itemId, type)) {
+        console.log("미보유 아이템 - 구매 모달 표시");
+        selectedItem.value = item;
+        selectedItemType.value = type;
+
         if (currentCoin.value < item.cost) {
           showCoinError.value = true;
           setTimeout(() => {
@@ -623,7 +757,42 @@ export default {
         } else {
           showPurchaseModal.value = true;
         }
+      } else {
+        // 보유한 아이템이면 착용할 아이템으로 선택
+        console.log("보유 아이템 - 착용 선택");
+        selectedItemForWear.value = { ...item, type };
       }
+    };
+
+    // 미리보기 아이템 설정
+    const setPreviewItem = (item, type) => {
+      const previewItem = {
+        ...item,
+        imageUrl: convertS3Url(item.imageUrl),
+      };
+
+      switch (type) {
+        case "level":
+          previewLevel.value = previewItem;
+          break;
+        case "top":
+          previewTop.value = previewItem;
+          break;
+        case "shoes":
+          previewShoes.value = previewItem;
+          break;
+        case "accessory":
+          previewAccessory.value = previewItem;
+          break;
+      }
+    };
+
+    // 미리보기 초기화
+    const clearPreview = () => {
+      previewLevel.value = null;
+      previewTop.value = null;
+      previewShoes.value = null;
+      previewAccessory.value = null;
     };
 
     // 구매 확인
@@ -633,105 +802,26 @@ export default {
       try {
         const purchaseData = {
           itemId: selectedItem.value.itemId,
-          itemType: selectedItemType.value,
         };
+
+        console.log("구매할 아이템:", purchaseData);
 
         const response = await insertClothe(purchaseData);
 
-        if (response.data && response.data.status === 0) {
+        if (
+          response.data &&
+          (response.data.status === 0 || response.data.status === 200)
+        ) {
+          console.log("아이템 구매 성공:", response);
           // 구매 성공 시 포인트와 아바타 상태 갱신
           await fetchCurrentCoin();
-          await fetchAvatarStatus();
+          await fetchAvatarAndItemData();
           closePurchaseModal();
+        } else {
+          console.error("아이템 구매 실패:", response);
         }
       } catch (error) {
         console.error("구매 실패:", error);
-      }
-    };
-
-    // 착용 확인
-    const confirmWear = async () => {
-      if (!selectedItem.value) return;
-
-      try {
-        const wearData = {
-          items: [selectedItem.value.itemId],
-        };
-
-        const response = await updateAvatar(wearData);
-
-        if (response.data && response.data.status === 0) {
-          // 착용 성공 시 아바타 상태 갱신
-          await fetchAvatarStatus();
-          closeWearModal();
-        }
-      } catch (error) {
-        console.error("착용 실패:", error);
-      }
-    };
-
-    // 보유한 아이템이 있는지 확인하는 computed
-    const hasOwnedItems = computed(() => {
-      return avatarItems.value.some((item) => item.owned);
-    });
-
-    // 모든 아바타 아이템 착용
-    const wearAllAvatarItems = async () => {
-      try {
-        wearLoading.value = true;
-        console.log("아바타 착용 시작");
-
-        // 보유한 아이템들의 ID를 배열로 수집
-        const itemsToWear = [];
-
-        // 각 카테고리별로 보유한 아이템 중 첫 번째 아이템을 선택
-        const titleItem = avatarItems.value.find(
-          (item) => item.type === "level" && item.owned
-        );
-        const shirtItem = avatarItems.value.find(
-          (item) => item.type === "top" && item.owned
-        );
-        const shoesItem = avatarItems.value.find(
-          (item) => item.type === "shoes" && item.owned
-        );
-        const accessoryItem = avatarItems.value.find(
-          (item) => item.type === "accessory" && item.owned
-        );
-
-        if (titleItem) itemsToWear.push(titleItem.itemId);
-        if (shirtItem) itemsToWear.push(shirtItem.itemId);
-        if (shoesItem) itemsToWear.push(shoesItem.itemId);
-        if (accessoryItem) itemsToWear.push(accessoryItem.itemId);
-
-        console.log("착용할 아이템들:", itemsToWear);
-
-        if (itemsToWear.length === 0) {
-          console.log("착용할 아이템이 없습니다.");
-          return;
-        }
-
-        // API 호출
-        const wearData = {
-          items: itemsToWear, // 배열로 전송
-        };
-
-        console.log("아바타 착용 API 호출:", wearData);
-        const response = await updateAvatar(wearData);
-
-        if (response.data && response.data.status === 0) {
-          console.log("아바타 착용 성공");
-          // 착용 성공 시 아바타 상태 갱신
-          await fetchAvatarStatus();
-          alert("아바타 착용이 완료되었습니다!");
-        } else {
-          console.error("아바타 착용 실패:", response);
-          alert("아바타 착용에 실패했습니다.");
-        }
-      } catch (error) {
-        console.error("아바타 착용 에러:", error);
-        alert("아바타 착용 중 오류가 발생했습니다.");
-      } finally {
-        wearLoading.value = false;
       }
     };
 
@@ -742,12 +832,58 @@ export default {
       selectedItemType.value = "";
     };
 
-    const closeWearModal = () => {
-      showWearModal.value = false;
-      selectedItem.value = null;
-      selectedItemType.value = "";
-    };
+    // 아이템 착용 함수
+    // AvatarShop2.vue 파일의 wearSelectedItem 함수
+    const wearSelectedItem = async () => {
+      if (!selectedItemForWear.value) return;
 
+      wearLoading.value = true;
+      try {
+        const currentAvatar = avatar.value;
+        const newItemId = selectedItemForWear.value.itemId;
+        const newItemType = selectedItemForWear.value.type;
+
+        // 현재 아바타가 착용 중인 모든 아이템 ID를 저장할 객체
+        const avatarItems = {
+          level: currentAvatar.levelId,
+          top: currentAvatar.topId,
+          shoes: currentAvatar.shoesId,
+          accessory: currentAvatar.accessoryId,
+        };
+
+        // 새로 선택한 아이템으로 기존 아이템을 교체
+        // 예를 들어, newItemType이 'top'이면 avatarItems.top을 새 ID로 업데이트
+        if (avatarItems.hasOwnProperty(newItemType)) {
+          avatarItems[newItemType] = newItemId;
+        }
+
+        // 유효한 ID만 추출하여 배열로 변환
+        const itemsToWear = Object.values(avatarItems).filter(
+          (id) => id !== null && typeof id !== "undefined"
+        );
+
+        console.log("백엔드에 전송할 전체 아이템 배열:", itemsToWear);
+
+        const response = await updateAvatar(itemsToWear);
+
+        if (
+          response.data &&
+          (response.data.status === 0 || response.data.status === 200)
+        ) {
+          console.log("아이템 착용 성공:", response);
+          await fetchAvatarAndItemData();
+          selectedItemForWear.value = null;
+          clearPreview();
+          console.log("아이템 착용 완료");
+        } else {
+          console.error("아이템 착용 실패:", response);
+        }
+      } catch (error) {
+        console.error("아이템 착용 중 에러 발생:", error);
+      } finally {
+        wearLoading.value = false;
+      }
+    };
     // 뒤로가기
     const goBack = () => {
       router.go(-1);
@@ -768,6 +904,11 @@ export default {
       // 이미지 경로 확인을 위한 로그
       console.log("시도한 이미지 경로:", avatarBase.value);
       console.log("이미지 import 값:", baseAvatar);
+    };
+
+    const onWearingItemImageError = (error) => {
+      console.error("착용 아이템 이미지 로딩 실패:", error);
+      // 이미지 로딩 실패 시 텍스트로 대체하거나 기본 이미지 표시
     };
 
     // 컴포넌트 마운트 시 데이터 로드
@@ -801,8 +942,7 @@ export default {
       console.log("API 호출을 시도합니다...");
 
       try {
-        await fetchCurrentCoin();
-        await fetchCumulativeCoin();
+        await fetchCurrentCoin(); // 현재 포인트와 누적 포인트를 모두 가져옴
         await fetchAvatarAndItemData(); // 개선된 함수 호출
         console.log("모든 데이터 로드 완료");
       } catch (error) {
@@ -871,14 +1011,11 @@ export default {
       avatarItems,
       ownedItems,
       cumulativeAmount,
-      loadingCumulativeCoin,
-      cumulativeCoinError,
       showPurchaseModal,
-      showWearModal,
       selectedItem,
       selectedItemType,
+      selectedItemForWear,
       wearLoading,
-      hasOwnedItems,
       avatarBase,
       avatarImageLoaded,
       avatarImageError,
@@ -891,6 +1028,10 @@ export default {
       wearingTop,
       wearingShoes,
       wearingAccessory,
+      previewLevel,
+      previewTop,
+      previewShoes,
+      previewAccessory,
       isOwned,
       isWearing,
       getTitleImage,
@@ -899,12 +1040,14 @@ export default {
       getGlassesImage,
       handleItemClick,
       confirmPurchase,
-      confirmWear,
-      wearAllAvatarItems,
+      wearSelectedItem,
       closePurchaseModal,
-      closeWearModal,
       onAvatarImageLoad,
       onAvatarImageError,
+      onWearingItemImageError,
+      resolveImage,
+      onImgError,
+      clearPreview,
       goBack,
     };
   },
@@ -1064,7 +1207,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #f8f9fa;
+  background-color: transparent;
   border: 2px dashed #dee2e6;
   border-radius: 8px;
 }
@@ -1075,6 +1218,13 @@ export default {
   color: #6c757d;
   font-weight: 500;
   text-align: center;
+}
+
+.wearing-item-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .coin-container {
@@ -1146,30 +1296,11 @@ export default {
 }
 
 .tab-content {
-  padding: 20px;
-  padding-bottom: 120px; /* 하단 navbar 높이 + 여유 공간 */
+  padding: 10px;
+  padding-bottom: 240px; /* 하단 navbar 높이 + 여유 공간 */
   max-height: calc(100vh - 200px);
   overflow-y: auto;
   scroll-behavior: smooth;
-}
-
-/* 탭 컨텐츠 스크롤바 스타일링 */
-.tab-content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.tab-content::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 2px;
-}
-
-.tab-content::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 2px;
-}
-
-.tab-content::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
 }
 
 .item-category {
@@ -1187,10 +1318,22 @@ export default {
 }
 
 .item-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 15px;
-  margin-bottom: 30px;
+  display: flex;
+  gap: 6px;
+  margin: 0 0 12px 24px;
+  justify-content: flex-start;
+  max-width: 390px;
+  margin-left: 24px;
+  margin-right: auto;
+  flex-wrap: nowrap; /* Ensures items stay in a single row */
+  overflow-x: auto; /* Enables horizontal scrolling */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scroll-behavior: smooth; /* Smooth scrolling */
+}
+
+.item-list::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 .item-card {
@@ -1231,8 +1374,8 @@ export default {
 }
 
 .item-image-placeholder {
-  width: 100%;
-  height: 80px;
+  width: 100px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1277,6 +1420,16 @@ export default {
   font-weight: 600;
   color: #333;
   margin-bottom: 5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.item-requirement {
+  display: block;
+  font-size: 10px;
+  color: #dc3545;
+  font-weight: 500;
+  margin-top: 2px;
 }
 
 .item-price {
@@ -1399,8 +1552,8 @@ export default {
 
 @media (max-width: 768px) {
   .item-list {
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 10px;
+    gap: 8px;
+    max-width: 350px;
   }
 
   .item-card {
@@ -1408,11 +1561,12 @@ export default {
   }
 
   .item-image-placeholder {
-    height: 60px;
+    height: 30px;
   }
 
   .item-name {
     font-size: 12px;
+    text-overflow: ellipsis;
   }
 
   .item-price {
