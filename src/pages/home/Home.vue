@@ -21,18 +21,19 @@
         <div class="avatar-pixel">
           <img :src="baseAvatar" class="avatar-img" alt="아바타" />
           <img
-            :src="wearingTitle ? getTitleImage : hatSprout"
+            v-if="getTitleImage"
+            :src="getTitleImage"
             class="title-img"
             alt="칭호"
           />
           <img
-            v-if="wearingShirt"
+            v-if="getShirtImage"
             :src="getShirtImage"
             class="shirt-img"
             alt="상의"
           />
           <img
-            v-if="wearingShoes"
+            v-if="getShoesImage"
             :src="getShoesImage"
             class="shoes-img"
             alt="신발"
@@ -132,7 +133,7 @@
       <!-- 오른쪽 플로팅 버튼 그룹 -->
       <div class="floating-btn-group">
         <button class="floating-btn" @click="openQuiz">
-          <i class="fas fa-piggy-bank"></i>
+          <i class="fa-solid fa-lightbulb"></i>
         </button>
         <button class="floating-btn">
           <i class="fas fa-envelope" @click="openNewsletter"></i>
@@ -145,15 +146,18 @@
 
     <Quiz v-if="showQuiz" @close="closeQuiz" />
     <Newsletter v-if="showNewsletter" @close="closeNewsletter" />
+    <WelcomePointModal v-if="showWelcomeModal" @close="closeWelcomeModal" />
   </div>
 </template>
 
 <script setup>
 import Quiz from './Quiz.vue';
 import Newsletter from './Newsletter.vue';
+import WelcomePointModal from '@/components/WelcomePointModal.vue';
 import { ref, computed } from 'vue';
 import { useAvatarStore } from '../../stores/avatar.js';
 import { getCumulativeCoin, getMyCoinStatus } from '@/api/mypage/avatar';
+import { getAvatarStatus, getClothes } from '@/api/mypage/avatar/avatarApi.js';
 import { getBubbleText } from '@/api/home/bubbleApi';
 import { useAuthStore } from '@/stores/auth';
 import baseAvatar from '../mypage/avatar/avatarimg/avatar-base.png';
@@ -167,6 +171,7 @@ const router = useRouter();
 
 const showQuiz = ref(false);
 const showNewsletter = ref(false);
+const showWelcomeModal = ref(false);
 
 // 누적 포인트 API 상태 관리
 const loadingCumulative = ref(false);
@@ -192,6 +197,10 @@ function closeNewsletter() {
   showNewsletter.value = false;
 }
 
+function closeWelcomeModal() {
+  showWelcomeModal.value = false;
+}
+
 function goToAvatarShop() {
   router.push('/avatar-shop');
 }
@@ -199,58 +208,78 @@ function goToAvatarShop() {
 const avatarStore = useAvatarStore();
 const authStore = useAuthStore();
 
-// 착용 중인 아이템 확인
+// 아바타 상태 관리 (AvatarShop2.vue와 동일한 방식)
+const avatarItems = ref([]); // API에서 받아온 모든 아이템 데이터
+const avatar = ref(null); // 아바타 데이터를 저장할 변수
+
+// S3 URL을 HTTPS URL로 변환하는 함수
+const convertS3Url = (s3Url) => {
+  if (!s3Url) return '';
+  if (s3Url.startsWith('s3://')) {
+    return s3Url.replace(
+      's3://finpickbucket/',
+      'https://finpickbucket.s3.ap-northeast-2.amazonaws.com/'
+    );
+  }
+  return s3Url;
+};
+
+// 착용 중인 아이템 확인 (AvatarShop2.vue와 동일한 방식)
 const wearingTitle = computed(() => {
-  const wearingItem = avatarStore.getWearingItem('titles');
-  return wearingItem ? wearingItem.id : null;
+  const item = avatarItems.value.find(
+    (item) => item.type === 'level' && item.wearing
+  );
+  return item ? item.itemId : null;
 });
 
 const wearingShirt = computed(() => {
-  const wearingItem = avatarStore.getWearingItem('shirts');
-  return wearingItem ? wearingItem.id : null;
+  const item = avatarItems.value.find(
+    (item) => item.type === 'top' && item.wearing
+  );
+  return item ? item.itemId : null;
 });
 
 const wearingShoes = computed(() => {
-  const wearingItem = avatarStore.getWearingItem('shoes');
-  return wearingItem ? wearingItem.id : null;
+  const item = avatarItems.value.find(
+    (item) => item.type === 'shoes' && item.wearing
+  );
+  return item ? item.itemId : null;
 });
 
-// 여러 액세서리를 동시에 착용할 수 있도록 수정
 const wearingGlasses = computed(() => {
-  const wearingItems = avatarStore.getWearingItems('glasses');
-  return wearingItems.map((item) => item.id);
+  const items = avatarItems.value.filter(
+    (item) => item.type === 'accessory' && item.wearing
+  );
+  return items.map((item) => item.itemId);
 });
 
-// 착용 중인 아이템 이미지 가져오기
+// 착용 중인 아이템 이미지 가져오기 (AvatarShop2.vue와 동일한 방식)
 const getTitleImage = computed(() => {
-  if (wearingTitle.value === 'hat-1sprout') return hatSprout;
-  if (wearingTitle.value === 'hat-2beginner') return hatBeginner;
-  if (wearingTitle.value === 'hat-3wizardhat') return hatWizardhat;
-  if (wearingTitle.value === 'hat-4dosa') return hatDosa;
-  return null;
+  const item = avatarItems.value.find(
+    (item) => item.type === 'level' && item.wearing
+  );
+  return item ? convertS3Url(item.imageUrl) : null;
 });
 
 const getShirtImage = computed(() => {
-  if (wearingShirt.value === 'shirt-blue') return shirtBlue;
-  if (wearingShirt.value === 'shirt-red') return shirtRed;
-  return null;
+  const item = avatarItems.value.find(
+    (item) => item.type === 'top' && item.wearing
+  );
+  return item ? convertS3Url(item.imageUrl) : null;
 });
 
 const getShoesImage = computed(() => {
-  if (wearingShoes.value === 'shoes-brown') return shoesBrown;
-  if (wearingShoes.value === 'shoes') return shoes;
-  return null;
+  const item = avatarItems.value.find(
+    (item) => item.type === 'shoes' && item.wearing
+  );
+  return item ? convertS3Url(item.imageUrl) : null;
 });
 
-// 여러 액세서리 이미지를 반환하는 함수
 const getGlassesImages = computed(() => {
-  const images = [];
-  wearingGlasses.value.forEach((glassesId) => {
-    if (glassesId === 'sport-glasses') images.push(sportGlasses);
-    if (glassesId === 'etc-sunglasses') images.push(sunGlasses);
-    if (glassesId === 'etc-blush') images.push(blush);
-  });
-  return images;
+  const items = avatarItems.value.filter(
+    (item) => item.type === 'accessory' && item.wearing
+  );
+  return items.map((item) => convertS3Url(item.imageUrl));
 });
 
 // 누적 포인트 관련 computed 속성들
@@ -264,6 +293,69 @@ const totalEarnedPoints = computed(() => {
   );
   return points;
 });
+
+// 아바타 상태 조회 (AvatarShop2.vue와 동일한 방식)
+const fetchAvatarAndItemData = async () => {
+  try {
+    console.log('아바타 데이터 조회 시작');
+
+    // 아바타 상태 조회
+    const avatarResponse = await getAvatarStatus();
+    console.log('아바타 상태 응답:', avatarResponse);
+
+    if (avatarResponse.data && avatarResponse.data.data) {
+      avatar.value = avatarResponse.data.data;
+      console.log('아바타 상태 저장:', avatar.value);
+    }
+
+    // 모든 아이템 조회
+    const itemsResponse = await getClothes();
+    console.log('아이템 목록 응답:', itemsResponse);
+
+    if (itemsResponse.data && itemsResponse.data.data) {
+      const allItems = itemsResponse.data.data;
+
+      // 착용 상태 설정
+      const itemsWithWearingStatus = allItems.map((item) => ({
+        ...item,
+        wearing: false, // 기본값은 착용하지 않음
+      }));
+
+      // 아바타 상태에 따라 착용 상태 설정
+      if (avatar.value) {
+        if (avatar.value.levelId) {
+          const levelItem = itemsWithWearingStatus.find(
+            (item) => item.itemId === avatar.value.levelId
+          );
+          if (levelItem) levelItem.wearing = true;
+        }
+        if (avatar.value.topId) {
+          const topItem = itemsWithWearingStatus.find(
+            (item) => item.itemId === avatar.value.topId
+          );
+          if (topItem) topItem.wearing = true;
+        }
+        if (avatar.value.shoesId) {
+          const shoesItem = itemsWithWearingStatus.find(
+            (item) => item.itemId === avatar.value.shoesId
+          );
+          if (shoesItem) shoesItem.wearing = true;
+        }
+        if (avatar.value.accessoryId) {
+          const accessoryItem = itemsWithWearingStatus.find(
+            (item) => item.itemId === avatar.value.accessoryId
+          );
+          if (accessoryItem) accessoryItem.wearing = true;
+        }
+      }
+
+      avatarItems.value = itemsWithWearingStatus;
+      console.log('아이템 목록 저장:', avatarItems.value);
+    }
+  } catch (error) {
+    console.error('아바타 데이터 조회 실패:', error);
+  }
+};
 
 // 누적 포인트 데이터 가져오기 (새로운 코인 상태 API 사용)
 const fetchCumulativePoints = async () => {
@@ -387,10 +479,52 @@ const nextTargetPoints = computed(() => {
 
 // 컴포넌트 마운트 시 저장된 아바타 정보 불러오기
 onMounted(() => {
-  avatarStore.loadAvatar();
+  fetchAvatarAndItemData(); // 아바타 데이터 조회 (AvatarShop2.vue와 동일한 방식)
   fetchCumulativePoints(); // 컴포넌트 마운트 시 누적 포인트 데이터 가져오기
   fetchBubbleText(); // 컴포넌트 마운트 시 말풍선 텍스트 가져오기
+
+  // 회원가입 후 첫 방문 확인
+  checkFirstVisit();
 });
+
+// 회원가입 후 첫 방문 확인 함수
+const checkFirstVisit = () => {
+  // URL 쿼리 파라미터에서 투자성향 분석 완료 여부 확인
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromProfileComplete = urlParams.get('from') === 'profile-complete';
+
+  // 로컬 스토리지에서 첫 방문 여부 확인
+  const hasVisited = localStorage.getItem('hasVisitedHome');
+
+  // 투자성향 분석 완료 후 홈으로 이동하거나, 첫 방문인 경우 모달 표시
+  if ((fromProfileComplete || !hasVisited) && authStore.isAuthenticated) {
+    // 모달 표시
+    showWelcomeModal.value = true;
+
+    // 로컬 스토리지에 방문 기록 저장
+    localStorage.setItem('hasVisitedHome', 'true');
+
+    // URL에서 쿼리 파라미터 제거
+    if (fromProfileComplete) {
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+
+    // 여기서 실제 포인트 지급 API 호출
+    // giveWelcomePoints();
+  }
+};
+
+// 가입 축하 포인트 지급 함수 (실제 API 연동 시 사용)
+const giveWelcomePoints = async () => {
+  try {
+    // TODO: 실제 포인트 지급 API 호출
+    // const response = await giveWelcomeBonus();
+    console.log('가입 축하 포인트 지급 완료');
+  } catch (error) {
+    console.error('포인트 지급 실패:', error);
+  }
+};
 
 // 목표 포인트 계산
 const getTargetPoints = computed(() => {
@@ -789,13 +923,13 @@ const getProgressPercentage = computed(() => {
 }
 
 .current-points {
-  color: #ffffff;
+  color: #000000;
   font-size: 28px;
 }
 
 .points-display-inside .current-points {
-  color: #ffffff;
-  font-size: 10px;
+  color: #000000;
+  font-size: 15px;
   font-weight: 800;
 }
 
@@ -813,14 +947,14 @@ const getProgressPercentage = computed(() => {
 }
 
 .target-points {
-  color: #ffffff;
+  color: #3700ff;
   font-size: 28px;
   font-weight: 600;
 }
 
 .points-display-inside .target-points {
-  color: #ffffff;
-  font-size: 10px;
+  color: #1900ff;
+  font-size: 14px;
   font-weight: 800;
 }
 

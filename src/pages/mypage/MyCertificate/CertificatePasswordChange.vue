@@ -52,6 +52,7 @@
               ></div>
             </div>
           </div>
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         </div>
 
         <!-- 숫자 패드 -->
@@ -76,7 +77,6 @@
               @click="addNumber(3)"
               :disabled="currentPassword.length >= 6"
             >
-              3
             </button>
             <button class="number-btn delete-btn" @click="deleteNumber">
               <font-awesome-icon :icon="['fas', 'backspace']" />
@@ -98,12 +98,15 @@ import {
   faTimes,
   faBackspace,
 } from "@fortawesome/free-solid-svg-icons";
+import { pinLogin } from "@/api/authApi.js";
 
 library.add(faAngleLeft, faTimes, faBackspace);
 
 const router = useRouter();
-
 const currentPassword = ref("");
+const isLoading = ref(false);
+const errorMessage = ref("");
+const shakeError = ref(false);
 
 // 숫자 패드 배열을 이미지와 동일하게 고정
 const numberPad = ref([
@@ -120,16 +123,51 @@ const isPasswordValid = computed(() => {
 });
 
 const addNumber = (number) => {
+  // 이미 6자리가 채워졌으면 더 이상 입력되지 않도록 막습니다.
+  if (currentPassword.value.length >= 6) {
+    return;
+  }
+
+  // 사용자가 다시 입력을 시작하면 에러 메시지를 초기화합니다.
+  errorMessage.value = "";
+
   if (currentPassword.value.length < 6) {
     currentPassword.value += number.toString();
 
     // 6자리 입력 완료 시 자동으로 다음 페이지로 이동
     if (currentPassword.value.length === 6) {
       setTimeout(() => {
-        nextStep();
+        verifyPassword();
       }, 300); // 0.3초 후 자동 이동
     }
   }
+};
+
+const verifyPassword = async () => {
+  isLoading.value = true;
+  try {
+    // 실제 pinLogin API를 호출합니다.
+    await pinLogin(parseInt(currentPassword.value,10));
+    // 인증 성공 시 다음 단계로 이동합니다.
+    await router.push({
+      name: "certificate-password-change-new",
+      query: { currentPassword: currentPassword.value },
+    });
+  } catch (error) {
+    // 인증 실패 시 API 응답에서 에러 메시지를 가져옵니다.
+    errorMessage.value = error.response?.data?.message || "인증에 실패했습니다.";
+    triggerShakeError();
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const triggerShakeError = () => {
+  shakeError.value = true;
+  setTimeout(() => {
+    shakeError.value = false;
+    clearPassword();
+  }, 800); // 애니메이션 시간(0.5s) 후 초기화
 };
 
 const deleteNumber = () => {
@@ -140,20 +178,13 @@ const deleteNumber = () => {
 
 const clearPassword = () => {
   currentPassword.value = "";
+  errorMessage.value = ""; // 수정: 에러 메시지 초기화
 };
 
 const goBack = () => {
   router.back();
 };
 
-const nextStep = () => {
-  if (isPasswordValid.value) {
-    router.push({
-      name: "certificate-password-change-new",
-      query: { currentPassword: currentPassword.value },
-    });
-  }
-};
 </script>
 
 <style scoped>

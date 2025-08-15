@@ -7,25 +7,27 @@
       <button class="mark-all-btn" @click="markAllAsRead">모두 읽음</button>
     </header>
 
-    <template v-for="(group, index) in groupedNotifications" :key="index">
-      <div class="group-title">{{ group.title }}</div>
-      <div
-        v-for="notification in group.items"
-        :key="notification.id"
-        class="notification-card"
-        :class="{ unread: !notification.read }"
-      >
-        <div class="icon-box">
-          <i :class="notification.icon"></i>
+    <div class="notification-content-wrapper">
+      <template v-for="(group, index) in groupedNotifications" :key="index">
+        <div class="group-title">{{ group.title }}</div>
+        <div
+          v-for="notification in group.items"
+          :key="notification.id"
+          class="notification-card"
+          :class="{ unread: !notification.read }"
+        >
+          <div class="icon-box">
+            <i :class="notification.icon"></i>
+          </div>
+          <div class="notification-content">
+            <div class="notification-title">{{ notification.title }}</div>
+            <div class="notification-desc">{{ notification.desc }}</div>
+            <div class="notification-time">{{ notification.time }}</div>
+          </div>
+          <span v-if="!notification.read" class="unread-dot"></span>
         </div>
-        <div class="notification-content">
-          <div class="notification-title">{{ notification.title }}</div>
-          <div class="notification-desc">{{ notification.desc }}</div>
-          <div class="notification-time">{{ notification.time }}</div>
-        </div>
-        <span v-if="!notification.read" class="unread-dot"></span>
-      </div>
-    </template>
+      </template>
+    </div>
   </div>
 </template>
 
@@ -44,67 +46,76 @@ const notifications = ref([
   // 오늘
   {
     id: 1,
-    title: '투자 포트폴리오 업데이트',
-    desc: '오늘 수익률이 +2.3% 상승했습니다.',
-    time: '2시간 전',
+    title: '챌린지 성공 여부를 확인하세요!',
+    desc: '참여 중인 챌린지의 결과를 확인하고 포인트를 받아보세요.',
+    time: '1시간 전',
     date: new Date(), // 오늘
-    icon: 'fas fa-rocket',
+    icon: 'fas fa-trophy',
     read: false,
   },
   {
     id: 2,
-    title: '새로운 투자 기회',
-    desc: '추천 종목에 대한 분석 리포트가 도착했습니다.',
-    time: '4시간 전',
+    title: '새로운 공통 챌린지에 참가하세요!',
+    desc: '새로운 공통 챌린지가 시작되었습니다. 지금 참가해보세요!',
+    time: '3시간 전',
     date: new Date(), // 오늘
-    icon: 'fas fa-lightbulb',
+    icon: 'fas fa-users',
+    read: false,
+  },
+  {
+    id: 3,
+    title: '새로운 금융 퀴즈를 풀고 포인트를 받으세요!',
+    desc: '오늘의 금융 퀴즈가 업데이트되었습니다. 정답을 맞추고 포인트를 획득하세요!',
+    time: '5시간 전',
+    date: new Date(), // 오늘
+    icon: 'fas fa-question-circle',
     read: false,
   },
   // 최근 7일
   {
-    id: 3,
-    title: '월간 투자 리포트',
-    desc: '지난달 투자 성과 요약을 확인하세요.',
-    time: '2일 전',
-    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-file-alt',
-    read: true,
-  },
-  {
     id: 4,
-    title: '커뮤니티 댓글',
-    desc: '챌린지 게시글에 새로운 댓글이 달렸습니다.',
-    time: '3일 전',
-    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-comments',
+    title: '새로운 인원이 챌린지에 참가하였습니다!',
+    desc: '참여 중인 챌린지에 새로운 멤버가 합류했습니다.',
+    time: '1일 전',
+    date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+    icon: 'fas fa-user-plus',
     read: true,
   },
   {
     id: 5,
-    title: '시장 동향 알림',
-    desc: '관심 종목의 가격이 5% 이상 변동했습니다.',
-    time: '5일 전',
-    date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-chart-line',
+    title: '새로운 카테고리에 맞는 뉴스를 확인해 보세요!',
+    desc: '관심 카테고리의 최신 금융 뉴스가 업데이트되었습니다.',
+    time: '2일 전',
+    date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
+    icon: 'fas fa-newspaper',
+    read: true,
+  },
+  {
+    id: 6,
+    title: '챌린지 성공 여부를 확인하세요!',
+    desc: '완료된 챌린지의 결과를 확인하고 보상을 받아보세요.',
+    time: '3일 전',
+    date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
+    icon: 'fas fa-trophy',
     read: true,
   },
   // 최근 30일
   {
-    id: 6,
-    title: '계좌 입금 완료',
-    desc: '계좌 거래에 500,000원이 입금되었습니다.',
+    id: 7,
+    title: '새로운 공통 챌린지에 참가하세요!',
+    desc: '새로운 공통 챌린지가 시작되었습니다. 지금 참가해보세요!',
     time: '1주 전',
     date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-wallet',
+    icon: 'fas fa-users',
     read: true,
   },
   {
-    id: 7,
-    title: '정기 투자 실행',
-    desc: '설정하신 정기 투자가 실행되었습니다.',
+    id: 8,
+    title: '새로운 금융 퀴즈를 풀고 포인트를 받으세요!',
+    desc: '오늘의 금융 퀴즈가 업데이트되었습니다. 정답을 맞추고 포인트를 획득하세요!',
     time: '2주 전',
     date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-calendar-check',
+    icon: 'fas fa-question-circle',
     read: true,
   },
 ]);
@@ -139,8 +150,10 @@ function markAllAsRead() {
   max-width: 540px;
   margin: 0 auto;
   background: #fff;
-  min-height: 100vh;
-  padding-bottom: 24px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .notification-header {
   display: flex;
@@ -149,6 +162,14 @@ function markAllAsRead() {
   padding: 18px 20px 10px 10px;
   background: #fff;
   position: relative;
+  height: 80px;
+  box-sizing: border-box;
+}
+
+.notification-content-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 24px;
 }
 .notification-header h1 {
   width: 100%;

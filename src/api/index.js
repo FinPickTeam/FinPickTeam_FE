@@ -1,5 +1,6 @@
 // 챌린지 api
 export * from './challenge/challenge.js';
+export * from './challenge/coinRank.js';
 
 // 재테크 api
 export * from './finance/deposit.js';

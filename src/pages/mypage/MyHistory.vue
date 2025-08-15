@@ -12,14 +12,14 @@
       <button
         class="tab-button"
         :class="{ active: activeTab === 'challenge' }"
-        @click="activeTab = 'challenge'"
+        @click="switchToChallengeTab"
       >
         챌린지
       </button>
       <button
         class="tab-button"
         :class="{ active: activeTab === 'quiz' }"
-        @click="activeTab = 'quiz'"
+        @click="switchToQuizTab"
       >
         금융 퀴즈
       </button>
@@ -29,25 +29,49 @@
     <div v-if="activeTab === 'challenge'" class="tab-content">
       <div class="challenge-history-card">
         <div class="challenge-list">
-          <div class="challenge-list-header">
-            <span class="challenge-list-header-title">챌린지명</span>
-            <span class="challenge-list-header-status">상태</span>
+          <!-- 로딩 상태 -->
+          <div v-if="challengeLoading" class="loading-state">
+            <div class="loading-spinner"></div>
+            <div>챌린지 히스토리를 불러오는 중...</div>
           </div>
-          <div
-            v-for="(challenge, index) in challengeHistory"
-            :key="index"
-            class="challenge-item"
-          >
-            <div class="challenge-title">{{ challenge.title }}</div>
-            <span
-              class="challenge-status"
-              :class="{
-                completed: challenge.status === '완료',
-                failed: challenge.status === '실패',
-              }"
+
+          <!-- 에러 상태 -->
+          <div v-else-if="challengeError" class="error-state">
+            <i class="fa-solid fa-exclamation-triangle"></i>
+            <div>{{ challengeError }}</div>
+            <button class="retry-btn" @click="fetchChallengeHistory">
+              다시 시도
+            </button>
+          </div>
+
+          <!-- 챌린지 히스토리 목록 -->
+          <div v-else-if="challengeHistory.length > 0">
+            <div class="challenge-list-header">
+              <span class="challenge-list-header-title">챌린지명</span>
+              <span class="challenge-list-header-status">상태</span>
+            </div>
+            <div
+              v-for="(challenge, index) in challengeHistory"
+              :key="challenge.id || index"
+              class="challenge-item"
             >
-              {{ challenge.status }}
-            </span>
+              <div class="challenge-title">{{ challenge.title }}</div>
+              <span
+                class="challenge-status"
+                :class="{
+                  completed: challenge.status === '성공',
+                  failed: challenge.status === '실패',
+                }"
+              >
+                {{ challenge.status }}
+              </span>
+            </div>
+          </div>
+
+          <!-- 빈 상태 -->
+          <div v-else class="empty-state">
+            <i class="fa-solid fa-inbox"></i>
+            <div>챌린지 히스토리가 없습니다.</div>
           </div>
         </div>
       </div>
@@ -186,7 +210,7 @@
             <span>상세 해설</span>
           </div>
           <div class="explanation-content">
-            {{ selectedQuiz.explanation }}
+            {{ selectedQuiz.explanation || selectedQuiz.question }}
           </div>
         </div>
 
@@ -201,6 +225,10 @@
 import { ref, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { getQuizHistoryList, getQuizHistoryDetail } from "@/api/home";
+import {
+  getUserChallengeHistory,
+  getChallengeResult,
+} from "@/api/challenge/challenge";
 import { useAuthStore } from "@/stores/auth";
 import Navbar from "../../components/Navbar.vue";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
@@ -235,35 +263,102 @@ const selectedQuiz = ref(null);
 const showModal = ref(false);
 const loading = ref(false);
 const error = ref(null);
-const activeTab = ref("quiz"); // 기본값은 퀴즈 탭
+const activeTab = ref("challenge"); // 기본값은 챌린지 탭
 
-// 샘플 챌린지 히스토리 데이터 (임시)
-const challengeHistory = ref([
-  {
-    title: "한 달 저축 챌린지",
-    status: "완료",
-    startDate: "2023-12-01",
-    endDate: "2023-12-31",
-  },
-  {
-    title: "독서 챌린지",
-    status: "실패",
-    startDate: "2023-11-01",
-    endDate: "2023-11-30",
-  },
-  {
-    title: "금연 챌린지",
-    status: "완료",
-    startDate: "2024-01-15",
-    endDate: "2024-02-15",
-  },
-  {
-    title: "운동 챌린지",
-    status: "실패",
-    startDate: "2024-01-01",
-    endDate: "2024-01-31",
-  },
-]);
+// 챌린지 히스토리 데이터
+const challengeHistory = ref([]);
+const challengeLoading = ref(false);
+const challengeError = ref(null);
+
+// 챌린지 히스토리 데이터 가져오기
+const fetchChallengeHistory = async () => {
+  try {
+    challengeLoading.value = true;
+    challengeError.value = null;
+
+    // 인증 상태 확인
+    if (!authStore.isAuthenticated) {
+      console.warn("챌린지 히스토리를 보려면 로그인이 필요합니다.");
+      challengeError.value = "챌린지 히스토리를 보려면 로그인이 필요합니다.";
+      challengeLoading.value = false;
+      return;
+    }
+
+    console.log("챌린지 히스토리 데이터 가져오기 시작");
+    const response = await getUserChallengeHistory();
+    console.log("받아온 챌린지 히스토리 데이터:", response);
+
+    if (Array.isArray(response)) {
+      // 각 챌린지의 결과를 개별적으로 조회
+      const challengeResults = await Promise.allSettled(
+        response.map(async (challenge) => {
+          try {
+            const result = await getChallengeResult(challenge.id);
+            return {
+              id: challenge.id,
+              title: challenge.title || challenge.challengeName || "챌린지",
+              status: getChallengeStatus(result?.resultType),
+              resultType: result?.resultType,
+              actualRewardPoint: result?.actualRewardPoint,
+              savedAmount: result?.savedAmount,
+            };
+          } catch (error) {
+            console.warn(`챌린지 ${challenge.id} 결과 조회 실패:`, error);
+            return {
+              id: challenge.id,
+              title: challenge.title || challenge.challengeName || "챌린지",
+              status: "미완료",
+              resultType: null,
+              actualRewardPoint: 0,
+              savedAmount: 0,
+            };
+          }
+        })
+      );
+
+      challengeHistory.value = challengeResults
+        .filter((result) => result.status === "fulfilled")
+        .map((result) => result.value)
+        .filter((challenge) => challenge.status !== "미완료"); // 완료된 챌린지만 표시
+
+      console.log("챌린지 히스토리 데이터 설정 완료:", challengeHistory.value);
+    } else {
+      console.warn("챌린지 히스토리 데이터가 배열이 아닙니다:", response);
+      challengeError.value = "챌린지 히스토리 데이터 형식이 올바르지 않습니다.";
+    }
+  } catch (err) {
+    console.error("챌린지 히스토리 조회 에러:", err);
+
+    let errorMessage = "챌린지 히스토리를 불러오는데 실패했습니다.";
+
+    if (err.response?.status === 401) {
+      errorMessage = "로그인이 필요합니다.";
+    } else if (err.response?.status === 404) {
+      errorMessage = "챌린지 히스토리를 찾을 수 없습니다.";
+    } else if (err.response?.status === 500) {
+      errorMessage = "서버 오류가 발생했습니다.";
+    } else if (err.message) {
+      errorMessage = `연결 오류: ${err.message}`;
+    }
+
+    challengeError.value = errorMessage;
+  } finally {
+    challengeLoading.value = false;
+  }
+};
+
+// 챌린지 결과 타입을 상태로 변환
+const getChallengeStatus = (resultType) => {
+  switch (resultType) {
+    case "SUCCESS_WIN":
+    case "SUCCESS_EQUAL":
+      return "성공";
+    case "FAIL":
+      return "실패";
+    default:
+      return "미완료";
+  }
+};
 
 // 퀴즈 히스토리 데이터 가져오기
 const fetchQuizHistory = async () => {
@@ -367,7 +462,6 @@ const fetchQuizHistory = async () => {
 // 퀴즈 상세 정보 가져오기
 const fetchQuizDetail = async (quizId) => {
   try {
-    // quizId 유효성 검사
     if (!quizId || quizId === "undefined" || quizId === "null") {
       console.error("유효하지 않은 quizId:", quizId);
       error.value = "유효하지 않은 퀴즈 ID입니다.";
@@ -377,66 +471,73 @@ const fetchQuizDetail = async (quizId) => {
     console.log("퀴즈 상세 정보 가져오기 시작, quizId:", quizId);
     const response = await getQuizHistoryDetail(quizId);
     console.log("받아온 퀴즈 상세 데이터:", response);
-    console.log("response.data:", response.data);
-    console.log("response.data.status:", response.data?.status);
-    console.log("response.data.data:", response.data?.data);
 
-    // API 응답 구조에 따른 데이터 추출
     let quizDetailData;
 
-    // 구조 1: { status: 0, message: "...", data: {...} }
-    if (response.data && response.data.status === 0 && response.data.data) {
+    // (주의) getQuizHistoryDetail이 res.data를 반환한다면 response.data는 없을 수 있음
+
+    if (response?.data && response.data?.data) {
+      // 응답이 {status, data} 형태인 경우
       quizDetailData = response.data.data;
-    }
-    // 구조 2: { status: 200, data: {...} } (기존 호환성)
-    else if (
-      response.data &&
-      response.data.status === 200 &&
-      response.data.data
-    ) {
-      quizDetailData = response.data.data;
-    }
-    // 구조 3: 직접 객체로 응답하는 경우
-    else if (response.data && typeof response.data === "object") {
+    } else if (response?.data && typeof response.data === "object") {
+      // 응답이 { ... } 객체인 경우
       quizDetailData = response.data;
-    }
-    // 구조 4: response 자체가 데이터인 경우
-    else if (response && typeof response === "object") {
+    } else if (response && typeof response === "object") {
+      // getQuizHistoryDetail이 이미 res.data를 반환하는 경우
       quizDetailData = response;
-    } else {
-      console.warn("퀴즈 상세 데이터 형식이 올바르지 않습니다:", response);
+    }
+
+    if (!quizDetailData) {
+      console.warn("퀴즈 상세 데이터가 비어있습니다:", response);
       error.value = "퀴즈 상세 정보를 가져오는데 실패했습니다.";
       return;
     }
 
-    if (quizDetailData) {
-      selectedQuiz.value = quizDetailData;
-      console.log("퀴즈 상세 데이터 설정 완료:", selectedQuiz.value);
-      showModal.value = true;
-    } else {
-      console.warn("퀴즈 상세 데이터가 비어있습니다:", response);
-      error.value = "퀴즈 상세 정보를 가져오는데 실패했습니다.";
-    }
+    // 필드 정규화(안전 매핑)
+    const normalized = {
+      id:
+        quizDetailData.id ??
+        quizDetailData.historyId ??
+        quizDetailData.quizId ??
+        quizDetailData.quiz_id ??
+        null,
+      question:
+        quizDetailData.data?.question ??
+        quizDetailData.question ??
+        quizDetailData.title ??
+        "",
+      answer:
+        quizDetailData.answer ??
+        quizDetailData.correctAnswer ??
+        quizDetailData.ox ??
+        "",
+      isCorrect: quizDetailData.isCorrect ?? quizDetailData.correct ?? false,
+      explanation:
+        quizDetailData.explanation ??
+        quizDetailData.data.message ??
+        quizDetailData.detail ??
+        quizDetailData.message ??
+        "",
+    };
+
+    // 모달에 이미 있는 값(사용자 답 등)은 유지하고 서버 상세로 덮어쓰기
+    selectedQuiz.value = { ...(selectedQuiz.value || {}), ...normalized };
+
+    console.log("퀴즈 상세 데이터 설정 완료:", selectedQuiz.value);
   } catch (err) {
     console.error("퀴즈 상세 조회 에러:", err);
-
-    // 더 구체적인 에러 메시지
     let errorMessage = "퀴즈 상세 정보를 불러오는데 실패했습니다.";
-
-    if (err.response?.status === 400) {
-      errorMessage = "잘못된 퀴즈 ID입니다.";
-    } else if (err.response?.status === 404) {
+    if (err.response?.status === 400) errorMessage = "잘못된 퀴즈 ID입니다.";
+    else if (err.response?.status === 404)
       errorMessage = "퀴즈를 찾을 수 없습니다.";
-    } else if (err.response?.status === 500) {
+    else if (err.response?.status === 500)
       errorMessage = "서버 오류가 발생했습니다.";
-    }
-
     error.value = errorMessage;
   }
 };
 
 // 퀴즈 선택 시 상세 정보 가져오기
-const selectQuiz = (quiz) => {
+const selectQuiz = async (quiz) => {
   console.log("퀴즈 선택:", quiz);
 
   // historyId를 우선적으로 사용하고, 다른 ID 필드들도 확인
@@ -466,9 +567,11 @@ const selectQuiz = (quiz) => {
   selectedQuiz.value = {
     ...quiz,
     userAnswer: userAnswer, // 사용자가 선택한 답 추가
+    // explanation: await fetchQuizDetail(quizId),
   };
 
   showModal.value = true;
+  await fetchQuizDetail(quizId); // 내부에서 selectedQuiz를 덮어씁니다
 };
 
 // 모달 닫기
@@ -477,14 +580,30 @@ const closeModal = () => {
   selectedQuiz.value = null;
 };
 
+// 탭 전환 함수들
+const switchToChallengeTab = () => {
+  activeTab.value = "challenge";
+  if (challengeHistory.value.length === 0 && !challengeLoading.value) {
+    fetchChallengeHistory();
+  }
+};
+
+const switchToQuizTab = () => {
+  activeTab.value = "quiz";
+  if (quizHistory.value.length === 0 && !loading.value) {
+    fetchQuizHistory();
+  }
+};
+
 // 뒤로가기
 const goBack = () => {
   router.go(-1);
 };
 
-// 컴포넌트 마운트 시 퀴즈 히스토리 데이터 가져오기
+// 컴포넌트 마운트 시 히스토리 데이터 가져오기
 onMounted(() => {
   fetchQuizHistory();
+  fetchChallengeHistory();
 });
 </script>
 

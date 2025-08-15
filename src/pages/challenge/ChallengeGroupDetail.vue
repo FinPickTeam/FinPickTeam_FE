@@ -8,6 +8,22 @@
       @confirm="confirmJoin"
     />
 
+    <!-- 참여 제한 모달 -->
+    <ChallengeParticipationLimitModal
+      :isVisible="showParticipationLimitModal"
+      :personalCount="challengeStore.counts.PERSONAL"
+      :groupCount="challengeStore.counts.GROUP"
+      @close="showParticipationLimitModal = false"
+    />
+
+    <!-- 포인트 부족 모달 -->
+    <ChallengeInsufficientPointsModal
+      :isVisible="showInsufficientPointsModal"
+      :currentPoints="challengeStore.points.userPoints"
+      :requiredPoints="challengeStore.points.required.GROUP"
+      @close="showInsufficientPointsModal = false"
+    />
+
     <!-- 결과 모달들 (완료 + 미확인 진입 시) -->
     <ChallengeSuccessModal
       v-if="showSuccessModal && challengeResult"
@@ -16,8 +32,9 @@
       @close="handleResultConfirm"
     />
     <ChallengeFailModal
-      v-if="showFailModal"
+      v-if="showFailModal && challengeResult"
       :isVisible="showFailModal"
+      :challengeResult="challengeResult"
       @close="handleResultConfirm"
     />
 
@@ -229,13 +246,18 @@ import {
   joinChallenge,
   getChallengeResult,
   confirmChallengeResult,
+  getChallengeList,
 } from '@/api/challenge/challenge.js';
 import ChallengeJoinConfirmModal from '@/components/challenge/ChallengeJoinConfirmModal.vue';
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
+import ChallengeParticipationLimitModal from '@/components/challenge/ChallengeParticipationLimitModal.vue';
+import ChallengeInsufficientPointsModal from '@/components/challenge/ChallengeInsufficientPointsModal.vue';
 import AvatarStack from '@/components/avatar/AvatarStack.vue';
+import { useChallengeStore } from '@/stores/challenge';
 
 const route = useRoute();
+const challengeStore = useChallengeStore();
 
 const loading = ref(true);
 const challenge = ref(null);
@@ -243,6 +265,13 @@ const challenge = ref(null);
 // join modal
 const showJoinModal = ref(false);
 const password = ref('');
+const isPasswordVerified = ref(false); // 비밀번호 검증 상태 추가
+
+// participation limit modal
+const showParticipationLimitModal = ref(false);
+
+// insufficient points modal
+const showInsufficientPointsModal = ref(false);
 
 // result modals
 const showSuccessModal = ref(false);
@@ -269,18 +298,51 @@ const fetchDetail = async () => {
     const data = await getChallengeDetail(id);
     challenge.value = data;
 
+    // 참여 중인 챌린지 목록을 가져와서 store 업데이트
+    try {
+      const participatingList = await getChallengeList({ participating: true });
+      challengeStore.updateCountsFromList(participatingList || []);
+    } catch (e) {
+      console.error('참여 중인 챌린지 목록 조회 실패:', e);
+    }
+
+    // 포인트 정보 업데이트
+    try {
+      await challengeStore.fetchCoinStatus();
+    } catch (e) {
+      console.error('포인트 정보 조회 실패:', e);
+    }
+
     // 완료 + 미확인 → 결과 모달
     if (
       data?.status === 'COMPLETED' &&
       data?.isParticipating &&
       !data?.isResultCheck
     ) {
+      // 결과 데이터 가져오기
       const result = await getChallengeResult(id);
+      console.log('=== ChallengeGroupDetail - API 응답 ===');
+      console.log('getChallengeResult API 응답:', result);
+      console.log('stockRecommendation:', result?.stockRecommendation);
+      console.log('==========================================');
       challengeResult.value = result || null;
 
-      if (result?.resultType?.startsWith('SUCCESS'))
+      // isSuccess 값에 따라 모달 표시
+      if (data?.isSuccess === true) {
         showSuccessModal.value = true;
-      else showFailModal.value = true;
+        showFailModal.value = false;
+      } else if (data?.isSuccess === false) {
+        showSuccessModal.value = false;
+        showFailModal.value = true;
+      } else {
+        // isSuccess가 null인 경우 기존 로직 사용
+        if (result?.resultType?.startsWith('SUCCESS')) {
+          showSuccessModal.value = true;
+          console.log('success', showSuccessModal.value);
+        } else {
+          showFailModal.value = true;
+        }
+      }
     } else {
       showSuccessModal.value = false;
       showFailModal.value = false;
@@ -296,7 +358,35 @@ const fetchDetail = async () => {
 
 onMounted(fetchDetail);
 
+const checkParticipationLimit = () => {
+  // 그룹 챌린지 참여 제한 체크
+  if (challengeStore.isTypeFull('GROUP')) {
+    showParticipationLimitModal.value = true;
+    return false;
+  }
+  return true;
+};
+
+const checkPoints = () => {
+  // 포인트 부족 체크
+  if (!challengeStore.hasEnoughPointsForType('GROUP')) {
+    showInsufficientPointsModal.value = true;
+    return false;
+  }
+  return true;
+};
+
 const openJoinModal = () => {
+  // 참여 제한 체크
+  if (!checkParticipationLimit()) {
+    return;
+  }
+
+  // 포인트 부족 체크
+  if (!checkPoints()) {
+    return;
+  }
+
   showJoinModal.value = true;
 };
 
@@ -310,12 +400,25 @@ const handlePasswordSubmit = async () => {
     return;
   }
 
+  // 참여 제한 체크
+  if (!checkParticipationLimit()) {
+    return;
+  }
+
+  // 포인트 부족 체크
+  if (!checkPoints()) {
+    return;
+  }
+
   try {
-    // 비밀번호 검증을 위해 joinChallenge 호출
+    // 비밀번호 검증만 수행 (실제 참여는 하지 않음)
+    // TODO: 백엔드에서 비밀번호 검증 전용 API가 필요할 수 있음
+    // 현재는 joinChallenge를 사용하되, 실제 참여는 모달에서 처리
     await joinChallenge(route.params.id, { password: password.value });
     password.value = '';
-    // 참여 완료 후 현재 페이지 새로고침하여 참여 상태 업데이트
-    await fetchDetail();
+    isPasswordVerified.value = true; // 비밀번호 검증 완료
+    // 비밀번호 검증 성공 후 확인 모달 표시
+    showJoinModal.value = true;
   } catch (e) {
     alert(e?.response?.data?.message || '비밀번호가 올바르지 않습니다.');
   }
@@ -323,7 +426,16 @@ const handlePasswordSubmit = async () => {
 
 const confirmJoin = async () => {
   try {
-    await joinChallenge(route.params.id);
+    // 비밀번호가 있는 챌린지의 경우 이미 검증된 상태이므로 바로 참여
+    // 비밀번호가 없는 챌린지의 경우 일반 참여
+    if (isPasswordVerified.value) {
+      // 비밀번호가 이미 검증된 경우, 실제 참여는 이미 완료된 상태
+      // 페이지 새로고침만 수행
+      isPasswordVerified.value = false; // 상태 초기화
+    } else {
+      // 일반 참여
+      await joinChallenge(route.params.id);
+    }
     showJoinModal.value = false;
     // 참여 완료 후 현재 페이지 새로고침하여 참여 상태 업데이트
     await fetchDetail();
@@ -552,7 +664,9 @@ const categoryTheme = computed(() => {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  min-height: calc(100vh - 80px - 68px); /* 헤더와 네비바 높이를 제외한 전체 높이 */
+  min-height: calc(
+    100vh - 80px - 68px
+  ); /* 헤더와 네비바 높이를 제외한 전체 높이 */
 }
 
 .challenge-info {
