@@ -8,6 +8,14 @@
       @confirm="confirmJoin"
     />
 
+    <!-- 참여 제한 모달 -->
+    <ChallengeParticipationLimitModal
+      :isVisible="showParticipationLimitModal"
+      :personalCount="challengeStore.counts.PERSONAL"
+      :groupCount="challengeStore.counts.GROUP"
+      @close="showParticipationLimitModal = false"
+    />
+
     <!-- 결과 모달들 (완료 + 미확인 진입 시) -->
     <ChallengeSuccessModal
       v-if="showSuccessModal && challengeResult"
@@ -230,13 +238,17 @@ import {
   joinChallenge,
   getChallengeResult,
   confirmChallengeResult,
+  getChallengeList,
 } from '@/api/challenge/challenge.js';
 import ChallengeJoinConfirmModal from '@/components/challenge/ChallengeJoinConfirmModal.vue';
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
+import ChallengeParticipationLimitModal from '@/components/challenge/ChallengeParticipationLimitModal.vue';
 import AvatarStack from '@/components/avatar/AvatarStack.vue';
+import { useChallengeStore } from '@/stores/challenge';
 
 const route = useRoute();
+const challengeStore = useChallengeStore();
 
 const loading = ref(true);
 const challenge = ref(null);
@@ -245,6 +257,9 @@ const challenge = ref(null);
 const showJoinModal = ref(false);
 const password = ref('');
 const isPasswordVerified = ref(false); // 비밀번호 검증 상태 추가
+
+// participation limit modal
+const showParticipationLimitModal = ref(false);
 
 // result modals
 const showSuccessModal = ref(false);
@@ -270,6 +285,14 @@ const fetchDetail = async () => {
     const id = route.params.id;
     const data = await getChallengeDetail(id);
     challenge.value = data;
+
+    // 참여 중인 챌린지 목록을 가져와서 store 업데이트
+    try {
+      const participatingList = await getChallengeList({ participating: true });
+      challengeStore.updateCountsFromList(participatingList || []);
+    } catch (e) {
+      console.error('참여 중인 챌린지 목록 조회 실패:', e);
+    }
 
     // 완료 + 미확인 → 결과 모달
     if (
@@ -316,7 +339,20 @@ const fetchDetail = async () => {
 
 onMounted(fetchDetail);
 
+const checkParticipationLimit = () => {
+  // 그룹 챌린지 참여 제한 체크
+  if (challengeStore.isTypeFull('GROUP')) {
+    showParticipationLimitModal.value = true;
+    return false;
+  }
+  return true;
+};
+
 const openJoinModal = () => {
+  // 참여 제한 체크
+  if (!checkParticipationLimit()) {
+    return;
+  }
   showJoinModal.value = true;
 };
 
@@ -330,6 +366,11 @@ const handlePasswordSubmit = async () => {
     return;
   }
 
+  // 참여 제한 체크
+  if (!checkParticipationLimit()) {
+    return;
+  }
+
   try {
     // 비밀번호 검증만 수행 (실제 참여는 하지 않음)
     // TODO: 백엔드에서 비밀번호 검증 전용 API가 필요할 수 있음
@@ -338,7 +379,7 @@ const handlePasswordSubmit = async () => {
     password.value = '';
     isPasswordVerified.value = true; // 비밀번호 검증 완료
     // 비밀번호 검증 성공 후 확인 모달 표시
-    openJoinModal();
+    showJoinModal.value = true;
   } catch (e) {
     alert(e?.response?.data?.message || '비밀번호가 올바르지 않습니다.');
   }
