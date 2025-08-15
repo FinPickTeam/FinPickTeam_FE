@@ -27,12 +27,6 @@
         :emptyMessage="'현재 모집 중인 소그룹 챌린지가 없습니다.'"
         @cardClick="handleCardClick"
       >
-        <template #right>
-          <label class="toggle-chip">
-            <input type="checkbox" v-model="includeParticipating" />
-            <span class="chip-label">내가 참여중인 챌린지도 보기</span>
-          </label>
-        </template>
       </ChallengeSection>
     </div>
   </div>
@@ -49,7 +43,6 @@ const router = useRouter();
 const loading = ref(false);
 const error = ref('');
 const allRecruiting = ref([]);
-const includeParticipating = ref(false);
 
 // 월 1일 체크
 const isFirstDay = computed(() => new Date().getDate() === 1);
@@ -84,9 +77,8 @@ onMounted(async () => {
   }
 });
 
-// 필터링 (기본: 참여중 제외)
+// 필터링 (참여중 제외)
 const recruitingBase = computed(() => {
-  if (includeParticipating.value) return allRecruiting.value;
   return allRecruiting.value.filter(
     (c) => !c?.isParticipating && !c?.participating
   );
@@ -138,27 +130,5 @@ const handleCardClick = (payload) => {
   overflow-x: hidden;
   padding-top: 12px;
   padding-bottom: 140px;
-}
-
-/* 섹션 헤더 우측 토글을 칩 형태로 */
-.toggle-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-}
-.toggle-chip input[type='checkbox'] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-}
-.chip-label {
-  font-size: 12px;
-  color: #555;
-  background: #f3f4f6; /* 밝은 회색 */
-  border: 1px solid #e5e7eb; /* 경계선 */
-  padding: 6px 10px;
-  border-radius: 9999px;
 }
 </style>

@@ -113,7 +113,7 @@ const openCommon = (s) => {
         <div v-else-if="item.kind === 'common'" class="common-container">
           <div class="common-title">{{ item.title }}</div>
           <div class="common-sub">
-            <span class="common-badge">공통 챌린지</span>
+            <span class="common-badge">공통</span>
             <span class="sep">·</span>
             <span class="chip" :data-variant="item.status">
               {{

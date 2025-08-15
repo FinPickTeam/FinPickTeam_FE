@@ -26,11 +26,6 @@
           class="badge badge-recruiting"
           >모집중</span
         >
-        <span
-          v-else-if="statusUpper === 'IN_PROGRESS'"
-          class="badge badge-inprogress"
-          >진행중</span
-        >
       </div>
     </div>
 
@@ -94,15 +89,19 @@
           </template>
           <template v-else> D-{{ getRemainingDays() }} </template>
         </span>
-        <!-- 참여중인 챌린지 리스트 페이지에서는 참여자 수 표시하지 않음 -->
-        <span v-if="!isParticipating" class="stat">{{ getStatText() }}</span>
+        <!-- 카테고리 표시 -->
+        <span class="stat">{{ getCategoryName() }}</span>
+        <!-- 참여자 수 표시 (참여중인 챌린지 리스트 페이지에서만 표시, 개인 챌린지 제외) -->
+        <span v-if="isParticipating && typeUpper !== 'PERSONAL'" class="stat">{{
+          getStatText()
+        }}</span>
         <!-- 그룹 챌린지인 경우에만 공개 설정 표시 -->
         <span v-if="typeUpper === 'GROUP'" class="stat">
           {{ challenge.usePassword ? '비공개' : '공개' }}
         </span>
-        <!-- 내가 만든 챌린지 배지 -->
+        <!-- 내가 만든 챌린지 배지 (개인 챌린지 제외) -->
         <span
-          v-if="isCreatorFlag"
+          v-if="isCreatorFlag && typeUpper !== 'PERSONAL'"
           class="badge badge-owner"
           title="내가 생성한 챌린지"
           >내가 만든</span
@@ -224,8 +223,24 @@ const getRecruitingRemainingDays = () => {
   const diff = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
   return Math.max(0, diff);
 };
-const getStatText = () =>
-  isParticipating.value ? '참여중' : `${curParticipants.value}명 참여`;
+const getStatText = () => `${curParticipants.value}명 참여`;
+
+// 카테고리 이름 반환 함수
+const getCategoryName = (categoryId) => {
+  // categoryName을 한글로 매핑
+  const categoryMapping = {
+    total: '전체 소비',
+    food: '식비',
+    snack: '카페·간식',
+    transport: '교통비',
+    shopping: '미용·쇼핑',
+  };
+  return (
+    categoryMapping[props.challenge.categoryName] ||
+    props.challenge.categoryName ||
+    '기타'
+  );
+};
 
 const emit = defineEmits(['cardClick']);
 const handleCardClick = () =>
@@ -306,7 +321,7 @@ const handleCardClick = () =>
 .badge-danger {
   background: #ffe5e5;
   color: #d32f2f;
-  font-weight: 700;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -315,7 +330,7 @@ const handleCardClick = () =>
 .badge-success {
   background: #e8f5e9;
   color: #2e7d32;
-  font-weight: 700;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
