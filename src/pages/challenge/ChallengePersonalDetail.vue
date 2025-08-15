@@ -46,12 +46,6 @@
 
         <div class="challenge-stats">
           <div class="stat-item">
-            <span class="stat-label">진행률</span>
-            <span class="stat-value"
-              >{{ Math.round((challenge.myProgress || 0) * 100) }}%</span
-            >
-          </div>
-          <div class="stat-item">
             <span class="stat-label">목표 {{ challenge.goalType }}</span>
             <span class="stat-value"
               >{{ (challenge.goalValue || 0).toLocaleString() }}원</span
@@ -385,7 +379,7 @@ const categoryTheme = computed(() => {
 
 .challenge-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-bottom: 20px;
 }
