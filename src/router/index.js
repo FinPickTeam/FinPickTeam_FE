@@ -265,13 +265,6 @@ const router = createRouter({
         { path: 'quiz', name: 'Quiz', component: Quiz },
         { path: 'finance', name: 'FinanceHome', component: FinanceHome },
 
-        // 오픈뱅킹 (MainLayout 하위 엔트리)
-        {
-          path: 'openbanking',
-          name: 'OpenBankingHome',
-          component: OpenBankingHome,
-        },
-
         // 마이페이지
         { path: 'mypage', name: 'mypage', component: Mypage },
         { path: 'profile', name: 'profile', component: Profile },
@@ -382,6 +375,7 @@ const router = createRouter({
           name: 'OpenBankingMyHome',
           component: () => import('../pages/openbanking/OpenBankingMyHome.vue'),
         },
+        { path: '', name: 'OpenBankingHome', component: OpenBankingHome },
         { path: 'account-list', name: 'AccountList', component: AccountList },
         {
           path: 'account-detail/:accountId',
@@ -465,7 +459,6 @@ function obCacheKey(userId) {
 async function ensureHasOpenBankingData(auth) {
   const uid = auth?.user?.id ?? auth?.id ?? auth?.userId ?? null;
   const key = obCacheKey(uid);
-  const cached = sessionStorage.getItem(key);
 
   // 재검증 or 최초검증
   try {

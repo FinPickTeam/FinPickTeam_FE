@@ -10,7 +10,6 @@
         :last-month-diff-text="lastMonthDiffText"
         :daily-expenses="dailyExpensesObject"
         scroll-row-id-prefix="d-"
-        :auto-scroll-on-select="false"
         @date-selected="onDateSelected"
         @month-changed="onMonthChanged"
         @toggle-expanded="onToggleExpanded"
@@ -252,23 +251,22 @@ const scrollToDate = async (date) => {
   const el = document.getElementById('d-' + key);
   const container = monthlyListRef.value;
   if (el && container) {
-    const top = el.offsetTop - 8;
-    if (container.scrollTo) container.scrollTo({ top, behavior: 'smooth' });
-    else container.scrollTop = top;
+    scrollWithin(container, el, 24); // ← 위 여백 확실히
   }
 };
 const onScrollToDate = async ({ key, date }) => {
   if (!isExpanded.value) return;
   await nextTick();
-  const el = document.getElementById('d-' + key);
-  const container = monthlyListRef.value;
-  if (el && container) {
-    const top = el.offsetTop - 8;
-    if (container.scrollTo) container.scrollTo({ top, behavior: 'smooth' });
-    else container.scrollTop = top;
-  } else {
-    requestAnimationFrame(() => scrollToDate(date));
-  }
+  selectedDate.value = new Date(date);
+};
+
+const scrollWithin = (container, el, extra = 24) => {
+  // extra: 위 여백(24~28 추천)
+  const c = container.getBoundingClientRect();
+  const e = el.getBoundingClientRect();
+  const top = container.scrollTop + (e.top - c.top) + extra; // + 여백
+  container.scrollTo?.({ top: Math.max(top, 0), behavior: 'smooth' }) ??
+    (container.scrollTop = Math.max(top, 0));
 };
 
 /* 이벤트 */
@@ -329,10 +327,14 @@ onUnmounted(() => cleanupSessionStorage());
   border-radius: 0;
   box-shadow: none;
   border: none;
-  scroll-margin-top: 12px;
+  scroll-margin-top: 24px;
 }
 .obcal-list-title {
-  padding: 10px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: #fff;
+  padding: 0 0 5px 25px;
   border-bottom: 1px solid #f0f0f0;
   font: 600 15px/1.2 'Noto Sans KR', sans-serif;
   color: #111;
@@ -461,7 +463,7 @@ onUnmounted(() => cleanupSessionStorage());
     max-width: 100vw;
   }
   .obcal-month-card {
-    padding: 16px 16px 8px;
+    padding: 0 16px;
   }
   .obcal-list-container {
     padding: 12px;

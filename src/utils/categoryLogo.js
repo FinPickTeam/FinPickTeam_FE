@@ -1,5 +1,3 @@
-// /src/utils/categoryLogo.js
-// spending_logo 폴더의 모든 png 미리 매핑
 const logos = import.meta.glob('/src/assets/spending_logo/*.png', {
   eager: true,
   import: 'default',

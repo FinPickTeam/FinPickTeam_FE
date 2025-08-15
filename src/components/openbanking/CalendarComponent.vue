@@ -155,7 +155,7 @@ const props = defineProps({
   scrollRowIdPrefix: { type: String, default: 'tx-' },
   autoScrollOnSelect: { type: Boolean, default: true },
   scrollContainerSelector: { type: String, default: '.monthly-transactions' },
-  scrollOffset: { type: Number, default: 8 },
+  scrollOffset: { type: Number, default: 16 },
 });
 
 const emit = defineEmits([
@@ -225,12 +225,11 @@ const scrollToDateKey = async (key) => {
   const el = document.getElementById(id);
   const container = document.querySelector(props.scrollContainerSelector);
   if (el && container) {
-    const top = el.offsetTop - (props.scrollOffset || 0);
-    if (typeof container.scrollTo === 'function') {
-      container.scrollTo({ top, behavior: 'smooth' });
-    } else {
-      container.scrollTop = top;
-    }
+    const cRect = container.getBoundingClientRect();
+    const eRect = el.getBoundingClientRect();
+    const top =
+      container.scrollTop + (eRect.top - cRect.top) + (props.scrollOffset || 0);
+    container.scrollTo({ top: Math.max(top, 0), behavior: 'smooth' });
   }
 };
 
@@ -265,9 +264,6 @@ const weekDays = computed(() => {
 
 /* events */
 const onDayClick = async (day) => {
-  selectedDate.value = day.date;
-  emit('date-selected', day.date);
-
   const clickedKey = formatDateKey(day.date);
   let targetKey = clickedKey;
   const hasData = (props.dailyExpenses[clickedKey] || 0) > 0;
@@ -276,8 +272,12 @@ const onDayClick = async (day) => {
     if (nearest) targetKey = nearest;
   }
 
+  const targetDate = parseKey(targetKey);
+  selectedDate.value = targetDate;
+  emit('date-selected', targetDate);
+
   emit('scroll-to-date', {
-    date: new Date(parseKey(targetKey)),
+    date: new Date(targetDate),
     key: targetKey,
   });
 
@@ -619,7 +619,7 @@ const onToggleClick = async () => {
 .expand-toggle {
   display: flex;
   justify-content: center;
-  margin-top: 6px;
+  margin-top: 0px;
 }
 .toggle-btn {
   background: transparent;
