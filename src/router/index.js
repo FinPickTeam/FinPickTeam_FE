@@ -181,27 +181,27 @@ const router = createRouter({
 
     // 마이페이지 finance test ProfileStep6~10
     {
-      path: "/mypage/financetest/profile-step-6",
+      path: "/profile-step-6",
       name: "ProfileStep6",
       component: ProfileStep6,
     },
     {
-      path: "/mypage/financetest/profile-step-7",
+      path: "/profile-step-7",
       name: "ProfileStep7",
       component: ProfileStep7,
     },
     {
-      path: "/mypage/financetest/profile-step-8",
+      path: "/profile-step-8",
       name: "ProfileStep8",
       component: ProfileStep8,
     },
     {
-      path: "/mypage/financetest/profile-step-9",
+      path: "/profile-step-9",
       name: "ProfileStep9",
       component: ProfileStep9,
     },
     {
-      path: "/mypage/financetest/profile-step-10",
+      path: "/profile-step-10",
       name: "ProfileStep10",
       component: ProfileStep10,
     },

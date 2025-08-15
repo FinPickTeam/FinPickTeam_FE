@@ -51,7 +51,7 @@ const totalSteps = ref(10);
 const goNext = () => {
   if (profileStore.answers.question7 === null) return;
   const from = route.query.from || 'mypage';
-  router.push(`/mypage/financetest/profile-step-8?from=${from}`);
+  router.push(`/profile-step-8?from=${from}`);
 };
 </script>
 

@@ -57,7 +57,7 @@ const goNext = () => {
   if (profileStore.answers.question6 === null) return;
 
   const from = route.query.from || 'mypage';
-  router.push(`/mypage/financetest/profile-step-7?from=${from}`);
+  router.push(`/profile-step-7?from=${from}`);
 };
 </script>
 

@@ -33,7 +33,6 @@
 <script setup>
 import { computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-// Pinia Store를 가져옵니다.
 import { useProfileStore } from '@/stores/profile.js';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
@@ -50,8 +49,6 @@ const options = [
   '결혼자금',
 ];
 
-// 로컬 상태 'selected'는 이제 사용하지 않습니다.
-
 const totalSteps = computed(() => {
   const from = route.query.from;
   if (from === 'mypage' || from === 'fund') {
@@ -66,10 +63,10 @@ const goNext = () => {
   if (profileStore.answers.question2 !== null) {
     const from = route.query.from || 'signup';
     if (from === 'mypage') {
-      router.push(`/mypage/financetest/profile-step-3?from=${from}`);
+      router.push(`/profile-step-3?from=${from}`);
     } else if (from === 'fund') {
       // 펀드 시나리오의 다음 경로는 6단계가 맞는지 확인이 필요합니다.
-      router.push(`/mypage/financetest/profile-step-6?from=${from}`);
+      router.push(`/profile-step-3?from=${from}`);
     } else {
       router.push('/profile-step-3');
     }

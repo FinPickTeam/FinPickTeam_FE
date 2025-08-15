@@ -59,9 +59,9 @@ const goNext = () => {
   if (profileStore.answers.question4 !== null) {
     const from = route.query.from || 'signup';
     if (from === 'mypage') {
-      router.push(`/mypage/financetest/profile-step-5?from=${from}`);
+      router.push(`/profile-step-5?from=${from}`);
     } else if (from === 'fund') {
-      router.push(`/mypage/financetest/profile-step-6?from=${from}`);
+      router.push(`/profile-step-5?from=${from}`);
     } else {
       router.push('/profile-step-5');
     }
