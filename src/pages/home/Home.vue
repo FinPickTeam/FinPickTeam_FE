@@ -146,6 +146,7 @@
 
     <Quiz v-if="showQuiz" @close="closeQuiz" />
     <Newsletter v-if="showNewsletter" @close="closeNewsletter" />
+    <WelcomePointModal v-if="showWelcomeModal" @close="closeWelcomeModal" />
   </div>
 </template>
 
@@ -169,6 +170,7 @@ const router = useRouter();
 
 const showQuiz = ref(false);
 const showNewsletter = ref(false);
+const showWelcomeModal = ref(false);
 
 // 누적 포인트 API 상태 관리
 const loadingCumulative = ref(false);
@@ -192,6 +194,10 @@ function openNewsletter() {
 }
 function closeNewsletter() {
   showNewsletter.value = false;
+}
+
+function closeWelcomeModal() {
+  showWelcomeModal.value = false;
 }
 
 function goToAvatarShop() {
@@ -475,7 +481,49 @@ onMounted(() => {
   fetchAvatarAndItemData(); // 아바타 데이터 조회 (AvatarShop2.vue와 동일한 방식)
   fetchCumulativePoints(); // 컴포넌트 마운트 시 누적 포인트 데이터 가져오기
   fetchBubbleText(); // 컴포넌트 마운트 시 말풍선 텍스트 가져오기
+
+  // 회원가입 후 첫 방문 확인
+  checkFirstVisit();
 });
+
+// 회원가입 후 첫 방문 확인 함수
+const checkFirstVisit = () => {
+  // URL 쿼리 파라미터에서 투자성향 분석 완료 여부 확인
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromProfileComplete = urlParams.get("from") === "profile-complete";
+
+  // 로컬 스토리지에서 첫 방문 여부 확인
+  const hasVisited = localStorage.getItem("hasVisitedHome");
+
+  // 투자성향 분석 완료 후 홈으로 이동하거나, 첫 방문인 경우 모달 표시
+  if ((fromProfileComplete || !hasVisited) && authStore.isAuthenticated) {
+    // 모달 표시
+    showWelcomeModal.value = true;
+
+    // 로컬 스토리지에 방문 기록 저장
+    localStorage.setItem("hasVisitedHome", "true");
+
+    // URL에서 쿼리 파라미터 제거
+    if (fromProfileComplete) {
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+
+    // 여기서 실제 포인트 지급 API 호출
+    // giveWelcomePoints();
+  }
+};
+
+// 가입 축하 포인트 지급 함수 (실제 API 연동 시 사용)
+const giveWelcomePoints = async () => {
+  try {
+    // TODO: 실제 포인트 지급 API 호출
+    // const response = await giveWelcomeBonus();
+    console.log("가입 축하 포인트 지급 완료");
+  } catch (error) {
+    console.error("포인트 지급 실패:", error);
+  }
+};
 
 // 목표 포인트 계산
 const getTargetPoints = computed(() => {
