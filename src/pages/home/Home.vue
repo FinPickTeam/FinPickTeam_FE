@@ -153,6 +153,7 @@
 <script setup>
 import Quiz from './Quiz.vue';
 import Newsletter from './Newsletter.vue';
+import WelcomePointModal from '@/components/WelcomePointModal.vue';
 import { ref, computed } from 'vue';
 import { useAvatarStore } from '../../stores/avatar.js';
 import { getCumulativeCoin, getMyCoinStatus } from '@/api/mypage/avatar';
