@@ -16,6 +16,14 @@
       @close="showParticipationLimitModal = false"
     />
 
+    <!-- 포인트 부족 모달 -->
+    <ChallengeInsufficientPointsModal
+      :isVisible="showInsufficientPointsModal"
+      :currentPoints="challengeStore.points.userPoints"
+      :requiredPoints="challengeStore.points.required.GROUP"
+      @close="showInsufficientPointsModal = false"
+    />
+
     <!-- 결과 모달들 (완료 + 미확인 진입 시) -->
     <ChallengeSuccessModal
       v-if="showSuccessModal && challengeResult"
@@ -244,6 +252,7 @@ import ChallengeJoinConfirmModal from '@/components/challenge/ChallengeJoinConfi
 import ChallengeFailModal from '@/components/challenge/ChallengeFailModal.vue';
 import ChallengeSuccessModal from '@/components/challenge/ChallengeSuccessModal.vue';
 import ChallengeParticipationLimitModal from '@/components/challenge/ChallengeParticipationLimitModal.vue';
+import ChallengeInsufficientPointsModal from '@/components/challenge/ChallengeInsufficientPointsModal.vue';
 import AvatarStack from '@/components/avatar/AvatarStack.vue';
 import { useChallengeStore } from '@/stores/challenge';
 
@@ -260,6 +269,9 @@ const isPasswordVerified = ref(false); // 비밀번호 검증 상태 추가
 
 // participation limit modal
 const showParticipationLimitModal = ref(false);
+
+// insufficient points modal
+const showInsufficientPointsModal = ref(false);
 
 // result modals
 const showSuccessModal = ref(false);
@@ -292,6 +304,13 @@ const fetchDetail = async () => {
       challengeStore.updateCountsFromList(participatingList || []);
     } catch (e) {
       console.error('참여 중인 챌린지 목록 조회 실패:', e);
+    }
+
+    // 포인트 정보 업데이트
+    try {
+      await challengeStore.fetchCoinStatus();
+    } catch (e) {
+      console.error('포인트 정보 조회 실패:', e);
     }
 
     // 완료 + 미확인 → 결과 모달
@@ -348,11 +367,26 @@ const checkParticipationLimit = () => {
   return true;
 };
 
+const checkPoints = () => {
+  // 포인트 부족 체크
+  if (!challengeStore.hasEnoughPointsForType('GROUP')) {
+    showInsufficientPointsModal.value = true;
+    return false;
+  }
+  return true;
+};
+
 const openJoinModal = () => {
   // 참여 제한 체크
   if (!checkParticipationLimit()) {
     return;
   }
+
+  // 포인트 부족 체크
+  if (!checkPoints()) {
+    return;
+  }
+
   showJoinModal.value = true;
 };
 
@@ -368,6 +402,11 @@ const handlePasswordSubmit = async () => {
 
   // 참여 제한 체크
   if (!checkParticipationLimit()) {
+    return;
+  }
+
+  // 포인트 부족 체크
+  if (!checkPoints()) {
     return;
   }
 
