@@ -130,24 +130,15 @@ export const insertGifticon = async (gifticonData) => {
 
 // 아바타 수정 (PUT /api/avatar/updateAvatar)
 export const updateAvatar = async (items = []) => {
-  try {
-    console.log("아바타 수정 시작, items:", items);
+  const ids = [
+    ...new Set(items.map(Number).filter((v) => Number.isInteger(v) && v > 0)),
+  ];
+  if (ids.length === 0) throw new Error("전송할 유효한 아이템 ID가 없음");
 
-    // items=4&items=31 형태로 만들기
-    const qs = new URLSearchParams();
-    items.forEach((id) => qs.append("items", id));
+  const qs = new URLSearchParams();
+  ids.forEach((id) => qs.append("items", String(id))); // 대괄호 없이 append
 
-    const url = `/avatar/updateAvatar?${qs.toString()}`;
-    console.log("요청 URL:", url);
-
-    // 본문 없이 쿼리스트링만 전달 (PUT)
-    const res = await instance.put(url);
-    console.log("아바타 수정 성공:", res);
-    return res;
-  } catch (error) {
-    console.error("아바타 수정 에러:", error.response?.data || error);
-    throw error;
-  }
+  return instance.put(`/avatar/updateAvatar?${qs.toString()}`, null);
 };
 // 아바타 조회 (GET /api/avatar/userId={userId})
 export const getAvatar = async (userId) => {

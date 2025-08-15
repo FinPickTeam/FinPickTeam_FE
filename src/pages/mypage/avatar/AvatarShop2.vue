@@ -83,6 +83,26 @@
           <div v-else class="glasses-placeholder">
             <span class="item-text"></span>
           </div>
+          <div
+            v-if="previewGiftCard || wearingGiftCard"
+            class="giftcard-placeholder"
+          >
+            <img
+              :src="
+                previewGiftCard
+                  ? previewGiftCard.imageUrl
+                  : wearingGiftCard.imageUrl
+              "
+              :alt="
+                previewGiftCard ? previewGiftCard.name : wearingGiftCard.name
+              "
+              class="wearing-item-img"
+              @error="onWearingItemImageError"
+            />
+          </div>
+          <div v-else class="giftcard-placeholder">
+            <span class="item-text"></span>
+          </div>
         </div>
       </div>
       <div class="coin-container">
@@ -307,32 +327,50 @@
 
     <!-- 기프티콘 탭 내용 -->
     <div v-if="activeTab === 'gifticon'" class="tab-content">
+      <!-- 영화 쿠폰 섹션 -->
       <div class="item-category">
-        <span class="category-icon">🎁</span> 기프티콘
+        <span class="category-icon">🎬</span> 영화 쿠폰
       </div>
       <div class="item-list">
         <div
-          v-for="item in gifticonItems"
-          :key="item.itemId"
+          v-for="item in movieGiftItems"
+          :key="item.id"
           class="item-card"
-          :class="{ owned: isOwned(item.itemId, 'giftCard') }"
-          @click="handleItemClick(item, 'giftCard')"
+          @click="handleGiftItemClick(item)"
         >
-          <div v-if="item.imageUrl" class="item-image">
+          <div class="item-image">
             <img :src="item.imageUrl" :alt="item.name" class="item-img" />
-          </div>
-          <div v-else class="item-image-placeholder">
-            <span class="item-image-text">{{ item.name }}</span>
           </div>
           <div class="item-info">
             <span class="item-name">{{ item.name }}</span>
             <span class="item-price">🪙 {{ item.cost }}</span>
           </div>
           <div class="item-status">
-            <span v-if="isOwned(item.itemId, 'giftCard')" class="owned-badge"
-              >보유</span
-            >
-            <span v-else class="buy-badge">구매</span>
+            <span class="buy-badge">구매</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 커피 쿠폰 섹션 -->
+      <div class="item-category">
+        <span class="category-icon">☕</span> 커피 쿠폰
+      </div>
+      <div class="item-list">
+        <div
+          v-for="item in coffeeGiftItems"
+          :key="item.id"
+          class="item-card"
+          @click="handleGiftItemClick(item)"
+        >
+          <div class="item-image">
+            <img :src="item.imageUrl" :alt="item.name" class="item-img" />
+          </div>
+          <div class="item-info">
+            <span class="item-name">{{ item.name }}</span>
+            <span class="item-price">🪙 {{ item.cost }}</span>
+          </div>
+          <div class="item-status">
+            <span class="buy-badge">구매</span>
           </div>
         </div>
       </div>
@@ -357,6 +395,86 @@
             구매하기
           </button>
           <button @click="closePurchaseModal">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 기프티콘 구매 모달 -->
+    <div
+      v-if="showGiftPurchaseModal"
+      class="modal-overlay"
+      @click="closeGiftPurchaseModal"
+    >
+      <div class="modal-content" @click.stop>
+        <h3>기프티콘 구매</h3>
+        <div class="gift-item-info">
+          <img
+            :src="selectedGiftItem?.imageUrl"
+            :alt="selectedGiftItem?.name"
+            class="gift-item-image"
+          />
+          <div class="gift-item-details">
+            <p class="gift-item-name">{{ selectedGiftItem?.name }}</p>
+            <p class="price-info">가격: 🪙 {{ selectedGiftItem?.cost }}</p>
+            <p class="balance-info">현재 포인트: 🪙 {{ currentCoin }}</p>
+          </div>
+        </div>
+
+        <div class="phone-input-section">
+          <label for="phoneNumber" class="phone-label">휴대폰 번호</label>
+          <input
+            id="phoneNumber"
+            v-model="phoneNumber"
+            type="tel"
+            placeholder="010-1234-5678"
+            class="phone-input"
+            maxlength="13"
+            @input="formatPhoneNumber"
+          />
+          <p class="phone-hint">
+            기프티콘을 전송받을 휴대폰 번호를 입력해주세요
+          </p>
+        </div>
+
+        <div class="modal-buttons">
+          <button
+            @click="confirmGiftPurchase"
+            :disabled="
+              !isValidPhoneNumber || currentCoin < selectedGiftItem?.cost
+            "
+          >
+            구매하기
+          </button>
+          <button @click="closeGiftPurchaseModal">취소</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 기프티콘 구매 성공 모달 -->
+    <div
+      v-if="showGiftSuccessModal"
+      class="modal-overlay"
+      @click="closeGiftSuccessModal"
+    >
+      <div class="modal-content success-modal" @click.stop>
+        <div class="success-icon">🎉</div>
+        <h3>구매 완료!</h3>
+        <div class="success-item-info">
+          <div class="success-item-icon">
+            <i class="fa-solid fa-gift"></i>
+          </div>
+          <div class="success-item-details">
+            <p class="success-item-name">{{ selectedGiftItem?.name }}</p>
+            <p class="success-phone">구매가 완료되었습니다.</p>
+          </div>
+        </div>
+        <p class="success-message">
+          기프티콘이 입력하신 휴대폰 번호로 전송됩니다.
+        </p>
+        <div class="modal-buttons">
+          <button @click="closeGiftSuccessModal" class="success-btn">
+            확인
+          </button>
         </div>
       </div>
     </div>
@@ -447,6 +565,7 @@ export default {
     const wearLoading = ref(false);
     const avatar = ref(null); // 아바타 데이터를 저장할 변수
     const userId = ref(1); // 실제 userId로 변경 필요
+    const previewGiftCard = ref(null);
 
     // 미리보기 관련 상태
     const previewLevel = ref(null);
@@ -461,12 +580,85 @@ export default {
     console.log("baseAvatar import 값:", baseAvatar);
     console.log("avatarBase ref 값:", avatarBase.value);
 
+    // 기프티콘 아이템 데이터 (무한 구매 가능)
+    const movieGiftItems = ref([
+      {
+        id: 1,
+        name: "CGV 영화관람권",
+        cost: 5000,
+        imageUrl: "/src/pages/mypage/avatar/giftshopimg/CGV TICKET.jpeg",
+        type: "movie",
+      },
+      {
+        id: 2,
+        name: "롯데시네마 스윗콤보",
+        cost: 3000,
+        imageUrl:
+          "/src/pages/mypage/avatar/giftshopimg/LOTTECINEMA SWEET COMBO.jpg",
+        type: "movie",
+      },
+      {
+        id: 3,
+        name: "메가 팝콘세트",
+        cost: 2500,
+        imageUrl:
+          "/src/pages/mypage/avatar/giftshopimg/MEGABOX CINEMA POPCORN SET.jpg",
+        type: "movie",
+      },
+    ]);
+
+    const coffeeGiftItems = ref([
+      {
+        id: 4,
+        name: "투썸 아메리카노",
+        cost: 1500,
+        imageUrl:
+          "/src/pages/mypage/avatar/giftshopimg/TWOSOMEPLACE AMECARICANO.png",
+        type: "coffee",
+      },
+      {
+        id: 5,
+        name: "투썸 핫라떼",
+        cost: 2000,
+        imageUrl:
+          "/src/pages/mypage/avatar/giftshopimg/TWOSOMEPLACE HOTLATTE.png",
+        type: "coffee",
+      },
+      {
+        id: 6,
+        name: "투썸 카페라떼",
+        cost: 2000,
+        imageUrl:
+          "/src/pages/mypage/avatar/giftshopimg/TWOSOMEPLACE  CAFELATTE.png",
+        type: "coffee",
+      },
+      {
+        id: 7,
+        name: "투썸 콜드브루",
+        cost: 1800,
+        imageUrl:
+          "/src/pages/mypage/avatar/giftshopimg/TWOSOMEPLACE  COLDBRUE.png",
+        type: "coffee",
+      },
+    ]);
+
+    // 기프티콘 구매 관련 상태
+    const showGiftPurchaseModal = ref(false);
+    const showGiftSuccessModal = ref(false);
+    const selectedGiftItem = ref(null);
+    const phoneNumber = ref("");
+    const isValidPhoneNumber = ref(false);
+
     // 타입별 아이템 computed 속성
     const titleItems = computed(() => getItemsByType("level"));
     const shirtItems = computed(() => getItemsByType("top"));
     const shoesItems = computed(() => getItemsByType("shoes"));
     const glassesItems = computed(() => getItemsByType("accessory"));
-    const gifticonItems = computed(() => getItemsByType("giftCard"));
+    const gifticonItems = computed(() => {
+      const items = getItemsByType("giftCard");
+      console.log("기프티콘 아이템들:", items); // 디버깅 로그 추가
+      return items;
+    });
 
     // 착용 중인 아이템 computed 속성
     const wearingLevel = computed(() => {
@@ -522,6 +714,20 @@ export default {
       return item;
     });
 
+    const wearingGiftCard = computed(() => {
+      const item = avatarItems.value.find(
+        (item) => item.type === "giftCard" && item.wearing
+      );
+      if (item) {
+        return {
+          ...item,
+          imageUrl: convertS3Url(item.imageUrl),
+        };
+      }
+      console.log("착용 중인 기프티콘:", item);
+      return item;
+    });
+
     // 포인트 조회 (현재 포인트 + 누적 포인트)
     const fetchCurrentCoin = async () => {
       loadingCoin.value = true;
@@ -545,15 +751,14 @@ export default {
     };
 
     // 아바타 상태 조회
-    // 아바타 상태 조회
     const fetchAvatarAndItemData = async () => {
       try {
         // 사용자 ID 가져오기 (authStore에서)
         const userId = authStore.user?.id || 1; // 기본값 1
 
-        // 아바타 조회 API 호출
-        const avatarResponse = await getAvatar(userId);
-        console.log("아바타 조회 응답:", avatarResponse);
+        // 아바타 상태 조회 API 호출 (수정된 경로 사용)
+        const avatarResponse = await getAvatarStatus();
+        console.log("아바타 상태 조회 응답:", avatarResponse);
 
         // 의상 목록 조회 API 호출
         const clothesResponse = await getClothes();
@@ -693,21 +898,32 @@ export default {
 
     // 타입별 아이템 필터링 (중복 제거)
     const getItemsByType = (type) => {
+      console.log(
+        `getItemsByType 호출 - 타입: ${type}, 전체 아이템:`,
+        avatarItems.value
+      );
+
       const items = avatarItems.value.filter((item) => item.type === type);
+      console.log(`${type} 타입 필터링 결과:`, items);
+
       // itemId 기준으로 중복 제거
       const uniqueItems = items.filter(
         (item, index, self) =>
           index === self.findIndex((t) => t.itemId === item.itemId)
       );
+      console.log(`${type} 타입 중복 제거 결과:`, uniqueItems);
 
       // S3 URL을 HTTPS URL로 변환하고 레벨 제한 정보 추가
-      return uniqueItems.map((item) => ({
+      const result = uniqueItems.map((item) => ({
         ...item,
         imageUrl: convertS3Url(item.imageUrl),
         isAvailable: type === "level" ? isLevelAvailable(item.name) : true,
         requirementText:
           type === "level" ? getLevelRequirementText(item.name) : "",
       }));
+
+      console.log(`${type} 타입 최종 결과:`, result);
+      return result;
     };
 
     // 이미지 경로 반환 함수들 (플레이스홀더)
@@ -764,6 +980,26 @@ export default {
       }
     };
 
+    // 기프티콘 아이템 클릭 처리
+    const handleGiftItemClick = (item) => {
+      console.log("기프티콘 아이템 클릭:", item);
+
+      // 포인트 확인
+      if (currentCoin.value < item.cost) {
+        showCoinError.value = true;
+        setTimeout(() => {
+          showCoinError.value = false;
+        }, 2000);
+        return;
+      }
+
+      // 기프티콘 구매 모달 표시
+      selectedGiftItem.value = item;
+      phoneNumber.value = "";
+      isValidPhoneNumber.value = false;
+      showGiftPurchaseModal.value = true;
+    };
+
     // 미리보기 아이템 설정
     const setPreviewItem = (item, type) => {
       const previewItem = {
@@ -784,6 +1020,9 @@ export default {
         case "accessory":
           previewAccessory.value = previewItem;
           break;
+        case "giftCard":
+          previewGiftCard.value = previewItem;
+          break;
       }
     };
 
@@ -793,13 +1032,15 @@ export default {
       previewTop.value = null;
       previewShoes.value = null;
       previewAccessory.value = null;
+      previewGiftCard.value = null;
     };
 
-    // 구매 확인
+    // 구매 확인 (아바타 아이템만)
     const confirmPurchase = async () => {
       if (!selectedItem.value) return;
 
       try {
+        // 아바타 아이템 구매 로직
         const purchaseData = {
           itemId: selectedItem.value.itemId,
         };
@@ -832,37 +1073,104 @@ export default {
       selectedItemType.value = "";
     };
 
+    // 기프티콘 구매 모달 닫기
+    const closeGiftPurchaseModal = () => {
+      showGiftPurchaseModal.value = false;
+      selectedGiftItem.value = null;
+      phoneNumber.value = "";
+      isValidPhoneNumber.value = false;
+    };
+
+    // 기프티콘 구매 성공 모달 닫기
+    const closeGiftSuccessModal = () => {
+      showGiftSuccessModal.value = false;
+    };
+
+    // 휴대폰 번호 포맷팅
+    const formatPhoneNumber = (event) => {
+      let value = event.target.value.replace(/[^0-9]/g, "");
+
+      if (value.length <= 3) {
+        phoneNumber.value = value;
+      } else if (value.length <= 7) {
+        phoneNumber.value = value.slice(0, 3) + "-" + value.slice(3);
+      } else {
+        phoneNumber.value =
+          value.slice(0, 3) +
+          "-" +
+          value.slice(3, 7) +
+          "-" +
+          value.slice(7, 11);
+      }
+
+      // 휴대폰 번호 유효성 검사 (010-XXXX-XXXX 형식)
+      const phoneRegex = /^010-\d{4}-\d{4}$/;
+      isValidPhoneNumber.value = phoneRegex.test(phoneNumber.value);
+    };
+
+    // 기프티콘 구매 확인
+    const confirmGiftPurchase = async () => {
+      if (!selectedGiftItem.value || !isValidPhoneNumber.value) return;
+
+      try {
+        console.log("기프티콘 구매:", selectedGiftItem.value);
+        console.log("휴대폰 번호:", phoneNumber.value);
+
+        // 포인트 차감
+        if (currentCoin.value >= selectedGiftItem.value.cost) {
+          currentCoin.value -= selectedGiftItem.value.cost;
+
+          // 여기에 실제 기프티콘 구매 API 호출 로직을 추가할 수 있습니다
+          // const response = await purchaseGiftCard({
+          //   itemId: selectedGiftItem.value.id,
+          //   phoneNumber: phoneNumber.value
+          // });
+
+          console.log("기프티콘 구매 성공");
+          closeGiftPurchaseModal();
+          showGiftSuccessModal.value = true;
+        } else {
+          console.error("포인트 부족");
+          showCoinError.value = true;
+          setTimeout(() => {
+            showCoinError.value = false;
+          }, 2000);
+        }
+      } catch (error) {
+        console.error("기프티콘 구매 실패:", error);
+        alert("기프티콘 구매에 실패했습니다. 다시 시도해주세요.");
+      }
+    };
+
     // 아이템 착용 함수
-    // AvatarShop2.vue 파일의 wearSelectedItem 함수
     const wearSelectedItem = async () => {
-      if (!selectedItemForWear.value) return;
+      if (!selectedItemForWear.value || !avatar.value) return;
 
       wearLoading.value = true;
       try {
         const currentAvatar = avatar.value;
-        const newItemId = selectedItemForWear.value.itemId;
+        const newItemId = Number(selectedItemForWear.value.itemId);
         const newItemType = selectedItemForWear.value.type;
 
-        // 현재 아바타가 착용 중인 모든 아이템 ID를 저장할 객체
-        const avatarItems = {
-          level: currentAvatar.levelId,
-          top: currentAvatar.topId,
-          shoes: currentAvatar.shoesId,
-          accessory: currentAvatar.accessoryId,
+        // 현재 장착 상태를 객체로 수집 (giftCard 포함)
+        const next = {
+          level: Number(currentAvatar.levelId) || 0,
+          top: Number(currentAvatar.topId) || 0,
+          shoes: Number(currentAvatar.shoesId) || 0,
+          accessory: Number(currentAvatar.accessoryId) || 0,
+          giftCard: Number(currentAvatar.giftCardId) || 0, // giftCard 추가
         };
 
-        // 새로 선택한 아이템으로 기존 아이템을 교체
-        // 예를 들어, newItemType이 'top'이면 avatarItems.top을 새 ID로 업데이트
-        if (avatarItems.hasOwnProperty(newItemType)) {
-          avatarItems[newItemType] = newItemId;
+        // 새 항목 반영
+        if (Object.prototype.hasOwnProperty.call(next, newItemType)) {
+          next[newItemType] = newItemId;
         }
 
-        // 유효한 ID만 추출하여 배열로 변환
-        const itemsToWear = Object.values(avatarItems).filter(
-          (id) => id !== null && typeof id !== "undefined"
+        // 유효한 숫자만 뽑아서 배열화 (0이 아닌 값들만)
+        const itemsToWear = Object.values(next).filter(
+          (v) => Number.isFinite(v) && v > 0
         );
-
-        console.log("백엔드에 전송할 전체 아이템 배열:", itemsToWear);
+        console.log("백엔드 전송 items:", itemsToWear);
 
         const response = await updateAvatar(itemsToWear);
 
@@ -870,16 +1178,14 @@ export default {
           response.data &&
           (response.data.status === 0 || response.data.status === 200)
         ) {
-          console.log("아이템 착용 성공:", response);
           await fetchAvatarAndItemData();
           selectedItemForWear.value = null;
           clearPreview();
-          console.log("아이템 착용 완료");
         } else {
           console.error("아이템 착용 실패:", response);
         }
-      } catch (error) {
-        console.error("아이템 착용 중 에러 발생:", error);
+      } catch (err) {
+        console.error("아이템 착용 중 에러:", err);
       } finally {
         wearLoading.value = false;
       }
@@ -1028,10 +1334,12 @@ export default {
       wearingTop,
       wearingShoes,
       wearingAccessory,
+      wearingGiftCard,
       previewLevel,
       previewTop,
       previewShoes,
       previewAccessory,
+      previewGiftCard,
       isOwned,
       isWearing,
       getTitleImage,
@@ -1039,6 +1347,7 @@ export default {
       getShoesImage,
       getGlassesImage,
       handleItemClick,
+      handleGiftItemClick,
       confirmPurchase,
       wearSelectedItem,
       closePurchaseModal,
@@ -1049,6 +1358,17 @@ export default {
       onImgError,
       clearPreview,
       goBack,
+      movieGiftItems,
+      coffeeGiftItems,
+      showGiftPurchaseModal,
+      showGiftSuccessModal,
+      selectedGiftItem,
+      phoneNumber,
+      isValidPhoneNumber,
+      closeGiftPurchaseModal,
+      closeGiftSuccessModal,
+      formatPhoneNumber,
+      confirmGiftPurchase,
     };
   },
 };
@@ -1198,7 +1518,8 @@ export default {
 .title-placeholder,
 .shirt-placeholder,
 .shoes-placeholder,
-.glasses-placeholder {
+.glasses-placeholder,
+.giftcard-placeholder {
   position: absolute;
   top: 0;
   left: 0;
@@ -1548,6 +1869,156 @@ export default {
 
 .modal-buttons button:last-child:hover {
   background-color: #545b62;
+}
+
+/* 기프티콘 구매 모달 스타일 */
+.gift-item-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.gift-item-image {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.gift-item-details {
+  flex: 1;
+}
+
+.gift-item-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.phone-input-section {
+  margin-bottom: 20px;
+}
+
+.phone-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.phone-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.phone-input:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.phone-input.error {
+  border-color: #dc3545;
+}
+
+.phone-hint {
+  font-size: 12px;
+  color: #666;
+  margin-top: 5px;
+}
+
+/* 기프티콘 구매 성공 모달 스타일 */
+.success-modal {
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 48px;
+  margin-bottom: 15px;
+  animation: bounce 0.6s ease-in-out;
+}
+
+@keyframes bounce {
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+.success-item-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin: 20px 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 2px solid #28a745;
+}
+
+.success-item-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #28a745;
+  border-radius: 8px;
+  color: white;
+  font-size: 24px;
+}
+
+.success-item-details {
+  flex: 1;
+  text-align: left;
+}
+
+.success-item-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.success-phone {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.success-message {
+  font-size: 14px;
+  color: #28a745;
+  font-weight: 500;
+  margin: 15px 0;
+}
+
+.success-btn {
+  background-color: #28a745 !important;
+  color: white !important;
+  min-width: 120px;
+}
+
+.success-btn:hover {
+  background-color: #218838 !important;
 }
 
 @media (max-width: 768px) {
