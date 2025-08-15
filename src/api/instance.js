@@ -48,13 +48,13 @@ instance.interceptors.response.use(
       if (status === 401 && !isAuthCall && !original._retry) {
         original._retry = true;
 
-        try {
+
           // 이미 다른 요청이 리프레시 중이면 그걸 기다림
           if (!refreshingPromise) {
             // 글로벌 axios 사용 (인터셉터/오래된 AT 부착 방지)
             refreshingPromise = axios.post('/api/auth/refresh', null, {
               withCredentials: true,
-              headers: { Authorization: '' }, // 혹시 모를 오래된 AT 제거
+              headers: {Authorization: ''}, // 혹시 모를 오래된 AT 제거
             });
           }
 
@@ -68,21 +68,41 @@ instance.interceptors.response.use(
           }
 
           const newAT = hdr.slice(7);
-          auth.setTokens({ accessToken: newAT });
+          auth.setTokens({accessToken: newAT});
+          // 401이면 리프레시 시도 → 성공 시 원요청 재시도
+          if (error.response?.status === 401 && !isAuthCall) {
 
-          // 원 요청 재시도 시 최신 AT 부착
-          original.headers = original.headers || {};
-          original.headers.Authorization = `Bearer ${newAT}`;
-          return instance(original);
-        } catch (e) {
-          // 리프레시 실패 → 세션 종료(리다이렉트는 라우터 가드에서)
-          auth.logout(false);
-        }
+            // 수정 1: 이미 재시도한 요청인지 확인하여 무한 루프 방지
+            if (original._retry) {
+              return Promise.reject(error); // 무한 재시도 방지
+            }
+            // 수정 2: 재시도한 요청이라고 꼬리표(플래그)를 붙임
+            original._retry = true;
+
+            try {
+              const r = await instance.post('/auth/refresh'); // 바디 없음, 쿠키 자동 전송
+              const authHeader = r.headers?.authorization;
+              if (!authHeader?.startsWith('Bearer ')) {
+                throw new Error('No Authorization header in refresh response');
+              }
+              const newAT = authHeader.slice(7);
+              auth.setTokens({accessToken: newAT});
+
+              // 원 요청 재시도 시 최신 AT 부착
+              original.headers = original.headers || {};
+              original.headers.Authorization = `Bearer ${newAT}`;
+              return instance(original);
+            } catch (e) {
+              // 리프레시 실패 → 세션 종료(리다이렉트는 라우터 가드에서)
+              auth.logout(false);
+            }
+          }
+
+          // 그 외 에러는 그대로 던짐
+          return Promise.reject(error);
       }
-
-      // 그 외 에러는 그대로 던짐
-      return Promise.reject(error);
     }
 );
+
 
 export default instance;
