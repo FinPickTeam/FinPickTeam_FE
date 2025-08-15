@@ -261,12 +261,13 @@ onUnmounted(() => {
   background: #fff;
   border-radius: 16px;
   padding: 20px 16px;
-  margin: 0 16px 24px;
+  margin: 0 -16px;
 }
 .group-title {
   font-size: 16px;
   font-weight: 700;
   margin-bottom: 16px;
+  padding-left: 16px;
   color: #222;
 }
 .card-list {

@@ -229,13 +229,12 @@ onUnmounted(() => {
   background-color: #f6f7f8;
   min-height: 100vh;
   padding: 0 16px 100px; /* 하단 여백 확보 */
-  box-sizing: border-box;
 }
 
 .category-wrap {
   background: #fff;
   margin: 0 -16px; /* 좌우 꽉 차게 */
-  padding: 8px 16px 24px; /* 내부 패딩만 유지 */
+  padding: 8px 16px; /* 내부 패딩만 유지 */
   border-radius: 0;
 }
 
@@ -279,7 +278,6 @@ onUnmounted(() => {
   padding: 16px 0;
   margin: 0;
   box-shadow: none;
-  border-top: 1px solid #f1f2f4;
 }
 .group-title {
   font-size: 16px;
@@ -307,7 +305,6 @@ onUnmounted(() => {
 }
 .account-item.selected {
   background-color: #eef2ff;
-  border: 1px solid #c7d2fe;
 }
 .item-logo {
   width: 32px;
