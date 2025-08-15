@@ -103,7 +103,9 @@ import ChallengePersonalDetail from "../pages/challenge/ChallengePersonalDetail.
 import AdminLayout from "@/layouts/AdminLayout.vue";
 import AdminHome from "@/pages/admin/AdminHome.vue";
 import AdminCommonChallenge from "@/pages/admin/AdminCommonChallenge.vue";
-import AdminTickets from "@/pages/admin/AdminTickets.vue";
+import AdminSupport from "@/pages/admin/AdminSupport.vue";
+import AdminFaq from "@/pages/admin/AdminFaq.vue";
+
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -438,9 +440,14 @@ const router = createRouter({
           component: AdminCommonChallenge,
         },
         {
-          path: "tickets",
-          name: "AdminTickets",
-          component: AdminTickets,
+        path: "support",
+        name: "AdminSupport",
+        component: AdminSupport,
+        },
+        {
+        path: "faq",
+        name: "AdminFaq",
+        component: AdminFaq,
         },
       ],
     },

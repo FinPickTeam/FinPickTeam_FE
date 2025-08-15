@@ -42,7 +42,9 @@ instance.interceptors.response.use(
       // 로그인/리프레시 자체는 여기서 손대지 않음
       const isAuthCall =
           original?.url?.includes('/auth/login') ||
-          original?.url?.includes('/auth/refresh');
+          original?.url?.includes('/auth/refresh') ||
+          // 로그아웃 응답에서 401이 떨어져도(환경에 따라) 쓸데없는 리프레시 재시도를 안 하게 가드 추가
+          original?.url?.includes('/auth/logout');
 
       // 401이면: 리프레시 1회 시도 후 원요청 재시도
       if (status === 401 && !isAuthCall && !original._retry) {
