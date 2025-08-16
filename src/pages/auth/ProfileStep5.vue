@@ -16,17 +16,24 @@
       <!-- <div class="question-desc">투자경험</div> -->
       <div class="options">
         <div
-            v-for="(option, idx) in options"
-            :key="idx"
-            :class="['option', { selected: profileStore.answers.question5 === option }]"
-            @click="profileStore.answers.question5 = option"
+          v-for="(option, idx) in options"
+          :key="idx"
+          :class="[
+            'option',
+            { selected: profileStore.answers.question5 === option },
+          ]"
+          @click="profileStore.answers.question5 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
     <!-- 완료 버튼 -->
-    <button class="next-btn" :disabled="profileStore.answers.question5 === null || isLoading" @click="goNext">
+    <button
+      class="next-btn"
+      :disabled="profileStore.answers.question5 === null || isLoading"
+      @click="goNext"
+    >
       {{ isLoading ? '처리 중...' : '완료' }}
     </button>
   </div>
@@ -35,8 +42,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import {useProfileStore} from "@/stores/profile.js";
-import {submitSignupProfile} from "@/api/index.js";
+import { useProfileStore } from '@/stores/profile.js';
+import { submitSignupProfile } from '@/api/index.js';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
 const router = useRouter();
@@ -90,8 +97,9 @@ const submitResults = async () => {
 
   try {
     // 1~5번 답변만 추출하여 payload 생성
-    const {question1, question2, question3, question4, question5} = profileStore.answers;
-    const payload = {question1, question2, question3, question4, question5};
+    const { question1, question2, question3, question4, question5 } =
+      profileStore.answers;
+    const payload = { question1, question2, question3, question4, question5 };
 
     // API 호출
     const response = await submitSignupProfile(payload);
@@ -105,14 +113,13 @@ const submitResults = async () => {
 
     const from = route.query.from || 'signup';
     await router.push(`/profile-complete?from=${from}`);
-
   } catch (error) {
     console.error('결과 전송 실패:', error);
     alert('오류가 발생했습니다.');
   } finally {
     isLoading.value = false;
   }
-}
+};
 </script>
 
 <style scoped>
@@ -177,14 +184,14 @@ const submitResults = async () => {
   transition: border-color 0.2s, background 0.2s;
 }
 .option.selected {
-  border-color: #8e74e3;
+  border-color: var(--color-main-dark);
   background: #f3f0fa;
   color: #6c4cf1;
   font-weight: 600;
 }
 .next-btn {
   width: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 10px;

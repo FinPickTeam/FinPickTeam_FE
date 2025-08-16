@@ -518,7 +518,7 @@ input.error { border-color: #ef4444; }
 
 .check-btn {
   padding: 12px 16px;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -528,8 +528,14 @@ input.error { border-color: #ef4444; }
   white-space: nowrap;
   transition: background 0.2s;
 }
-.check-btn:hover { background: #6c4cf1; }
-.check-btn:disabled { background-color: #8e74e3; opacity: .8; cursor: not-allowed; }
+
+.check-btn:hover {
+  background: var(--color-main-dark);
+}
+.check-btn:disabled {
+  background-color: var(--color-main-dark);
+  cursor: not-allowed;
+}
 
 .error-message {
   display: block;
@@ -545,7 +551,7 @@ input.error { border-color: #ef4444; }
 }
 .signup-btn {
   width: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -556,8 +562,24 @@ input.error { border-color: #ef4444; }
   cursor: pointer;
   transition: background 0.2s;
 }
-.signup-btn:hover { background: #6c4cf1; }
-.signup-btn:disabled { background-color: #8e74e3; opacity:.9; cursor: not-allowed; }
+
+.signup-btn:hover {
+  background: var(--color-main-dark);
+}
+.signup-btn:disabled {
+  background-color: var(--color-main-dark);
+  cursor: not-allowed;
+}
+.login-link {
+  text-align: center;
+  color: #666666;
+  font-size: 15px;
+}
+.login-link a {
+  color: #4318d1;
+  text-decoration: none;
+  margin-left: 4px;
+}
 
 .warning-message {
   color: #ef4444;

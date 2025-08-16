@@ -15,16 +15,23 @@
       <div class="question-title">[문항 4] 투자경험</div>
       <div class="options">
         <div
-            v-for="(option, idx) in options"
-            :key="idx"
-            :class="['option', { selected: profileStore.answers.question4 === option }]"
-            @click="profileStore.answers.question4 = option"
+          v-for="(option, idx) in options"
+          :key="idx"
+          :class="[
+            'option',
+            { selected: profileStore.answers.question4 === option },
+          ]"
+          @click="profileStore.answers.question4 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
-    <button class="next-btn" :disabled="profileStore.answers.question4 === null" @click="goNext">
+    <button
+      class="next-btn"
+      :disabled="profileStore.answers.question4 === null"
+      @click="goNext"
+    >
       다음
     </button>
   </div>
@@ -43,7 +50,6 @@ const route = useRoute();
 const profileStore = useProfileStore();
 
 const options = ['경험 없음', '1년 미만', '1년 이상 ~ 3년 미만', '3년 이상'];
-
 
 const totalSteps = computed(() => {
   const from = route.query.from;
@@ -131,14 +137,14 @@ const goNext = () => {
   transition: border-color 0.2s, background 0.2s;
 }
 .option.selected {
-  border-color: #8e74e3;
+  border-color: var(--color-main-dark);
   background: #f3f0fa;
   color: #6c4cf1;
   font-weight: 600;
 }
 .next-btn {
   width: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 10px;
