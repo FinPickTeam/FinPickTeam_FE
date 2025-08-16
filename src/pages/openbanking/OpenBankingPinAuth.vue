@@ -1,65 +1,40 @@
 <template>
-  <div class="password-change-container">
-    <!-- 상단 헤더 -->
-    <div class="password-header">
-      <button class="password-back" @click="goBack">
+  <div class="pin-auth-container">
+    <div class="pin-auth-header">
+      <button class="pin-auth-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="password-title center-title">간편 인증</span>
+      <span class="pin-auth-title">간편 인증</span>
     </div>
 
-    <!-- 메인 콘텐츠 -->
-    <div class="password-content">
-      <!-- 제목 -->
+    <div class="pin-auth-content">
       <h1 class="main-title">간편 비밀번호 입력</h1>
+      <p class="description-text">오픈뱅킹 서비스를 이용하려면<br />간편 비밀번호 6자리를 입력해주세요.</p>
 
-      <!-- 설명 -->
-      <div class="description-section">
-        <p class="description-text">오픈뱅킹 서비스를 이용하려면<br />간편 비밀번호 6자리를 입력해주세요.</p>
-      </div>
-
-      <!-- 비밀번호 입력 폼 -->
       <div class="password-form">
         <div class="input-group">
           <div class="password-display">
             <div class="password-dots">
               <div
-                v-for="i in 6"
-                :key="i"
-                class="password-dot"
-                :class="{ filled: i <= currentPassword.length }"
+                  v-for="i in 6"
+                  :key="i"
+                  class="password-dot"
+                  :class="{ filled: i <= password.length }"
               ></div>
             </div>
           </div>
           <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         </div>
 
-        <!-- 숫자 패드 -->
         <div class="number-pad">
-          <div
-            class="number-row"
-            v-for="(row, index) in numberPad.slice(0, 3)"
-            :key="index"
-          >
-            <button
-              v-for="number in row"
-              :key="number"
-              class="number-btn"
-              @click="addNumber(number)"
-              :disabled="currentPassword.length >= 6"
-            >
+          <div class="number-row" v-for="(row, index) in numberPad.slice(0, 3)" :key="index">
+            <button v-for="number in row" :key="number" class="number-btn" @click="addNumber(number)" :disabled="password.length >= 6">
               {{ number }}
             </button>
           </div>
           <div class="number-row">
-            <button class="number-btn clear-btn" @click="clearPassword">
-              전체삭제
-            </button>
-            <button
-              class="number-btn"
-              @click="addNumber(numberPad[3])"
-              :disabled="currentPassword.length >= 6"
-            >
+            <button class="number-btn clear-btn" @click="clearPassword">전체삭제</button>
+            <button class="number-btn" @click="addNumber(numberPad[3])" :disabled="password.length >= 6">
               {{ numberPad[3] }}
             </button>
             <button class="number-btn delete-btn" @click="deleteNumber">
@@ -73,82 +48,62 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
+import { ref } from "vue";
+import { useRouter, useRoute } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-  faAngleLeft,
-  faTimes,
-  faBackspace,
-} from "@fortawesome/free-solid-svg-icons";
+import { faAngleLeft, faBackspace } from "@fortawesome/free-solid-svg-icons";
 import { pinLogin } from "@/api/authApi.js";
 
-library.add(faAngleLeft, faTimes, faBackspace);
+library.add(faAngleLeft, faBackspace);
 
 const router = useRouter();
-const currentPassword = ref("");
+const route = useRoute();
+
+const password = ref("");
 const isLoading = ref(false);
 const errorMessage = ref("");
 const shakeError = ref(false);
 
-// 숫자 패드 배열을 랜덤하게 생성하는 함수
 const generateRandomNumberPad = () => {
-  const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
   const shuffled = [...numbers].sort(() => Math.random() - 0.5);
-
   return [
-    [shuffled[0], shuffled[1], shuffled[2]],
-    [shuffled[3], shuffled[4], shuffled[5]],
-    [shuffled[6], shuffled[7], shuffled[8]],
-    shuffled[9], // 10번째 숫자
+    shuffled.slice(0, 3), // 섞인 배열의 0, 1, 2번째 요소
+    shuffled.slice(3, 6), // 섞인 배열의 3, 4, 5번째 요소
+    shuffled.slice(6, 9),
   ];
 };
-
-// 숫자 패드 배열을 랜덤하게 생성
 const numberPad = ref(generateRandomNumberPad());
 
-// 비밀번호 유효성 검사 (6자리 숫자)
-const isPasswordValid = computed(() => {
-  return (
-    currentPassword.value.length === 6 && /^\d{6}$/.test(currentPassword.value)
-  );
-});
-
 const addNumber = (number) => {
-  // 이미 6자리가 채워졌으면 더 이상 입력되지 않도록 막습니다.
-  if (currentPassword.value.length >= 6) {
-    return;
-  }
-
-  // 사용자가 다시 입력을 시작하면 에러 메시지를 초기화합니다.
+  if (password.value.length >= 6) return;
   errorMessage.value = "";
-
-  if (currentPassword.value.length < 6) {
-    currentPassword.value += number.toString();
-
-    // 6자리 입력 완료 시 자동으로 다음 페이지로 이동
-    if (currentPassword.value.length === 6) {
-      setTimeout(() => {
-        verifyPassword();
-      }, 300); // 0.3초 후 자동 이동
-    }
+  password.value += number.toString();
+  if (password.value.length === 6) {
+    setTimeout(() => {
+      verifyPassword();
+    }, 300);
   }
 };
 
 const verifyPassword = async () => {
   isLoading.value = true;
   try {
-    // 실제 pinLogin API를 호출합니다.
-    await pinLogin(parseInt(currentPassword.value, 10));
-    // 오픈뱅킹으로 redirect
+    await pinLogin(parseInt(password.value, 10));
+    sessionStorage.setItem('openBankingAuthenticated', 'true');
     const redirectPath = route.query.redirect || { name: "OpenBankingMyHome" };
     await router.replace(redirectPath);
   } catch (error) {
-    // 인증 실패 시 API 응답에서 에러 메시지를 가져옵니다.
-    errorMessage.value =
-      error.response?.data?.message || "인증에 실패했습니다.";
-    triggerShakeError();
+    const response = error.response;
+    if (response?.data?.status === 200) {
+      sessionStorage.setItem('openBankingAuthenticated', 'true');
+      const redirectPath = route.query.redirect || { name: "OpenBankingMyHome" };
+      await router.replace(redirectPath);
+    } else {
+      errorMessage.value = response?.data?.message || error.message || "인증에 실패했습니다.";
+      triggerShakeError();
+    }
   } finally {
     isLoading.value = false;
   }
@@ -159,29 +114,28 @@ const triggerShakeError = () => {
   setTimeout(() => {
     shakeError.value = false;
     clearPassword();
-    // 에러 발생 시 숫자 패드를 다시 랜덤하게 생성
     numberPad.value = generateRandomNumberPad();
-  }, 800); // 애니메이션 시간(0.5s) 후 초기화
+  }, 800);
 };
 
 const deleteNumber = () => {
-  if (currentPassword.value.length > 0) {
-    currentPassword.value = currentPassword.value.slice(0, -1);
+  if (password.value.length > 0) {
+    password.value = password.value.slice(0, -1);
   }
 };
 
 const clearPassword = () => {
-  currentPassword.value = "";
-  errorMessage.value = ""; // 수정: 에러 메시지 초기화
+  password.value = "";
+  errorMessage.value = "";
 };
 
 const goBack = () => {
-  router.back({ name: 'Home' });
+  router.push({ name: 'Home' });
 };
 </script>
 
 <style scoped>
-.password-change-container {
+.pin-auth-container {
   width: 100%;
   max-width: 390px;
   margin: 0 auto;
@@ -192,8 +146,7 @@ const goBack = () => {
   display: flex;
   flex-direction: column;
 }
-
-.password-header {
+.pin-auth-header {
   width: 100%;
   height: 56px;
   display: flex;
@@ -205,9 +158,9 @@ const goBack = () => {
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid #e5e7eb;
 }
-
-.password-back {
+.pin-auth-back {
   position: absolute;
   left: 16px;
   top: 50%;
@@ -218,82 +171,17 @@ const goBack = () => {
   color: #222;
   cursor: pointer;
 }
-
-.password-title {
+.pin-auth-title {
   font-size: 18px;
   font-weight: 600;
   color: #222;
 }
-
-.center-title {
-  text-align: center;
-}
-
-.password-content {
+.pin-auth-content {
   padding: 24px 20px;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-
-.progress-section {
-  margin-bottom: 32px;
-}
-
-.progress-steps {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.step-number {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #e0e0e0;
-  color: #999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.step.completed .step-number {
-  background: var(--color-success);
-  color: #fff;
-}
-
-.step.active .step-number {
-  background: var(--color-main);
-  color: #fff;
-}
-
-.step-text {
-  font-size: 10px;
-  color: #999;
-  font-weight: 500;
-}
-
-.step.completed .step-text,
-.step.active .step-text {
-  color: #222;
-}
-
-.step-line {
-  width: 20px;
-  height: 1px;
-  background: #e0e0e0;
-}
-
 .main-title {
   font-size: 24px;
   font-weight: 700;
@@ -301,41 +189,24 @@ const goBack = () => {
   margin: 0 0 12px 0;
   text-align: center;
 }
-
-.description-section {
-  margin-bottom: 32px;
-  text-align: center;
-}
-
 .description-text {
   font-size: 14px;
   color: #666;
   line-height: 1.5;
   margin: 0;
-}
-
-.password-form {
+  text-align: center;
   margin-bottom: 32px;
+}
+.password-form {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-
 .input-group {
   margin-bottom: 32px;
 }
-
-.input-label {
-  display: block;
-  font-size: 14px;
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 12px;
-}
-
 .password-display {
   background: #fff;
-  border: 2px solid #e0e0e0;
   border-radius: 12px;
   padding: 20px;
   display: flex;
@@ -343,12 +214,10 @@ const goBack = () => {
   align-items: center;
   min-height: 60px;
 }
-
 .password-dots {
   display: flex;
   gap: 16px;
 }
-
 .password-dot {
   width: 16px;
   height: 16px;
@@ -356,38 +225,29 @@ const goBack = () => {
   background: #e0e0e0;
   transition: all 0.2s ease;
 }
-
 .password-dot.filled {
   background: var(--color-main);
 }
-
+.error-message {
+  color: #ef4444;
+  text-align: center;
+  margin-top: 12px;
+  min-height: 1em;
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 500;
+  font-size: 13px;
+}
 .number-pad {
   margin-top: auto;
-  background: transparent;
-  padding: 0;
-  width: 100%;
-  max-width: 390px;
-  margin-left: auto;
-  margin-right: auto;
 }
-
 .number-row {
   display: flex;
-  gap: 0;
-  margin-bottom: 0;
   justify-content: space-between;
-  width: 100%;
 }
-
-.number-row:last-child {
-  margin-bottom: 0;
-}
-
 .number-btn {
   width: 33.333%;
   height: 60px;
   border: none;
-  border-radius: 0;
   background: transparent;
   color: #333;
   font-size: 18px;
@@ -396,38 +256,15 @@ const goBack = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
-  position: relative;
+  transition: background 0.2s ease;
 }
-
 .number-btn:hover:not(:disabled) {
   background: rgba(0, 0, 0, 0.05);
 }
-
-.number-btn:active:not(:disabled) {
-  background: rgba(0, 0, 0, 0.1);
-}
-
 .number-btn:disabled {
   opacity: 0.5;
-  cursor: not-allowed;
 }
-
 .clear-btn {
-  color: #333;
   font-size: 14px;
-}
-
-.delete-btn {
-  color: #333;
-}
-
-.empty-btn {
-  background: transparent;
-  cursor: default;
-}
-
-.empty-btn:hover {
-  background: transparent;
 }
 </style>

@@ -568,7 +568,7 @@ async function ensureHasOpenBankingData(auth) {
   }
 }
 
-router.beforeEach(async (to) => {
+router.beforeEach(async (to,from) => {
   const publicPages = new Set([
     "Login",
     "Signup",
@@ -627,20 +627,62 @@ router.beforeEach(async (to) => {
     return { name: "AdminHome", replace: true };
   }
 
-  // 오픈뱅킹 엔트리('/openbanking') 접근 시: 연동 데이터 있으면 MyHome으로
-  if (to.name === "OpenBankingHome" || to.name === "OpenBankingMyHome") {
-    if (to.name !== 'OpenBankingPinAuth') {
-      try {
-        const has = await ensureHasOpenBankingData(auth);
-        if (has) {
-          return{
-          name: "OpenBankingPinAuth",
-              query: { redirect: to.fullPath }
-          };
+  // // 오픈뱅킹 엔트리('/openbanking') 접근 시: 연동 데이터 있으면 MyHome으로
+  // if (to.name === "OpenBankingHome" || to.name === "OpenBankingMyHome") {
+  //   if (to.name !== 'OpenBankingPinAuth') {
+  //     try {
+  //       const has = await ensureHasOpenBankingData(auth);
+  //       if (has) {
+  //         return{
+  //         name: "OpenBankingPinAuth",
+  //             query: { redirect: to.fullPath }
+  //         };
+  //       }
+  //     } catch (e) {
+  //       console.error("오픈뱅킹 데이터 확인 중 오류", e);
+  //     }
+  //   }
+  // }
+
+  const openBankingProtectedRoutes = new Set([
+    "OpenBankingHome", "OpenBankingMyHome", "AccountList", "CardList",
+    "AccountDetail", "CardDetail", "OpenbankingCalendar", "OpenbankingMonthlyReport",
+  ]);
+
+  if (openBankingProtectedRoutes.has(to.name)) {
+    // 계좌 연동 여부 확인
+    try {
+      const hasData = await ensureHasOpenBankingData(auth);
+      if (hasData) {
+        // 계좌가 있는 사용자의 경우 최종 목적지는OpenBankingMyHome
+        const finalDestination = { name: 'OpenBankingMyHome' };
+
+        // PIN 인증 세션 확인
+        const isAuthenticated = sessionStorage.getItem('openBankingAuthenticated') === 'true';
+
+        if (isAuthenticated) {
+          // 통행권이 있으면 바로 최종 목적지로 보냅니다.
+          if (to.name !== finalDestination.name) return finalDestination;
+          else return;
+        } else {
+          // 통행권이 없으면 PIN 인증 페이지로 보낸 뒤 MyHome으로 보냄
+          if (to.name !== 'OpenBankingPinAuth') {
+            return {
+              name: "OpenBankingPinAuth",
+              query: { redirect: router.resolve(finalDestination).fullPath }
+            };
+          }
         }
-      } catch (e) {
-        console.error("오픈뱅킹 데이터 확인 중 오류", e);
+      } else {
+        // 계좌가 없는 사용자의 경우 OpenBankingHome
+        if (to.name !== 'OpenBankingHome') {
+          return { name: 'OpenBankingHome' };
+        }
       }
+    } catch (e) {
+      console.error("오픈뱅킹 데이터 확인 중 오류", e);
+      // 에러 발생 시 홈으로
+      return { name: 'Home' };
     }
   }
 });
