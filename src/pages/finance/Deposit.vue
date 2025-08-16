@@ -42,20 +42,13 @@
           <div class="summary-info">
             <div class="summary-text-container">
               <div class="summary-item-box">
-                <span class="summary-item-value">{{ formData.period }}</span>
+                <span class="summary-item-value">{{ periodText }}</span>
               </div>
               <div class="summary-item-box">
-                <span class="summary-item-value"
-                  >월 {{ formData.amount.toLocaleString() }}원</span
-                >
+                <span class="summary-item-value">월 {{ amountText }}원</span>
               </div>
-              <div
-                v-if="formData.selectedPrefer.length > 0"
-                class="summary-item-box"
-              >
-                <span class="summary-item-value">{{
-                  formData.selectedPrefer.join(', ')
-                }}</span>
+              <div v-if="preferSummary" class="summary-item-box">
+                <span class="summary-item-value">{{ preferSummary }}</span>
               </div>
             </div>
           </div>
@@ -67,15 +60,19 @@
       <div v-if="isLoadingRecommend" class="loading-section">
         <LoadingSpinner message="추천 상품을 불러오는 중..." />
       </div>
-
-      <ProductCardList_deposit
-        v-if="showResults && !isLoadingRecommend"
-        :products="recommendProducts"
-      />
-      <span v-if="showResults && !isLoadingRecommend" class="subtab info-text">
-        선택한 우대 조건과 사용자의 투자 성향을 <br />
-        종합 분석해 선정한 상품입니다.
-      </span>
+      <div class="recommend-card-list">
+        <ProductCardList_deposit
+          v-if="showResults && !isLoadingRecommend"
+          :products="recommendProducts"
+        />
+        <span
+          v-if="showResults && !isLoadingRecommend"
+          class="subtab info-text"
+        >
+          선택한 우대 조건과 사용자의 투자 성향을 <br />
+          종합 분석해 선정한 상품입니다.
+        </span>
+      </div>
     </div>
 
     <!-- 전체 보기 탭일 때 -->
@@ -180,6 +177,15 @@ const showFilter = ref(false);
 const selectedTargets = ref([]);
 const selectedInterests = ref([]);
 
+const MAX_PREFER_CHARS = 24;
+
+const periodText = computed(() => formData.value.period || '-');
+const amountText = computed(() =>
+  Number(
+    formData.value.amount ?? formData.value.amountRaw ?? 0
+  ).toLocaleString()
+);
+
 // 태그 데이터
 const targetTags = ref([
   { value: 'KB국민은행', label: 'KB국민은행' },
@@ -240,12 +246,6 @@ function showSearchResults(receivedFormData) {
   showResults.value = true;
   formData.value = receivedFormData;
   console.log('데이터: ', receivedFormData);
-
-  // amount가 유효한 값인지 확인하고 toLocaleString() 호출
-  const amountToDisplay =
-    receivedFormData.amount !== undefined
-      ? receivedFormData.amount.toLocaleString()
-      : '0'; // 또는 다른 기본값 설정
 
   // 요약 텍스트 생성
   const preferText =
@@ -354,6 +354,25 @@ function closeFilter() {
   fetchDepositList(params);
   showFilter.value = false;
 }
+
+const preferSummary = computed(() => {
+  const arr = formData.value.selectedPrefer || [];
+  if (!arr.length) return '';
+
+  const joined = arr.join(', ');
+  if (joined.length <= MAX_PREFER_CHARS) return joined;
+
+  const kept = [];
+  let used = 0;
+  for (const item of arr) {
+    const add = (kept.length ? 2 : 0) + item.length;
+    if (used + add > MAX_PREFER_CHARS) break;
+    kept.push(item);
+    used += add;
+  }
+  const hidden = arr.length - kept.length;
+  return kept.join(', ') + (hidden > 0 ? ` 외 ${hidden}건` : '');
+});
 </script>
 
 <style scoped>
@@ -413,7 +432,6 @@ function closeFilter() {
   padding-bottom: 2px;
   border-bottom: 2px solid transparent;
   font-size: 15px;
-  /* 필요하다면 높이, 라인하이트 등 추가 */
 }
 
 .subtab.active {
@@ -427,7 +445,6 @@ function closeFilter() {
 }
 
 .summary-text-box {
-  margin-top: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -528,7 +545,6 @@ function closeFilter() {
 }
 .info-text {
   position: relative;
-  top: -12px;
   display: flex;
   justify-content: center;
 }
@@ -658,7 +674,9 @@ function closeFilter() {
   padding-top: 16px;
   text-align: center;
 }
-
+.recommend-card-list {
+  margin-top: 16px;
+}
 .complete-btn {
   background: var(--color-main);
   color: white;
