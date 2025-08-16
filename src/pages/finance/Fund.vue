@@ -32,16 +32,15 @@
       </div>
 
       <!-- 투자성향이 불완전한 경우 -->
-      <div v-else-if="hasIncompletePropensity">
-        <div class="button-container">
-          <button class="check-btn incomplete" @click="goToInvestmentTest">
-            투자성향 검사 완료하기
-          </button>
-        </div>
+      <div v-else-if="hasIncompletePropensity" class="incomplete-prompt">
         <div class="info-text">
-          <span class="emoji">📝</span>
           <br />
           투자성향 검사를 완료하면<br />맞춤형 펀드를 추천받을 수 있어요!
+        </div>
+        <div class="prompt-button-container">
+          <button class="prompt-action-button" @click="goToInvestmentTest">
+            투자성향 검사 완료하기
+          </button>
         </div>
       </div>
 
@@ -196,9 +195,9 @@ const initializeRecommendTab = async () => {
     if (completionResponse.data === false) {
       // 2a. 설문이 미완료 상태이면, 즉시 설문 페이지로 보냅니다.
       console.log('설문 미완료 상태. 추가 설문 페이지로 이동합니다.');
+      hasIncompletePropensity.value = true;
       const profileResponse = await getProfileByUserId();
       profile.loadAnswers(profileResponse.data);
-      router.push('/profile-step-6?from=fund');
       return; // 여기서 함수 실행을 중단하여 더 이상 진행하지 않도록 합니다.
     }
 
@@ -349,7 +348,7 @@ const fetchInvestmentPropensity = async () => {
 
 // 투자성향 검사 페이지로 이동
 const goToInvestmentTest = () => {
-  router.push('/mypage/financetest/profile-step-6?from=fund');
+  router.push('/profile-step-6?from=fund');
 };
 
 const fetchFundRecommendedList = async () => {
@@ -554,13 +553,14 @@ const fetchFundRecommendedList = async () => {
   display: block;
 }
 
+
 .info-text {
-  margin-top: 36px;
-  font-size: 17px;
+  margin-top: 0; /* incomplete-prompt의 gap으로 간격을 제어하므로 여백 초기화 */
+  font-size: 20px; /* 글씨 크기를 키웁니다. */
   color: #222;
   text-align: center;
   font-weight: 500;
-  line-height: 1.6;
+  line-height: 1.7; /* 줄 간격을 늘려 가독성을 높입니다. */
 }
 
 .emoji {
@@ -634,5 +634,51 @@ const fetchFundRecommendedList = async () => {
 
 .complete-btn:hover {
   background: var(--color-main-dark);
+}
+
+/* 새로 추가: 불완전 상태 안내 영역 전체 스타일 */
+.incomplete-prompt {
+  /* 위쪽 여백을 넉넉하게 주어 시선을 중앙으로 유도합니다. */
+  padding-top: 60px;
+  padding-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px; /* 버튼과 텍스트 사이 간격을 늘립니다. */
+}
+
+/* 버튼을 감싸는 컨테이너 전용 스타일 */
+.prompt-button-container {
+  display: flex;
+  justify-content: center; /* 버튼을 수평 중앙에 배치 */
+}
+
+/* 투자성향 검사 버튼 전용 스타일 */
+.prompt-action-button {
+  /* 크기 및 간격 */
+  width: 280px;
+  padding: 14px 24px;
+
+  /* 폰트 */
+  font-size: 18px;
+  font-weight: 600; /* 굵은 글씨체 */
+  color: #ffffff; /* 흰색 글씨 */
+
+  /* 디자인 */
+  background-color: var(--color-main); /* 메인 색상 배경 */
+  border: none; /* 테두리 없음 */
+  border-radius: 12px; /* 둥근 모서리 */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 입체감을 주는 그림자 */
+
+  /* 기타 */
+  cursor: pointer; /* 마우스 올리면 손가락 모양 */
+  transition: all 0.2s ease-in-out; /* 부드러운 전환 효과 */
+}
+
+/* 마우스를 올렸을 때의 효과 */
+.prompt-action-button:hover {
+  background-color: var(--color-main-dark); /* 살짝 어두운 배경색 */
+  transform: translateY(-2px); /* 살짝 위로 이동하는 효과 */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); /* 그림자 강조 */
 }
 </style>
