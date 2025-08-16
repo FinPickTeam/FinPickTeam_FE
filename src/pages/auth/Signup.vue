@@ -396,7 +396,7 @@ input.error {
 }
 .check-btn {
   padding: 12px 16px;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -407,10 +407,10 @@ input.error {
   transition: background 0.2s;
 }
 .check-btn:hover {
-  background: #6c4cf1;
+  background: var(--color-main-dark);
 }
 .check-btn:disabled {
-  background-color: #8e74e3;
+  background-color: var(--color-main-dark);
   cursor: not-allowed;
 }
 .error-message {
@@ -427,7 +427,7 @@ input.error {
 }
 .signup-btn {
   width: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 10px;
@@ -439,10 +439,10 @@ input.error {
   transition: background 0.2s;
 }
 .signup-btn:hover {
-  background: #6c4cf1;
+  background: var(--color-main-dark);
 }
 .signup-btn:disabled {
-  background-color: #8e74e3;
+  background-color: var(--color-main-dark);
   cursor: not-allowed;
 }
 .login-link {

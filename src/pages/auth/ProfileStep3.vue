@@ -17,16 +17,23 @@
 
       <div class="options">
         <div
-            v-for="(option, idx) in options"
-            :key="idx"
-            :class="['option', { selected: profileStore.answers.question3 === option }]"
-            @click="profileStore.answers.question3 = option"
+          v-for="(option, idx) in options"
+          :key="idx"
+          :class="[
+            'option',
+            { selected: profileStore.answers.question3 === option },
+          ]"
+          @click="profileStore.answers.question3 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
-    <button class="next-btn" :disabled="profileStore.answers.question3 === null" @click="goNext">
+    <button
+      class="next-btn"
+      :disabled="profileStore.answers.question3 === null"
+      @click="goNext"
+    >
       다음
     </button>
   </div>
@@ -138,14 +145,14 @@ const goNext = () => {
   transition: border-color 0.2s, background 0.2s;
 }
 .option.selected {
-  border-color: #8e74e3;
+  border-color: var(--color-main-dark);
   background: #f3f0fa;
   color: #6c4cf1;
   font-weight: 600;
 }
 .next-btn {
   width: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 10px;

@@ -16,17 +16,24 @@
       <!-- <div class="question-desc">투자 형태 / 금융 자산</div> -->
       <div class="options">
         <div
-            v-for="(option, idx) in options"
-            :key="idx"
-            :class="['option', { selected: profileStore.answers.question8 === option }]"
-            @click="profileStore.answers.question8 = option"
+          v-for="(option, idx) in options"
+          :key="idx"
+          :class="[
+            'option',
+            { selected: profileStore.answers.question8 === option },
+          ]"
+          @click="profileStore.answers.question8 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
     <!-- 다음 버튼 -->
-    <button class="next-btn" :disabled="profileStore.answers.question8 === null" @click="goNext">
+    <button
+      class="next-btn"
+      :disabled="profileStore.answers.question8 === null"
+      @click="goNext"
+    >
       다음
     </button>
   </div>
@@ -35,10 +42,10 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import {useProfileStore} from "@/stores/profile.js";
+import { useProfileStore } from '@/stores/profile.js';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
 
-const profileStore=useProfileStore();
+const profileStore = useProfileStore();
 const router = useRouter();
 const route = useRoute();
 const options = [
@@ -122,14 +129,14 @@ const goNext = () => {
   transition: border-color 0.2s, background 0.2s;
 }
 .option.selected {
-  border-color: #8e74e3;
+  border-color: var(--color-main-dark);
   background: #f3f0fa;
   color: #6c4cf1;
   font-weight: 600;
 }
 .next-btn {
   width: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 10px;
