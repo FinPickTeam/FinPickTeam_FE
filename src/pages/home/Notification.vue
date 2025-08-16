@@ -32,8 +32,8 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 
@@ -46,76 +46,76 @@ const notifications = ref([
   // 오늘
   {
     id: 1,
-    title: '챌린지 성공 여부를 확인하세요!',
-    desc: '참여 중인 챌린지의 결과를 확인하고 포인트를 받아보세요.',
-    time: '1시간 전',
+    title: "챌린지 성공 여부를 확인하세요!",
+    desc: "참여 중인 챌린지의 결과를 확인하고 포인트를 받아보세요.",
+    time: "1시간 전",
     date: new Date(), // 오늘
-    icon: 'fas fa-trophy',
+    icon: "fas fa-trophy",
     read: false,
   },
   {
     id: 2,
-    title: '새로운 공통 챌린지에 참가하세요!',
-    desc: '새로운 공통 챌린지가 시작되었습니다. 지금 참가해보세요!',
-    time: '3시간 전',
+    title: "새로운 공통 챌린지에 참가하세요!",
+    desc: "새로운 공통 챌린지가 시작되었습니다. 지금 참가해보세요!",
+    time: "3시간 전",
     date: new Date(), // 오늘
-    icon: 'fas fa-users',
+    icon: "fas fa-users",
     read: false,
   },
   {
     id: 3,
-    title: '새로운 금융 퀴즈를 풀고 포인트를 받으세요!',
-    desc: '오늘의 금융 퀴즈가 업데이트되었습니다. 정답을 맞추고 포인트를 획득하세요!',
-    time: '5시간 전',
+    title: "새로운 금융 퀴즈를 풀고 포인트를 받으세요!",
+    desc: "오늘의 금융 퀴즈가 업데이트되었습니다. 정답을 맞추고 포인트를 획득하세요!",
+    time: "5시간 전",
     date: new Date(), // 오늘
-    icon: 'fas fa-question-circle',
+    icon: "fas fa-question-circle",
     read: false,
   },
   // 최근 7일
   {
     id: 4,
-    title: '새로운 인원이 챌린지에 참가하였습니다!',
-    desc: '참여 중인 챌린지에 새로운 멤버가 합류했습니다.',
-    time: '1일 전',
+    title: "새로운 인원이 챌린지에 참가하였습니다!",
+    desc: "참여 중인 챌린지에 새로운 멤버가 합류했습니다.",
+    time: "1일 전",
     date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-user-plus',
+    icon: "fas fa-user-plus",
     read: true,
   },
   {
     id: 5,
-    title: '새로운 카테고리에 맞는 뉴스를 확인해 보세요!',
-    desc: '관심 카테고리의 최신 금융 뉴스가 업데이트되었습니다.',
-    time: '2일 전',
+    title: "새로운 카테고리에 맞는 뉴스를 확인해 보세요!",
+    desc: "관심 카테고리의 최신 금융 뉴스가 업데이트되었습니다.",
+    time: "2일 전",
     date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-newspaper',
+    icon: "fas fa-newspaper",
     read: true,
   },
   {
     id: 6,
-    title: '챌린지 성공 여부를 확인하세요!',
-    desc: '완료된 챌린지의 결과를 확인하고 보상을 받아보세요.',
-    time: '3일 전',
+    title: "챌린지 성공 여부를 확인하세요!",
+    desc: "완료된 챌린지의 결과를 확인하고 보상을 받아보세요.",
+    time: "3일 전",
     date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-trophy',
+    icon: "fas fa-trophy",
     read: true,
   },
   // 최근 30일
   {
     id: 7,
-    title: '새로운 공통 챌린지에 참가하세요!',
-    desc: '새로운 공통 챌린지가 시작되었습니다. 지금 참가해보세요!',
-    time: '1주 전',
+    title: "새로운 공통 챌린지에 참가하세요!",
+    desc: "새로운 공통 챌린지가 시작되었습니다. 지금 참가해보세요!",
+    time: "1주 전",
     date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-users',
+    icon: "fas fa-users",
     read: true,
   },
   {
     id: 8,
-    title: '새로운 금융 퀴즈를 풀고 포인트를 받으세요!',
-    desc: '오늘의 금융 퀴즈가 업데이트되었습니다. 정답을 맞추고 포인트를 획득하세요!',
-    time: '2주 전',
+    title: "새로운 금융 퀴즈를 풀고 포인트를 받으세요!",
+    desc: "오늘의 금융 퀴즈가 업데이트되었습니다. 정답을 맞추고 포인트를 획득하세요!",
+    time: "2주 전",
     date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-question-circle',
+    icon: "fas fa-question-circle",
     read: true,
   },
 ]);
@@ -133,9 +133,9 @@ const groupedNotifications = computed(() => {
     else if (diff < 30) month.push(n);
   });
   const groups = [];
-  if (today.length) groups.push({ title: '오늘', items: today });
-  if (week.length) groups.push({ title: '최근 7일', items: week });
-  if (month.length) groups.push({ title: '최근 30일', items: month });
+  if (today.length) groups.push({ title: "오늘", items: today });
+  if (week.length) groups.push({ title: "최근 7일", items: week });
+  if (month.length) groups.push({ title: "최근 30일", items: month });
   return groups;
 });
 
