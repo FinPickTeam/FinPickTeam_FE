@@ -73,7 +73,7 @@ export const getStockRecommendedList = (limit, priceLimit) => {
     params.priceLimit = priceLimit;
   }
   return api
-    .get('/v1/stock/recommend/', { params })
+    .get('/v1/stock/recommend', { params })
     .then((res) => res.data)
     .catch((err) => {
       throw err;
@@ -97,6 +97,25 @@ export const getStockReturns = (params = {}) => {
         startDate: params.startDate,
         endDate: params.endDate,
       },
+    })
+    .then((res) => res.data)
+    .catch((err) => {
+      throw err;
+    });
+};
+
+/** 주식 비교 데이터 조회
+ * GET /v1/stock/stockCompare
+ * @param {*} stockCode
+ * @returns
+ */
+export const getStockCompareData = (stockCode) => {
+  if (stockCode == null) {
+    throw new Error('주식 코드가 존재하지 않습니다.');
+  }
+  return api
+    .get('/v1/stock/stockCompare', {
+      params: { stockCode },
     })
     .then((res) => res.data)
     .catch((err) => {

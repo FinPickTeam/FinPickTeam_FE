@@ -290,7 +290,6 @@ const fetchDepositDetail = async () => {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-  padding: 0px 0 8px 0;
 }
 
 .title-with-heart {
@@ -464,7 +463,7 @@ const fetchDepositDetail = async () => {
 .detail-card {
   background: white;
   border-radius: 12px;
-  padding: 16px;
+  padding: 6px 12px;
 }
 
 .detail-item {

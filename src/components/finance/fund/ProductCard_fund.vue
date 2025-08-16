@@ -104,7 +104,7 @@ const riskClass = computed(() => riskClassMap[props.fund?.fundRiskLevel] || '');
 .card-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   margin-bottom: -6px;
 }
 

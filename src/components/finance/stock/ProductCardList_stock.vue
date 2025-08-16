@@ -33,6 +33,6 @@ const handleFavoriteRemoved = (product) => {
   gap: 10px;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 0 16px;
 }
 </style>

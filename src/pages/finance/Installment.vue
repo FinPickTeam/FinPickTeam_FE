@@ -77,6 +77,10 @@
         v-if="showResults && !isLoadingRecommend"
         :products="recommendProducts"
       />
+      <span v-if="showResults && !isLoadingRecommend" class="subtab info-text">
+        선택한 우대 조건과 사용자의 투자 성향을 <br />
+        종합 분석해 선정한 상품입니다.
+      </span>
     </div>
 
     <!-- 전체 보기 탭일 때 -->
@@ -426,14 +430,11 @@ function closeFilter() {
 .scroll-area::-webkit-scrollbar {
   display: none; /* Chrome, Safari */
 }
-
 .info-text {
-  margin-top: 36px;
-  font-size: 17px;
-  color: #222;
-  text-align: center;
-  font-weight: 500;
-  line-height: 1.6;
+  position: relative;
+  top: -12px;
+  display: flex;
+  justify-content: center;
 }
 
 .emoji {

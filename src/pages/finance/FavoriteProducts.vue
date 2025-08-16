@@ -1,71 +1,74 @@
 <template>
-  <div class="mypage-container">
-    <header class="favorite-header">
-      <i class="fas fa-chevron-left back-icon" @click="goBack"></i>
-      <h1>찜한 상품</h1>
-      <i class="fas fa-chevron-left ghost"></i>
-    </header>
+  <header class="favorite-header">
+    <i class="fas fa-chevron-left back-icon" @click="goBack"></i>
+    <h1>찜한 상품</h1>
+    <i class="fas fa-chevron-left ghost"></i>
+  </header>
 
-    <main class="main-content">
-      <!-- 예금 상품 -->
-      <div v-if="depositFavorites.length > 0">
-        <div class="group-title">예금 상품</div>
-        <ProductCardList_deposit
-          :products="depositFavorites"
-          @favorite-removed="handleDepositFavoriteRemoved"
-        />
-      </div>
-
-      <!-- 적금 상품 -->
-      <div v-if="installmentFavorites.length > 0">
-        <div class="group-title">적금 상품</div>
-        <ProductCardList_installment
-          :products="installmentFavorites"
-          @favorite-removed="handleInstallmentFavoriteRemoved"
-        />
-      </div>
-
-      <!-- 펀드 상품 -->
-      <div v-if="fundFavorites.length > 0">
-        <div class="group-title">펀드 상품</div>
-        <ProductCardList_fund
-          :funds="fundFavorites"
-          @favorite-removed="handleFundFavoriteRemoved"
-        />
-      </div>
-
-      <!-- 주식 상품 -->
-      <div v-if="stockFavorites.length > 0">
-        <div class="group-title">주식 상품</div>
-        <ProductCardList_stock
-          :products="stockFavorites"
-          @favorite-removed="handleStockFavoriteRemoved"
-        />
-      </div>
-
-      <!-- 찜한 상품이 없을 때 -->
-      <div
-        v-if="
-          depositFavorites.length === 0 &&
-          installmentFavorites.length === 0 &&
-          stockFavorites.length === 0 &&
-          fundFavorites.length === 0
-        "
-        class="no-favorites"
-      >
-        <p>찜한 상품이 없습니다.</p>
-      </div>
-    </main>
-    <Navbar />
+  <!-- 로딩 상태 -->
+  <div v-if="isLoading" class="loading-section">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">찜 목록 불러오는 중...</p>
   </div>
+
+  <main v-if="!isLoading" class="main-content">
+    <!-- 예금 상품 -->
+    <div v-if="depositFavorites.length > 0">
+      <div class="group-title">예금 상품</div>
+      <ProductCardList_deposit
+        :products="depositFavorites"
+        @favorite-removed="handleDepositFavoriteRemoved"
+      />
+    </div>
+
+    <!-- 적금 상품 -->
+    <div v-if="installmentFavorites.length > 0">
+      <div class="group-title">적금 상품</div>
+      <ProductCardList_installment
+        :products="installmentFavorites"
+        @favorite-removed="handleInstallmentFavoriteRemoved"
+      />
+    </div>
+
+    <!-- 펀드 상품 -->
+    <div v-if="fundFavorites.length > 0">
+      <div class="group-title">펀드 상품</div>
+      <ProductCardList_fund
+        :funds="fundFavorites"
+        @favorite-removed="handleFundFavoriteRemoved"
+      />
+    </div>
+
+    <!-- 주식 상품 -->
+    <div v-if="stockFavorites.length > 0">
+      <div class="group-title">주식 상품</div>
+      <ProductCardList_stock
+        :products="stockFavorites"
+        @favorite-removed="handleStockFavoriteRemoved"
+      />
+    </div>
+
+    <!-- 찜한 상품이 없을 때 -->
+    <div
+      v-if="
+        depositFavorites.length === 0 &&
+        installmentFavorites.length === 0 &&
+        stockFavorites.length === 0 &&
+        fundFavorites.length === 0
+      "
+      class="no-favorites"
+    >
+      <p>찜한 상품이 없습니다.</p>
+    </div>
+  </main>
+  <Navbar />
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { getActivePinia } from 'pinia';
 import Navbar from '@/components/Navbar.vue';
-import { getWishlist } from '@/api'; // /v1/wishlist : { status, message, data: { depositList, fundList, ... } }
+import { getWishlist } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite.js';
 
 import ProductCardList_deposit from '@/components/finance/deposit/ProductCardList_deposit.vue';
@@ -85,6 +88,7 @@ const depositFavorites = ref([]);
 const installmentFavorites = ref([]);
 const stockFavorites = ref([]);
 const fundFavorites = ref([]);
+const isLoading = ref(true);
 
 // 찜 해제 시 리스트에서 제거하는 함수들
 const handleDepositFavoriteRemoved = (product) => {
@@ -127,13 +131,17 @@ const handleFundFavoriteRemoved = (product) => {
   }
 };
 
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 onMounted(async () => {
   try {
     await Promise.all([favoriteStore.syncAllIdSets(), null]); // 두 번째는 placeholder
 
-    const wishlistRes = await getWishlist(); // 분리 호출해도 OK
+    await delay(1000);
+    const wishlistRes = await getWishlist();
 
-    // 어떤 래핑이든 한 번에 풀기
     const lists =
       wishlistRes?.data?.data ?? wishlistRes?.data ?? wishlistRes ?? {};
 
@@ -148,6 +156,8 @@ onMounted(async () => {
     installmentFavorites.value = [];
     stockFavorites.value = [];
     fundFavorites.value = [];
+  } finally {
+    isLoading.value = false;
   }
 });
 </script>
@@ -223,7 +233,7 @@ onMounted(async () => {
   font-size: 15px;
   font-weight: 600;
   color: #888;
-  margin: 0px 0 10px 10px;
+  margin: 0px 0 0 10px;
 }
 
 .no-favorites {
@@ -234,5 +244,37 @@ onMounted(async () => {
 
 .no-favorites p {
   font-size: 16px;
+}
+.loading-section {
+  height: 100dvh;
+  background-color: var(--color-bg-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px;
+}
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+.loading-text {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>

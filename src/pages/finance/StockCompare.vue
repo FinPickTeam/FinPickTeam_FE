@@ -82,15 +82,24 @@
                 compareCount > 2 ? stockData3.stockPer : undefined,
               ].filter(Boolean)
             "
+            suffix="배"
           />
-          <div class="metric-content" style="border: none">
-            <div class="metric-stock-name metric-label">배당률</div>
-          </div>
+          <MetricRow
+            label="배당률"
+            :values="
+              [
+                stock1CompareData.stockDiv,
+                stock2CompareData.stockDiv,
+                compareCount > 2 ? stock3CompareData.stockDiv : undefined,
+              ].filter(Boolean)
+            "
+            suffix="%"
+          />
         </div>
       </div>
       <div class="financial-wrap">
         <div class="title-content">
-          <div class="title-text">재무 건전성</div>
+          <div class="title-text">투자 지표</div>
         </div>
         <div class="metric-main">
           <div class="metric-header-row metric-content">
@@ -108,53 +117,51 @@
             </div>
           </div>
           <MetricRow
+            label="BPS"
+            :values="
+              [
+                Number(stock1CompareData.stockBps).toLocaleString(),
+                Number(stock2CompareData.stockBps).toLocaleString(),
+                compareCount > 2
+                  ? Number(stock3CompareData.stockBps).toLocaleString()
+                  : undefined,
+              ].filter(Boolean)
+            "
+          />
+          <MetricRow
+            label="EPS"
+            :values="
+              [
+                Number(stock1CompareData.stockEps).toLocaleString(),
+                Number(stock2CompareData.stockEps).toLocaleString(),
+                compareCount > 2
+                  ? Number(stock3CompareData.stockEps).toLocaleString()
+                  : undefined,
+              ].filter(Boolean)
+            "
+          />
+          <MetricRow
             label="ROE"
             :values="
               [
-                Number(stockData1.stockPrice).toLocaleString(),
-                Number(stockData2.stockPrice).toLocaleString(),
-                compareCount > 2
-                  ? Number(stockData3.stockPrice).toLocaleString()
-                  : undefined,
+                stock1CompareData.stockRoe,
+                stock2CompareData.stockRoe,
+                compareCount > 2 ? stock3CompareData.stockRoe : undefined,
               ].filter(Boolean)
             "
-          />
-          <MetricRow
-            label="ROA"
-            :values="
-              [
-                Number(stockData1.stockPrice).toLocaleString(),
-                Number(stockData2.stockPrice).toLocaleString(),
-                compareCount > 2
-                  ? Number(stockData3.stockPrice).toLocaleString()
-                  : undefined,
-              ].filter(Boolean)
-            "
-          />
-          <MetricRow
-            label="부채비율"
-            :values="
-              [
-                stockData1.stockChangeRate,
-                stockData2.stockChangeRate,
-                compareCount > 2 ? stockData3.stockChangeRate : undefined,
-              ].filter(Boolean)
-            "
-            :colorize="true"
             suffix="%"
           />
 
           <MetricRow
-            label="유동비율"
+            label="PBR"
             :values="
               [
-                Number(stockData1.stockMarketCap).toLocaleString(),
-                Number(stockData2.stockMarketCap).toLocaleString(),
-                compareCount > 2
-                  ? Number(stockData3.stockMarketCap).toLocaleString()
-                  : undefined,
+                stock1CompareData.stockPbr,
+                stock2CompareData.stockPbr,
+                compareCount > 2 ? stock3CompareData.stockPbr : undefined,
               ].filter(Boolean)
             "
+            suffix="배"
           />
         </div>
       </div>
@@ -163,8 +170,11 @@
         <div class="best-content">
           <div class="main-text-content">
             <div class="main-text">최고 수익률</div>
-            <div class="stock-name" style="color: #10b981">
-              {{ stockData1.stockName }}
+            <div
+              class="stock-name"
+              :style="{ color: colorByName(highestChangeRateStock?.stockName) }"
+            >
+              {{ highestChangeRateStock?.stockName || '-' }}
             </div>
           </div>
           <div class="sub-text">오늘 가장 높은 수익을 기록한 주식</div>
@@ -172,8 +182,11 @@
         <div class="best-content">
           <div class="main-text-content">
             <div class="main-text">최고 시가총액</div>
-            <div class="stock-name" style="color: #10b981">
-              {{ stockData1.stockName }}
+            <div
+              class="stock-name"
+              :style="{ color: colorByName(highestMarketCapStock?.stockName) }"
+            >
+              {{ highestMarketCapStock?.stockName || '-' }}
             </div>
           </div>
           <div class="sub-text">가장 큰 시가총액을 보유한 주식</div>
@@ -181,8 +194,11 @@
         <div class="best-content">
           <div class="main-text-content">
             <div class="main-text">최고 배당률</div>
-            <div class="stock-name" style="color: #10b981">
-              {{ stockData1.stockName }}
+            <div
+              class="stock-name"
+              :style="{ color: colorByName(highestDividendStock?.stockName) }"
+            >
+              {{ highestDividendStock?.stockName || '-' }}
             </div>
           </div>
           <div class="sub-text">가장 높은 배당률을 제공하는 주식</div>
@@ -192,7 +208,7 @@
   </div>
 </template>
 <script setup>
-import { getStockDetail } from '@/api';
+import { getStockDetail, getStockCompareData } from '@/api';
 import { useRoute } from 'vue-router';
 import { ref, computed, onMounted } from 'vue';
 import Chart from 'chart.js/auto';
@@ -216,6 +232,10 @@ const stock1ChartData = ref([]);
 const stock2ChartData = ref([]);
 const stock3ChartData = ref([]);
 
+const stock1CompareData = ref([]);
+const stock2CompareData = ref([]);
+const stock3CompareData = ref([]);
+
 //비교 갯수 확인
 const compareCount = computed(
   () => (Array.isArray(compareIds) ? compareIds.length : 0) + 1
@@ -224,14 +244,21 @@ const compareCount = computed(
 // 데이터 로드
 async function loadAll() {
   isLoading.value = true;
+
   try {
-    const [s1, s2, s3] = await Promise.all([
-      fetchStock(mainStockId),
-      fetchStock(compareIds[0]),
-      compareCount.value > 2
-        ? fetchStock(compareIds[1])
-        : Promise.resolve(null),
-    ]);
+    const s1 = await fetchStock(mainStockId);
+    const sc1 = await fetchStockCompare(mainStockId);
+
+    const s2 = await fetchStock(compareIds[0]);
+    const sc2 = await fetchStockCompare(compareIds[0]);
+
+    let s3 = null;
+    let sc3 = null;
+    if (compareCount.value > 2) {
+      s3 = await fetchStock(compareIds[1]);
+      sc3 = await fetchStockCompare(compareIds[1]);
+    }
+
     stockData1.value = s1;
     stockData2.value = s2;
     stockData3.value = s3;
@@ -239,6 +266,10 @@ async function loadAll() {
     stock1ChartData.value = parseChartData(s1?.stockChartData);
     stock2ChartData.value = parseChartData(s2?.stockChartData);
     stock3ChartData.value = parseChartData(s3?.stockChartData);
+
+    stock1CompareData.value = sc1;
+    stock2CompareData.value = sc2;
+    stock3CompareData.value = sc3;
 
     creatChart();
   } finally {
@@ -280,7 +311,6 @@ const creatChart = () => {
     });
   }
   if (chart) chart.destroy();
-  // 원색 계열, 시인성 좋은 컬러
   const vividColors = [
     'rgba(255, 99, 132, 0.9)',
     'rgba(54, 162, 235, 0.9)',
@@ -315,11 +345,11 @@ const creatChart = () => {
             boxWidth: 16,
             boxHeight: 8,
             font: {
-              size: 13,
+              size: 14,
               family: 'Pretendard, Arial, sans-serif',
               weight: 'bold',
             },
-            color: '#555',
+            color: 'black',
             padding: 12,
             usePointStyle: true,
           },
@@ -341,7 +371,7 @@ const creatChart = () => {
           display: false,
         },
         y: {
-          min: -10,
+          min: -20,
           ticks: {
             callback: function (value) {
               return value;
@@ -374,6 +404,12 @@ async function fetchStock(code) {
   return { stockName: d?.stockName ?? '', ...d };
 }
 
+async function fetchStockCompare(code) {
+  const res = await getStockCompareData(code);
+  const d = res?.data?.data ?? res?.data ?? res;
+  return { stockName: d?.stockName ?? '', ...d };
+}
+
 // 데이터를 차트 데이터로 변환
 const parseChartData = (data) => {
   if (!data) return [];
@@ -384,6 +420,106 @@ const parseChartData = (data) => {
     .sort(([a], [b]) => new Date(a) - new Date(b))
     .map(([date, price]) => ({ date, price: Number(price) }));
 };
+
+// 최고 수익률 주식 찾기
+const stocks = computed(() => {
+  return [
+    stockData1.value,
+    stockData2.value,
+    compareCount.value > 2 ? stockData3.value : null,
+  ].filter(Boolean);
+});
+
+const divStocks = computed(() => {
+  return [
+    {
+      stockName: stockData1.value?.stockName,
+      stockDividend: stock1CompareData.value?.stockDiv,
+    },
+    {
+      stockName: stockData2.value?.stockName,
+      stockDividend: stock2CompareData.value?.stockDiv,
+    },
+    compareCount.value > 2
+      ? {
+          stockName: stockData3.value?.stockName,
+          stockDividend: stock3CompareData.value?.stockDiv,
+        }
+      : null,
+  ].filter((x) => x && x.stockName);
+});
+
+const toRate = (v) => {
+  if (v == null) return NaN;
+  const cleaned = String(v).replace(/[^\d.+-]/g, '');
+  const num = Number(cleaned);
+  return Number.isFinite(num) ? num : NaN;
+};
+
+const getHighestChangeRateStock = (list) => {
+  if (!Array.isArray(list) || list.length === 0) return null;
+
+  const valid = list.filter((s) => Number.isFinite(toRate(s.stockChangeRate)));
+  if (valid.length === 0) return null;
+
+  return valid.reduce((max, s) =>
+    toRate(s.stockChangeRate) > toRate(max.stockChangeRate) ? s : max
+  );
+};
+
+const getHighestMarketcapStock = (list) => {
+  if (!Array.isArray(list) || list.length === 0) return null;
+
+  const valid = list.filter((s) => Number.isFinite(toRate(s.stockMarketCap)));
+  if (valid.length === 0) return null;
+
+  return valid.reduce((max, s) =>
+    toRate(s.stockMarketCap) > toRate(max.stockMarketCap) ? s : max
+  );
+};
+
+const getHighestDividendStock = (list) => {
+  if (!Array.isArray(list) || list.length === 0) return null;
+
+  const valid = list.filter((s) => Number.isFinite(toRate(s.stockDividend)));
+  if (valid.length === 0) return null;
+
+  return valid.reduce((max, s) =>
+    toRate(s.stockDividend) > toRate(max.stockDividend) ? s : max
+  );
+};
+// UI에 보일 변수명
+const highestChangeRateStock = computed(() =>
+  getHighestChangeRateStock(stocks.value)
+);
+
+const highestMarketCapStock = computed(() =>
+  getHighestMarketcapStock(stocks.value)
+);
+
+const highestDividendStock = computed(() =>
+  getHighestDividendStock(divStocks.value)
+);
+
+// best 색 변환
+const COLORS = {
+  s1: 'rgba(255, 99, 132, 0.9)',
+  s2: 'rgba(54, 162, 235, 0.9)',
+  s3: 'rgba(75, 192, 122, 0.9)',
+  default: '#10b981',
+};
+
+const colorByName = computed(() => {
+  const map = new Map();
+  const n1 = stockData1.value?.stockName;
+  const n2 = stockData2.value?.stockName;
+  const n3 = stockData3.value?.stockName;
+  if (n1) map.set(n1, COLORS.s1);
+  if (n2) map.set(n2, COLORS.s2);
+  if (n3) map.set(n3, COLORS.s3);
+
+  return (name) => map.get(name ?? '') ?? COLORS.default;
+});
 </script>
 <style scoped>
 * {
@@ -392,9 +528,9 @@ const parseChartData = (data) => {
 /* 로딩 스타일 */
 .loading-section {
   display: flex;
+  height: 100vh;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   min-height: 200px;
   padding: 40px 20px;
 }
@@ -424,7 +560,7 @@ const parseChartData = (data) => {
 }
 .container {
   width: 100%;
-  height: calc(100vh - 160px);
+  height: calc(100vh - 140px);
   overflow-y: auto;
   max-height: calc(100vh - 140px);
 }
@@ -474,6 +610,9 @@ const parseChartData = (data) => {
   border-radius: 12px;
   padding: 12px 12px 0 12px;
   background-color: white;
+}
+.financial-wrap:last-child {
+  margin-bottom: 24px;
 }
 .metric-main {
   display: flex;
