@@ -345,7 +345,7 @@ watch(
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 0;
+  padding: 12px 4px;
   border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
 }

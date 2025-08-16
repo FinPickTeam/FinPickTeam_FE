@@ -243,7 +243,7 @@ onUnmounted(() => {
   background: #fff;
   border-radius: 16px;
   padding: 20px;
-  margin-bottom: 24px;
+  margin: 0 16px 24px;
 }
 .summary-header {
   display: flex;

@@ -201,7 +201,6 @@ onUnmounted(() => {
   border-radius: 16px;
   padding: 20px;
   margin: 0 16px 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 .summary-title {
   font-size: 1rem;
@@ -259,7 +258,6 @@ onUnmounted(() => {
 
 .list-wrap {
   background: #fff;
-  border-radius: 16px;
   padding: 20px 16px;
   margin: 0 -16px;
 }
