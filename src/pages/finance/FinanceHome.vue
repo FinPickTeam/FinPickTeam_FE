@@ -36,29 +36,34 @@
     </div>
 
     <div class="guide-buttons">
-      <div class="guide-text" @click="showDriverGuide">
-        <i class="fa-solid fa-play"></i>
-        <span class="guide-text-underline">단계별 가이드</span>
+      <div class="guide-section">
+        <div class="hashtag-container">
+          <div class="hashtag-btn" @click="showMultiRouteGuide">
+            <span>#예금투어</span>
+          </div>
+          <div class="hashtag-btn" @click="showInstallmentTour">
+            <span>#적금투어</span>
+          </div>
+          <div class="hashtag-btn" @click="showFundTour">
+            <span>#펀드투어</span>
+          </div>
+          <div class="hashtag-btn" @click="showStockTour">
+            <span>#주식투어</span>
+          </div>
+        </div>
       </div>
-      <div class="guide-text" @click="showMultiRouteGuide">
-        <i class="fa-solid fa-route"></i>
-        <span class="guide-text-underline">예금 투어</span>
-      </div>
-      <div class="guide-text" @click="showInstallmentTour">
-        <i class="fa-solid fa-coins"></i>
-        <span class="guide-text-underline">적금 투어</span>
-      </div>
-      <div class="guide-text" @click="showFundTour">
-        <i class="fa-solid fa-chart-line"></i>
-        <span class="guide-text-underline">펀드 투어</span>
-      </div>
-      <div class="guide-text" @click="showStockTour">
-        <i class="fa-solid fa-trend-up"></i>
-        <span class="guide-text-underline">주식 투어</span>
-      </div>
-      <div class="guide-text" @click="showGuideModal">
-        <i class="fa-solid fa-circle-info"></i>
-        <span class="guide-text-underline">이용 가이드</span>
+
+      <div class="guide-section">
+        <div class="other-guide-buttons">
+          <div class="guide-btn primary" @click="showDriverGuide">
+            <i class="fa-solid fa-play"></i>
+            <span>단계별 가이드</span>
+          </div>
+          <div class="guide-btn secondary" @click="showGuideModal">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>이용 가이드</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -289,42 +294,186 @@ onMounted(() => {
 .guide-buttons {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 24px;
+  margin-top: 24px;
+  width: 100%;
+  max-width: 400px;
 }
 
-.guide-text {
+.guide-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guide-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-main, #6b46c1);
+  margin: 0;
   text-align: center;
-  font-size: 14px;
-  color: #888;
-  font-family: var(--font-main, sans-serif);
+  position: relative;
+}
+
+.guide-section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--color-main, #6b46c1),
+    rgba(107, 70, 193, 0.3)
+  );
+  border-radius: 1px;
+}
+
+/* 해시태그 스타일 */
+.hashtag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.hashtag-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(107, 70, 193, 0.08);
+  border: 1px solid rgba(107, 70, 193, 0.15);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-main, #6b46c1);
+  position: relative;
+  overflow: hidden;
+}
+
+.hashtag-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(107, 70, 193, 0.1),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.hashtag-btn:hover::before {
+  left: 100%;
+}
+
+.hashtag-btn:hover {
+  background: rgba(107, 70, 193, 0.15);
+  border-color: var(--color-main, #6b46c1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(107, 70, 193, 0.2);
+}
+
+.hashtag-btn:active {
+  transform: translateY(0);
+}
+
+.hashtag-btn i {
+  font-size: 12px;
+  color: var(--color-main, #6b46c1);
+  transition: transform 0.3s ease;
+}
+
+.hashtag-btn:hover i {
+  transform: scale(1.1);
+}
+
+.hashtag-btn span {
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* 기타 가이드 버튼 스타일 */
+.other-guide-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.guide-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 8px 12px;
+  gap: 8px;
+  padding: 12px 16px;
   border-radius: 8px;
-}
-
-.guide-text:hover {
-  color: var(--color-main, #6b46c1);
-  background: rgba(107, 70, 193, 0.05);
-}
-
-.guide-text:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(107, 70, 193, 0.3);
-}
-
-.guide-text i {
+  cursor: pointer;
+  transition: all 0.3s ease;
   font-size: 14px;
-  color: inherit;
+  font-weight: 500;
+  border: none;
+  position: relative;
+  overflow: hidden;
 }
 
-.guide-text-underline {
-  text-decoration: underline;
+.guide-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.guide-btn:hover::before {
+  left: 100%;
+}
+
+.guide-btn.primary {
+  background: linear-gradient(
+    135deg,
+    var(--color-main, #6b46c1),
+    rgba(107, 70, 193, 0.8)
+  );
+  color: white;
+  box-shadow: 0 2px 8px rgba(107, 70, 193, 0.3);
+}
+
+.guide-btn.primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.4);
+}
+
+.guide-btn.secondary {
+  background: rgba(107, 70, 193, 0.05);
+  color: var(--color-main, #6b46c1);
+  border: 1px solid rgba(107, 70, 193, 0.2);
+}
+
+.guide-btn.secondary:hover {
+  background: rgba(107, 70, 193, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(107, 70, 193, 0.15);
+}
+
+.guide-btn i {
+  font-size: 14px;
 }
 
 /* 반응형 디자인 */
@@ -346,22 +495,54 @@ onMounted(() => {
   .btn-text {
     font-size: 15px;
   }
+
+  .guide-buttons {
+    max-width: 100%;
+    gap: 20px;
+  }
+
+  .hashtag-container {
+    gap: 6px;
+  }
+
+  .hashtag-btn {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  .hashtag-btn i {
+    font-size: 10px;
+  }
+
+  .guide-btn {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
 }
 
 /* 접근성 개선 */
 @media (prefers-reduced-motion: reduce) {
   .grid-btn,
   .grid-icon,
-  .guide-text {
+  .hashtag-btn,
+  .guide-btn {
     transition: none;
   }
 
-  .grid-btn:hover {
+  .grid-btn:hover,
+  .hashtag-btn:hover,
+  .guide-btn:hover {
     transform: none;
   }
 
-  .grid-btn:hover .grid-icon {
+  .grid-btn:hover .grid-icon,
+  .hashtag-btn:hover i {
     transform: none;
+  }
+
+  .guide-btn::before,
+  .hashtag-btn::before {
+    display: none;
   }
 }
 
