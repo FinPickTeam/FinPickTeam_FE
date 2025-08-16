@@ -186,7 +186,7 @@
       <div v-if="selectedTerm" class="modal-overlay" @click="closeModal">
         <div class="modal-content" @click.stop>
           <div class="modal-header">
-            <h2>{{ selectedTerm.term }}</h2>
+            <div>{{ selectedTerm.term }}</div>
             <button @click="closeModal" class="close-btn">×</button>
           </div>
           <div class="modal-body">
@@ -194,7 +194,7 @@
               {{ selectedTerm.definition }}
             </div>
             <div v-if="selectedTerm.relatedTerms" class="related-terms">
-              <h4>연관 검색어:</h4>
+              <div>연관 검색어:</div>
               <div class="related-tags">
                 <span
                   v-for="relatedTerm in selectedTerm.relatedTerms"
@@ -215,21 +215,21 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import dictionaryData from "./financial_dictionary_parsed.json";
+import { ref, computed, onMounted } from 'vue';
+import dictionaryData from './financial_dictionary_parsed.json';
 // import Headerbar from "../../components/Headerbar.vue"; // 제거
-import Navbar from "../../components/Navbar.vue";
-import { useRouter } from "vue-router"; // ✅ 추가
+import Navbar from '../../components/Navbar.vue';
+import { useRouter } from 'vue-router'; // ✅ 추가
 const router = useRouter(); // ✅ 추가
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 library.add(faAngleLeft);
 
 const terms = ref([]);
 const filteredTerms = ref([]);
-const searchTerm = ref("");
-const currentFilter = ref("all");
+const searchTerm = ref('');
+const currentFilter = ref('all');
 const selectedTerm = ref(null);
 const currentPage = ref(1);
 const itemsPerPage = 10;
@@ -248,10 +248,10 @@ onMounted(() => {
       seen.add(t.term);
     }
   }
-  terms.value = uniqueTerms.sort((a, b) => a.term.localeCompare(b.term, "ko"));
+  terms.value = uniqueTerms.sort((a, b) => a.term.localeCompare(b.term, 'ko'));
   filteredTerms.value = terms.value;
   // 검색 히스토리 불러오기
-  const history = localStorage.getItem("dictionary_search_history");
+  const history = localStorage.getItem('dictionary_search_history');
   if (history) searchHistory.value = JSON.parse(history);
 });
 
@@ -263,7 +263,7 @@ const saveHistory = (term) => {
     ...searchHistory.value.filter((t) => t !== term),
   ].slice(0, 10);
   localStorage.setItem(
-    "dictionary_search_history",
+    'dictionary_search_history',
     JSON.stringify(searchHistory.value)
   );
 };
@@ -283,7 +283,7 @@ const selectHistory = (item) => {
 const deleteHistory = (idx) => {
   searchHistory.value.splice(idx, 1);
   localStorage.setItem(
-    "dictionary_search_history",
+    'dictionary_search_history',
     JSON.stringify(searchHistory.value)
   );
 };
@@ -297,8 +297,8 @@ const filterTerms = () => {
         term.definition.toLowerCase().includes(searchTerm.value.toLowerCase())
     );
   }
-  if (currentFilter.value !== "all") {
-    if (currentFilter.value === "A-Z") {
+  if (currentFilter.value !== 'all') {
+    if (currentFilter.value === 'A-Z') {
       filtered = filtered.filter((term) => /^[A-Za-z]/.test(term.term));
     } else {
       filtered = filtered.filter((term) => {
@@ -364,7 +364,7 @@ const prevPage = () => {
 const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++;
 };
-const getPreview = (def) => (def.length > 40 ? def.slice(0, 40) + "..." : def);
+const getPreview = (def) => (def.length > 40 ? def.slice(0, 40) + '...' : def);
 
 const toggleHistory = () => {
   if (showHistory.value) {
@@ -385,7 +385,7 @@ const goBack = () => {
   if (window.history.length > 1) {
     router.back();
   } else {
-    router.push("/");
+    router.push('/');
   }
 };
 </script>
@@ -400,7 +400,7 @@ const goBack = () => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
 }
 
 .dictionary-header {
@@ -618,14 +618,10 @@ const goBack = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 30px;
+  padding: 10px 10px 10px 20px;
   border-bottom: 2px solid #e1e5e9;
-}
-
-.modal-header h2 {
-  margin: 0;
-  color: #333;
-  font-size: 1.8rem;
+  font-size: var(--font-size-ars-small);
+  font-weight: var(--font-weight-bold);
 }
 
 .close-btn {
@@ -786,46 +782,5 @@ const goBack = () => {
 .next-btn:hover {
   background: #4318d1;
   color: #fff;
-}
-
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-  .dictionary-container {
-    padding: 15px;
-  }
-
-  .dictionary-header h1 {
-    font-size: 2rem;
-  }
-
-  .search-box {
-    flex-direction: column;
-  }
-
-  .terms-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .filter-options {
-    gap: 5px;
-  }
-
-  .filter-btn {
-    padding: 8px 15px;
-    font-size: 0.8rem;
-  }
-
-  .modal-content {
-    width: 95%;
-    margin: 20px;
-  }
-
-  .modal-header {
-    padding: 15px 20px;
-  }
-
-  .modal-body {
-    padding: 20px;
-  }
 }
 </style>

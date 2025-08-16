@@ -42,25 +42,16 @@
           <div class="summary-info">
             <div class="summary-text-container">
               <div class="summary-item-box">
-                <span class="summary-item-value">{{ formData.period }}</span>
+                <span class="summary-item-value">{{ periodText }}</span>
               </div>
               <div class="summary-item-box">
-                <span class="summary-item-value"
-                  >월 {{ formData.amount.toLocaleString() }}원</span
-                >
+                <span class="summary-item-value">월 {{ amountText }}원</span>
               </div>
               <div class="summary-item-box">
-                <span class="summary-item-value">{{
-                  formData.savingType
-                }}</span>
+                <span class="summary-item-value">{{ savingTypeText }}</span>
               </div>
-              <div
-                v-if="formData.selectedPrefer.length > 0"
-                class="summary-item-box"
-              >
-                <span class="summary-item-value">{{
-                  formData.selectedPrefer.join(', ')
-                }}</span>
+              <div v-if="preferSummary" class="summary-item-box">
+                <span class="summary-item-value">{{ preferSummary }}</span>
               </div>
             </div>
           </div>
@@ -72,15 +63,19 @@
       <div v-if="isLoadingRecommend">
         <LoadingSpinner message="추천 상품을 불러오는 중..." />
       </div>
-
-      <ProductCardList
-        v-if="showResults && !isLoadingRecommend"
-        :products="recommendProducts"
-      />
-      <span v-if="showResults && !isLoadingRecommend" class="subtab info-text">
-        선택한 우대 조건과 사용자의 투자 성향을 <br />
-        종합 분석해 선정한 상품입니다.
-      </span>
+      <div class="recommend-product-container">
+        <ProductCardList
+          v-if="showResults && !isLoadingRecommend"
+          :products="recommendProducts"
+        />
+        <span
+          v-if="showResults && !isLoadingRecommend"
+          class="subtab info-text"
+        >
+          선택한 우대 조건과 사용자의 투자 성향을 <br />
+          종합 분석해 선정한 상품입니다.
+        </span>
+      </div>
     </div>
 
     <!-- 전체 보기 탭일 때 -->
@@ -191,6 +186,12 @@ const showFilter = ref(false);
 const selectedTargets = ref([]);
 const selectedInterests = ref([]);
 
+const periodText = computed(() => formData.value.period || '-');
+const amountText = computed(() =>
+  Number(formData.value.amount ?? 0).toLocaleString()
+);
+const savingTypeText = computed(() => formData.value.savingType || '-');
+
 // 태그 데이터
 const targetTags = ref([
   { value: 'KB국민은행', label: 'KB국민은행' },
@@ -300,31 +301,8 @@ function changeSubtab(tabName) {
 
 function showSearchResults(receivedFormData) {
   showResults.value = true;
-
-  // 폼 데이터 저장
   formData.value = receivedFormData;
-
-  // 요약 텍스트 생성
-  const preferText =
-    receivedFormData.selectedPrefer.length > 0
-      ? receivedFormData.selectedPrefer.length === 1
-        ? receivedFormData.selectedPrefer[0]
-        : receivedFormData.selectedPrefer.length === 2
-        ? receivedFormData.selectedPrefer.join('+')
-        : receivedFormData.selectedPrefer[0] +
-          '+' +
-          receivedFormData.selectedPrefer[1] +
-          ' 외 ' +
-          (receivedFormData.selectedPrefer.length - 2) +
-          '건'
-      : '';
-
-  summaryText.value = `${
-    receivedFormData.period
-  } | 월 ${receivedFormData.amount.toLocaleString()}원 | ${
-    receivedFormData.savingType
-  }${preferText ? ' | ' + preferText : ''}`;
-
+  summaryText.value = 'show'; // 표시 트리거만
   fetchInstallmentRecommendation(receivedFormData);
 }
 
@@ -362,6 +340,19 @@ function toggleInterestTag(tagValue) {
 function closeFilter() {
   showFilter.value = false;
 }
+
+const preferSummary = computed(() => {
+  const raw = formData.value.selectedPrefer || [];
+
+  // 비어있거나 중복/공백 정리
+  const arr = [...new Set(raw.filter(Boolean).map((s) => String(s).trim()))];
+
+  if (arr.length === 0) return '';
+  if (arr.length === 1) return arr[0];
+
+  // 2개 이상인 경우
+  return `${arr[0]} 외 ${arr.length - 1}건`;
+});
 </script>
 
 <style scoped>
@@ -432,7 +423,6 @@ function closeFilter() {
 }
 .info-text {
   position: relative;
-  top: -12px;
   display: flex;
   justify-content: center;
 }
@@ -443,17 +433,16 @@ function closeFilter() {
 }
 
 .summary-text-box {
-  margin-top: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
 .summary-content {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto; /* 칩 영역 / 버튼 */
   align-items: center;
-  width: 100%;
+  gap: 8px;
 }
 
 .summary-info {
@@ -600,7 +589,9 @@ function closeFilter() {
   border: 1px solid #ddd;
   font-size: 14px;
 }
-
+.recommend-product-container {
+  margin-top: 16px;
+}
 .no-results {
   margin-top: 40px;
   text-align: center;
