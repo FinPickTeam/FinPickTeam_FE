@@ -35,10 +35,22 @@
       </button>
     </div>
 
-    <div class="guide-text" @click="showGuideModal">
-      <i class="fa-solid fa-circle-info"></i>
-      <span class="guide-text-underline">이용 가이드</span>
+    <div class="guide-buttons">
+      <div class="guide-text" @click="showDriverGuide">
+        <i class="fa-solid fa-play"></i>
+        <span class="guide-text-underline">단계별 가이드</span>
+      </div>
+      <div class="guide-text" @click="showGuideModal">
+        <i class="fa-solid fa-circle-info"></i>
+        <span class="guide-text-underline">이용 가이드</span>
+      </div>
     </div>
+
+    <!-- Driver.js 단계별 가이드 -->
+    <FinanceDriverGuide
+      :is-visible="isDriverGuideVisible"
+      @finish="closeDriverGuide"
+    />
 
     <!-- 이용 가이드 풀스크린 모달 -->
     <FinanceGuideFullscreenModal
@@ -50,12 +62,14 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import FinanceGuideFullscreenModal from '@/components/finance/FinanceGuideFullscreenModal.vue';
+import FinanceDriverGuide from '@/components/finance/FinanceDriverGuide.vue';
 
 const router = useRouter();
 const isGuideModalVisible = ref(false);
+const isDriverGuideVisible = ref(false);
 
 // 가이드 이미지 배열 (실제 이미지 경로로 수정 필요)
 const guideImages = ref([
@@ -85,6 +99,25 @@ function showGuideModal() {
 function closeGuideModal() {
   isGuideModalVisible.value = false;
 }
+
+function showDriverGuide() {
+  isDriverGuideVisible.value = true;
+}
+
+function closeDriverGuide() {
+  isDriverGuideVisible.value = false;
+}
+
+// 첫 방문 시 자동으로 단계별 가이드 시작 (선택사항)
+onMounted(() => {
+  const hasSeenGuide = localStorage.getItem('finance-guide-seen');
+  if (!hasSeenGuide) {
+    setTimeout(() => {
+      showDriverGuide();
+      localStorage.setItem('finance-guide-seen', 'true');
+    }, 1000);
+  }
+});
 </script>
 
 <style scoped>
@@ -195,11 +228,17 @@ function closeGuideModal() {
   transition: transform 0.1s ease;
 }
 
+.guide-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
 .guide-text {
   text-align: center;
   font-size: 14px;
   color: #888;
-  margin-top: 16px;
   font-family: var(--font-main, sans-serif);
   display: flex;
   align-items: center;
