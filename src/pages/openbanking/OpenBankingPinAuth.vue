@@ -5,82 +5,33 @@
       <button class="password-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="password-title center-title">비밀번호 변경</span>
+      <span class="password-title center-title">간편 인증</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
     <div class="password-content">
-      <div class="progress-section">
-        <div class="progress-steps">
-          <div class="step active">
-            <div class="step-number">1</div>
-            <span class="step-text">현재 비밀번호</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step active">
-            <div class="step-number">2</div>
-            <span class="step-text">새 비밀번호</span>
-          </div>
-          <div class="step-line"></div>
-          <div class="step active">
-            <div class="step-number">3</div>
-            <span class="step-text">확인</span>
-          </div>
-        </div>
-      </div>
-
       <!-- 제목 -->
-      <h1 class="main-title">비밀번호 확인</h1>
+      <h1 class="main-title">간편 비밀번호 입력</h1>
 
       <!-- 설명 -->
       <div class="description-section">
-        <p class="description-text">
-          새로운 비밀번호를 다시 한 번 입력해주세요.
-        </p>
+        <p class="description-text">오픈뱅킹 서비스를 이용하려면<br />간편 비밀번호 6자리를 입력해주세요.</p>
       </div>
 
-      <!-- 비밀번호 확인 폼 -->
+      <!-- 비밀번호 입력 폼 -->
       <div class="password-form">
         <div class="input-group">
-          <label class="input-label">비밀번호 확인</label>
           <div class="password-display">
             <div class="password-dots">
               <div
                 v-for="i in 6"
                 :key="i"
                 class="password-dot"
-                :class="{
-                  filled: i <= confirmPassword.length,
-                  correct: i <= confirmPassword.length && isPasswordMatch,
-                  incorrect:
-                    i <= confirmPassword.length &&
-                    !isPasswordMatch &&
-                    confirmPassword.length === 6,
-                }"
+                :class="{ filled: i <= currentPassword.length }"
               ></div>
             </div>
           </div>
-          <div class="password-match" v-if="confirmPassword.length > 0">
-            <font-awesome-icon
-              :icon="['fas', isPasswordMatch ? 'check' : 'times']"
-              :class="{
-                'text-success': isPasswordMatch,
-                'text-error': !isPasswordMatch,
-              }"
-            />
-            <span
-              :class="{
-                'text-success': isPasswordMatch,
-                'text-error': !isPasswordMatch,
-              }"
-            >
-              {{
-                isPasswordMatch
-                  ? "비밀번호가 성공적으로 변경되었습니다"
-                  : "비밀번호가 일치하지 않습니다"
-              }}
-            </span>
-          </div>
+          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
         </div>
 
         <!-- 숫자 패드 -->
@@ -95,7 +46,7 @@
               :key="number"
               class="number-btn"
               @click="addNumber(number)"
-              :disabled="confirmPassword.length >= 6"
+              :disabled="currentPassword.length >= 6"
             >
               {{ number }}
             </button>
@@ -107,7 +58,7 @@
             <button
               class="number-btn"
               @click="addNumber(numberPad[3])"
-              :disabled="confirmPassword.length >= 6"
+              :disabled="currentPassword.length >= 6"
             >
               {{ numberPad[3] }}
             </button>
@@ -122,26 +73,21 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
+import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faAngleLeft,
-  faCheck,
   faTimes,
   faBackspace,
 } from "@fortawesome/free-solid-svg-icons";
-import { pinReset } from "@/api/authApi.js";
+import { pinLogin } from "@/api/authApi.js";
 
-library.add(faAngleLeft, faCheck, faTimes, faBackspace);
+library.add(faAngleLeft, faTimes, faBackspace);
 
 const router = useRouter();
-const route = useRoute();
-
-const confirmPassword = ref("");
 const currentPassword = ref("");
-const newPassword = ref("");
 const isLoading = ref(false);
 const errorMessage = ref("");
 const shakeError = ref(false);
@@ -162,79 +108,75 @@ const generateRandomNumberPad = () => {
 // 숫자 패드 배열을 랜덤하게 생성
 const numberPad = ref(generateRandomNumberPad());
 
-// 비밀번호 일치 확인
-const isPasswordMatch = computed(() => {
-  return confirmPassword.value === newPassword.value;
-});
-
-onMounted(() => {
-  currentPassword.value = route.query.currentPassword || "";
-  newPassword.value = route.query.newPassword || "";
-  if (!newPassword.value) {
-    alert("비밀번호 정보가 없습니다. 이전 단계로 돌아갑니다.");
-    router.go(-2); // 정보 없으면 1단계로
-  }
+// 비밀번호 유효성 검사 (6자리 숫자)
+const isPasswordValid = computed(() => {
+  return (
+    currentPassword.value.length === 6 && /^\d{6}$/.test(currentPassword.value)
+  );
 });
 
 const addNumber = (number) => {
-  if (confirmPassword.value.length < 6) {
-    confirmPassword.value += number.toString();
+  // 이미 6자리가 채워졌으면 더 이상 입력되지 않도록 막습니다.
+  if (currentPassword.value.length >= 6) {
+    return;
+  }
 
-    // 6자리 입력 완료 시 비밀번호가 일치하면 자동으로 완료
-    if (confirmPassword.value.length === 6) {
+  // 사용자가 다시 입력을 시작하면 에러 메시지를 초기화합니다.
+  errorMessage.value = "";
+
+  if (currentPassword.value.length < 6) {
+    currentPassword.value += number.toString();
+
+    // 6자리 입력 완료 시 자동으로 다음 페이지로 이동
+    if (currentPassword.value.length === 6) {
       setTimeout(() => {
-        if (isPasswordMatch.value) {
-          completePasswordChange();
-        }
-      }, 1000); // 0.3초 후 자동 완료
+        verifyPassword();
+      }, 300); // 0.3초 후 자동 이동
     }
   }
 };
 
-const deleteNumber = () => {
-  if (confirmPassword.value.length > 0) {
-    confirmPassword.value = confirmPassword.value.slice(0, -1);
-  }
-};
-
-const clearPassword = () => {
-  confirmPassword.value = "";
-};
-
-const goBack = () => {
-  router.back();
-};
-
-const completePasswordChange = async () => {
-  if (!isPasswordMatch.value || isLoading.value) return;
-
+const verifyPassword = async () => {
   isLoading.value = true;
   try {
-    await pinReset(parseInt(newPassword.value, 10));
-
-    // 성공 시 사용자에게 알림 후 페이지 이동
-    await router.push("/mypage");
+    // 실제 pinLogin API를 호출합니다.
+    await pinLogin(parseInt(currentPassword.value, 10));
+    // 오픈뱅킹으로 redirect
+    const redirectPath = route.query.redirect || { name: "OpenBankingMyHome" };
+    await router.replace(redirectPath);
   } catch (error) {
-    // API 호출 실패 시 에러 처리
-    const message =
-      error.response?.data?.message || "비밀번호 변경에 실패했습니다.";
-    triggerShakeError(message);
+    // 인증 실패 시 API 응답에서 에러 메시지를 가져옵니다.
+    errorMessage.value =
+      error.response?.data?.message || "인증에 실패했습니다.";
+    triggerShakeError();
   } finally {
     isLoading.value = false;
   }
-  // 완료 페이지로 이동
-  await router.push("/mypage");
 };
 
-const triggerShakeError = (message) => {
-  errorMessage.value = message;
+const triggerShakeError = () => {
   shakeError.value = true;
   setTimeout(() => {
     shakeError.value = false;
     clearPassword();
     // 에러 발생 시 숫자 패드를 다시 랜덤하게 생성
     numberPad.value = generateRandomNumberPad();
-  }, 500);
+  }, 800); // 애니메이션 시간(0.5s) 후 초기화
+};
+
+const deleteNumber = () => {
+  if (currentPassword.value.length > 0) {
+    currentPassword.value = currentPassword.value.slice(0, -1);
+  }
+};
+
+const clearPassword = () => {
+  currentPassword.value = "";
+  errorMessage.value = ""; // 수정: 에러 메시지 초기화
+};
+
+const goBack = () => {
+  router.back({ name: 'Home' });
 };
 </script>
 
@@ -292,6 +234,64 @@ const triggerShakeError = (message) => {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+.progress-section {
+  margin-bottom: 32px;
+}
+
+.progress-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.step.completed .step-number {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.step.active .step-number {
+  background: var(--color-main);
+  color: #fff;
+}
+
+.step-text {
+  font-size: 10px;
+  color: #999;
+  font-weight: 500;
+}
+
+.step.completed .step-text,
+.step.active .step-text {
+  color: #222;
+}
+
+.step-line {
+  width: 20px;
+  height: 1px;
+  background: #e0e0e0;
 }
 
 .main-title {
@@ -361,31 +361,6 @@ const triggerShakeError = (message) => {
   background: var(--color-main);
 }
 
-.password-dot.correct {
-  background: var(--color-success);
-}
-
-.password-dot.incorrect {
-  background: #f44336;
-}
-
-.password-match {
-  margin-top: 12px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.text-success {
-  color: var(--color-success);
-}
-
-.text-error {
-  color: #f44336;
-}
-
 .number-pad {
   margin-top: auto;
   background: transparent;
@@ -447,62 +422,12 @@ const triggerShakeError = (message) => {
   color: #333;
 }
 
-.progress-section {
-  margin-bottom: 32px;
+.empty-btn {
+  background: transparent;
+  cursor: default;
 }
 
-.progress-steps {
-  display: flex;
-  align-items: center;
-  /*justify-content: center;*/
-  gap: 0;
-  width: 100%;
+.empty-btn:hover {
+  background: transparent;
 }
-
-.step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  flex: 1;
-}
-
-.step-number {
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  background: #e0e0e0;
-  color: #999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.step.completed .step-number {
-  background: var(--color-success);
-  color: #fff;
-}
-
-.step.active .step-number {
-  background: var(--color-main);
-  color: #fff;
-}
-
-.step-text {
-  font-size: 10px;
-  color: #999;
-  font-weight: 500;
-}
-
-.step.completed .step-text,
-.step.active .step-text {
-  color: #222;
-}
-
-.step-line {
-  width: 20px;
-  height: 1px;
-  background: #e0e0e0;
-}</style>
+</style>

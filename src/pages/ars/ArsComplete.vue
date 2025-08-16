@@ -58,6 +58,7 @@ import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { isPin } from "@/api/authApi.js";
 
 library.add(faAngleLeft);
 
@@ -80,9 +81,25 @@ function formatCurrentTime() {
   currentTime.value = `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
 }
 
-function goToNextStep() {
-  // CertificateCreate 페이지로 이동
-  router.push("/openbanking/create-certificate");
+async function goToNextStep() {
+  try {
+    // isPin API를 호출하여 간편비밀번호 존재 여부를 확인합니다.
+    const pinStatus = await isPin();
+
+    // 간편비밀번호가 이미 있다면, 계좌 선택 화면으로 바로 이동
+    if (pinStatus.data === true) {
+
+      console.log("isPin API 응답: true. 계좌 선택으로 바로 이동합니다.");
+      router.push("/ars/link-banking");
+    } else {  // 간편비밀번호가 없다면, 간편 비밀번호 생성 페이지로 이동합니다.
+      console.log("isPin API 응답: false. 생성 단계로 이동합니다.");
+      router.push("/openbanking/create-certificate");
+    }
+  } catch (error) {
+    // isPin API 호출 실패 시, 안전하게 생성 단계로 보냅니다.
+    console.error("isPin API 호출 실패:", error);
+    router.push("/openbanking/create-certificate");
+  }
 }
 
 function goToCustomerSupport() {
