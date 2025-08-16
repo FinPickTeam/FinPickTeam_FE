@@ -44,6 +44,10 @@
         <i class="fa-solid fa-route"></i>
         <span class="guide-text-underline">예금 투어</span>
       </div>
+      <div class="guide-text" @click="showInstallmentTour">
+        <i class="fa-solid fa-coins"></i>
+        <span class="guide-text-underline">적금 투어</span>
+      </div>
       <div class="guide-text" @click="showGuideModal">
         <i class="fa-solid fa-circle-info"></i>
         <span class="guide-text-underline">이용 가이드</span>
@@ -77,10 +81,15 @@ import { useRouter } from 'vue-router';
 import FinanceGuideFullscreenModal from '@/components/finance/FinanceGuideFullscreenModal.vue';
 import FinanceDriverGuide from '@/components/finance/FinanceDriverGuide.vue';
 import FinanceMultiRouteGuide from '@/components/finance/FinanceMultiRouteGuide.vue';
+import { useFinanceRouteTours } from '@/composables/useFinanceRouteTours';
+
 const router = useRouter();
 const isGuideModalVisible = ref(false);
 const isDriverGuideVisible = ref(false);
 const isMultiRouteGuideVisible = ref(false);
+
+// 투어 기능
+const { startInstallmentTour } = useFinanceRouteTours();
 
 // 가이드 이미지 배열 (실제 이미지 경로로 수정 필요)
 const guideImages = ref([
@@ -125,6 +134,13 @@ function showMultiRouteGuide() {
 
 function closeMultiRouteGuide() {
   isMultiRouteGuideVisible.value = false;
+}
+
+function showInstallmentTour() {
+  startInstallmentTour({
+    includeDetail: true,
+    detailId: '1', // 실제 상품 ID로 변경 필요
+  });
 }
 
 // 첫 방문 시 자동으로 단계별 가이드 시작 (선택사항)

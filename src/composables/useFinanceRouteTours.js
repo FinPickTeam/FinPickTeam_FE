@@ -231,6 +231,7 @@ export function useFinanceRouteTours() {
   const startInstallmentTour = async (
     opts = { includeDetail: false, detailId: null }
   ) => {
+    // 1) 재테크 홈
     await goAndWait(router, { name: 'FinanceHome' }, [
       SELECTORS.tab.installment,
     ]);
@@ -247,51 +248,129 @@ export function useFinanceRouteTours() {
       },
     ]);
 
+    // 2) 적금 목록 (추천 탭)
     await goAndWait(router, { name: 'Installment' }, [
-      SELECTORS.list.firstCard,
+      '.subtab-row',
+      '.period-amount-card',
     ]);
     await runSteps([
       {
-        element: SELECTORS.list.sort,
+        element: '.subtab-row .subtab:first-child',
         popover: {
-          title: '정렬/필터',
-          description: '최대 금리, 기간, 자유/정기 적립식 등으로 골라요.',
+          title: '📊 추천 적금',
+          description:
+            '추천 탭에서는 사용자 맞춤 적금 상품을 확인할 수 있어요!',
           side: 'bottom',
           align: 'center',
         },
       },
       {
-        element: SELECTORS.list.favHeart,
+        element: '.period-amount-card',
         popover: {
-          title: '찜하기',
-          description: '마음에 드는 적금을 저장해 두세요.',
+          title: '💡 투자 조건 설정',
+          description: '투자 금액과 기간을 설정하면 맞춤 상품을 찾아드려요!',
+          side: 'top',
+          align: 'center',
+        },
+      },
+      {
+        element: '.prefer-row',
+        popover: {
+          title: '🎯 우대 조건 선택',
+          description:
+            '급여이체, 카드실적 등 우대 조건을 선택하면 더 높은 금리를 받을 수 있어요!',
+          side: 'top',
+          align: 'center',
+        },
+      },
+      {
+        element: '.search-btn',
+        popover: {
+          title: '🔍 AI 추천 시스템',
+          description:
+            '선택한 우대 조건과 사용자의 투자 성향을 종합 분석해 적금 상품을 추천합니다!',
+          side: 'top',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 실제로 전체보기 탭 클릭
+    const allViewTab = document.querySelector('.subtab-row .subtab:last-child');
+    if (allViewTab) {
+      allViewTab.click();
+    }
+
+    // 3) 전체보기 탭 클릭 후 전체보기 설명
+    await runSteps([
+      {
+        element: '.subtab-row .subtab:last-child',
+        popover: {
+          title: '📋 전체보기 탭',
+          description:
+            '전체보기 탭을 클릭하면 모든 적금 상품을 확인할 수 있어요!',
+          side: 'bottom',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 탭 전환 후 전체보기 화면이 로드될 때까지 대기
+    try {
+      await waitForEl('.search-filter-row', { timeout: 5000 });
+    } catch (error) {
+      console.warn('전체보기 화면을 찾을 수 없습니다:', error);
+    }
+
+    // 전체보기 화면 설명
+    await runSteps([
+      {
+        element: '.search-filter-row',
+        popover: {
+          title: '🔍 전체보기 화면',
+          description:
+            '검색창과 필터 버튼을 통해 원하는 상품을 쉽게 찾을 수 있어요!',
+          side: 'top',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 상품 카드가 로드될 때까지 대기
+    try {
+      await waitForEl('.product-card:first-child', { timeout: 5000 });
+    } catch (error) {
+      console.warn('전체보기 탭의 상품 카드를 찾을 수 없습니다:', error);
+    }
+
+    // 5) 상품 카드 설명
+    await runSteps([
+      {
+        element: '.product-card:first-child',
+        popover: {
+          title: '💳 적금 상품 카드',
+          description:
+            '은행 로고, 상품명, 금리 정보가 한눈에 보기 쉽게 구성되어 있어요!',
           side: 'left',
           align: 'center',
         },
       },
     ]);
 
+    // 6) (선택) 적금 상세
     if (opts.includeDetail && (opts.detailId ?? null) !== null) {
       await goAndWait(
         router,
         { name: 'InstallmentDetail', params: { id: String(opts.detailId) } },
-        [SELECTORS.detail.favorite]
+        [SELECTORS.detail.termToggle]
       );
       await runSteps([
         {
-          element: SELECTORS.detail.favorite,
+          element: SELECTORS.detail.termToggle,
           popover: {
-            title: '상세에서 찜/해제',
-            description: '상세 화면에서도 바로 찜 상태를 바꿀 수 있어요.',
-            side: 'left',
-            align: 'center',
-          },
-        },
-        {
-          element: SELECTORS.detail.dictBtn,
-          popover: {
-            title: '용어사전',
-            description: '가산금리/우대조건 등 용어를 바로 확인!',
+            title: '🔮 단어 마법사',
+            description:
+              '금융 용어에 마우스를 올리면 쉽게 이해할 수 있도록 설명해드려요!',
             side: 'bottom',
             align: 'center',
           },
