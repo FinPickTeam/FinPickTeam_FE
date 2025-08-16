@@ -7,7 +7,7 @@
           alt="예금"
           class="grid-icon"
         />
-        <span>예금</span>
+        <span class="btn-text">예금</span>
       </button>
       <button class="grid-btn" @click="goInstallment">
         <img
@@ -15,7 +15,7 @@
           alt="적금"
           class="grid-icon"
         />
-        <span>적금</span>
+        <span class="btn-text">적금</span>
       </button>
       <button class="grid-btn" @click="goFund">
         <img
@@ -23,7 +23,7 @@
           alt="펀드"
           class="grid-icon"
         />
-        <span>펀드</span>
+        <span class="btn-text">펀드</span>
       </button>
       <button class="grid-btn" @click="goStock">
         <img
@@ -31,9 +31,10 @@
           alt="주식"
           class="grid-icon"
         />
-        <span>주식</span>
+        <span class="btn-text">주식</span>
       </button>
     </div>
+
     <div class="guide-text" @click="showGuideModal">
       <i class="fa-solid fa-circle-info"></i>
       <span class="guide-text-underline">이용 가이드</span>
@@ -92,28 +93,16 @@ function closeGuideModal() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
+  height: calc(100vh - 80px - 68px); /* 헤더와 네비바 높이를 제외한 전체 높이 */
   padding: 20px;
+  background: var(--color-bg-light, #f8f9fa);
+  box-sizing: border-box;
+  position: absolute;
+  top: 80px; /* 헤더 높이만큼 아래로 이동 */
+  left: 0;
+  right: 0;
 }
 
-.button-group {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-top: 32px;
-  align-items: center;
-}
-.button-group button {
-  width: 300px;
-}
-
-.button-grid-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100vw;
-  height: 100vh;
-}
 .button-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -123,13 +112,14 @@ function closeGuideModal() {
   align-items: stretch;
   width: 300px;
   height: 300px;
+  margin-bottom: 32px;
 }
 
 .grid-btn {
   width: 100%;
   height: 100%;
   aspect-ratio: 1 / 1;
-  background: var(--color-bg);
+  background: var(--color-bg, #fff);
   border-radius: 16px;
   border: none;
   display: flex;
@@ -138,7 +128,26 @@ function closeGuideModal() {
   justify-content: center;
   font-size: 16px;
   cursor: pointer;
-  transition: box-shadow 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.grid-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(107, 70, 193, 0.05) 0%,
+    rgba(107, 70, 193, 0.02) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .grid-icon {
@@ -146,13 +155,44 @@ function closeGuideModal() {
   height: auto;
   margin-bottom: 10px;
   object-fit: contain;
+  transition: transform 0.2s ease;
+  position: relative;
+  z-index: 1;
 }
 
-.grid-btn span {
-  font-size: var(--font-size-body-large);
-  font-weight: var(--font-weight-medium);
+.btn-text {
+  font-size: var(--font-size-body-large, 16px);
+  font-weight: var(--font-weight-medium, 500);
   margin-top: 2px;
-  color: var(--color-main);
+  color: var(--color-main, #6b46c1);
+  position: relative;
+  z-index: 1;
+}
+
+/* 호버 효과 */
+.grid-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.grid-btn:hover::before {
+  opacity: 1;
+}
+
+.grid-btn:hover .grid-icon {
+  transform: scale(1.05);
+}
+
+/* 포커스 상태 (접근성) */
+.grid-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.3);
+}
+
+/* 활성 상태 */
+.grid-btn:active {
+  transform: translateY(0);
+  transition: transform 0.1s ease;
 }
 
 .guide-text {
@@ -160,25 +200,82 @@ function closeGuideModal() {
   font-size: 14px;
   color: #888;
   margin-top: 16px;
-  font-family: var(--font-main);
+  font-family: var(--font-main, sans-serif);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: all 0.2s ease;
+  padding: 8px 12px;
+  border-radius: 8px;
 }
 
 .guide-text:hover {
-  color: var(--color-main);
+  color: var(--color-main, #6b46c1);
+  background: rgba(107, 70, 193, 0.05);
+}
+
+.guide-text:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(107, 70, 193, 0.3);
 }
 
 .guide-text i {
   font-size: 14px;
-  color: #888;
+  color: inherit;
 }
 
 .guide-text-underline {
   text-decoration: underline;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+  .finance-container {
+    padding: 16px;
+  }
+
+  .button-grid {
+    width: 280px;
+    height: 280px;
+    gap: 20px;
+  }
+
+  .grid-icon {
+    width: 70px;
+  }
+
+  .btn-text {
+    font-size: 15px;
+  }
+}
+
+/* 접근성 개선 */
+@media (prefers-reduced-motion: reduce) {
+  .grid-btn,
+  .grid-icon,
+  .guide-text {
+    transition: none;
+  }
+
+  .grid-btn:hover {
+    transform: none;
+  }
+
+  .grid-btn:hover .grid-icon {
+    transform: none;
+  }
+}
+
+/* 고대비 모드 지원 */
+@media (prefers-contrast: high) {
+  .grid-btn {
+    border: 2px solid #333;
+  }
+
+  .guide-text {
+    border: 1px solid #333;
+  }
 }
 </style>
