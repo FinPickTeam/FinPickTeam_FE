@@ -170,7 +170,9 @@
     </div>
 
     <!-- 오른쪽 하단 비교 버튼 -->
-    <div class="compare-button" @click="openCompare">추천좀</div>
+    <div class="compare-button" @click="openCompare">
+      <img :src="CompareImg" alt="" />
+    </div>
     <!-- 바텀시트 -->
     <StockBottomSheet v-model:open="bottomSheetOpen" @confirm="goCompare" />
   </div>
@@ -184,6 +186,7 @@ import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { getStockList, getStockRecommendedList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
 import StockBottomSheet from '@/components/finance/stock/StockBottomSheet.vue';
+import CompareImg from '@/assets/icons/stock-compare-btn.png';
 
 const router = useRouter();
 const showProducts = ref(false);
@@ -603,7 +606,6 @@ const filteredAllProducts = computed(() => {
 .recommend-container {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
 }
 .recommend-content {
   display: flex;
@@ -666,5 +668,10 @@ const filteredAllProducts = computed(() => {
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+}
+.compare-button img {
+  width: 52px;
+  height: 52px;
+  filter: brightness(0) invert(1);
 }
 </style>

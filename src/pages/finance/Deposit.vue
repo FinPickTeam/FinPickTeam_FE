@@ -84,14 +84,15 @@
           type="text"
           placeholder="상품명을 검색해보세요"
         />
-        <button class="filter-btn" @click="showFilter = !showFilter">
+        <!-- ⬇️ 토글 대신 openFilter 사용 -->
+        <button class="filter-btn" @click="openFilter">
           <i class="fa-solid fa-filter"></i>
         </button>
       </div>
 
-      <!-- 태그 필터 -->
+      <!-- 태그 필터 (임시 선택 → 확인 시 반영) -->
       <div v-if="showFilter" class="filter-dropdown">
-        <!-- 대상 섹션 -->
+        <!-- 은행 -->
         <div class="filter-section">
           <h4 class="filter-section-title">은행</h4>
           <div class="tag-container">
@@ -99,15 +100,15 @@
               v-for="tag in targetTags"
               :key="tag.value"
               class="filter-tag"
-              :class="{ active: selectedTargets.includes(tag.value) }"
-              @click="toggleTargetTag(tag.value)"
+              :class="{ active: pendingTargets.includes(tag.value) }"
+              @click="togglePendingTag('bank', tag.value)"
             >
               {{ tag.label }}
             </button>
           </div>
         </div>
 
-        <!-- 관심/특징 섹션 -->
+        <!-- 금리 구간 (기본금리 기준) -->
         <div class="filter-section">
           <h4 class="filter-section-title">금리 구간</h4>
           <div class="tag-container">
@@ -115,21 +116,24 @@
               v-for="tag in interestTags"
               :key="tag.value"
               class="filter-tag"
-              :class="{ active: selectedInterests.includes(tag.value) }"
-              @click="toggleInterestTag(tag.value)"
+              :class="{ active: pendingInterests.includes(tag.value) }"
+              @click="togglePendingTag('interest', tag.value)"
             >
               {{ tag.label }}
             </button>
           </div>
         </div>
 
-        <!-- 선택 완료 버튼 -->
-        <div class="filter-complete-section">
-          <button class="complete-btn" @click="closeFilter">선택 완료</button>
+        <!-- 버튼 -->
+        <div class="filter-action-row">
+          <!-- 임시선택만 초기화 -->
+          <button class="reset-btn" @click="resetPending">초기화</button>
+          <!-- 임시선택 → 실제적용 -->
+          <button class="complete-btn" @click="applyFilter">선택 완료</button>
         </div>
       </div>
 
-      <!-- 로딩 상태 -->
+      <!-- 로딩 -->
       <div v-if="isLoadingAll">
         <LoadingSpinner message="상품 목록을 불러오는 중..." />
       </div>
@@ -171,11 +175,17 @@ const formData = ref({
 });
 const fav = useFavoriteStore();
 
-// 태그 필터 관련 상태
+// 검색/필터 UI 상태
 const searchKeyword = ref('');
 const showFilter = ref(false);
-const selectedTargets = ref([]);
-const selectedInterests = ref([]);
+
+// ✅ 실제 적용되는 값
+const selectedTargets = ref([]); // 은행
+const selectedInterests = ref([]); // 금리 구간
+
+// ✅ 드롭다운에서 임시 선택되는 값
+const pendingTargets = ref([]);
+const pendingInterests = ref([]);
 
 const MAX_PREFER_CHARS = 24;
 
@@ -189,7 +199,7 @@ const amountText = computed(() =>
 // 태그 데이터
 const targetTags = ref([
   { value: 'KB국민은행', label: 'KB국민은행' },
-  { value: 'NH농협은행', label: 'NH농협은행' },
+  { value: '농협은행', label: 'NH농협은행' },
   { value: 'IBK기업은행', label: 'IBK기업은행' },
   { value: 'KDB산업은행', label: 'KDB산업은행' },
   { value: 'SC제일은행', label: 'SC제일은행' },
@@ -222,7 +232,7 @@ onMounted(async () => {
   fav.syncIdSet('DEPOSIT');
 });
 
-const fetchDepositList = async (params) => {
+const fetchDepositList = async () => {
   isLoadingAll.value = true;
   try {
     const res = await getDepositList();
@@ -237,17 +247,15 @@ const fetchDepositList = async (params) => {
 function goTo(path) {
   router.push(path);
 }
-
 function changeSubtab(tabName) {
   activeSubtab.value = tabName;
 }
 
+// 추천
 function showSearchResults(receivedFormData) {
   showResults.value = true;
   formData.value = receivedFormData;
-  console.log('데이터: ', receivedFormData);
 
-  // 요약 텍스트 생성
   const preferText =
     receivedFormData.selectedPrefer.length > 0
       ? receivedFormData.selectedPrefer.length === 1
@@ -267,11 +275,9 @@ function showSearchResults(receivedFormData) {
   } | 월 ${receivedFormData.amount.toLocaleString()}원${
     preferText ? ' | ' + preferText : ''
   }`;
-
   fetchDepositRecommendation(receivedFormData);
 }
 
-// 예금 추천 리스트 받기
 const fetchDepositRecommendation = async (receivedFormData) => {
   try {
     const params = {
@@ -297,14 +303,56 @@ const fetchDepositRecommendation = async (receivedFormData) => {
   }
 };
 
-// 전체보기 필터링된 데이터
+const toNum = (v) => {
+  if (v == null) return NaN;
+  const n = Number(String(v).replace(/[^\d.+-]/g, ''));
+  return Number.isFinite(n) ? n : NaN;
+};
+
+const INTEREST_RANGE = {
+  '1% 미만': { min: -Infinity, max: 1 },
+  '1~2%': { min: 1, max: 2 },
+  '2~3%': { min: 2, max: 3 },
+  '3~4%': { min: 3, max: 4 },
+  '4~5%': { min: 4, max: 5 },
+  '5% 이상': { min: 5, max: Infinity },
+};
+
+// 기본금리 필터 매칭 (depositBasicRate 기준)
+function matchInterestRanges(product) {
+  if (!selectedInterests.value.length) return true;
+
+  const rate = toNum(product.depositBasicRate);
+  if (!Number.isFinite(rate)) return false;
+
+  return selectedInterests.value.some((label) => {
+    const r = INTEREST_RANGE[label];
+    return r ? rate >= r.min && rate < r.max : false;
+  });
+}
+
+// 전체보기 목록 필터
 const filteredAllDeposit = computed(() => {
-  const list = Array.isArray(allProducts.value) ? allProducts.value : [];
+  let out = Array.isArray(allProducts.value) ? allProducts.value : [];
+
+  // 검색어
   const q = (searchKeyword.value ?? '').toLowerCase().replace(/\s+/g, '');
-  if (!q) return list;
-  return list.filter((d) =>
-    (d.depositProductName ?? '').toLowerCase().replace(/\s+/g, '').includes(q)
-  );
+  if (q) {
+    out = out.filter((d) =>
+      (d.depositProductName ?? '').toLowerCase().replace(/\s+/g, '').includes(q)
+    );
+  }
+
+  // 은행 (적용된 값만)
+  if (selectedTargets.value.length) {
+    const set = new Set(selectedTargets.value);
+    out = out.filter((p) => set.has(p.depositBankName));
+  }
+
+  // 금리 구간 (적용된 값만)
+  out = out.filter((p) => matchInterestRanges(p));
+
+  return out;
 });
 
 function toMonths(periodLabel) {
@@ -322,79 +370,60 @@ function hideSearchResults() {
 
 function toggleSummaryMode() {
   isSummaryMode.value = !isSummaryMode.value;
-  if (!isSummaryMode.value) {
-    hideSearchResults();
-  }
+  if (!isSummaryMode.value) hideSearchResults();
 }
 
-// 태그 토글 함수들
-function toggleTargetTag(tagValue) {
-  const index = selectedTargets.value.indexOf(tagValue);
-  if (index > -1) {
-    selectedTargets.value.splice(index, 1);
-  } else {
-    selectedTargets.value.push(tagValue);
-  }
+/* ===== 필터 드롭다운: 임시선택 → 확인 시 반영 ===== */
+
+// 열기: 현재 적용값을 임시값으로 복사
+function openFilter() {
+  pendingTargets.value = [...selectedTargets.value];
+  pendingInterests.value = [...selectedInterests.value];
+  showFilter.value = true;
 }
 
-function toggleInterestTag(tagValue) {
-  const index = selectedInterests.value.indexOf(tagValue);
-  if (index > -1) {
-    selectedInterests.value.splice(index, 1);
-  } else {
-    selectedInterests.value.push(tagValue);
-  }
+// 임시 토글
+function togglePendingTag(kind, tagValue) {
+  const arr = kind === 'bank' ? pendingTargets.value : pendingInterests.value;
+  const idx = arr.indexOf(tagValue);
+  if (idx > -1) arr.splice(idx, 1);
+  else arr.push(tagValue);
 }
 
-function closeFilter() {
-  const params = {
-    bankName: selectedTargets.value,
-  };
-  console.log(params);
-  fetchDepositList(params);
+// 임시선택 초기화
+function resetPending() {
+  pendingTargets.value = [];
+  pendingInterests.value = [];
+}
+
+// 적용(확인): 임시값 → 실제값 복사
+function applyFilter() {
+  selectedTargets.value = [...pendingTargets.value];
+  selectedInterests.value = [...pendingInterests.value];
   showFilter.value = false;
 }
-
-const preferSummary = computed(() => {
-  const arr = formData.value.selectedPrefer || [];
-  if (!arr.length) return '';
-
-  const joined = arr.join(', ');
-  if (joined.length <= MAX_PREFER_CHARS) return joined;
-
-  const kept = [];
-  let used = 0;
-  for (const item of arr) {
-    const add = (kept.length ? 2 : 0) + item.length;
-    if (used + add > MAX_PREFER_CHARS) break;
-    kept.push(item);
-    used += add;
-  }
-  const hidden = arr.length - kept.length;
-  return kept.join(', ') + (hidden > 0 ? ` 외 ${hidden}건` : '');
-});
 </script>
 
 <style scoped>
+/* (기존 스타일 그대로) */
 .deposit-container {
   max-width: 390px;
   margin: 0 auto;
   padding: 0px 16px;
   font-family: var(--font-main);
-  height: calc(100vh - 56px); /* 예: 전체 화면 높이 - 헤더/탭 높이 */
+  height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
 }
 .scroll-area {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 100px; /* 네비게이션바 가리는 문제 방지 */
-  /* 스크롤바 숨기기 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE, Edge */
+  padding-bottom: 100px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .scroll-area::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
 
 .tab-row {
@@ -405,13 +434,11 @@ const preferSummary = computed(() => {
   margin-bottom: 8px;
   align-items: baseline;
 }
-
 .tab {
   color: var(--color-text-light);
   cursor: pointer;
   padding-bottom: 4px;
 }
-
 .tab.active {
   color: var(--color-main);
   font-weight: var(--font-weight-bold);
@@ -423,7 +450,6 @@ const preferSummary = computed(() => {
   width: 100%;
   margin-bottom: 10px;
 }
-
 .subtab {
   flex: 1 1 0;
   text-align: center;
@@ -433,7 +459,6 @@ const preferSummary = computed(() => {
   border-bottom: 2px solid transparent;
   font-size: 15px;
 }
-
 .subtab.active {
   color: var(--color-main-light);
   border-bottom: 2px solid var(--color-main-light);
@@ -443,28 +468,24 @@ const preferSummary = computed(() => {
   font-size: 20px;
   vertical-align: middle;
 }
-
 .summary-text-box {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .summary-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
   width: 100%;
 }
-
 .summary-info {
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 1;
-  min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+  min-width: 0;
 }
-
 .summary-text-container {
   display: flex;
   align-items: center;
@@ -474,15 +495,12 @@ const preferSummary = computed(() => {
   flex: 1;
   min-width: 0;
   padding-right: 8px;
-  /* 스크롤바 숨기기 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-
 .summary-text-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
-
 .summary-item-box {
   display: flex;
   flex-direction: column;
@@ -494,15 +512,6 @@ const preferSummary = computed(() => {
   min-width: 30px;
   flex-shrink: 0;
 }
-
-.summary-item-label {
-  font-size: 11px;
-  color: #6c757d;
-  font-weight: 500;
-  margin-bottom: 2px;
-  text-align: center;
-}
-
 .summary-item-value {
   font-size: 12px;
   color: #333;
@@ -510,21 +519,6 @@ const preferSummary = computed(() => {
   text-align: center;
   line-height: 1.2;
 }
-
-.summary-label {
-  font-weight: var(--font-weight-medium);
-  color: #555;
-  font-size: 14px;
-  flex-shrink: 0;
-}
-
-.summary-text {
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
 .edit-btn {
   background-color: var(--color-main);
   color: white;
@@ -539,7 +533,6 @@ const preferSummary = computed(() => {
   height: 32px;
   flex-shrink: 0;
 }
-
 .edit-btn:hover {
   background-color: var(--color-main-dark);
 }
@@ -549,14 +542,12 @@ const preferSummary = computed(() => {
   justify-content: center;
 }
 
-/* 전체보기 탭 */
 .search-filter-row {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
 }
-
 .search-bar {
   flex: 1;
   padding: 8px 12px;
@@ -565,7 +556,6 @@ const preferSummary = computed(() => {
   font-size: 15px;
   background: var(--color-bg);
 }
-
 .filter-btn {
   background: var(--color-bg-light);
   border: none;
@@ -590,28 +580,6 @@ const preferSummary = computed(() => {
   position: absolute;
 }
 
-.filter-group {
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-group label {
-  min-width: 48px;
-  font-size: 14px;
-  color: #555;
-}
-
-.filter-group select,
-.rate-input {
-  flex: 1;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  font-size: 14px;
-}
-
 .no-results {
   margin-top: 40px;
   text-align: center;
@@ -628,7 +596,6 @@ const preferSummary = computed(() => {
 .filter-section {
   margin-bottom: 20px;
 }
-
 .filter-section-title {
   font-size: 14px;
   font-weight: 600;
@@ -636,13 +603,11 @@ const preferSummary = computed(() => {
   margin-bottom: 12px;
   margin-top: 0;
 }
-
 .tag-container {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-
 .filter-tag {
   display: flex;
   align-items: center;
@@ -657,40 +622,48 @@ const preferSummary = computed(() => {
   transition: border 0.2s, color 0.2s, background 0.2s;
   white-space: nowrap;
 }
-
 .filter-tag:hover {
   border-color: var(--color-main);
   color: var(--color-main);
 }
-
 .filter-tag.active {
   border: 1.5px solid var(--color-main);
   color: var(--color-main);
   background: #f3f0fa;
 }
 
-.filter-complete-section {
-  margin-top: 20px;
-  padding-top: 16px;
-  text-align: center;
-}
 .recommend-card-list {
   margin-top: 16px;
 }
+.filter-action-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 12px;
+}
+.reset-btn,
 .complete-btn {
-  background: var(--color-main);
-  color: white;
-  border: none;
+  flex: 1;
+  padding: 10px 0;
   border-radius: 8px;
-  padding: 10px 24px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  border: none;
   transition: background-color 0.2s ease;
-  width: 100%;
 }
-
-.complete-btn:hover {
+.reset-btn {
+  background: #f1f3f5;
+  color: #333;
+}
+.reset-btn:hover {
+  background: #e9ecef;
+}
+.complete-btn {
   background: var(--color-main-dark);
+  color: white;
+}
+.complete-btn:hover {
+  background: #3b5bdb;
 }
 </style>
