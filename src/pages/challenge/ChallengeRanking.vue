@@ -4,16 +4,16 @@
     <div class="ranking-header">
       <div class="ranking-tabs">
         <button
-            class="tab-btn"
-            :class="{ active: activeTab === 'common' }"
-            @click="switchTab('common')"
+          class="tab-btn"
+          :class="{ active: activeTab === 'common' }"
+          @click="switchTab('common')"
         >
           공통 랭킹
         </button>
         <button
-            class="tab-btn"
-            :class="{ active: activeTab === 'coin' }"
-            @click="switchTab('coin')"
+          class="tab-btn"
+          :class="{ active: activeTab === 'coin' }"
+          @click="switchTab('coin')"
         >
           개인 랭킹
         </button>
@@ -41,7 +41,8 @@
       <div v-if="!commonChallenge" class="ranking-card">
         <div class="ranking-info" style="margin-top: 12px">
           <div class="user-name">
-            <strong class="nickname nickname-lg">{{ nickname }}</strong>님,
+            <strong class="nickname nickname-lg">{{ nickname }}</strong
+            >님,
           </div>
           <div class="total-participants">
             이번 달 공통 챌린지가 진행 중이 아니에요.
@@ -54,9 +55,9 @@
         <div class="target-section">
           <div class="target-icon">
             <img
-                src="@/assets/challenge/empty-state.png"
-                alt="빈 상태"
-                class="target-image"
+              src="@/assets/challenge/empty-state.png"
+              alt="빈 상태"
+              class="target-image"
             />
           </div>
         </div>
@@ -64,7 +65,8 @@
         <div class="ranking-info">
           <!-- 닉네임 라인 -->
           <div class="user-name">
-            <strong class="nickname nickname-lg">{{ nickname }}</strong>님
+            <strong class="nickname nickname-lg">{{ nickname }}</strong
+            >님
           </div>
           <!-- 아래 문구 분리 + 여백 -->
           <div class="np-subtext">
@@ -74,91 +76,113 @@
 
         <!-- 하단 고정 느낌의 알림 영역 -->
         <div class="notify-block">
-          <button class="notify-cta" @click="handleNotifyToggle" aria-live="polite">
+          <button
+            class="notify-cta"
+            @click="handleNotifyToggle"
+            aria-live="polite"
+          >
             <span class="notify-cta-icon">🔔</span>
             <span class="notify-cta-text">알림</span>
           </button>
 
-          <p class="notify-desc">
-            다음달 챌린지 시작 알림을 받으시겠어요?
-          </p>
+          <p class="notify-desc">다음달 챌린지 시작 알림을 받으시겠어요?</p>
         </div>
 
         <!-- 글래스 토스트 -->
         <transition name="toast-fade">
           <div
-              v-if="showToast"
-              class="notify-toast"
-              :class="toastType === 'applied' ? 'toast-on' : 'toast-off'"
-              role="status"
-              aria-live="assertive"
+            v-if="showToast"
+            class="notify-toast"
+            :class="toastType === 'applied' ? 'toast-on' : 'toast-off'"
+            role="status"
+            aria-live="assertive"
           >
             <span class="toast-icon" v-if="toastType === 'applied'">✅</span>
             <span class="toast-icon" v-else>🚫</span>
             <span class="toast-text">
-              {{ toastType === 'applied' ? '알림이 신청되었습니다!' : '챌린지 알림 신청이 취소되었습니다!' }}
+              {{
+                toastType === 'applied'
+                  ? '알림이 신청되었습니다!'
+                  : '챌린지 알림 신청이 취소되었습니다!'
+              }}
             </span>
           </div>
         </transition>
       </div>
 
       <!-- 공통 챌린지 있음 + 참여 중 -->
-      <div v-else class="ranking-card">
-        <div class="target-section">
-          <div class="target-icon">
-            <img
-                src="@/assets/challenge/target-dynamic-color.png"
-                alt="타겟"
-                class="target-image"
-            />
+      <div v-else class="common-participating-card">
+        <!-- 헤더 섹션 -->
+        <div class="common-header">
+          <div class="common-status">
+            <div class="status-indicator active"></div>
+            <h2 class="common-title">{{ commonChallenge.title }}</h2>
           </div>
         </div>
 
-        <div class="ranking-info">
-          <div class="user-name user-headline">
-            <strong class="nickname nickname-lg">{{ nickname }}</strong>님은 현재
-            <span class="highlight-rank rank-lg">{{ myCommonRow?.rank }}등</span>
-          </div>
-          <!-- 총 인원수는 한 줄 아래로 분리 -->
-          <div class="participants-secondary muted">
-            총 {{ totalParticipants.toLocaleString() }}명 기준
+        <!-- 내 랭킹 섹션 -->
+        <div class="my-rank-section">
+          <div class="rank-display">
+            <div class="rank-circle">
+              <span class="rank-label">{{ myCommonRow?.rank }}등</span>
+            </div>
+            <div class="rank-info">
+              <h3 class="user-name">{{ nickname }}님</h3>
+              <p class="total-participants">
+                총 {{ totalParticipants.toLocaleString() }}명 중
+              </p>
+            </div>
           </div>
         </div>
 
+        <!-- 진행률 섹션 -->
         <div class="progress-section">
-          <div class="progress-header">현재 소비액</div>
-          <div class="progress-bar">
-            <div
+          <div class="progress-header">
+            <span class="progress-title">현재 소비액</span>
+            <span class="progress-percentage"
+              >{{ commonProgressPercent }}%</span
+            >
+          </div>
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div
                 class="progress-fill"
                 :style="{ width: commonProgressPercent + '%' }"
-            ></div>
-          </div>
-          <div class="progress-labels">
-            <span>0</span>
-            <span>
-              {{ formatCurrency(myCommonRow?.actualValue) }} /
-              {{ formatCurrency(commonChallenge.goalValue) }}
-            </span>
-            <span>{{ formatCurrency(commonChallenge.goalValue) }}</span>
+              ></div>
+            </div>
+            <div class="progress-details">
+              <span class="current-amount">{{
+                formatCurrency(myCommonRow?.actualValue)
+              }}</span>
+              <span class="separator">/</span>
+              <span class="goal-amount">{{
+                formatCurrency(commonChallenge.goalValue)
+              }}</span>
+            </div>
           </div>
         </div>
 
-        <div class="list-caption">현재 시간 기준 등수</div>
+        <!-- 랭킹 섹션 -->
+        <div class="ranking-section">
+          <div class="section-header">
+            <h3 class="section-title">실시간 랭킹</h3>
+            <span class="section-subtitle">현재 시간 기준</span>
+          </div>
 
-        <div class="rank-list">
-          <ul>
-            <li
-                v-for="(it, idx) in commonRankListSorted"
-                :key="idx"
-                :class="{ me: isMe(it) }"
+          <div class="ranking-list">
+            <div
+              v-for="(it, idx) in commonRankListSorted"
+              :key="idx"
+              class="ranking-item"
+              :class="{ 'my-rank': isMe(it) }"
             >
-              <div class="row-left row-content">
-                <span class="pos">{{ it.rank }}</span>
-                <span class="name">{{ it.nickname }}</span>
-              </div>
-              <span class="value row-content">{{ formatCurrency(it.actualValue) }}</span>
-            </li>
-          </ul>
+              <span class="position-number">{{ it.rank }}</span>
+              <span class="user-nickname">{{ it.nickname }}</span>
+              <span class="user-amount">{{
+                formatCurrency(it.actualValue)
+              }}</span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -167,37 +191,41 @@
     <div v-else-if="activeTab === 'coin'" class="coin-ranking">
       <div class="ranking-cards">
         <div
-            v-for="(u, i) in coinTop5"
-            :key="i"
-            class="ranking-card-item"
-            :class="{ 'top-rank': i < 3 }"
+          v-for="(u, i) in coinTop5"
+          :key="i"
+          class="ranking-card-item"
+          :class="{ 'top-rank': i < 3 }"
         >
           <div class="rank-medal">
             <img
-                v-if="i === 0"
-                src="@/assets/challenge/금메달.png"
-                alt="금메달"
-                class="medal-icon"
+              v-if="i === 0"
+              src="@/assets/challenge/금메달.png"
+              alt="금메달"
+              class="medal-icon"
             />
             <img
-                v-else-if="i === 1"
-                src="@/assets/challenge/은메달.png"
-                alt="은메달"
-                class="medal-icon"
+              v-else-if="i === 1"
+              src="@/assets/challenge/은메달.png"
+              alt="은메달"
+              class="medal-icon"
             />
             <img
-                v-else-if="i === 2"
-                src="@/assets/challenge/동메달.png"
-                alt="동메달"
-                class="medal-icon"
+              v-else-if="i === 2"
+              src="@/assets/challenge/동메달.png"
+              alt="동메달"
+              class="medal-icon"
             />
             <div v-else class="rank-number">{{ u.rank }}</div>
           </div>
           <div class="user-info">
             <div class="user-name">{{ u.nickname }}</div>
             <div class="user-details">
-              <span class="participants">{{ totalParticipants.toLocaleString() }}개 참여</span>
-              <span class="progress-rate">성공률 {{ u.displaySuccessRate }}</span>
+              <span class="participants"
+                >총 {{ totalParticipants.toLocaleString() }}개 참여</span
+              >
+              <span class="progress-rate"
+                >성공률 {{ u.displaySuccessRate }}</span
+              >
             </div>
           </div>
           <div class="user-score">
@@ -218,7 +246,7 @@
           <div class="my-rank-info">
             <div class="my-rank-number">{{ myCoinRow.rank }}</div>
             <div class="my-rank-details">
-              <div class="my-rank-title">내가 참여한 챌린지</div>
+              <div class="my-rank-title">{{ nickname }}</div>
               <div class="my-rank-subtitle">
                 총 {{ myCoinRow.challengeCount ?? 0 }}개 챌린지 참여 중
               </div>
@@ -258,7 +286,9 @@ import {
 const auth = useAuthStore();
 
 // 안전한 사용자 프로필
-const nickname = computed(() => auth?.user?.nickname || auth?.user?.nickName || '나');
+const nickname = computed(
+  () => auth?.user?.nickname || auth?.user?.nickName || '나'
+);
 const userId = computed(() => auth?.user?.id || null);
 
 // 탭/상태
@@ -281,7 +311,9 @@ const toastType = ref(null);
 
 // 정렬
 const commonRankListSorted = computed(() =>
-    [...commonRankList.value].sort((a, b) => (a.rank || 99999) - (b.rank || 99999))
+  [...commonRankList.value].sort(
+    (a, b) => (a.rank || 99999) - (b.rank || 99999)
+  )
 );
 
 // 게이지 %
@@ -304,7 +336,10 @@ const isMe = (row) => {
 // 현재 공통 챌린지
 const findCurrentCommonChallenge = async () => {
   try {
-    const list = await getChallengeList({ type: 'COMMON', status: 'IN_PROGRESS' });
+    const list = await getChallengeList({
+      type: 'COMMON',
+      status: 'IN_PROGRESS',
+    });
     if (!Array.isArray(list) || list.length === 0) return null;
 
     const c = list[0];
@@ -334,7 +369,9 @@ const loadCommonRank = async () => {
   try {
     const rows = await getCommonChallengeRank(commonChallenge.value.id);
     commonRankList.value = Array.isArray(rows) ? rows : [];
-    totalParticipants.value = Number(commonChallenge.value.participantCount ?? 0);
+    totalParticipants.value = Number(
+      commonChallenge.value.participantCount ?? 0
+    );
 
     myCommonRow.value = commonRankList.value.find((r) => isMe(r)) || null;
     participating.value = !!myCommonRow.value;
@@ -348,7 +385,9 @@ const loadCommonRank = async () => {
 
 const refreshCommon = async () => {
   if (!commonChallenge.value?.id) return;
-  try { await refreshCommonChallengeRank(commonChallenge.value.id); } catch {}
+  try {
+    await refreshCommonChallengeRank(commonChallenge.value.id);
+  } catch {}
   await loadCommonRank();
 };
 
@@ -356,9 +395,9 @@ const refreshCommon = async () => {
 const coinRows = ref([]);
 
 const coinTop5 = computed(() =>
-    [...coinRows.value]
-        .filter((r) => Number.isInteger(Number(r.rank)) && Number(r.rank) <= 5)
-        .sort((a, b) => Number(a.rank) - Number(b.rank))
+  [...coinRows.value]
+    .filter((r) => Number.isInteger(Number(r.rank)) && Number(r.rank) <= 5)
+    .sort((a, b) => Number(a.rank) - Number(b.rank))
 );
 
 const myCoinRow = computed(() => {
@@ -390,7 +429,9 @@ const loadCoinRank = async () => {
   try {
     const rows = await getCoinRankTop5WithMe(uid);
     coinRows.value = (rows || []).map((r) => {
-      const pct = toIntPercent(r.successRate ?? toIntPercentSafe(r.successCount, r.totalChallenges));
+      const pct = toIntPercent(
+        r.successRate ?? toIntPercentSafe(r.successCount, r.totalChallenges)
+      );
       return {
         userId: r.userId ?? null,
         nickname: r.nickname ?? '-',
@@ -433,7 +474,9 @@ const refreshData = async () => {
     if (activeTab.value === 'common') {
       await refreshCommon();
     } else {
-      try { await runCoinRankCalculationNow(); } catch {}
+      try {
+        await runCoinRankCalculationNow();
+      } catch {}
       await loadCoinRank();
     }
     lastUpdated.value = new Date();
@@ -449,12 +492,18 @@ const handleNotifyToggle = () => {
   localStorage.setItem('common-rank-notify', next ? '1' : '0');
   toastType.value = next ? 'applied' : 'canceled';
   showToast.value = true;
-  setTimeout(() => { showToast.value = false; }, 1800);
+  setTimeout(() => {
+    showToast.value = false;
+  }, 1800);
 };
 
 // 유틸
 const formatLastUpdated = (date) =>
-    date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  date.toLocaleTimeString('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
 const formatCurrency = (n) => (Number(n) || 0).toLocaleString();
 
 // 마운트
@@ -508,7 +557,11 @@ onMounted(async () => {
   transition: all 0.2s;
 }
 .tab-btn.active {
-  background: linear-gradient(135deg, var(--color-main) 0%, var(--color-main-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
   color: #fff;
 }
 .refresh-section {
@@ -521,7 +574,11 @@ onMounted(async () => {
   width: 30px;
   height: 30px;
   border: none;
-  background: linear-gradient(135deg, var(--color-main) 0%, var(--color-main-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
   border-radius: 50%;
   color: white;
   cursor: pointer;
@@ -535,184 +592,896 @@ onMounted(async () => {
   transform: scale(1.05);
   box-shadow: 0 4px 12px rgba(107, 70, 193, 0.4);
 }
-.refresh-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-.last-updated { font-size: 10px; color: #666; text-align: center; white-space: nowrap; }
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.last-updated {
+  font-size: 10px;
+  color: #666;
+  text-align: center;
+  white-space: nowrap;
+}
 
 /* 로딩 */
 .loading-container {
-  display: flex; flex-direction: column; justify-content: center; align-items: center;
-  min-height: 300px; padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  padding: 40px 20px;
 }
 .loading-spinner {
-  width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--color-main);
-  border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid var(--color-main);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
 }
-@keyframes spin { 0% { transform: rotate(0); } 100% { transform: rotate(360deg); } }
-.loading-text { font-size: 16px; color: #666; }
+@keyframes spin {
+  0% {
+    transform: rotate(0);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.loading-text {
+  font-size: 16px;
+  color: #666;
+}
 
-/* 공통 레이아웃 */
-.common-ranking { display: flex; justify-content: center; align-items: flex-start; min-height: 60vh; }
+/* 공통 랭킹 전용 스타일 */
+.common-ranking {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 기존 카드 스타일 (미참여, 빈 상태용) */
 .ranking-card {
   background: var(--color-bg);
   border-radius: 16px;
   padding: 0 24px 32px 24px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-width: 360px; width: 100%;
+  max-width: 360px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* 공통 참여 중 카드 */
+.common-participating-card {
+  background: var(--color-bg);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
+  width: 100%;
+  margin: 0 auto;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* 공통 헤더 */
+.common-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.common-status {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #4caf50;
+}
+
+.status-indicator.active {
+  background-color: #ff9800;
+  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.2);
+}
+
+.common-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+/* 내 랭킹 섹션 */
+.my-rank-section {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border-radius: 16px;
+  border: 1px solid #e8f0ff;
+}
+
+.rank-display {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.rank-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+  animation: rankPulse 3s ease-in-out infinite;
+  transition: all 0.3s ease;
+}
+
+.rank-circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+  animation: rankShake 0.6s ease-in-out;
+}
+
+.rank-circle::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
+  border-radius: 50%;
+}
+
+.rank-number {
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  position: relative;
+  z-index: 1;
+}
+
+.rank-label {
+  font-size: 32px;
+  font-weight: 900;
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  position: relative;
+  z-index: 1;
+}
+
+.rank-info {
+  flex: 1;
+  text-align: left;
+}
+
+.rank-info .user-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.rank-info .total-participants {
+  font-size: 14px;
+  color: #666;
+}
+
+/* 진행률 섹션 */
+.progress-section {
+  margin-bottom: 32px;
+  padding: 20px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #eee;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.progress-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.progress-percentage {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-main);
+}
+
+.progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #e0e0e0;
+  border-radius: 6px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    var(--color-main),
+    var(--color-main-light)
+  );
+  border-radius: 6px;
+  transition: width 0.5s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-details {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.current-amount {
+  font-weight: 700;
+  color: var(--color-main);
+}
+
+.separator {
+  color: #999;
+}
+
+.goal-amount {
+  color: #666;
+}
+
+/* 랭킹 섹션 */
+.ranking-section {
+  flex: 1;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  /* margin-bottom: 16px; */
+  padding-bottom: 12px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.section-subtitle {
+  font-size: 12px;
+  color: #999;
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 10px;
+  border-bottom: 1px solid #f5f5f5;
+  transition: all 0.2s ease;
+  gap: 10px;
+}
+
+.ranking-item:last-child {
+  border-bottom: none;
+}
+
+.ranking-item:hover {
+  background-color: #fafafa;
+}
+
+.ranking-item.my-rank {
+  background: linear-gradient(135deg, #fff8e1 0%, #fff3e0 100%);
+}
+
+.ranking-item.my-rank:hover {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+}
+
+.position-number {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-main);
+  line-height: 1;
+  min-width: 40px;
+  text-align: center;
+}
+
+.ranking-item.my-rank .position-number {
+  color: #f57c00;
+}
+
+.user-nickname {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+.user-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-main);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 100px;
+}
+
+.ranking-item.my-rank .user-amount {
+  color: #f57c00;
+}
+
+.rank-indicator {
+  width: 24px;
+  text-align: center;
+}
+
+.rank-indicator i {
+  color: #ff9800;
+  font-size: 16px;
+  animation: starPulse 2s ease-in-out infinite;
+}
+
+@keyframes starPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* 랭킹 원형 애니메이션 */
+@keyframes rankPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+  }
+}
+
+@keyframes rankShake {
+  0%,
+  100% {
+    transform: scale(1.05) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.05) rotate(-2deg);
+  }
+  75% {
+    transform: scale(1.05) rotate(2deg);
+  }
+}
+
+/* 내부 반짝임 효과 */
+.rank-circle::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.1) 50%,
+    transparent 70%
+  );
+  animation: shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) translateY(-100%) rotate(0deg);
+  }
+  100% {
+    transform: translateX(100%) translateY(100%) rotate(360deg);
+  }
 }
 
 /* 미참여 카드: 버튼이 하단 가깝게 */
-.ranking-card.not-participating { display: flex; flex-direction: column; min-height: 540px; }
+.ranking-card.not-participating {
+  display: flex;
+  flex-direction: column;
+  min-height: 540px;
+}
 
-.target-section { margin-bottom: 24px; }
-.target-icon { display: flex; justify-content: center; margin-bottom: 16px; }
-.ranking-info { margin-bottom: 12px; }
+.target-section {
+  margin-bottom: 24px;
+}
+.target-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.ranking-info {
+  margin-bottom: 12px;
+}
 
-.user-name, .total-participants { font-size: 16px; color: #333; margin-bottom: 6px; }
+.user-name,
+.total-participants {
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 6px;
+}
 
 /* 미참여 - 간격 */
-.np-subtext { margin-top: 12px; color: #444; }
+.np-subtext {
+  margin-top: 12px;
+  color: #444;
+}
 
 /* 닉네임/등수 크게 */
-.nickname { font-weight: 800; font-size: 18px; color: #222; }
-.nickname-lg { font-size: 20px; }
-.rank-lg { font-size: 22px; }
+.nickname {
+  font-weight: 800;
+  font-size: 18px;
+  color: #222;
+}
+.nickname-lg {
+  font-size: 20px;
+}
+.rank-lg {
+  font-size: 22px;
+}
 
-.user-headline { margin-bottom: 2px; }
-.participants-secondary { font-size: 13px; margin-top: 2px; }
+.user-headline {
+  margin-bottom: 2px;
+}
+.participants-secondary {
+  font-size: 13px;
+  margin-top: 2px;
+}
 
 /* 참여 O 강조 */
-.highlight-rank { font-weight: 800; color: var(--color-main); margin: 0 2px; }
-.muted { color: #777; font-weight: 500; }
+.highlight-rank {
+  font-weight: 800;
+  color: var(--color-main);
+  margin: 0 2px;
+}
+.muted {
+  color: #777;
+  font-weight: 500;
+}
 
 /* 게이지 */
-.progress-section { margin-top: 16px; }
-.progress-header { text-align: left; font-size: 12px; color: #9aa0a6; margin-bottom: 6px; }
-.progress-bar { width: 100%; height: 8px; background: #fff; border-radius: 4px; overflow: hidden; }
+.progress-section {
+  margin-top: 16px;
+}
+.progress-header {
+  text-align: left;
+  font-size: 12px;
+  color: #9aa0a6;
+  margin-bottom: 6px;
+}
+
 .progress-fill {
   height: 100%;
-  background: linear-gradient(to right, var(--color-main), var(--color-main-light));
-  border-radius: 4px; transition: width 0.3s;
+  background: linear-gradient(
+    to right,
+    var(--color-main),
+    var(--color-main-light)
+  );
+  border-radius: 4px;
+  transition: width 0.3s;
 }
-.progress-labels { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-top: 6px; }
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #666;
+  margin-top: 6px;
+}
 
 /* 리스트 캡션 */
-.list-caption { margin-top: 28px; font-size: 12px; color: #9aa0a6; text-align: left; }
+.list-caption {
+  margin-top: 28px;
+  font-size: 12px;
+  color: #9aa0a6;
+  text-align: left;
+}
 
 /* 랭킹 리스트 */
-.rank-list ul { list-style: none; padding: 0; margin: 10px 0 0; }
-.rank-list li {
-  position: relative;               /* ✅ 배경 오버레이용 */
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 0; border-bottom: 1px solid #eee; font-size: 14px;
+.rank-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
 }
-.rank-list li.me::before {          /* ✅ 내 칸 색칠을 가로로 더 넓게 */
+.rank-list li {
+  position: relative; /* ✅ 배경 오버레이용 */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+}
+.rank-list li.me::before {
+  /* ✅ 내 칸 색칠을 가로로 더 넓게 */
   content: '';
   position: absolute;
-  left: -16px; right: -16px; top: 0; bottom: 0;
+  left: -16px;
+  right: -16px;
+  top: 0;
+  bottom: 0;
   background: rgba(255, 215, 0, 0.2);
   border-radius: 8px;
   z-index: 0;
 }
-.row-content { position: relative; z-index: 1; } /* 텍스트는 오버레이 위 */
-.row-left { display: flex; align-items: center; gap: 10px; }
-.pos { width: 40px; font-weight: 800; color: var(--color-main-dark); text-align: left; }
-.rank-list li.me .pos { color: var(--color-main); }
-.name { flex: 1; text-align: left; color: #222; }
-.value { min-width: 100px; text-align: right; font-variant-numeric: tabular-nums; color: var(--color-main); font-weight: 700; }
+.row-content {
+  position: relative;
+  z-index: 1;
+} /* 텍스트는 오버레이 위 */
+.row-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.pos {
+  width: 40px;
+  font-weight: 800;
+  color: var(--color-main-dark);
+  text-align: left;
+}
+.rank-list li.me .pos {
+  color: var(--color-main);
+}
+.name {
+  flex: 1;
+  text-align: left;
+  color: #222;
+}
+.value {
+  min-width: 100px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-main);
+  font-weight: 700;
+}
 
 /* ===== 미참여: 하단 알림 블록 ===== */
 .notify-block {
   margin-top: auto;
-  display: flex; flex-direction: column; align-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding-top: 16px;
 }
 
 /* 단일 토글 버튼 */
 .notify-cta {
-  display: inline-flex; align-items: center; gap: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 8px 14px;
-  border: none; border-radius: 999px;
-  background: linear-gradient(135deg, var(--color-main) 0%, var(--color-main-dark) 100%);
-  color: #fff; font-weight: 700; font-size: 14px; cursor: pointer;
+  border: none;
+  border-radius: 999px;
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
+  color: #fff;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
   box-shadow: 0 6px 16px rgba(107, 70, 193, 0.25);
-  transition: transform .18s ease, box-shadow .18s ease;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
 }
-.notify-cta:hover { transform: translateY(-1px); box-shadow: 0 10px 20px rgba(107,70,193,.32); }
-.notify-cta-icon { line-height: 1; }
-.notify-cta-text { letter-spacing: -0.2px; }
+.notify-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 20px rgba(107, 70, 193, 0.32);
+}
+.notify-cta-icon {
+  line-height: 1;
+}
+.notify-cta-text {
+  letter-spacing: -0.2px;
+}
 
-.notify-desc { margin-top: 24px; margin-bottom: 8px; font-size: 14px; color: #555; text-align: center; }
+.notify-desc {
+  margin-top: 24px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #555;
+  text-align: center;
+}
 
 /* ===== 토스트 (하단 중앙) ===== */
 .notify-toast {
-  position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%);
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 16px; border-radius: 12px; font-size: 14px; font-weight: 700;
-  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-  box-shadow: 0 10px 30px rgba(0,0,0,.18); z-index: 1000;
-  border: 1px solid rgba(255,255,255,.4);
+  position: fixed;
+  left: 50%;
+  bottom: 90px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 700;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  z-index: 1000;
+  border: 1px solid rgba(255, 255, 255, 0.4);
 }
-.toast-on  { background: linear-gradient(135deg, rgba(230,244,234,.9), rgba(214,240,223,.92)); color: #126a35; }
-.toast-off { background: linear-gradient(135deg, rgba(253,236,234,.92), rgba(250,225,222,.94)); color: #a21414; }
-.toast-icon { font-size: 16px; }
-.toast-text { letter-spacing: -0.2px; }
+.toast-on {
+  background: linear-gradient(
+    135deg,
+    rgba(230, 244, 234, 0.9),
+    rgba(214, 240, 223, 0.92)
+  );
+  color: #126a35;
+}
+.toast-off {
+  background: linear-gradient(
+    135deg,
+    rgba(253, 236, 234, 0.92),
+    rgba(250, 225, 222, 0.94)
+  );
+  color: #a21414;
+}
+.toast-icon {
+  font-size: 16px;
+}
+.toast-text {
+  letter-spacing: -0.2px;
+}
 
-.toast-fade-enter-active, .toast-fade-leave-active { transition: all .38s ease; }
-.toast-fade-enter-from, .toast-fade-leave-to { opacity: 0; transform: translate(-50%, 8px); }
+.toast-fade-enter-active,
+.toast-fade-leave-active {
+  transition: all 0.38s ease;
+}
+.toast-fade-enter-from,
+.toast-fade-leave-to {
+  opacity: 0;
+  transform: translate(-50%, 8px);
+}
 
 /* 누적 포인트 */
-.coin-ranking { display: flex; flex-direction: column; gap: 16px; }
-.ranking-cards { display: flex; flex-direction: column; gap: 12px; }
-.ranking-card-item {
-  display: flex; align-items: center; padding: 16px;
-  background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); gap: 16px;
+.coin-ranking {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
-.ranking-card-item.top-rank { background: linear-gradient(135deg, #fff2cc 0%, #ffeaa7 100%); border: 1px solid #ffd54f; }
-.ranking-card-item:nth-child(2) { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 1px solid #dee2e6; }
-.ranking-card-item:nth-child(3) { background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border: 1px solid #ffb74d; }
-.rank-medal { display: flex; align-items: center; justify-content: center; width: 48px; height: 48px; flex-shrink: 0; }
-.medal-icon { width: 48px; height: 48px; object-fit: contain; }
-.rank-number { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #f0f0f0; border-radius: 50%; font-weight: 700; font-size: 16px; color: #666; }
-.user-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-.user-name { font-size: 16px; font-weight: 600; color: #333; }
-.user-details { display: flex; gap: 12px; font-size: 12px; color: #666; }
-.participants { color: #666; }
-.progress-rate { color: var(--color-main); font-weight: 500; }
-.user-score { text-align: right; flex-shrink: 0; }
-.score-value { font-size: 18px; font-weight: 700; color: var(--color-main); margin-bottom: 2px; }
-.score-label { font-size: 12px; color: #666; }
+.ranking-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ranking-card-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  gap: 16px;
+}
+.ranking-card-item.top-rank {
+  background: linear-gradient(135deg, #fff2cc 0%, #ffeaa7 100%);
+  border: 1px solid #ffd54f;
+}
+.ranking-card-item:nth-child(2) {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+}
+.ranking-card-item:nth-child(3) {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  border: 1px solid #ffb74d;
+}
+.rank-medal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+}
+.medal-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+.rank-number {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f0f0f0;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 16px;
+  color: #666;
+}
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.user-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+.user-details {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: #666;
+}
+.participants {
+  color: #666;
+}
+.progress-rate {
+  color: var(--color-main);
+  font-weight: 500;
+}
+.user-score {
+  text-align: right;
+  flex-shrink: 0;
+}
+.score-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-main);
+  margin-bottom: 2px;
+}
+.score-label {
+  font-size: 12px;
+  color: #666;
+}
 
 .empty {
-  color: #777; padding: 20px; text-align: center; background: white;
-  border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  color: #777;
+  padding: 20px;
+  text-align: center;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-.my-ranking { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.my-ranking h2 { font-size: 18px; font-weight: 700; color: #333; margin-bottom: 16px; }
+.my-ranking {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.my-ranking h2 {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+}
 .my-rank-card {
-  display: flex; align-items: center; justify-content: space-between; padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
   background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-  border-radius: 12px; border: 1px solid #e8f0ff;
+  border-radius: 12px;
+  border: 1px solid #e8f0ff;
 }
-.my-rank-info { display: flex; align-items: center; gap: 16px; }
+.my-rank-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
 .my-rank-number {
-  width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;
-  background: linear-gradient(135deg, var(--color-main) 0%, var(--color-main-dark) 100%);
-  border-radius: 50%; font-weight: 800; color: white; font-size: 24px;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
+  border-radius: 50%;
+  font-weight: 800;
+  color: white;
+  font-size: 24px;
 }
-.my-rank-details { display: flex; flex-direction: column; gap: 4px; }
-.my-rank-title { font-size: 16px; font-weight: 600; color: #333; }
-.my-rank-subtitle { font-size: 12px; color: #666; }
-.my-rank-score { text-align: right; }
-.my-rank-score .score { font-size: 20px; font-weight: 800; color: var(--color-main); margin-bottom: 2px; }
-.my-rank-score .score-label { font-size: 12px; color: #666; }
+.my-rank-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.my-rank-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+.my-rank-subtitle {
+  font-size: 12px;
+  color: #666;
+}
+.my-rank-score {
+  text-align: right;
+}
+.my-rank-score .score {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-main);
+  margin-bottom: 2px;
+}
+.my-rank-score .score-label {
+  font-size: 12px;
+  color: #666;
+}
 
 /* 비참여 이미지 반응형 축소 */
-.target-image { max-width: 70%; width: 220px; height: auto; display: block; margin: 0 auto; }
+.target-image {
+  max-width: 70%;
+  width: 220px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
+}
 
 /* 스크린 리더용 텍스트 숨김 */
 .sr-only {
-  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
-  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 </style>
