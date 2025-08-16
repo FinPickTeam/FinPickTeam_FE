@@ -103,7 +103,8 @@ import ChallengePersonalDetail from '../pages/challenge/ChallengePersonalDetail.
 import AdminLayout from '@/layouts/AdminLayout.vue';
 import AdminHome from '@/pages/admin/AdminHome.vue';
 import AdminCommonChallenge from '@/pages/admin/AdminCommonChallenge.vue';
-import AdminTickets from '@/pages/admin/AdminTickets.vue';
+import AdminSupport from '@/pages/admin/AdminSupport.vue';
+import AdminFaq from '@/pages/admin/AdminFaq.vue';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -181,27 +182,27 @@ const router = createRouter({
 
     // 마이페이지 finance test ProfileStep6~10
     {
-      path: '/mypage/financetest/profile-step-6',
+      path: '/profile-step-6',
       name: 'ProfileStep6',
       component: ProfileStep6,
     },
     {
-      path: '/mypage/financetest/profile-step-7',
+      path: '/profile-step-7',
       name: 'ProfileStep7',
       component: ProfileStep7,
     },
     {
-      path: '/mypage/financetest/profile-step-8',
+      path: '/profile-step-8',
       name: 'ProfileStep8',
       component: ProfileStep8,
     },
     {
-      path: '/mypage/financetest/profile-step-9',
+      path: '/profile-step-9',
       name: 'ProfileStep9',
       component: ProfileStep9,
     },
     {
-      path: '/mypage/financetest/profile-step-10',
+      path: '/profile-step-10',
       name: 'ProfileStep10',
       component: ProfileStep10,
     },
@@ -439,9 +440,14 @@ const router = createRouter({
           component: AdminCommonChallenge,
         },
         {
-          path: 'tickets',
-          name: 'AdminTickets',
-          component: AdminTickets,
+          path: 'support',
+          name: 'AdminSupport',
+          component: AdminSupport,
+        },
+        {
+          path: 'faq',
+          name: 'AdminFaq',
+          component: AdminFaq,
         },
       ],
     },

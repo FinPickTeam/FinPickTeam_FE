@@ -74,10 +74,10 @@ const goNext = () => {
 
   if (from === 'mypage') {
     // 마이페이지에서 왔으면 6단계로 이동
-    router.push(`/mypage/financetest/profile-step-6?from=${from}`);
+    router.push(`/profile-step-6?from=${from}`);
   } else if (from === 'fund') {
     // 펀드에서 왔으면 6단계로 이동
-    router.push(`/mypage/financetest/profile-step-6?from=${from}`);
+    router.push(`/profile-step-6?from=${from}`);
   } else {
     // 그 외, 즉 'signup' 시나리오일 경우, 페이지 이동이 아니라 '결과 제출' 함수를 호출합니다.
     submitResults();

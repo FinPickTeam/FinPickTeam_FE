@@ -1,44 +1,50 @@
 <!-- src/components/challenge/ParticipatingChallengeCard.vue -->
 <template>
   <div class="challenge-card" @click="handleCardClick">
-    <!-- 결과 확인 배지 -->
-    <span
-      v-if="needsResultConfirm && isSuccess !== null"
-      class="badge"
-      :class="isSuccess ? 'badge-success' : 'badge-danger'"
-      :title="`결과 확인 페이지에서 보상 확정이 필요합니다 (isSuccess: ${isSuccess}, type: ${typeof isSuccess})`"
-    >
-      <!-- 성공/실패 상태 표시 원 -->
-      <div
-        class="status-indicator"
-        :class="isSuccess ? 'success' : 'failure'"
-        :title="`상태: ${isSuccess ? '성공' : '실패'} (값: ${isSuccess})`"
-        @click.stop="handleCardClick"
-      ></div>
-      결과 확인
-    </span>
+    <div class="card-header">
+      <h3 class="challenge-title">{{ challenge.title }}</h3>
 
-    <h4 class="challenge-title">{{ challenge.title }}</h4>
-    <div class="challenge-date">
-      {{ formatDate(challenge.startDate) }} ~
-      {{ formatDate(challenge.endDate) }}
+      <div class="status-area">
+        <span
+          v-if="needsResultConfirm"
+          class="badge"
+          :class="isSuccess ? 'badge-success' : 'badge-danger'"
+          title="결과 확인 페이지에서 보상 확정이 필요합니다"
+        >
+          <!-- 성공/실패 상태 표시 원 -->
+          <div
+            v-if="isSuccess !== null"
+            class="status-indicator"
+            :class="isSuccess ? 'success' : 'failure'"
+            @click.stop="handleCardClick"
+          ></div>
+          결과 확인
+        </span>
+      </div>
     </div>
 
-    <div class="challenge-footer">
-      <div class="progress-category-group">
-        <div
-          class="challenge-progress"
-          v-if="challenge.myProgressRate !== null"
-        >
-          진행률 {{ Math.round(challenge.myProgressRate * 100) }}%
-        </div>
-        <div class="challenge-progress" v-else>진행률 0%</div>
+    <div class="card-content">
+      <div class="challenge-date">
+        {{ formatDate(challenge.startDate) }} ~
+        {{ formatDate(challenge.endDate) }}
+      </div>
 
-        <div class="challenge-category">
-          {{ getCategoryName(challenge.categoryId) }}
-        </div>
-        <div class="challenge-type">
-          {{ getChallengeTypeName(challenge.type) }}
+      <div class="challenge-footer">
+        <div class="progress-category-group">
+          <div
+            class="challenge-progress"
+            v-if="challenge.myProgressRate !== null"
+          >
+            진행률 {{ Math.round(challenge.myProgressRate * 100) }}%
+          </div>
+          <div class="challenge-progress" v-else>진행률 0%</div>
+
+          <div class="challenge-category">
+            {{ getCategoryName(challenge.categoryId) }}
+          </div>
+          <div class="challenge-type">
+            {{ getChallengeTypeName(challenge.type) }}
+          </div>
         </div>
       </div>
     </div>
@@ -119,18 +125,19 @@ const formatDate = (dateString) => {
 
 // 카테고리 이름 반환 함수
 const getCategoryName = (categoryId) => {
-  // 서버가 categoryName을 내려주면 그걸 우선 사용
-  if (props.challenge?.categoryName) return props.challenge.categoryName;
-
-  // (구) local dummy 대비 호환
-  const categories = {
-    1: '전체 소비',
-    2: '식비',
-    3: '카페·간식',
-    4: '교통비',
-    5: '미용·쇼핑',
+  // categoryName을 한글로 매핑
+  const categoryMapping = {
+    total: '전체 소비',
+    food: '식비',
+    snack: '카페·간식',
+    transport: '교통비',
+    shopping: '미용·쇼핑',
   };
-  return categories[categoryId] || '기타';
+  return (
+    categoryMapping[props.challenge.categoryName] ||
+    props.challenge.categoryName ||
+    '기타'
+  );
 };
 
 // 챌린지 타입 이름 반환 함수
@@ -158,23 +165,16 @@ const getChallengeTypeName = (type) => {
 
 /* 결과 확인 배지 */
 .badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
   font-size: 11px;
   padding: 4px 8px;
   border-radius: 10px;
   white-space: nowrap;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
 }
 
 .badge-danger {
   background: #ffe5e5;
   color: #d32f2f;
-  font-weight: 700;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -183,12 +183,13 @@ const getChallengeTypeName = (type) => {
 .badge-success {
   background: #e8f5e9;
   color: #2e7d32;
-  font-weight: 700;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* 성공/실패 상태 표시 원 */
 .status-indicator {
   display: inline-block;
   width: 8px;
@@ -221,12 +222,28 @@ const getChallengeTypeName = (type) => {
     inset 0 -1px 2px rgba(0, 0, 0, 0.2);
 }
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
 .challenge-title {
   font-size: 16px;
   font-weight: bold;
   color: #333;
   margin: 0 0 8px 0;
   line-height: 1.4;
+}
+
+.status-area {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 .challenge-date {
   font-size: 14px;
@@ -266,7 +283,7 @@ const getChallengeTypeName = (type) => {
 }
 .challenge-progress {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 500;
   background: linear-gradient(
     135deg,
     var(--color-main-dark) 0%,

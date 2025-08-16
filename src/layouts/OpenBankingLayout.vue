@@ -47,7 +47,6 @@
     <main class="openbanking-content">
       <router-view />
     </main>
-
     <!-- 하단 네비게이션 (특정 페이지에서만 표시) -->
     <Navbar v-if="showNavbar" />
   </div>

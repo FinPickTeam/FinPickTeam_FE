@@ -46,20 +46,15 @@
 
     <!-- 본문 -->
     <div v-else-if="challenge" class="content">
-      <!-- 카테고리 뱃지 -->
-      <div
-        class="category-chip"
-        :style="{
-          background: categoryTheme.bg,
-          boxShadow: '0 6px 16px ' + categoryTheme.shadow,
-        }"
-      >
-        {{ displayCategory }}
-      </div>
-
       <div class="challenge-info">
         <div class="title-section">
-          <h1 class="challenge-title">{{ challenge.title }}</h1>
+          <div class="title-header">
+            <!-- 카테고리 뱃지 -->
+            <div class="category-chip">
+              {{ displayCategory }}
+            </div>
+            <h1 class="challenge-title">{{ challenge.title }}</h1>
+          </div>
           <div class="challenge-date">
             {{ formatDate(challenge.startDate) }} ~
             {{ formatDate(challenge.endDate) }}
@@ -71,12 +66,6 @@
           <p class="challenge-description">{{ challenge.description }}</p>
 
           <div class="challenge-stats">
-            <div class="stat-item">
-              <span class="stat-label">참여자</span>
-              <span class="stat-value"
-                >{{ challenge.participantsCount || 0 }}명</span
-              >
-            </div>
             <div class="stat-item">
               <span class="stat-label">목표 {{ challenge.goalType }}</span>
               <span class="stat-value"
@@ -495,12 +484,22 @@ const categoryKey = computed(() => {
   return 'default';
 });
 
-const displayCategory = computed(
-  () =>
+const displayCategory = computed(() => {
+  const categoryMapping = {
+    total: '전체 소비',
+    food: '식비',
+    snack: '카페·간식',
+    transport: '교통비',
+    shopping: '미용·쇼핑',
+  };
+
+  const categoryName =
     challenge.value?.categoryName ||
     CATEGORY_FALLBACK_BY_ID[challenge.value?.categoryId] ||
-    '카테고리'
-);
+    '카테고리';
+
+  return categoryMapping[categoryName] || categoryName;
+});
 
 const categoryTheme = computed(() => {
   const map = {
@@ -542,14 +541,21 @@ const categoryTheme = computed(() => {
 
 /* 카테고리 뱃지 */
 .category-chip {
-  align-self: flex-start;
-  color: #fff;
-  font-weight: 700;
   font-size: 12px;
-  letter-spacing: 0.2px;
-  padding: 8px 12px;
-  border-radius: 9999px;
-  margin-bottom: 12px;
+  color: var(--color-main);
+  background: rgba(107, 70, 193, 0.1);
+  padding: 6px 12px;
+  border-radius: 14px;
+  white-space: nowrap;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.title-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
 }
 
 .avatar-grid {
@@ -705,7 +711,7 @@ const categoryTheme = computed(() => {
 
 .challenge-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-bottom: 20px;
 }

@@ -200,7 +200,7 @@
         console.log("설문 미완료 상태. 추가 설문 페이지로 이동합니다.");
         const profileResponse = await getProfileByUserId();
         profile.loadAnswers(profileResponse.data);
-        router.push('/mypage/financetest/profile-step-6?from=fund');
+        router.push('/profile-step-6?from=fund');
         return; // 여기서 함수 실행을 중단하여 더 이상 진행하지 않도록 합니다.
       }
 
@@ -213,7 +213,7 @@
     } catch (error) {
       console.error("투자성향 정보 확인 중 오류 발생", error);
       // 에러 발생 시에도 설문 페이지로 보내는 것이 안전합니다.
-      router.push('/mypage/financetest/profile-step-6?from=fund');
+      router.push('/profile-step-6?from=fund');
     } finally {
       isLoadingPropensity.value = false;
     }

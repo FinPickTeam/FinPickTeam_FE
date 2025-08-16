@@ -114,11 +114,25 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout(redirect = true) {
-      await this.serverLogout();
+      try { await this.serverLogout(); } catch {}
       this.clearTokens();
       this.user = null;
-      if (redirect) router.push('/login');
-    },
+
+      // 선택: 세션 스토리지에 쌓아둔 캐시(오픈뱅킹 등) 정리
+      try {
+        const removeKeys = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const k = sessionStorage.key(i);
+          if (!k) continue;
+          if (k.startsWith('ob:') || k.startsWith('admin:')) removeKeys.push(k);
+        }
+        removeKeys.forEach(k => sessionStorage.removeItem(k));
+      } catch {}
+
+      if (redirect) {
+        router.push('/login');
+      }
+    }
   },
 
   persist: {

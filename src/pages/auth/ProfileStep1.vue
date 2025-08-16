@@ -63,15 +63,15 @@ const totalSteps = computed(() => {
 
 // goNext 함수는 요청하신 내비게이션 로직을 그대로 유지합니다.
 const goNext = () => {
-  // ⭐로컬 상태 대신 Pinia에 저장된 1번 문항 답변을 확인합니다.
+  // 로컬 상태 대신 Pinia에 저장된 1번 문항 답변을 확인합니다.
   if (profileStore.answers.question1 !== null) {
     const from = route.query.from || 'signup';
     if (from === 'mypage') {
-      router.push(`/mypage/financetest/profile-step-2?from=${from}`);
+      router.push(`/profile-step-2?from=${from}`);
     } else if (from === 'fund') {
       // 펀드 시나리오의 다음 경로는 6단계가 맞는지 확인이 필요합니다.
       //  (보통은 순서대로 2단계로 갑니다.)
-      router.push(`/mypage/financetest/profile-step-6?from=${from}`);
+      router.push(`/profile-step-2?from=${from}`);
     } else {
       router.push('/profile-step-2');
     }

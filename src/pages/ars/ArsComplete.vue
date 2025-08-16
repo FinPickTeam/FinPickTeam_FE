@@ -55,16 +55,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 
 library.add(faAngleLeft);
 
 const router = useRouter();
-const currentTime = ref("");
+const currentTime = ref('');
 
 function goBack() {
   router.back();
@@ -73,22 +73,22 @@ function goBack() {
 function formatCurrentTime() {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
 
   currentTime.value = `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
 }
 
 function goToNextStep() {
   // CertificateCreate 페이지로 이동
-  router.push("/openbanking/create-certificate");
+  router.push('/openbanking/create-certificate');
 }
 
 function goToCustomerSupport() {
-  router.push("/customer-support");
+  router.push('/customer-support');
 }
 
 onMounted(() => {
@@ -244,24 +244,27 @@ onMounted(() => {
 .ars_complete_card {
   width: 100%;
   max-width: 100%;
-  background: #fff;
-  border: 1.5px solid #e5e6ea;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  padding: 40px 24px 24px 24px;
+
+  padding: 40px 0px 24px 0px;
   margin-bottom: 24px;
   text-align: center;
 }
 
 .success_icon {
-  width: 90px;
-  height: 90px;
-  background: #8e74e3;
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto 28px auto;
+  box-shadow: 0 4px 20px rgba(33, 150, 243, 0.3);
+  animation: pulse 0.6s ease;
 }
 
 .checkmark {
@@ -287,7 +290,7 @@ onMounted(() => {
 }
 
 .auth_details_box {
-  border: 1px solid #8e74e3;
+  border: 1px solid var(--color-main-dark);
   border-radius: 8px;
   padding: 28px;
   margin-bottom: 32px;
@@ -327,7 +330,7 @@ onMounted(() => {
 
 .next_step_btn {
   width: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   font-size: 19px;
   font-weight: 700;
@@ -357,7 +360,7 @@ onMounted(() => {
 }
 
 .support_link {
-  color: #8e74e3;
+  color: var(--color-main-dark);
   text-decoration: none;
   font-weight: 600;
   font-size: 14px;
@@ -367,31 +370,15 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-/* 반응형 디자인 */
-@media (max-width: 768px) {
-  .ars_complete_outer_box {
-    padding: 16px;
+@keyframes pulse {
+  0% {
+    transform: scale(1);
   }
-
-  .ars_complete_card {
-    padding: 24px 16px 16px 16px;
+  50% {
+    transform: scale(1.1);
   }
-
-  .success_icon {
-    width: 60px;
-    height: 60px;
-  }
-
-  .checkmark {
-    font-size: 30px;
-  }
-
-  .primary_message {
-    font-size: 18px;
-  }
-
-  .auth_timestamp {
-    font-size: 16px;
+  100% {
+    transform: scale(1);
   }
 }
 </style>
