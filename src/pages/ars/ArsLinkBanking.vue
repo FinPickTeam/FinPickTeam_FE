@@ -1,12 +1,7 @@
 <template>
   <div class="ars_link_bg">
     <div class="ars_link_outer_box">
-      <div class="ars_link_header">
-        <div class="login-logo">
-          <h1 class="logo">FinPick</h1>
-          <p>금융 생활의 새로운 시작</p>
-        </div>
-      </div>
+      <div class="ars_link_header"></div>
 
       <div class="ars_link_wrapper">
         <div class="ars_link_card">
@@ -82,8 +77,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 const percent = ref(0);
@@ -91,11 +86,11 @@ const visibleSteps = ref([false, false, false, false]);
 const isButtonActive = ref(false);
 
 function goToOpenBanking() {
-  router.push('/openbanking/myhome');
+  router.push("/openbanking/myhome");
 }
 
 function goToCustomerSupport() {
-  router.push('/customer-support');
+  router.push("/customer-support");
 }
 
 onMounted(() => {

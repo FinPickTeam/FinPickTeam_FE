@@ -9,43 +9,44 @@
     </div>
 
     <!-- 로딩 후 화면-->
-    <div v-if="!isLoading" class="content-wrapper">\
+    <div v-if="!isLoading" class="content-wrapper">
+      \
       <!--핀번호가 있을 때 화면-->
       <div v-if="hasPin">
-    <!-- 보안 배너 -->
-    <div class="security-banner">
-      <span class="security-text">간편 비밀번호가 안전하게 보호됩니다</span>
-    </div>
+        <!-- 보안 배너 -->
+        <div class="security-banner">
+          <span class="security-text">간편 비밀번호가 안전하게 보호됩니다</span>
+        </div>
 
-    <!-- 인증서 카드 -->
-    <div class="certificate-card">
-      <div class="certificate-header">
-        <span class="certificate-name">간편 비밀번호</span>
-        <div class="user-icon">
-          <font-awesome-icon :icon="['fas', 'user']" />
+        <!-- 인증서 카드 -->
+        <div class="certificate-card">
+          <div class="certificate-header">
+            <span class="certificate-name">간편 비밀번호</span>
+            <div class="user-icon">
+              <font-awesome-icon :icon="['fas', 'user']" />
+            </div>
+          </div>
+          <div class="certificate-info">
+            <div class="user-name">{{ userName }}</div>
+            <div class="expiry-info">
+              <span class="expiry-date">2028-07-31</span>
+              <span class="status-badge">정상</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 메뉴 리스트 -->
+        <div class="menu-list">
+          <div class="menu-item" @click="goToCertificateInfo">
+            <span>간편 비밀번호 정보</span>
+            <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
+          </div>
+          <div class="menu-item" @click="goToPasswordChange">
+            <span>비밀번호 변경</span>
+            <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
+          </div>
         </div>
       </div>
-      <div class="certificate-info">
-        <div class="user-name">{{ userName }}</div>
-        <div class="expiry-info">
-          <span class="expiry-date">2028-07-31</span>
-          <span class="status-badge">정상</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- 메뉴 리스트 -->
-    <div class="menu-list">
-      <div class="menu-item" @click="goToCertificateInfo">
-        <span>간편 비밀번호 정보</span>
-        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
-      </div>
-      <div class="menu-item" @click="goToPasswordChange">
-        <span>비밀번호 변경</span>
-        <font-awesome-icon class="chevron" :icon="['fas', 'angle-right']" />
-      </div>
-    </div>
-  </div>
       <!-- 간편 비밀번호가 없을 때 화면 -->
       <div v-else class="no-pin-container">
         <div class="no-pin-icon">
@@ -62,7 +63,7 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
@@ -72,19 +73,21 @@ import {
   faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { useUserStore } from "@/stores/user.js";
+import { useAuthStore } from "@/stores/auth.js";
 import { isPin } from "@/api/authApi.js"; // isPin API 함수 import
 
 library.add(faAngleLeft, faAngleRight, faUser);
 
 const router = useRouter();
 const userStore = useUserStore();
+const authStore = useAuthStore();
 const isLoading = ref(true);
 const hasPin = ref(false);
 
-// ARS 인증에서 입력한 사용자 이름 가져오기
+// Pinia의 auth 스토어에서 닉네임 가져오기
 const userName = computed(() => {
-  const name = userStore.getUserName();
-  return name || "사용자";
+  const nickname = authStore.user?.nickname;
+  return nickname || "사용자";
 });
 
 //
@@ -397,5 +400,4 @@ function goToPasswordChange() {
   height: calc(100vh - 100px);
   min-height: 500px;
 }
-
 </style>

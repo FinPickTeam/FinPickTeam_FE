@@ -36,7 +36,11 @@
 
         <!-- 숫자 패드 -->
         <div class="number-pad">
-          <div class="number-row" v-for="row in numberPad" :key="row.join('')">
+          <div
+            class="number-row"
+            v-for="(row, index) in numberPad.slice(0, 3)"
+            :key="index"
+          >
             <button
               v-for="number in row"
               :key="number"
@@ -53,10 +57,10 @@
             </button>
             <button
               class="number-btn"
-              @click="addNumber(3)"
+              @click="addNumber(numberPad[3])"
               :disabled="newPassword.length >= 6"
             >
-              3
+              {{ numberPad[3] }}
             </button>
             <button class="number-btn delete-btn" @click="deleteNumber">
               <font-awesome-icon :icon="['fas', 'backspace']" />
@@ -87,12 +91,21 @@ const route = useRoute();
 const newPassword = ref("");
 const currentPassword = ref("");
 
-// 숫자 패드 배열을 이미지와 동일하게 고정
-const numberPad = ref([
-  [0, 4, 6],
-  [2, 5, 7],
-  [8, 1, 9],
-]);
+// 숫자 패드 배열을 랜덤하게 생성하는 함수
+const generateRandomNumberPad = () => {
+  const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const shuffled = [...numbers].sort(() => Math.random() - 0.5);
+
+  return [
+    [shuffled[0], shuffled[1], shuffled[2]],
+    [shuffled[3], shuffled[4], shuffled[5]],
+    [shuffled[6], shuffled[7], shuffled[8]],
+    shuffled[9], // 10번째 숫자
+  ];
+};
+
+// 숫자 패드 배열을 랜덤하게 생성
+const numberPad = ref(generateRandomNumberPad());
 
 // 비밀번호 유효성 검사 (6자리 숫자)
 const isPasswordValid = computed(() => {

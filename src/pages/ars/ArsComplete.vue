@@ -9,8 +9,6 @@
     </div>
 
     <div class="ars_complete_outer_box">
-      <div class="ars_complete_header"></div>
-
       <div class="ars_complete_wrapper">
         <div class="ars_complete_card">
           <div class="success_icon">
@@ -55,16 +53,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import { ref, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
+import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
 
 library.add(faAngleLeft);
 
 const router = useRouter();
-const currentTime = ref('');
+const currentTime = ref("");
 
 function goBack() {
   router.back();
@@ -73,22 +71,22 @@ function goBack() {
 function formatCurrentTime() {
   const now = new Date();
   const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
 
   currentTime.value = `${year}.${month}.${day} ${hours}:${minutes}:${seconds}`;
 }
 
 function goToNextStep() {
   // CertificateCreate 페이지로 이동
-  router.push('/openbanking/create-certificate');
+  router.push("/openbanking/create-certificate");
 }
 
 function goToCustomerSupport() {
-  router.push('/customer-support');
+  router.push("/customer-support");
 }
 
 onMounted(() => {
@@ -181,16 +179,6 @@ onMounted(() => {
   box-sizing: border-box;
   padding-top: 56px;
   overflow: hidden;
-}
-
-.ars_complete_header {
-  width: 100%;
-  padding-top: 48px;
-  padding-bottom: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
 }
 
 .login-logo {

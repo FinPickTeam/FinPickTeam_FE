@@ -115,10 +115,10 @@ const goToOpenBanking = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fff;
+  background: #f7f8fa;
   padding: 0 16px;
   box-sizing: border-box;
-  border-bottom: 1px solid #ececec;
+  /* border-bottom: 1px solid #ececec; */
   position: sticky;
   top: 0;
   z-index: 100;
@@ -251,9 +251,10 @@ const goToOpenBanking = () => {
   transform: translateX(-50%);
   width: 100%;
   max-width: 390px;
-  background: #fff;
+  background: #f7f8fa;
   padding: 20px;
-  border-top: 1px solid #ececec;
+  padding-bottom: 80px;
+  /* border-top: 1px solid #ececec; */
   z-index: 100;
   box-sizing: border-box;
 }
@@ -264,7 +265,7 @@ const goToOpenBanking = () => {
   border: none;
   border-radius: 12px;
   background: var(--color-main);
-  color: #fff;
+  /* color: #fff; */
   font-size: 16px;
   font-weight: 600;
   cursor: pointer;

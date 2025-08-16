@@ -292,7 +292,7 @@ const startCertificate = () => {
   transform: translateX(-50%);
   width: 100%;
   max-width: 390px;
-  padding: 16px;
+  padding: 16px 16px 80px 16px;
   z-index: 1000;
 }
 
@@ -300,12 +300,13 @@ const startCertificate = () => {
   width: 100%;
   padding: 16px 0;
   border: none;
+  background: #3a16b8;
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #fff;
+  /* color: #fff; */
   box-shadow: none;
   outline: none;
 }
