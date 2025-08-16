@@ -493,9 +493,19 @@ export function useFinanceRouteTours() {
       await goAndWait(
         router,
         { name: 'FundDetail', params: { id: String(opts.detailId) } },
-        [SELECTORS.detail.termToggle]
+        ['.chart-card', SELECTORS.detail.termToggle]
       );
       await runSteps([
+        {
+          element: '.chart-card',
+          popover: {
+            title: '📈 펀드 차트',
+            description:
+              '펀드의 수익률 변화를 시각적으로 확인할 수 있어요! 과거 성과를 통해 투자 판단에 도움을 받을 수 있습니다.',
+            side: 'top',
+            align: 'center',
+          },
+        },
         {
           element: SELECTORS.detail.termToggle,
           popover: {
@@ -514,6 +524,7 @@ export function useFinanceRouteTours() {
   const startStockTour = async (
     opts = { includeDetail: false, detailId: null }
   ) => {
+    // 1) 재테크 홈
     await goAndWait(router, { name: 'FinanceHome' }, [SELECTORS.tab.stock]);
     await runSteps([
       {
@@ -528,49 +539,110 @@ export function useFinanceRouteTours() {
       },
     ]);
 
-    await goAndWait(router, { name: 'Stock' }, [SELECTORS.list.firstCard]);
+    // 2) 주식 목록 (추천 탭)
+    await goAndWait(router, { name: 'Stock' }, [
+      '.subtab-row',
+      '.btn-outline.with-icon',
+    ]);
     await runSteps([
       {
-        element: SELECTORS.list.sort,
+        element: '.subtab-row .subtab:first-child',
         popover: {
-          title: '정렬/필터',
-          description: '등락률/시총 등 기준으로 살펴봐요.',
+          title: '📊 추천 주식',
+          description:
+            '추천 탭에서는 사용자 맞춤 주식 상품을 확인할 수 있어요!',
           side: 'bottom',
           align: 'center',
         },
       },
       {
-        element: SELECTORS.list.favHeart,
+        element: '.btn-outline.with-icon',
         popover: {
-          title: '관심 종목',
-          description: '찜해 두면 비교/알림이 더 쉬워져요.',
+          title: '🔍 AI 주식 추천',
+          description:
+            '시장 흐름과 상품 특성을 고려하여, 사용자의 투자 성향에 맞게 추천해줍니다!',
+          side: 'top',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 실제로 전체보기 탭 클릭
+    const allViewTab = document.querySelector('.subtab-row .subtab:last-child');
+    if (allViewTab) {
+      allViewTab.click();
+    }
+
+    // 3) 전체보기 탭 클릭 후 전체보기 설명
+    await runSteps([
+      {
+        element: '.subtab-row .subtab:last-child',
+        popover: {
+          title: '📋 전체보기 탭',
+          description:
+            '전체보기 탭을 클릭하면 모든 주식 상품을 확인할 수 있어요!',
+          side: 'bottom',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 탭 전환 후 전체보기 화면이 로드될 때까지 대기
+    try {
+      await waitForEl('.search-filter-row', { timeout: 5000 });
+    } catch (error) {
+      console.warn('전체보기 화면을 찾을 수 없습니다:', error);
+    }
+
+    // 4) 전체보기 화면 검색/필터 설명
+    await runSteps([
+      {
+        element: '.search-filter-row',
+        popover: {
+          title: '🔍 검색 + 필터 기능',
+          description:
+            '주식명으로 검색하고, 업종과 시가총액으로 필터링할 수 있어요!',
+          side: 'top',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 상품 카드가 로드될 때까지 대기
+    try {
+      await waitForEl('.product-card:first-child', { timeout: 5000 });
+    } catch (error) {
+      console.warn('전체보기 탭의 상품 카드를 찾을 수 없습니다:', error);
+    }
+
+    // 5) 주식 상품 카드 설명
+    await runSteps([
+      {
+        element: '.product-card:first-child',
+        popover: {
+          title: '💳 주식 상품 추천 카드',
+          description:
+            '기업명, 종목코드, 현재가, 등락률 정보가 한눈에 보기 쉽게 구성되어 있어요!',
           side: 'left',
           align: 'center',
         },
       },
     ]);
 
+    // 6) (선택) 주식 상세
     if (opts.includeDetail && (opts.detailId ?? null) !== null) {
       await goAndWait(
         router,
         { name: 'StockDetail', params: { id: String(opts.detailId) } },
-        [SELECTORS.detail.favorite]
+        [SELECTORS.detail.termToggle]
       );
       await runSteps([
         {
-          element: SELECTORS.detail.favorite,
+          element: SELECTORS.detail.termToggle,
           popover: {
-            title: '상세에서 찜/해제',
-            description: '종목 상세에서도 바로 관리할 수 있어요.',
-            side: 'left',
-            align: 'center',
-          },
-        },
-        {
-          element: SELECTORS.detail.dictBtn,
-          popover: {
-            title: '용어사전',
-            description: 'PER, ROE 등 핵심 지표를 바로 확인!',
+            title: '🔮 단어 마법사',
+            description:
+              '금융 용어에 마우스를 올리면 쉽게 이해할 수 있도록 설명해드려요!',
             side: 'bottom',
             align: 'center',
           },

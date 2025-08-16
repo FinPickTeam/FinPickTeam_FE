@@ -52,6 +52,10 @@
         <i class="fa-solid fa-chart-line"></i>
         <span class="guide-text-underline">펀드 투어</span>
       </div>
+      <div class="guide-text" @click="showStockTour">
+        <i class="fa-solid fa-trend-up"></i>
+        <span class="guide-text-underline">주식 투어</span>
+      </div>
       <div class="guide-text" @click="showGuideModal">
         <i class="fa-solid fa-circle-info"></i>
         <span class="guide-text-underline">이용 가이드</span>
@@ -93,7 +97,8 @@ const isDriverGuideVisible = ref(false);
 const isMultiRouteGuideVisible = ref(false);
 
 // 투어 기능
-const { startInstallmentTour, startFundTour } = useFinanceRouteTours();
+const { startInstallmentTour, startFundTour, startStockTour } =
+  useFinanceRouteTours();
 
 // 가이드 이미지 배열 (실제 이미지 경로로 수정 필요)
 const guideImages = ref([
@@ -149,6 +154,13 @@ function showInstallmentTour() {
 
 function showFundTour() {
   startFundTour({
+    includeDetail: true,
+    detailId: '1', // 실제 상품 ID로 변경 필요
+  });
+}
+
+function showStockTour() {
+  startStockTour({
     includeDetail: true,
     detailId: '1', // 실제 상품 ID로 변경 필요
   });
