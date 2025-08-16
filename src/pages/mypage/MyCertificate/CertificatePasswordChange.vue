@@ -5,7 +5,7 @@
       <button class="password-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="password-title center-title">비밀번호 변경</span>
+      <span class="password-title center-title">간편 비밀번호 변경</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
@@ -52,7 +52,9 @@
               ></div>
             </div>
           </div>
-          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+          <div class="password-match">
+            <p v-if="errorMessage" class='text-error'>{{ errorMessage }}</p>
+          </div>
         </div>
 
         <!-- 숫자 패드 -->
@@ -94,16 +96,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-  faAngleLeft,
-  faTimes,
-  faBackspace,
-} from "@fortawesome/free-solid-svg-icons";
-import { pinLogin } from "@/api/authApi.js";
+import {computed, ref} from "vue";
+import {useRouter} from "vue-router";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {library} from "@fortawesome/fontawesome-svg-core";
+import {faAngleLeft, faBackspace, faTimes,} from "@fortawesome/free-solid-svg-icons";
+import {pinLogin} from "@/api/authApi.js";
 
 library.add(faAngleLeft, faTimes, faBackspace);
 
@@ -169,6 +167,7 @@ const verifyPassword = async () => {
     });
   } catch (error) {
     // 인증 실패 시 API 응답에서 에러 메시지를 가져옵니다.
+    console.log("CATCH BLOCK TRIGGERED - ERROR OBJECT:", error);
     errorMessage.value =
       error.response?.data?.message || "인증에 실패했습니다.";
     triggerShakeError();
@@ -266,8 +265,9 @@ const goBack = () => {
 .progress-steps {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  /*justify-content: center;*/
+  gap: 0;
+  width: 100%;
 }
 
 .step {
@@ -275,6 +275,7 @@ const goBack = () => {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  flex: 1;
 }
 
 .step-number {
@@ -452,5 +453,22 @@ const goBack = () => {
 
 .empty-btn:hover {
   background: transparent;
+}
+
+.password-match {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-error {
+  color: #f44336;
 }
 </style>

@@ -10,6 +10,25 @@
 
     <!-- 메인 콘텐츠 -->
     <div class="password-content">
+      <div class="progress-section">
+        <div class="progress-steps">
+          <div class="step active">
+            <div class="step-number">1</div>
+            <span class="step-text">현재 비밀번호</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step active">
+            <div class="step-number">2</div>
+            <span class="step-text">새 비밀번호</span>
+          </div>
+          <div class="step-line"></div>
+          <div class="step active">
+            <div class="step-number">3</div>
+            <span class="step-text">확인</span>
+          </div>
+        </div>
+      </div>
+
       <!-- 제목 -->
       <h1 class="main-title">비밀번호 확인</h1>
 
@@ -427,4 +446,63 @@ const triggerShakeError = (message) => {
 .delete-btn {
   color: #333;
 }
-</style>
+
+.progress-section {
+  margin-bottom: 32px;
+}
+
+.progress-steps {
+  display: flex;
+  align-items: center;
+  /*justify-content: center;*/
+  gap: 0;
+  width: 100%;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+}
+
+.step-number {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e0e0e0;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.step.completed .step-number {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.step.active .step-number {
+  background: var(--color-main);
+  color: #fff;
+}
+
+.step-text {
+  font-size: 10px;
+  color: #999;
+  font-weight: 500;
+}
+
+.step.completed .step-text,
+.step.active .step-text {
+  color: #222;
+}
+
+.step-line {
+  width: 20px;
+  height: 1px;
+  background: #e0e0e0;
+}</style>

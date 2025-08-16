@@ -49,9 +49,8 @@
       <div class="notice-section">
         <h3 class="notice-title">주의사항</h3>
         <ul class="notice-list">
-          <li>인증서 비밀번호는 안전한 곳에 보관해주세요</li>
-          <li>인증서는 개인정보이므로 타인과 공유하지 마세요</li>
-          <li>비밀번호 분실 시 재발급이 필요합니다</li>
+          <li>간편 비밀번호는 안전한 곳에 보관해주세요</li>
+          <li>간편 비밀번호는 개인정보이므로 타인과 공유하지 마세요</li>
         </ul>
       </div>
     </div>

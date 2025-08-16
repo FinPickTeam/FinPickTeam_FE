@@ -54,6 +54,9 @@ const hideHeaderNames = [
   'ObAgreement',
   'OpenBankingAgreement',
   'ObArsAgreement',
+  'certificate-password-change',
+  'certificate-password-change-new',
+  'certificate-password-change-confirm',
 ];
 const shouldHideHeader = computed(() => {
   return !hideHeaderNames.includes(route.name);
