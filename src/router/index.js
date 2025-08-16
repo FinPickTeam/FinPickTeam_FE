@@ -273,6 +273,18 @@ const router = createRouter({
       component: CertificatePasswordChange,
     },
 
+    // 회원탈퇴 관련 (레이아웃 없이)
+    {
+      path: "/withdraw",
+      name: "withdraw",
+      component: Withdraw,
+    },
+    {
+      path: "/withdraw-success",
+      name: "withdraw-success",
+      component: WithdrawSuccess,
+    },
+
     // 메인 레이아웃
     {
       path: "/",
