@@ -194,3 +194,12 @@ export const isPin = async () => {
     throw error;
   }
 }
+
+export const requestEmailVerification = (email) =>
+    api.post("/user/email/verify/request", { email });
+
+export const confirmEmailVerification = (email, code) =>
+    api.post("/user/email/verify/confirm", { email, code });
+
+export const getEmailVerifyStatus = (email) =>
+    api.get("/user/email/verify/status", { params: { email } });
