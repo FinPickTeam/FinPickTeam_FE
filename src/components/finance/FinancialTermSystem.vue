@@ -19,7 +19,7 @@
 </template>
 
 <script setup>
-import { computed, ref, onMounted } from 'vue';
+import { computed, ref } from 'vue';
 
 // Props 정의
 const props = defineProps({
@@ -152,14 +152,14 @@ const closeModal = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 20px 0 20px;
+  padding: 10px 10px 10px 20px;
   border-bottom: 1px solid #eee;
 }
 
 .modal-title {
   margin: 0;
   font-size: 18px;
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
   color: #333;
 }
 
@@ -193,5 +193,6 @@ const closeModal = () => {
   line-height: 1.6;
   color: #555;
   font-size: 14px;
+  font-weight: var(--font-weight-regular);
 }
 </style>
