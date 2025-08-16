@@ -3,14 +3,13 @@
     <!-- 상단 헤더 -->
     <div class="password-header">
       <button class="password-back" @click="goBack">
-        <font-awesome-icon :icon="['fas', 'angle-left']"/>
+        <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
       <span class="password-title center-title">비밀번호 변경</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
     <div class="password-content">
-
       <!-- 제목 -->
       <h1 class="main-title">비밀번호 확인</h1>
 
@@ -28,10 +27,10 @@
           <div class="password-display">
             <div class="password-dots">
               <div
-                  v-for="i in 6"
-                  :key="i"
-                  class="password-dot"
-                  :class="{
+                v-for="i in 6"
+                :key="i"
+                class="password-dot"
+                :class="{
                   filled: i <= confirmPassword.length,
                   correct: i <= confirmPassword.length && isPasswordMatch,
                   incorrect:
@@ -44,22 +43,22 @@
           </div>
           <div class="password-match" v-if="confirmPassword.length > 0">
             <font-awesome-icon
-                :icon="['fas', isPasswordMatch ? 'check' : 'times']"
-                :class="{
+              :icon="['fas', isPasswordMatch ? 'check' : 'times']"
+              :class="{
                 'text-success': isPasswordMatch,
                 'text-error': !isPasswordMatch,
               }"
             />
             <span
-                :class="{
+              :class="{
                 'text-success': isPasswordMatch,
                 'text-error': !isPasswordMatch,
               }"
             >
               {{
                 isPasswordMatch
-                    ? "비밀번호가 성공적으로 변경되었습니다"
-                    : "비밀번호가 일치하지 않습니다"
+                  ? "비밀번호가 성공적으로 변경되었습니다"
+                  : "비밀번호가 일치하지 않습니다"
               }}
             </span>
           </div>
@@ -67,13 +66,17 @@
 
         <!-- 숫자 패드 -->
         <div class="number-pad">
-          <div class="number-row" v-for="row in numberPad" :key="row.join('')">
+          <div
+            class="number-row"
+            v-for="(row, index) in numberPad.slice(0, 3)"
+            :key="index"
+          >
             <button
-                v-for="number in row"
-                :key="number"
-                class="number-btn"
-                @click="addNumber(number)"
-                :disabled="confirmPassword.length >= 6"
+              v-for="number in row"
+              :key="number"
+              class="number-btn"
+              @click="addNumber(number)"
+              :disabled="confirmPassword.length >= 6"
             >
               {{ number }}
             </button>
@@ -83,14 +86,14 @@
               전체삭제
             </button>
             <button
-                class="number-btn"
-                @click="addNumber(3)"
-                :disabled="confirmPassword.length >= 6"
+              class="number-btn"
+              @click="addNumber(numberPad[3])"
+              :disabled="confirmPassword.length >= 6"
             >
-              3
+              {{ numberPad[3] }}
             </button>
             <button class="number-btn delete-btn" @click="deleteNumber">
-              <font-awesome-icon :icon="['fas', 'backspace']"/>
+              <font-awesome-icon :icon="['fas', 'backspace']" />
             </button>
           </div>
         </div>
@@ -100,17 +103,17 @@
 </template>
 
 <script setup>
-import {ref, computed, onMounted} from "vue";
-import {useRouter, useRoute} from "vue-router";
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {library} from "@fortawesome/fontawesome-svg-core";
+import { ref, computed, onMounted } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import { library } from "@fortawesome/fontawesome-svg-core";
 import {
   faAngleLeft,
   faCheck,
   faTimes,
   faBackspace,
 } from "@fortawesome/free-solid-svg-icons";
-import {pinReset} from "@/api/authApi.js";
+import { pinReset } from "@/api/authApi.js";
 
 library.add(faAngleLeft, faCheck, faTimes, faBackspace);
 
@@ -124,12 +127,21 @@ const isLoading = ref(false);
 const errorMessage = ref("");
 const shakeError = ref(false);
 
-// 숫자 패드 배열을 이미지와 동일하게 고정
-const numberPad = ref([
-  [0, 4, 6],
-  [2, 5, 7],
-  [8, 1, 9],
-]);
+// 숫자 패드 배열을 랜덤하게 생성하는 함수
+const generateRandomNumberPad = () => {
+  const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const shuffled = [...numbers].sort(() => Math.random() - 0.5);
+
+  return [
+    [shuffled[0], shuffled[1], shuffled[2]],
+    [shuffled[3], shuffled[4], shuffled[5]],
+    [shuffled[6], shuffled[7], shuffled[8]],
+    shuffled[9], // 10번째 숫자
+  ];
+};
+
+// 숫자 패드 배열을 랜덤하게 생성
+const numberPad = ref(generateRandomNumberPad());
 
 // 비밀번호 일치 확인
 const isPasswordMatch = computed(() => {
@@ -183,17 +195,16 @@ const completePasswordChange = async () => {
 
     // 성공 시 사용자에게 알림 후 페이지 이동
     await router.push("/mypage");
-
   } catch (error) {
     // API 호출 실패 시 에러 처리
-    const message = error.response?.data?.message || "비밀번호 변경에 실패했습니다.";
+    const message =
+      error.response?.data?.message || "비밀번호 변경에 실패했습니다.";
     triggerShakeError(message);
   } finally {
     isLoading.value = false;
   }
   // 완료 페이지로 이동
   await router.push("/mypage");
-
 };
 
 const triggerShakeError = (message) => {
@@ -202,6 +213,8 @@ const triggerShakeError = (message) => {
   setTimeout(() => {
     shakeError.value = false;
     clearPassword();
+    // 에러 발생 시 숫자 패드를 다시 랜덤하게 생성
+    numberPad.value = generateRandomNumberPad();
   }, 500);
 };
 </script>
@@ -261,7 +274,6 @@ const triggerShakeError = (message) => {
   display: flex;
   flex-direction: column;
 }
-
 
 .main-title {
   font-size: 24px;

@@ -540,7 +540,7 @@ const goToNext = () => {
   width: 100%;
   max-width: 390px;
   background: transparent;
-  border-top: 1px solid #e5e7eb;
+  /* border-top: 1px solid #e5e7eb; */
   margin-bottom: 80px;
   padding: 16px;
 }
