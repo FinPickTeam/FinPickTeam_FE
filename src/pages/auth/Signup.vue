@@ -28,11 +28,13 @@
             placeholder="이메일을 입력하세요"
             :class="{ error: errors.email }"
             @blur="validateEmail"
+            :disabled="submitting"
           />
           <button
             type="button"
             class="check-btn"
             @click="handleEmailDuplicateCheck"
+            :disabled="submitting || !form.email || !!errors.email"
           >
             중복확인
           </button>
@@ -53,6 +55,7 @@
             placeholder="비밀번호를 입력하세요"
             :class="{ error: errors.password }"
             @blur="validatePassword"
+            :disabled="submitting"
           />
           <span class="icon" @click="togglePassword">
             <i
@@ -81,6 +84,7 @@
             placeholder="비밀번호를 다시 입력하세요"
             :class="{ error: errors.confirmPassword }"
             @blur="validateConfirmPassword"
+            :disabled="submitting"
           />
           <span class="icon" @click="toggleConfirmPassword">
             <i
@@ -98,11 +102,18 @@
       </div>
 
       <!-- 회원가입 버튼 -->
-      <button type="submit" class="signup-btn">회원가입</button>
+      <button
+        type="submit"
+        class="signup-btn"
+        :disabled="submitting || !isFormValid"
+      >
+        {{ submitting ? '처리 중...' : '회원가입' }}
+      </button>
       <div v-if="warningMessage" class="warning-message">
         {{ warningMessage }}
       </div>
     </form>
+
     <div class="login-link-middle">
       이미 계정이 있으신가요?
       <router-link to="/login">로그인</router-link>
@@ -113,9 +124,13 @@
 <script setup>
 import { ref, reactive, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { signup, checkEmailDuplicate, loginApi } from '@/api/index.js'; // API 함수 import
+import { signup, checkEmailDuplicate } from '@/api/index.js';
+import { useAuthStore } from '@/stores/auth.js';
 
 const router = useRouter();
+const authStore = useAuthStore();
+
+const REQUIRE_EMAIL_CHECK = true;
 
 const form = reactive({
   email: '',
@@ -135,15 +150,12 @@ const emailCheckMessage = ref('');
 const emailCheckMessageClass = ref('');
 const showPassword = ref(false);
 const showConfirmPassword = ref(false);
+const submitting = ref(false);
 let warningTimeout = null;
 
-const togglePassword = () => {
-  showPassword.value = !showPassword.value;
-};
-
-const toggleConfirmPassword = () => {
-  showConfirmPassword.value = !showConfirmPassword.value;
-};
+const togglePassword = () => (showPassword.value = !showPassword.value);
+const toggleConfirmPassword = () =>
+  (showConfirmPassword.value = !showConfirmPassword.value);
 
 const validateEmail = () => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -181,13 +193,9 @@ const validateConfirmPassword = () => {
 };
 
 const handleEmailDuplicateCheck = async () => {
-  if (!form.email || errors.email) {
-    return;
-  }
-
+  if (!form.email || errors.email) return;
   try {
     const response = await checkEmailDuplicate(form.email);
-
     if (response.status === 200) {
       isEmailChecked.value = true;
       emailCheckMessage.value = '사용 가능한 이메일입니다.';
@@ -201,8 +209,7 @@ const handleEmailDuplicateCheck = async () => {
       emailCheckMessage.value = '예상치 못한 응답입니다.';
       emailCheckMessageClass.value = 'error';
     }
-  } catch (e) {
-    // 이미 사용 중인 이메일이면 이곳으로 옴
+  } catch {
     isEmailChecked.value = false;
     emailCheckMessage.value = '중복된 이메일입니다.';
     emailCheckMessageClass.value = 'error';
@@ -210,27 +217,37 @@ const handleEmailDuplicateCheck = async () => {
 };
 
 const isFormValid = computed(() => {
-  const isValid =
+  const baseValid =
     form.email &&
     form.password &&
     form.confirmPassword &&
     !errors.email &&
     !errors.password &&
     !errors.confirmPassword;
-  return isValid;
+
+  if (!REQUIRE_EMAIL_CHECK) return baseValid;
+  return baseValid && isEmailChecked.value;
 });
+
+const showWarning = (msg) => {
+  warningMessage.value = msg;
+  if (warningTimeout) clearTimeout(warningTimeout);
+  warningTimeout = setTimeout(() => (warningMessage.value = ''), 2000);
+};
 
 const handleSignup = async () => {
   if (!isFormValid.value) {
-    warningMessage.value = '모든 항목을 올바르게 입력해주세요.';
-    if (warningTimeout) clearTimeout(warningTimeout);
-    warningTimeout = setTimeout(() => {
-      warningMessage.value = '';
-    }, 2000);
+    showWarning('모든 항목을 올바르게 입력해주세요.');
+    return;
+  }
+  if (REQUIRE_EMAIL_CHECK && !isEmailChecked.value) {
+    showWarning('이메일 중복확인을 해주세요.');
     return;
   }
 
   try {
+    submitting.value = true;
+
     const requestBody = {
       email: form.email,
       password: form.password,
@@ -239,19 +256,24 @@ const handleSignup = async () => {
 
     const response = await signup(requestBody);
 
-    if (response.status === 200) {
-      await loginApi(form.email, form.password);
-      router.push({
-        path: '/auth/signup-complete',
-        query: { userName: form.email.split('@')[0] },
+    if (response.status >= 200 && response.status < 300) {
+      const ok = await authStore.login({
+        email: form.email,
+        password: form.password,
       });
+
+      if (ok) {
+        router.push('/auth/signup-complete');
+      } else {
+        showWarning(authStore.error || '로그인에 실패했습니다.');
+      }
     } else {
-      warningMessage.value = response.message || '회원가입에 실패했습니다.';
+      showWarning(response.message || '회원가입에 실패했습니다.');
     }
   } catch (error) {
-    // 백엔드에서 400 에러 내려줄 때 예외 처리
-    warningMessage.value =
-      error.response?.data?.message || '오류가 발생했습니다.';
+    showWarning(error?.response?.data?.message || '오류가 발생했습니다.');
+  } finally {
+    submitting.value = false;
   }
 };
 </script>
@@ -448,27 +470,6 @@ input.error {
     opacity: 1;
   }
 }
-@media (max-width: 480px) {
-  .signup-container {
-    padding: 16px;
-  }
-  .app-title {
-    font-size: 28px;
-  }
-  .input-group {
-    flex-direction: row;
-    gap: 8px;
-  }
-  .input-group input {
-    flex: 1;
-  }
-  .check-btn {
-    width: auto;
-    min-width: 80px;
-    font-size: 12px;
-    padding: 12px 8px;
-  }
-}
 
 .login-link-fixed {
   text-align: center;
@@ -481,22 +482,11 @@ input.error {
   z-index: 10;
   background: transparent;
 }
-@media (max-width: 480px) {
-  .login-link-fixed {
-    bottom: 16px;
-  }
-}
 
-/* 스타일 */
 .login-link-middle {
   text-align: center;
   color: #666666;
   font-size: 15px;
   margin: 48px 0 0 0;
-}
-@media (max-width: 480px) {
-  .login-link-middle {
-    margin-top: 32px;
-  }
 }
 </style>

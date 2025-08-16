@@ -36,20 +36,26 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const route = useRoute();
+const auth = useAuthStore();
 
-// 사용자 이름 (실제로는 props나 store에서 가져올 수 있음)
-const userName = ref('금맹정음');
+const pickDisplayName = (u) =>
+  u?.nickname ?? u?.nickName ?? u?.name ?? u?.email?.split('@')[0] ?? '회원';
 
-// 컴포넌트 마운트 시 사용자 이름 설정
-onMounted(() => {
-  // URL 파라미터나 쿼리에서 사용자 이름을 가져올 수 있음
-  if (route.query.userName) {
-    userName.value = route.query.userName;
+const userName = computed(
+  () => route.query.userName || pickDisplayName(auth.user)
+);
+
+onMounted(async () => {
+  if (!auth.user) {
+    try {
+      await auth.fetchMe();
+    } catch {}
   }
 });
 
@@ -161,7 +167,7 @@ const goToProfile = () => {
 
 .bottom-section {
   max-width: 400px;
-  margin: 0 auto;
+  margin-bottom: 60px;
   width: 100%;
   padding-bottom: 24px;
 }
