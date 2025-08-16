@@ -31,13 +31,10 @@
     </div>
     <div class="content-scroll">
       <!-- 수익률 차트 섹션 -->
-      <div
-        class="chart-section"
-        v-if="unref(product).stockChartData && !isLoading"
-      >
+      <div class="chart-section" v-if="product.stockChartData && !isLoading">
         <div class="chart-card">
           <h3 class="chart-title">주가 상승률</h3>
-          <StockChart :chart-data="unref(product).stockChartData" />
+          <StockChart :chart-data="product.stockChartData" />
         </div>
       </div>
 
@@ -67,23 +64,46 @@
             </div>
           </div>
           <div class="result-content">
-            <span v-if="!simulationLoading && !hasResult" class="reuslt-text"
-              >시작·종료 날짜를 입력 후 검색 아이콘을 누르면 <br />투자 결과를
-              볼 수 있습니다.</span
-            >
-            <span v-if="!simulationLoading && hasResult" class="result-text">
-              {{ formattedStartDate }}부터 {{ formattedEndDate }}까지
-              <br />100만원을 투자했다면
+            <!-- 1) 아직 시작 전: 안내 -->
+            <span v-if="!isStarted" class="result-text">
+              시작·종료 날짜를 입력 후 검색 아이콘을 누르면 <br />투자 결과를 볼
+              수 있습니다.
+            </span>
+
+            <!-- 2) 시작 후 날짜 오류 -->
+            <span v-else-if="dateStatus !== 'OK'" class="result-text">
+              <template v-if="dateStatus === 'MISSING'"
+                >시작일과 종료일을 입력해주세요.</template
+              >
+              <template v-else-if="dateStatus === 'INVALID_ORDER'"
+                >시작일과 종료일이 올바르지 않습니다.</template
+              >
+              <template v-else-if="dateStatus === 'FUTURE_END'"
+                >종료일은 오늘보다 미래일 수 없습니다.</template
+              >
+            </span>
+
+            <!-- 3) 로딩 중 -->
+            <span v-else-if="simulationLoading" class="result-text">
+              {{ product.stockName }}의 수익률을 계산중입니다.
+            </span>
+
+            <!-- 4) 결과 -->
+            <span v-else-if="hasResult" class="result-text">
+              {{ formattedStartDate }}부터 {{ formattedEndDate }}까지 <br />
+              100만원을 투자했다면
               <span
                 class="result-value"
-                :class="{ red: isProfit, blue: isLoss, gray: isFlat }"
+                :class="{
+                  red: isProfit,
+                  blue: isLoss,
+                  gray: !isProfit && !isLoss,
+                }"
               >
-                {{ formattedAbsAmount }}원</span
-              >의 <span v-if="isProfit">수익</span
-              ><span v-if="!isProfit">손실</span>이 발생했습니다.
-            </span>
-            <span v-if="simulationLoading" class="result-text">
-              {{ product.stockName }}의 수익률을 계산중입니다.
+                {{ formattedAbsAmount }}원
+              </span>
+              의 <span v-if="isProfit">수익</span><span v-else>손실</span>이
+              발생했습니다.
             </span>
           </div>
         </div>
@@ -138,10 +158,11 @@
             </span>
             <span class="detail-value">
               <FinancialTermSystem
-                :text="`${String(product.stockYearHigh).replace(
-                  /^[-+]/,
-                  ''
-                )}원 / ${String(product.stockYearLow).replace(/^[-+]/, '')}원`"
+                :text="`${Number(
+                  String(product.stockYearHigh).replace(/^[-+]/, '')
+                ).toLocaleString('ko-KR')}원 / ${Number(
+                  String(product.stockYearLow).replace(/^[-+]/, '')
+                ).toLocaleString('ko-KR')}원`"
                 :financial-terms="financialTerms"
                 :is-enabled="isHighlightEnabled"
               />
@@ -157,7 +178,9 @@
             </span>
             <span class="detail-value">
               <FinancialTermSystem
-                :text="product.stockFaceValue + '원'"
+                :text="`${Number(product.stockFaceValue).toLocaleString(
+                  'ko-KR'
+                )}원`"
                 :financial-terms="financialTerms"
                 :is-enabled="isHighlightEnabled"
               />
@@ -209,7 +232,7 @@
             </span>
             <span class="detail-value">
               <FinancialTermSystem
-                :text="product.stockPer"
+                :text="`${product.stockPer}배`"
                 :financial-terms="financialTerms"
                 :is-enabled="isHighlightEnabled"
               />
@@ -217,37 +240,21 @@
           </div>
         </div>
       </div>
-      <!-- 이동하기 버튼 -->
-      <div class="action-section" v-if="!isLoading">
-        <p class="action-text">
-          찜한 주식과 나의 종목, 지금 바로 비교해 보세요!
-        </p>
-        <p class="action-subtext">아래 버튼을 눌러 비교 페이지로 이동합니다</p>
-        <button class="action-btn" @click="openBottomSheet">주식 선택</button>
-      </div>
-      <!-- 바텀시트 -->
-      <StockBottomSheet
-        v-model:open="bottomSheetOpen"
-        :base-id="String(route.params.id)"
-        @confirm="goCompare"
-      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, unref } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { ref, computed, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 import { useFavoriteStore } from '@/stores/favorite';
 import FinancialTermSystem from '@/components/finance/FinancialTermSystem.vue';
 import { getStockDetail, getStockReturns } from '@/api';
 import StockChart from '@/components/finance/stock/StockChart.vue';
 import loadingImg from '@/assets/stock_logo/loading.png';
 import startImg from '@/assets/stock_logo/start.png';
-import StockBottomSheet from '@/components/finance/stock/StockBottomSheet.vue';
 
 const route = useRoute();
-const router = useRouter();
 const favoriteStore = useFavoriteStore();
 
 // 상품 데이터
@@ -263,6 +270,7 @@ const startDate = ref('');
 const endDate = ref('');
 const simulationResult = ref('');
 const simulationLoading = ref(false);
+const isStarted = ref(false);
 const hasResult = computed(() => !!String(simulationResult.value ?? '').trim());
 const profitNumber = computed(() => {
   const v = simulationResult.value;
@@ -273,22 +281,33 @@ const profitNumber = computed(() => {
 
 const isProfit = computed(() => profitNumber.value > 0);
 const isLoss = computed(() => profitNumber.value < 0);
-const isFlat = computed(() => profitNumber.value === 0);
 const currentIcon = computed(() =>
   simulationLoading.value ? loadingImg : startImg
 );
 
-// 모달달 상태관리
-const bottomSheetOpen = ref(false);
+const normalize = (v) => {
+  const d = new Date(v);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
 
-// "+27,182" 같은 문자열/숫자 모두 처리 → "27,182"로 반환
+const dateStatus = computed(() => {
+  if (!startDate.value || !endDate.value) return 'MISSING';
+  const start = normalize(startDate.value);
+  const end = normalize(endDate.value);
+  const today = normalize(new Date());
+
+  if (start > end) return 'INVALID_ORDER';
+  if (end > today) return 'FUTURE_END';
+  return 'OK';
+});
+
 const formattedAbsAmount = computed(() => {
   const s = String(simulationResult.value ?? '').trim();
   if (!s) return '';
-  // 숫자와 음수 기호만 남기고 나머지(+, 콤마, 공백 등) 제거
   const n = Number(s.replace(/[^0-9-]/g, ''));
   if (Number.isNaN(n)) return '';
-  return Math.abs(n).toLocaleString('ko-KR'); // 3자리마다 쉼표
+  return Math.abs(n).toLocaleString('ko-KR');
 });
 
 onMounted(async () => {
@@ -301,7 +320,6 @@ onMounted(async () => {
   }
 });
 
-// 날짜 포맷 (yyyy년 mm월 dd일)
 const formattedStartDate = computed(() => {
   if (!startDate.value) return '';
   const [y, m, d] = startDate.value.split('-');
@@ -316,34 +334,28 @@ const formattedEndDate = computed(() => {
 
 // 수익률 얻기
 const getSimulationReturns = async () => {
-  // 1) 입력 검증
-  if (!startDate.value || !endDate.value) {
-    console.warn('날짜를 선택하세요.');
-    return;
-  }
-  if (startDate.value > endDate.value) {
-    console.warn('시작일이 종료일보다 늦습니다.');
+  isStarted.value = true;
+
+  // 날짜 검증 실패 시 메시지만 띄우고 종료
+  if (dateStatus.value !== 'OK') {
+    simulationResult.value = '';
     return;
   }
 
   simulationLoading.value = true;
   try {
-    // 2) 날짜 포맷: YYYYMMDD
     const apiStartDate = startDate.value.replace(/-/g, '');
     const apiEndDate = endDate.value.replace(/-/g, '');
-
-    // 3) 종목코드(필요 시 6자리 보장)
     const stockCode = String(route.params.id).padStart(6, '0');
-
-    const params = { stockCode, startDate: apiStartDate, endDate: apiEndDate };
-
-    // 4) 비동기 호출 (await 필수)
-    const res = await getStockReturns(params); // { status, message, data: "+27,182" }
+    const res = await getStockReturns({
+      stockCode,
+      startDate: apiStartDate,
+      endDate: apiEndDate,
+    });
     simulationResult.value = res?.data ?? '';
-    // isProfit은 computed가 자동 계산
-  } catch (err) {
-    console.error(err);
-    simulationResult.value = ''; // 실패 시 결과 비우기
+  } catch (e) {
+    console.error(e);
+    simulationResult.value = '';
   } finally {
     simulationLoading.value = false;
   }
@@ -396,21 +408,11 @@ function toggleFavorite() {
     favoriteStore.addFavorite(product.value);
   }
 }
-//모달창 열기
-function openBottomSheet() {
-  bottomSheetOpen.value = true;
-  console.log(bottomSheetOpen.value);
-}
 
-function goCompare(ids) {
-  bottomSheetOpen.value = false;
-  const withParam = (ids || []).slice(0, 2).join(',');
-  router.push({
-    name: 'StockCompare',
-    params: { id: String(route.params.id) },
-    query: { with: withParam },
-  });
-}
+watch([startDate, endDate], () => {
+  isStarted.value = false;
+  simulationResult.value = '';
+});
 </script>
 
 <style scoped>
@@ -437,12 +439,6 @@ function goCompare(ids) {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.bank-logo {
-  width: 24px;
-  height: 24px;
-  object-fit: contain;
 }
 
 .product-title {
@@ -593,7 +589,7 @@ function goCompare(ids) {
 .detail-card {
   background: white;
   border-radius: 12px;
-  padding: 16px;
+  padding: 6px 12px;
 }
 
 .detail-item {
@@ -652,11 +648,6 @@ function goCompare(ids) {
 .spinning {
   animation: spin 0.9s linear infinite;
 }
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
 .stock-simulation {
   width: 100%;
   height: 180px;
@@ -671,10 +662,6 @@ function goCompare(ids) {
   justify-content: space-between;
   align-items: flex-start;
   gap: 8px;
-}
-.simulation-title img {
-  width: 20px;
-  height: auto;
 }
 .s-title {
   font-size: 16px;
@@ -703,12 +690,6 @@ function goCompare(ids) {
   font-family: var(--font-main);
   background: #f8f9fa;
 }
-.date span {
-  color: #666;
-  font-size: 14px;
-  font-weight: 500;
-  font-family: var(--font-main);
-}
 .result-content {
   display: flex;
   margin-top: 16px;
@@ -717,50 +698,13 @@ function goCompare(ids) {
   font-size: 14px;
 }
 
-.action-section {
-  border-radius: 12px;
-  padding: 20px;
-  text-align: center;
-  margin-top: 20px;
-}
-
-.action-text {
-  font-size: 14px;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.action-subtext {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 16px;
-}
-
-.action-btn {
-  background: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 24px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #333;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.action-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
 .result-value.red {
-  color: red;
+  color: #ef4444;
 }
 .result-value.blue {
-  color: blue;
+  color: #3b82f6;
 }
 .result-value.gray {
-  color: #6b7280;
+  color: #9ca3af;
 }
 </style>

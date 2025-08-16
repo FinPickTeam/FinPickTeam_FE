@@ -43,7 +43,11 @@
         v-if="showProducts && !isLoadingRecommend"
         class="products-container"
       >
-        <ProductCardList_stock :products="stockRecommendData.data" />
+        <ProductCardList_stock :products="stockRecommendData" />
+        <span class="subtab info-text">
+          해당 종목은 다양한 시장 지표와 분석 결과를 바탕으로 <br />사용자의
+          투자 성향에 맞게 추천되었습니다.
+        </span>
       </div>
     </div>
 
@@ -151,6 +155,11 @@
         <p>검색 조건에 맞는 주식이 없습니다.</p>
       </div>
     </div>
+
+    <!-- 오른쪽 하단 비교 버튼 -->
+    <div class="compare-button" @click="openCompare">추천좀</div>
+    <!-- 바텀시트 -->
+    <StockBottomSheet v-model:open="bottomSheetOpen" @confirm="goCompare" />
   </div>
 </template>
 
@@ -161,6 +170,7 @@ import ProductCardList_stock from '@/components/finance/stock/ProductCardList_st
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { getStockList, getStockRecommendedList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
+import StockBottomSheet from '@/components/finance/stock/StockBottomSheet.vue';
 
 const router = useRouter();
 const showProducts = ref(false);
@@ -169,6 +179,9 @@ const isLoadingAll = ref(false);
 const stockAllData = ref([]);
 const stockRecommendData = ref([]);
 const fav = useFavoriteStore();
+
+//모달창 관련
+const bottomSheetOpen = ref(false);
 
 onMounted(async () => {
   fetchStockList();
@@ -192,7 +205,7 @@ const fetchStockRecommend = async () => {
   isLoadingRecommend.value = true;
   try {
     console.log('투자 성향에 맞는 상품 확인하기 클릭됨');
-    const res = await getStockRecommendedList(5);
+    const res = await getStockRecommendedList(20);
     stockRecommendData.value = res.data ?? [];
     showProducts.value = true;
   } catch (error) {
@@ -346,6 +359,17 @@ const filteredAllProducts = computed(() => {
 
   return result;
 });
+
+// 모달창 관련
+function openCompare() {
+  bottomSheetOpen.value = true;
+}
+
+function goCompare(ids) {
+  if (!Array.isArray(ids) || ids.length !== 3) return;
+  const [main, a, b] = ids;
+  router.push(`/finance/stock/compare/${main}?with=${a},${b}`);
+}
 </script>
 
 <style scoped>
@@ -416,12 +440,10 @@ const filteredAllProducts = computed(() => {
 }
 
 .info-text {
-  margin-top: 36px;
-  font-size: 17px;
-  color: #222;
-  text-align: center;
-  font-weight: 500;
-  line-height: 1.6;
+  position: relative;
+  top: -12px;
+  display: flex;
+  justify-content: center;
 }
 
 .emoji {
@@ -608,5 +630,22 @@ const filteredAllProducts = computed(() => {
 
 .complete-btn:hover {
   background: var(--color-main-dark);
+}
+
+/* 비교 버튼 */
+.compare-button {
+  position: fixed;
+  bottom: 80px;
+  right: 10px;
+  width: 60px;
+  height: 60px;
+  background: var(--color-main);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 </style>

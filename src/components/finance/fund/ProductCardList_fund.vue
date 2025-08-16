@@ -28,7 +28,7 @@ const handleFavoriteRemoved = (product) => {
 
 <style scoped>
 .fund-list {
-  padding: 16px;
+  padding: 0 16px;
   display: flex;
   flex-direction: column;
   align-items: center;

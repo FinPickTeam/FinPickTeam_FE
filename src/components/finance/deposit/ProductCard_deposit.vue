@@ -138,7 +138,7 @@ const getLogoUrl = (bankName) => {
 }
 .heart {
   color: var(--color-bg-accent);
-  font-size: 32px;
+  font-size: 26px;
   cursor: pointer;
   margin-left: 8px;
   user-select: none;

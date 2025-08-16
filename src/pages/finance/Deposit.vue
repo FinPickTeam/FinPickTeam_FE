@@ -49,7 +49,6 @@
                   >월 {{ formData.amount.toLocaleString() }}원</span
                 >
               </div>
-              <<<<<<< Updated upstream ======= >>>>>>> Stashed changes
               <div
                 v-if="formData.selectedPrefer.length > 0"
                 class="summary-item-box"
@@ -73,6 +72,10 @@
         v-if="showResults && !isLoadingRecommend"
         :products="recommendProducts"
       />
+      <span v-if="showResults && !isLoadingRecommend" class="subtab info-text">
+        선택한 우대 조건과 사용자의 투자 성향을 <br />
+        종합 분석해 선정한 상품입니다.
+      </span>
     </div>
 
     <!-- 전체 보기 탭일 때 -->
@@ -270,7 +273,6 @@ function showSearchResults(receivedFormData) {
 
 // 예금 추천 리스트 받기
 const fetchDepositRecommendation = async (receivedFormData) => {
-  isLoadingRecommend.value = true;
   try {
     const params = {
       amount: receivedFormData.amount,
@@ -419,15 +421,6 @@ function closeFilter() {
   border-bottom: 2px solid var(--color-main-light);
 }
 
-.info-text {
-  margin-top: 36px;
-  font-size: var(--font-size-body-large);
-  color: var(--color-text);
-  text-align: center;
-  font-weight: var(--font-weight-medium);
-  line-height: 1.6;
-}
-
 .emoji {
   font-size: 20px;
   vertical-align: middle;
@@ -532,6 +525,12 @@ function closeFilter() {
 
 .edit-btn:hover {
   background-color: var(--color-main-dark);
+}
+.info-text {
+  position: relative;
+  top: -12px;
+  display: flex;
+  justify-content: center;
 }
 
 /* 전체보기 탭 */
