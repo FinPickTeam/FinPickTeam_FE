@@ -66,12 +66,13 @@ const errorMessage = ref("");
 const shakeError = ref(false);
 
 const generateRandomNumberPad = () => {
-  const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
   const shuffled = [...numbers].sort(() => Math.random() - 0.5);
   return [
-    shuffled.slice(0, 3), // 섞인 배열의 0, 1, 2번째 요소
-    shuffled.slice(3, 6), // 섞인 배열의 3, 4, 5번째 요소
-    shuffled.slice(6, 9),
+    [shuffled[0], shuffled[1], shuffled[2]],
+    [shuffled[3], shuffled[4], shuffled[5]],
+    [shuffled[6], shuffled[7], shuffled[8]],
+    shuffled[9], // 10번째 숫자
   ];
 };
 const numberPad = ref(generateRandomNumberPad());
@@ -145,6 +146,8 @@ const goBack = () => {
   position: relative;
   display: flex;
   flex-direction: column;
+  padding-bottom: 50px;
+  box-sizing: border-box;
 }
 .pin-auth-header {
   width: 100%;
