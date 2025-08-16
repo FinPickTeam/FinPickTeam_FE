@@ -4,7 +4,6 @@
     <main class="main-content">
       <router-view />
     </main>
-    <Navbar />
   </div>
 </template>
 
@@ -20,12 +19,11 @@ import Navbar from '@/components/Navbar.vue';
   flex-direction: column;
   align-items: stretch;
   background: var(--color-bg-light);
-  padding-top: 80px; /* 헤더 높이만큼 상단 패딩 */
-  padding-bottom: 80px; /* 네비바 높이만큼 하단 패딩 */
+  padding-top: 80px;
+  padding-bottom: 80px;
 }
 
 .main-content {
   flex: 1 0 auto;
-  /* padding-bottom 제거 - 이미 main-layout에서 처리 */
 }
 </style>

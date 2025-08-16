@@ -54,3 +54,8 @@ export const getUserChallengeHistory = () =>
     .catch((err) => {
       throw err;
     });
+
+// 미확인 결과 존재 여부
+export function hasUnconfirmedChallengeResult() {
+    return api.get('/challenge/has-unconfirmed');
+}

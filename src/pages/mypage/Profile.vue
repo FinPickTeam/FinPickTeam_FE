@@ -225,15 +225,7 @@ const passwordValid = computed(() => {
 </script>
 
 <style scoped>
-.profile-container {
-  min-height: 100vh;
-  background: var(--color-bg);
-  position: relative;
-  padding-bottom: 80px;
-  font-family: var(--font-main);
-  padding-left: 10px;
-  padding-right: 10px;
-}
+.profile-container { padding-top: 56px; }
 .profile-form {
   padding: 20px;
   max-width: 390px;
@@ -374,32 +366,22 @@ input:focus {
   }
 }
 .profile-header-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 18px;
-  max-width: 540px;
-  padding: 20px 0 0 0;
+  position: fixed; top: 0; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; width: 100%; max-width: 390px;
+  height: 56px; padding: 0 12px; z-index: 1100; background: #fff; border-bottom: 1px solid #e5e6ea;
 }
 .profile-header-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: var(--color-text);
-  width: 100%;
-  text-align: center;
-  display: block;
+  position: absolute; left: 50%; transform: translateX(-50%); width: 100%;
+  text-align: center; font-size: 1.2rem; font-weight: bold; color: var(--color-text);
 }
 .back-btn {
-  background: none;
-  border: none;
-  font-size: 22px;
-  color: #222;
-  cursor: pointer;
-  padding: 2px 8px 2px 2px;
-  border-radius: 8px;
-  transition: background 0.15s;
+  display: flex; align-items: center; justify-content: center;
+  width: 44px; height: 44px;          /* 터치 타겟 크게 */
+  margin-left: -6px;
+  background: none; border: none; color: #222; font-size: 22px; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
-.back-btn:hover {
-  background: var(--color-bg-accent);
-}
+.back-btn:hover { background: transparent; } /* 호버 제거 */
+.back-btn:active { transform: scale(0.98); } /* 눌렀을 때만 반응 */
+
 </style>
