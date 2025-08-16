@@ -67,7 +67,33 @@ function goToMyAssets() {
   router.push('/openbanking/myhome');
 }
 function onPrimaryClick() {
-  hasAccounts.value ? goToAgreement() : goToAgreement();
+  if (loading.value) return;
+
+  loading.value = true;
+  error.value = '';
+
+  (async () => {
+    try {
+      // 전체 계좌 및 카드 동기화
+      await syncAllAccounts();
+      await syncAllCards();
+
+      // 월간 리포트 초기화
+      await initMonthReport();
+
+      // 자산 요약 초기화
+      const assetSummary = await getAssetTotal();
+      console.log('자산 요약 초기화 완료:', assetSummary);
+
+      // 성공 메시지
+      alert('연동 및 초기화가 완료되었습니다.');
+    } catch (e) {
+      error.value =
+        e?.response?.data?.message || e?.message || '연동 및 초기화 실패';
+    } finally {
+      loading.value = false;
+    }
+  })();
 }
 
 onMounted(async () => {
