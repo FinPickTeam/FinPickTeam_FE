@@ -1486,6 +1486,7 @@ export default {
   padding: 4px;
   white-space: pre-line;
   line-height: 1.2;
+  white-space: pre-line;
 }
 
 .avatar-loading,
@@ -1720,6 +1721,7 @@ export default {
   margin-top: 30px;
   border-radius: 8px;
   /* padding-bottom: 5px; */
+  overflow: hidden;
 }
 
 .item-img {
@@ -1797,7 +1799,6 @@ export default {
 .disabled-badge {
   background-color: #6c757d;
   color: white;
-
   border-radius: 5px;
   display: flex;
   align-items: center;
