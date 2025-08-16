@@ -14,15 +14,15 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter } from "vue-router";
 
 const router = useRouter();
 
 const goToNotification = () => {
-  router.push('/notification');
+  router.push("/notification");
 };
 const goToDictionary = () => {
-  router.push('/dictionary');
+  router.push("/dictionary");
 };
 </script>
 
@@ -67,13 +67,13 @@ const goToDictionary = () => {
 }
 .notification-dot {
   position: absolute;
-  top: 2px;
-  right: 2px;
-  width: 8px;
-  height: 8px;
+  top: 6px;
+  right: 0px;
+  width: 4px;
+  height: 4px;
   background: var(--color-accent);
   border-radius: 50%;
-  border: 2px solid #fff;
+  /* border: 2px solid #fff; */
   display: inline-block;
 }
 
