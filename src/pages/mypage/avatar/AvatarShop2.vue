@@ -478,9 +478,8 @@
         </div>
       </div>
     </div>
-
     <!-- 아바타 착용 버튼 -->
-    <div class="avatar-wear-section">
+    <div v-if="activeTab === 'avatar'" class="avatar-wear-section">
       <button
         class="avatar-wear-btn"
         :disabled="!selectedItemForWear || wearLoading"
