@@ -72,20 +72,13 @@ function toggleFavorite() {
     favoriteStore.addFavorite(props.fund);
   }
 }
-
-const typeClassMap = {
-  주식형: 'type-stock',
-  채권형: 'type-bond',
-  혼합형: 'type-mix',
-};
-
 const riskClassMap = {
   '높은 위험': 'risk-high',
   '보통 위험': 'risk-medium',
   '낮은 위험': 'risk-low',
 };
 
-const typeClass = computed(() => typeClassMap[props.fund?.fundType] || '');
+const typeClass = 'fund-type';
 const riskClass = computed(() => riskClassMap[props.fund?.fundRiskLevel] || '');
 </script>
 
@@ -200,16 +193,8 @@ const riskClass = computed(() => riskClassMap[props.fund?.fundRiskLevel] || '');
   color: white;
 }
 
-.type-stock {
+.fund-type {
   background-color: #7c3aed;
-}
-
-.type-bond {
-  background-color: #059669;
-}
-
-.type-mix {
-  background-color: #dc2626;
 }
 
 .risk-high {

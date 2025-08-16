@@ -233,7 +233,7 @@ onMounted(async () => {
   font-size: 15px;
   font-weight: 600;
   color: #888;
-  margin: 0px 0 0 10px;
+  margin: 0px 0 10px 10px;
 }
 
 .no-favorites {
