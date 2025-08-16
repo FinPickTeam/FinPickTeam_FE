@@ -149,6 +149,23 @@
         </div>
       </div>
     </div>
+    <!-- 성공 모달 -->
+    <div
+      v-if="showSuccessModal"
+      class="modal-overlay"
+      @click="showSuccessModal = false"
+    >
+      <div class="modal-content success-modal" @click.stop>
+        <div class="success-icon">✓</div>
+        <h3>완료</h3>
+        <p>{{ successMessage }}</p>
+        <div class="btn-group">
+          <button class="save-btn" @click="showSuccessModal = false">
+            확인
+          </button>
+        </div>
+      </div>
+    </div>
     <Navbar />
   </div>
 </template>
@@ -185,6 +202,8 @@ const showNicknameModal = ref(false);
 const nicknameForm = ref({ new: "" });
 const nicknameCheckResult = ref("");
 const isChangingPassword = ref(false);
+const showSuccessModal = ref(false);
+const successMessage = ref("");
 
 const goBack = () => {
   router.go(-1);
@@ -229,8 +248,9 @@ function changeNickname() {
   nicknameCheckResult.value = "";
   nicknameForm.value.new = "";
 
-  // 성공 메시지
-  alert("닉네임이 변경되었습니다.");
+  // 성공 모달 표시
+  successMessage.value = "닉네임이 성공적으로 변경되었습니다.";
+  showSuccessModal.value = true;
 }
 
 const changePassword = async () => {
@@ -267,9 +287,12 @@ const changePassword = async () => {
     await changePasswordApi(passwordData);
 
     // 성공 시 처리
-    alert("비밀번호가 성공적으로 변경되었습니다.");
     showPasswordModal.value = false;
     passwordForm.value = { current: "", new: "", confirm: "" };
+
+    // 성공 모달 표시
+    successMessage.value = "비밀번호가 성공적으로 변경되었습니다.";
+    showSuccessModal.value = true;
   } catch (error) {
     console.error("비밀번호 변경 실패:", error);
 
@@ -439,6 +462,36 @@ input:focus {
 }
 .password-check-msg.fail {
   color: var(--color-accent);
+}
+
+/* 성공 모달 스타일 */
+.success-modal {
+  text-align: center;
+}
+
+.success-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #4caf50;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  margin: 0 auto 20px;
+}
+
+.success-modal h3 {
+  color: #4caf50;
+  margin-bottom: 10px;
+}
+
+.success-modal p {
+  color: var(--color-text);
+  font-size: 16px;
+  margin-bottom: 20px;
+  line-height: 1.5;
 }
 @media (max-width: 600px) {
   .profile-form {
