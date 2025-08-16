@@ -48,6 +48,10 @@
         <i class="fa-solid fa-coins"></i>
         <span class="guide-text-underline">적금 투어</span>
       </div>
+      <div class="guide-text" @click="showFundTour">
+        <i class="fa-solid fa-chart-line"></i>
+        <span class="guide-text-underline">펀드 투어</span>
+      </div>
       <div class="guide-text" @click="showGuideModal">
         <i class="fa-solid fa-circle-info"></i>
         <span class="guide-text-underline">이용 가이드</span>
@@ -89,7 +93,7 @@ const isDriverGuideVisible = ref(false);
 const isMultiRouteGuideVisible = ref(false);
 
 // 투어 기능
-const { startInstallmentTour } = useFinanceRouteTours();
+const { startInstallmentTour, startFundTour } = useFinanceRouteTours();
 
 // 가이드 이미지 배열 (실제 이미지 경로로 수정 필요)
 const guideImages = ref([
@@ -138,6 +142,13 @@ function closeMultiRouteGuide() {
 
 function showInstallmentTour() {
   startInstallmentTour({
+    includeDetail: true,
+    detailId: '1', // 실제 상품 ID로 변경 필요
+  });
+}
+
+function showFundTour() {
+  startFundTour({
     includeDetail: true,
     detailId: '1', // 실제 상품 ID로 변경 필요
   });

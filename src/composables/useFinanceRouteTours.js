@@ -383,6 +383,7 @@ export function useFinanceRouteTours() {
   const startFundTour = async (
     opts = { includeDetail: false, detailId: null }
   ) => {
+    // 1) 재테크 홈
     await goAndWait(router, { name: 'FinanceHome' }, [SELECTORS.tab.fund]);
     await runSteps([
       {
@@ -397,28 +398,97 @@ export function useFinanceRouteTours() {
       },
     ]);
 
-    await goAndWait(router, { name: 'Fund' }, [SELECTORS.list.firstCard]);
+    // 2) 펀드 목록 (추천 탭)
+    await goAndWait(router, { name: 'Fund' }, [
+      '.subtab-row',
+      '.btn-outline.with-icon',
+    ]);
     await runSteps([
       {
-        element: SELECTORS.list.sort,
+        element: '.subtab-row .subtab:first-child',
         popover: {
-          title: '정렬/필터',
-          description: '수익률/보수/설정액 등 기준으로 정렬해요.',
+          title: '📊 추천 펀드',
+          description:
+            '추천 탭에서는 사용자 맞춤 펀드 상품을 확인할 수 있어요!',
           side: 'bottom',
           align: 'center',
         },
       },
       {
-        element: SELECTORS.list.favHeart,
+        element: '.btn-outline.with-icon',
         popover: {
-          title: '관심 펀드',
-          description: '나중에 비교하기 쉽도록 저장해요.',
+          title: '🔍 AI 펀드 추천',
+          description:
+            '시장 흐름과 상품 특성을 고려하여, 사용자의 투자 성향에 맞게 추천해줍니다!',
+          side: 'top',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 실제로 전체보기 탭 클릭
+    const allViewTab = document.querySelector('.subtab-row .subtab:last-child');
+    if (allViewTab) {
+      allViewTab.click();
+    }
+
+    // 3) 전체보기 탭 클릭 후 전체보기 설명
+    await runSteps([
+      {
+        element: '.subtab-row .subtab:last-child',
+        popover: {
+          title: '📋 전체보기 탭',
+          description:
+            '전체보기 탭을 클릭하면 모든 펀드 상품을 확인할 수 있어요!',
+          side: 'bottom',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 탭 전환 후 전체보기 화면이 로드될 때까지 대기
+    try {
+      await waitForEl('.search-filter-row', { timeout: 5000 });
+    } catch (error) {
+      console.warn('전체보기 화면을 찾을 수 없습니다:', error);
+    }
+
+    // 4) 전체보기 화면 검색/필터 설명
+    await runSteps([
+      {
+        element: '.search-filter-row',
+        popover: {
+          title: '🔍 검색 + 필터 기능',
+          description:
+            '펀드명으로 검색하고, 펀드 유형과 위험도로 필터링할 수 있어요!',
+          side: 'top',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 상품 카드가 로드될 때까지 대기
+    try {
+      await waitForEl('.product-card:first-child', { timeout: 5000 });
+    } catch (error) {
+      console.warn('전체보기 탭의 상품 카드를 찾을 수 없습니다:', error);
+    }
+
+    // 5) 펀드 상품 카드 설명
+    await runSteps([
+      {
+        element: '.product-card:first-child',
+        popover: {
+          title: '💳 펀드 상품 추천 카드',
+          description:
+            '펀드사, 상품명, 수익률, 위험도 정보가 한눈에 보기 쉽게 구성되어 있어요!',
           side: 'left',
           align: 'center',
         },
       },
     ]);
 
+    // 6) (선택) 펀드 상세
     if (opts.includeDetail && (opts.detailId ?? null) !== null) {
       await goAndWait(
         router,
@@ -429,17 +499,9 @@ export function useFinanceRouteTours() {
         {
           element: SELECTORS.detail.termToggle,
           popover: {
-            title: '용어 하이라이트',
-            description: '총보수, 벤치마크 등 핵심 용어를 빠르게 이해!',
-            side: 'top',
-            align: 'center',
-          },
-        },
-        {
-          element: SELECTORS.detail.dictBtn,
-          popover: {
-            title: '용어사전',
-            description: '낯선 용어는 바로 검색해서 확인해요.',
+            title: '🔮 단어 마법사',
+            description:
+              '금융 용어에 마우스를 올리면 쉽게 이해할 수 있도록 설명해드려요!',
             side: 'bottom',
             align: 'center',
           },
