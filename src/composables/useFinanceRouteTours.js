@@ -21,6 +21,102 @@ function waitForEl(selector, { timeout = 8000, interval = 100 } = {}) {
   });
 }
 
+// === 유틸: 보이는지 체크 ===
+function isVisible(el) {
+  if (!el) return false;
+  const rect = el.getBoundingClientRect();
+  const style = getComputedStyle(el);
+  return (
+    rect.width > 0 &&
+    rect.height > 0 &&
+    style.display !== 'none' &&
+    style.visibility !== 'hidden' &&
+    style.opacity !== '0'
+  );
+}
+
+// === 유틸: 보이는 상태까지 대기 ===
+async function waitForVisible(
+  selector,
+  { timeout = 4000, interval = 80 } = {}
+) {
+  const start = Date.now();
+  while (Date.now() - start < timeout) {
+    const el = document.querySelector(selector);
+    if (isVisible(el)) return el;
+    await new Promise((r) => setTimeout(r, interval));
+  }
+  throw new Error(`[tour] visible timeout: ${selector}`);
+}
+
+// === 유틸: 현재 페이지 범위에서 필터 버튼만 선택 ===
+function getFilterBtnInScope() {
+  // 적금 페이지는 search-filter-container 안에 필터 버튼이 있음
+  const scope =
+    document.querySelector('.search-filter-container') ||
+    document.querySelector('.search-filter-row') ||
+    document; // fallback
+  return (
+    scope.querySelector('[data-tour="filter-btn"]') ||
+    scope.querySelector('.filter-btn') ||
+    scope.querySelector('.fa-solid.fa-filter')
+  );
+}
+
+// === 유틸: 투어 중 바깥 클릭으로 닫히지 않도록 캡처 단계에서 막기 ===
+function openFilterAndHold({ btn, panelSel }) {
+  // 1) 열기
+  btn?.click();
+
+  // 2) 바깥 클릭 차단(캡처 단계)
+  const stopper = (e) => e.stopPropagation();
+  document.addEventListener('click', stopper, true);
+  document.addEventListener('mousedown', stopper, true);
+  document.body.dataset.tourLock = '1';
+
+  // 3) 정리 함수 반환
+  const cleanup = () => {
+    document.removeEventListener('click', stopper, true);
+    document.removeEventListener('mousedown', stopper, true);
+    delete document.body.dataset.tourLock;
+  };
+
+  return {
+    waitPanel: async () => {
+      // Vue의 반응성 업데이트를 기다림
+      await nextTick();
+      // 적금 페이지의 경우 더 긴 지연 시간 필요
+      await new Promise((r) => setTimeout(r, 500));
+      return waitForVisible(panelSel, { timeout: 5000 });
+    },
+    cleanup,
+  };
+}
+
+// === 유틸: 적금 페이지 필터 강제 열기 ===
+function forceOpenInstallmentFilter() {
+  // 적금 페이지의 showFilter 상태를 직접 변경
+  const installmentPage =
+    document.querySelector('[data-page="installment"]') || document;
+  const script = document.createElement('script');
+  script.textContent = `
+    // Vue 컴포넌트 인스턴스를 찾아서 showFilter를 true로 설정
+    const app = document.querySelector('#app').__vue_app__;
+    if (app) {
+      const currentRoute = app.config.globalProperties.$route;
+      if (currentRoute && currentRoute.name === 'Installment') {
+        // 현재 컴포넌트의 showFilter를 true로 설정
+        const vm = app._instance;
+        if (vm && vm.setupState && vm.setupState.showFilter !== undefined) {
+          vm.setupState.showFilter = true;
+        }
+      }
+    }
+  `;
+  document.head.appendChild(script);
+  document.head.removeChild(script);
+}
+
 // === 유틸: 현재 라우트 이동 후 DOM 안정화 ===
 async function goAndWait(router, to, mustSelectors = []) {
   await router.push(to);
@@ -175,7 +271,7 @@ export function useFinanceRouteTours() {
       {
         element: '.search-filter-row',
         popover: {
-          title: '🔍 전체보기 화면',
+          title: '🔍 예금 검색창',
           description:
             '검색창과 필터 버튼을 통해 원하는 상품을 쉽게 찾을 수 있어요!',
           side: 'top',
@@ -183,6 +279,34 @@ export function useFinanceRouteTours() {
         },
       },
     ]);
+
+    // 필터 열기 + 바깥닫힘 잠시 차단
+    const filterBtn = getFilterBtnInScope();
+    const guard = openFilterAndHold({
+      btn: filterBtn,
+      panelSel: '.filter-dropdown',
+    });
+    // 패널이 '보이는' 상태가 될 때까지 대기
+    await guard.waitPanel();
+
+    // 필터창 설명(이때는 반드시 열린 상태)
+    await runSteps([
+      {
+        element: '.filter-dropdown',
+        popover: {
+          title: '🔧 예금 필터',
+          description:
+            '금리, 기간, 은행별로 필터링하여 원하는 조건의 예금 상품을 찾을 수 있어요!',
+          side: 'left',
+          align: 'center',
+        },
+      },
+    ]);
+
+    // 바깥닫힘 차단 해제 후 닫기
+    guard.cleanup();
+    filterBtn?.click(); // 같은 버튼으로 닫기
+    await new Promise((r) => setTimeout(r, 300));
 
     // 상품 카드가 로드될 때까지 대기
     try {
