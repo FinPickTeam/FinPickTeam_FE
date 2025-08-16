@@ -545,7 +545,7 @@ const downloadServerPdf = async () => {
 .nav-arrow {
   background: none;
   border: none;
-  color: #4318d1;
+  color: var(--color-main);
   font-size: 22px;
   cursor: pointer;
   padding: 8px;
@@ -580,7 +580,7 @@ const downloadServerPdf = async () => {
   font-size: 14px;
 }
 .accent-blue {
-  color: #4318d1;
+  color: var(--color-main);
   font-weight: 700;
 }
 .accent-red {
@@ -613,7 +613,7 @@ const downloadServerPdf = async () => {
   transition: height 0.3s, background 0.3s;
 }
 .bar-accent {
-  background: #4318d1;
+  background: var(--color-main);
 }
 .bar-red {
   background: #e74c3c !important;
@@ -645,7 +645,7 @@ const downloadServerPdf = async () => {
   transition: 0.3s;
 }
 .month-label-current {
-  background: #4318d1;
+  background: var(--color-main);
   color: #fff;
   font-weight: 700;
 }
@@ -777,7 +777,7 @@ const downloadServerPdf = async () => {
   color: #222;
 }
 .tendency-icon {
-  color: #4318d1;
+  color: var(--color-main);
   font-size: 18px;
 }
 .tendency-desc {
@@ -818,7 +818,7 @@ const downloadServerPdf = async () => {
 .challenge-text {
   font-size: 0.9rem;
   font-weight: 600;
-  color: #4318d1;
+  color: var(--color-main);
 }
 .challenge-goal {
   font-size: 0.8rem;
@@ -827,7 +827,7 @@ const downloadServerPdf = async () => {
 .challenge-edit-btn {
   background: none;
   border: none;
-  color: #4318d1;
+  color: var(--color-main);
   font-size: 18px;
   cursor: pointer;
   padding: 8px;

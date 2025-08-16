@@ -82,13 +82,13 @@ const formatAmount = (amount) => {
 }
 
 .refresh-btn:hover {
-  color: #4318d1;
+  color: var(--color-main);
 }
 
 .asset-amount {
   font-size: 2.1rem;
   font-weight: 700;
-  color: #4318d1;
+  color: var(--color-main);
   margin-bottom: 4px;
 }
 

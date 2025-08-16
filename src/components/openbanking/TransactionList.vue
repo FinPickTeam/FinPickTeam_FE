@@ -27,7 +27,7 @@
 
 <script setup>
 import { computed } from 'vue';
-import { parseLocalDate } from '@/utils/dateUtils.js';
+import { parseLocalDate } from '@/components/openbanking/dateUtils.js';
 
 const props = defineProps({
   items: { type: Array, default: () => [] },

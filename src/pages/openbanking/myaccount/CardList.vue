@@ -1,30 +1,48 @@
 <!-- src/views/openbanking/CardList.vue -->
 <template>
   <div class="page">
-    <AssetSummaryCard title="이번달 카드 사용 내역" :amount="cardTotalAmount" />
-
-    <section class="group">
-      <div v-if="loading" class="loading">
-        <div class="loading-spinner"></div>
-        <p>카드 정보를 불러오는 중...</p>
+    <section class="summary-card">
+      <h2 class="summary-title">총 소비</h2>
+      <div class="summary-right">
+        <div
+          class="hero-delta"
+          :class="{ up: spendingDiff > 0, down: spendingDiff < 0 }"
+        >
+          <span class="delta-icon">
+            {{ spendingDiff > 0 ? '▲' : spendingDiff < 0 ? '▼' : '–' }}
+          </span>
+          전월 대비 {{ Math.abs(spendingChangePercent).toFixed(1) }}%
+        </div>
+        <div class="summary-amount">
+          {{ cardTotalAmount.toLocaleString() }}원
+        </div>
       </div>
-      <ListItemCard
-        v-else
-        v-for="c in cards"
-        :key="c.id"
-        :logo="cardLogo(c.bank)"
-        :bank="c.bank"
-        :badge="c.type"
-        badgeClass="bg-card"
-        :amount="c.amount"
-        :isNegative="c.amount < 0"
-        :name="c.name"
-        :sub="`본인 ${c.cardNumber || '****'}`"
-        :selected="selected.includes(c)"
-        @click="onClick(c)"
-        class="card-item"
-      />
     </section>
+
+    <div v-if="loading" class="loading">
+      <div class="loading-spinner"></div>
+      <p>카드 정보를 불러오는 중...</p>
+    </div>
+
+    <div v-else class="list-wrap">
+      <h3 class="group-title">카드</h3>
+      <div class="card-list">
+        <ListItemCard
+          v-for="c in cards"
+          :key="c.id"
+          :logo="cardLogo(c.bank)"
+          :badge="c.type"
+          badgeClass="bg-card"
+          :amount="c.amount"
+          :isNegative="c.amount < 0"
+          :name="c.name"
+          :sub="`본인 ${c.cardNumber || '****'}`"
+          :selected="selected.includes(c)"
+          @click="onClick(c)"
+          class="card-item"
+        />
+      </div>
+    </div>
 
     <ConfirmModal
       :open="showModal"
@@ -47,16 +65,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import ListItemCard from '@/components/openbanking/ListItemCard.vue';
 import ConfirmModal from '@/components/openbanking/ConfirmModal.vue';
 import DeleteModeFooter from '@/components/openbanking/DeleteModeFooter.vue';
-import AssetSummaryCard from '@/components/openbanking/AssetSummaryCard.vue';
 import Navbar from '@/components/Navbar.vue';
 import { useSelectDelete } from '@/components/openbanking/useSelectDelete.js';
 import { useLogos } from '@/components/openbanking/useLogos.js';
 import { useRouter } from 'vue-router';
 import { getCardsWithTotal } from '@/api/openbanking/cardsApi';
+import { getAssetSummaryCompare } from '@/api/openbanking/assetSummaryApi.js';
 
 const router = useRouter();
 const { cardLogo } = useLogos();
@@ -73,6 +91,8 @@ const {
 const cards = ref([]);
 const cardTotalAmount = ref(0);
 const loading = ref(false);
+const spendingDiff = ref(0);
+const spendingChangePercent = ref(0);
 
 const fetchCards = async () => {
   try {
@@ -94,6 +114,26 @@ const fetchCards = async () => {
       (sum, card) => sum + (card.amount || 0),
       0
     );
+
+    // 전월 대비 소비 비교
+    const now = new Date();
+    const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      '0'
+    )}`;
+    try {
+      const cmp = await getAssetSummaryCompare({ month: ym });
+      const d = cmp?.data || {};
+      const cur = Number(d.currentSpending ?? cardTotalAmount.value);
+      const prev = Number(d.prevSpending ?? 0);
+      spendingDiff.value = Number(d.spendingDiff ?? cur - prev);
+      spendingChangePercent.value = prev
+        ? (spendingDiff.value / prev) * 100
+        : 0;
+    } catch {
+      spendingDiff.value = 0;
+      spendingChangePercent.value = 0;
+    }
   } catch (error) {
     console.error('카드 API 호출 에러:', error);
     // 폴백
@@ -128,7 +168,16 @@ const confirmDelete = () => {
   selected.value = [];
 };
 
-onMounted(fetchCards);
+const handleToggleDelete = () => toggleMode();
+
+onMounted(async () => {
+  window.addEventListener('toggle-delete-mode', handleToggleDelete);
+  fetchCards();
+});
+
+onUnmounted(() => {
+  window.removeEventListener('toggle-delete-mode', handleToggleDelete);
+});
 </script>
 
 <style scoped>
@@ -146,11 +195,53 @@ onMounted(fetchCards);
   min-height: 0;
 }
 
+/* ===== Summary card ===== */
+.summary-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 0 16px 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+.summary-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #555;
+}
+.summary-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-top: 4px;
+}
+.summary-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-main);
+  white-space: nowrap;
+}
+.hero-delta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: #666;
+}
+.hero-delta.up {
+  color: #ef4444;
+}
+.hero-delta.down {
+  color: #3b82f6;
+}
+.delta-icon {
+  font-weight: 700;
+}
+
 .header-icon-btn {
   background: none;
   border: none;
   font-size: 16px;
-  color: #4318d1;
+  color: var(--color-main);
   cursor: pointer;
   padding: 8px;
   border-radius: 8px;
@@ -166,23 +257,28 @@ onMounted(fetchCards);
   background: #f3f3f3;
 }
 
-.group {
-  margin: 0 16px 16px;
-  flex: 1;
-  overflow-y: auto;
+.list-wrap {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 16px;
+  margin: 0 -16px;
 }
-
-.card-item {
-  margin-bottom: 12px;
+.group-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-left: 16px;
+  color: #222;
 }
-
-.card-item:last-child {
-  margin-bottom: 0;
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .bg-card {
   background: #ece9fd;
-  color: #4318d1;
+  color: var(--color-main);
 }
 
 .loading {
@@ -198,7 +294,7 @@ onMounted(fetchCards);
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #4318d1;
+  border-top: 4px solid var(--color-main);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 16px;

@@ -1,24 +1,14 @@
 <template>
   <div class="item" :class="[{ selected, disabled }]">
-    <div class="top">
-      <div class="bank">
-        <img v-if="logo" :src="logo" alt="" class="logo" />
-        <div class="names">
-          <div class="bank-name">
-            {{ bank }}
-            <span v-if="badge" class="badge" :class="badgeClass">{{
-              badge
-            }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="right-amount" :class="{ negative: isNegative }">
-        <slot name="amount">{{ amount?.toLocaleString() }}원</slot>
+    <div class="left">
+      <img v-if="logo" :src="logo" alt="" class="logo" />
+      <div class="text">
+        <div class="name">{{ name }}</div>
+        <div v-if="sub" class="sub">{{ sub }}</div>
       </div>
     </div>
-    <div class="bottom">
-      <div class="name">{{ name }}</div>
-      <div class="sub">{{ sub }}</div>
+    <div class="right-amount" :class="{ negative: isNegative }">
+      <slot name="amount">{{ amount?.toLocaleString() }}원</slot>
     </div>
   </div>
 </template>
@@ -40,30 +30,29 @@ defineProps({
 
 <style scoped>
 .item {
-  background: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  transition: 0.15s;
-  cursor: pointer;
-}
-.item.selected {
-  border-color: #dc2626;
-  background: #fef2f2;
-}
-.item.disabled {
-  opacity: 0.5;
-  pointer-events: none;
-}
-.top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-.bank {
+  background: var(--color-bg);
+  border-radius: 12px;
+  padding: 14px 16px;
   display: flex;
   align-items: center;
   gap: 12px;
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.item.selected {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+}
+.item.disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+.left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 auto;
+  min-width: 0;
 }
 .logo {
   width: 32px;
@@ -71,33 +60,33 @@ defineProps({
   object-fit: contain;
   border-radius: 4px;
 }
-.bank-name {
-  font-weight: 600;
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
 }
-.badge {
-  padding: 2px 6px;
-  border-radius: 8px;
-  font-size: 0.7rem;
-  color: #fff;
-  margin-left: 8px;
+.name {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sub {
+  font-size: 0.75rem;
+  color: #888;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .right-amount {
   font-weight: 700;
-  color: #4318d1;
+  color: var(--color-main);
+  white-space: nowrap;
 }
 .right-amount.negative {
-  color: #e11d48;
-}
-.bottom {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.name {
-  color: #666;
-}
-.sub {
-  color: #888;
-  font-size: 0.9rem;
+  color: var(--color-accent);
 }
 </style>
