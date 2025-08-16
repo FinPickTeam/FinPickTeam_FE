@@ -51,41 +51,85 @@
       </div>
 
       <!-- 공통 챌린지 있음 + 미참여 -->
-      <div v-else-if="!participating" class="ranking-card not-participating">
-        <div class="target-section">
-          <div class="target-icon">
-            <img
-              src="@/assets/challenge/empty-state.png"
-              alt="빈 상태"
-              class="target-image"
-            />
+      <div v-else-if="!participating" class="not-participating-container">
+        <!-- 메인 카드 -->
+        <div class="not-participating-card">
+          <!-- 상단 일러스트레이션 -->
+          <div class="illustration-section">
+            <div class="illustration-container">
+              <div class="floating-elements">
+                <div class="floating-coin coin-1">💰</div>
+                <div class="floating-coin coin-2">🎯</div>
+                <div class="floating-coin coin-3">⭐</div>
+              </div>
+              <div class="main-illustration">
+                <div class="challenge-icon">
+                  <i class="fas fa-trophy"></i>
+                </div>
+                <div class="sparkle sparkle-1">✨</div>
+                <div class="sparkle sparkle-2">✨</div>
+                <div class="sparkle sparkle-3">✨</div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div class="ranking-info">
-          <!-- 닉네임 라인 -->
-          <div class="user-name">
-            <strong class="nickname nickname-lg">{{ nickname }}</strong
-            >님
+          <!-- 사용자 인사말 -->
+          <div class="greeting-section">
+            <div class="greeting-text">
+              <span class="greeting-nickname">{{ nickname }}</span
+              >님,
+              <br />
+              <span class="greeting-message"
+                >이번 달 챌린지에 참여하지 않으셨어요!</span
+              >
+            </div>
           </div>
-          <!-- 아래 문구 분리 + 여백 -->
-          <div class="np-subtext">
-            이번 달 공통 챌린지에 참여하지 않으셨어요!
+
+          <!-- 정보 카드 -->
+          <div class="info-cards">
+            <div class="info-card">
+              <div class="info-icon">📊</div>
+              <div class="info-content">
+                <h3 class="info-title">현재 참여 현황</h3>
+                <p class="info-desc">
+                  {{ totalParticipants.toLocaleString() }}명이 참여 중
+                </p>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <div class="info-icon">🎁</div>
+              <div class="info-content">
+                <h3 class="info-title">다음 기회</h3>
+                <p class="info-desc">다음 달 챌린지에 참여해보세요!</p>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <!-- 하단 고정 느낌의 알림 영역 -->
-        <div class="notify-block">
-          <button
-            class="notify-cta"
-            @click="handleNotifyToggle"
-            aria-live="polite"
-          >
-            <span class="notify-cta-icon">🔔</span>
-            <span class="notify-cta-text">알림</span>
-          </button>
+          <!-- 액션 버튼 -->
+          <div class="action-section">
+            <button
+              class="notify-toggle-btn"
+              :class="{ 'notify-active': notifyEnabled }"
+              @click="handleNotifyToggle"
+              aria-live="polite"
+            >
+              <div class="btn-content">
+                <span class="btn-icon">{{ notifyEnabled ? '🔔' : '🔕' }}</span>
+                <span class="btn-text">
+                  {{ notifyEnabled ? '알림 설정됨' : '다음 달 알림 받기' }}
+                </span>
+              </div>
+            </button>
 
-          <p class="notify-desc">다음달 챌린지 시작 알림을 받으시겠어요?</p>
+            <p class="action-desc">
+              {{
+                notifyEnabled
+                  ? '다음 달 챌린지 시작 시 알림을 받으실 수 있어요!'
+                  : '다음 달 챌린지 시작 알림을 받으시겠어요?'
+              }}
+            </p>
+          </div>
         </div>
 
         <!-- 글래스 토스트 -->
@@ -1030,36 +1074,329 @@ onMounted(async () => {
   }
 }
 
-/* 미참여 카드: 버튼이 하단 가깝게 */
-.ranking-card.not-participating {
+/* ===== 미참여 사용자 UI 개선 ===== */
+.not-participating-container {
   display: flex;
   flex-direction: column;
-  min-height: 540px;
+  align-items: center;
+  padding: 20px 0;
 }
 
-.target-section {
-  margin-bottom: 24px;
+.not-participating-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+  border-radius: 24px;
+  padding: 32px 24px;
+  box-shadow: 0 12px 32px rgba(107, 70, 193, 0.12);
+  border: 1px solid rgba(107, 70, 193, 0.08);
+  max-width: 380px;
+  width: 100%;
+
+  overflow: hidden;
 }
-.target-icon {
+
+.not-participating-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    var(--color-main) 0%,
+    var(--color-main-light) 100%
+  );
+  border-radius: 24px 24px 0 0;
+}
+
+/* 일러스트레이션 섹션 */
+.illustration-section {
+  margin-bottom: 32px;
+  position: relative;
+}
+
+.illustration-container {
+  position: relative;
   display: flex;
   justify-content: center;
+  align-items: center;
+  height: 120px;
+}
+
+.floating-elements {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.floating-coin {
+  position: absolute;
+  font-size: 24px;
+  animation: float 3s ease-in-out infinite;
+  opacity: 0.8;
+}
+
+.coin-1 {
+  top: 10%;
+  left: 15%;
+  animation-delay: 0s;
+}
+
+.coin-2 {
+  top: 20%;
+  right: 20%;
+  animation-delay: 1s;
+}
+
+.coin-3 {
+  bottom: 15%;
+  left: 25%;
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+.main-illustration {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.challenge-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 24px rgba(107, 70, 193, 0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.challenge-icon i {
+  font-size: 36px;
+  color: white;
+  animation: trophyGlow 2s ease-in-out infinite;
+}
+
+@keyframes trophyGlow {
+  0%,
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: brightness(1.2);
+  }
+}
+
+.sparkle {
+  position: absolute;
+  font-size: 16px;
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.sparkle-1 {
+  top: -10px;
+  left: 20px;
+  animation-delay: 0s;
+}
+
+.sparkle-2 {
+  top: 10px;
+  right: 15px;
+  animation-delay: 0.7s;
+}
+
+.sparkle-3 {
+  bottom: -5px;
+  left: 50%;
+  animation-delay: 1.4s;
+}
+
+@keyframes sparkle {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8) rotate(0deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2) rotate(180deg);
+  }
+}
+
+/* 인사말 섹션 */
+.greeting-section {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.greeting-text {
+  font-size: 18px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.greeting-nickname {
+  font-weight: 800;
+  color: var(--color-main);
+  font-size: 20px;
+}
+
+.greeting-message {
+  font-weight: 500;
+  color: #666;
+  margin-top: 4px;
+  display: inline-block;
+}
+
+/* 정보 카드 */
+.info-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.info-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(107, 70, 193, 0.1);
+  transition: all 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(107, 70, 193, 0.15);
+}
+
+.info-icon {
+  font-size: 24px;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%);
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px 0;
+}
+
+.info-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+/* 액션 섹션 */
+.action-section {
+  text-align: center;
+}
+
+.notify-toggle-btn {
+  width: 100%;
+  padding: 16px 20px;
+  border: none;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+  border: 2px solid rgba(107, 70, 193, 0.2);
+  color: var(--color-main); /* 기본 폰트 색상 추가 */
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
   margin-bottom: 16px;
 }
-.ranking-info {
-  margin-bottom: 12px;
+
+.notify-toggle-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(107, 70, 193, 0.2);
 }
 
-.user-name,
-.total-participants {
+.notify-toggle-btn.notify-active {
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
+  border-color: var(--color-main);
+  color: white;
+}
+
+.btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  position: relative;
+  z-index: 2;
+}
+
+.btn-icon {
+  font-size: 20px;
+}
+
+.btn-text {
   font-size: 16px;
-  color: #333;
-  margin-bottom: 6px;
+  font-weight: 600;
 }
 
-/* 미참여 - 간격 */
-.np-subtext {
-  margin-top: 12px;
-  color: #444;
+.btn-toggle-indicator {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+}
+
+.notify-toggle-btn.notify-active .btn-toggle-indicator {
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.action-desc {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.4;
 }
 
 /* 닉네임/등수 크게 */
@@ -1189,53 +1526,8 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-/* ===== 미참여: 하단 알림 블록 ===== */
-.notify-block {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding-top: 16px;
-}
-
-/* 단일 토글 버튼 */
-.notify-cta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  border: none;
-  border-radius: 999px;
-  background: linear-gradient(
-    135deg,
-    var(--color-main) 0%,
-    var(--color-main-dark) 100%
-  );
-  color: #fff;
-  font-weight: 700;
-  font-size: 14px;
-  cursor: pointer;
-  box-shadow: 0 6px 16px rgba(107, 70, 193, 0.25);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-.notify-cta:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 20px rgba(107, 70, 193, 0.32);
-}
-.notify-cta-icon {
-  line-height: 1;
-}
-.notify-cta-text {
-  letter-spacing: -0.2px;
-}
-
-.notify-desc {
-  margin-top: 24px;
-  margin-bottom: 8px;
-  font-size: 14px;
-  color: #555;
-  text-align: center;
-}
+/* ===== 기존 미참여 스타일 정리 ===== */
+/* 이전 스타일들은 새로운 UI로 대체되었습니다 */
 
 /* ===== 토스트 (하단 중앙) ===== */
 .notify-toast {
@@ -1246,8 +1538,8 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 16px;
-  border-radius: 12px;
+  padding: 16px 24px;
+  border-radius: 16px;
   font-size: 14px;
   font-weight: 700;
   backdrop-filter: blur(8px);
@@ -1255,6 +1547,9 @@ onMounted(async () => {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
   z-index: 1000;
   border: 1px solid rgba(255, 255, 255, 0.4);
+  min-width: 280px;
+  max-width: 320px;
+  justify-content: center;
 }
 .toast-on {
   background: linear-gradient(
@@ -1463,14 +1758,8 @@ onMounted(async () => {
   color: #666;
 }
 
-/* 비참여 이미지 반응형 축소 */
-.target-image {
-  max-width: 70%;
-  width: 220px;
-  height: auto;
-  display: block;
-  margin: 0 auto;
-}
+/* ===== 기존 이미지 스타일 정리 ===== */
+/* 새로운 일러스트레이션으로 대체되었습니다 */
 
 /* 스크린 리더용 텍스트 숨김 */
 .sr-only {
