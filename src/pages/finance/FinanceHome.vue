@@ -40,6 +40,10 @@
         <i class="fa-solid fa-play"></i>
         <span class="guide-text-underline">단계별 가이드</span>
       </div>
+      <div class="guide-text" @click="showMultiRouteGuide">
+        <i class="fa-solid fa-route"></i>
+        <span class="guide-text-underline">예금 투어</span>
+      </div>
       <div class="guide-text" @click="showGuideModal">
         <i class="fa-solid fa-circle-info"></i>
         <span class="guide-text-underline">이용 가이드</span>
@@ -50,6 +54,12 @@
     <FinanceDriverGuide
       :is-visible="isDriverGuideVisible"
       @finish="closeDriverGuide"
+    />
+
+    <!-- 멀티 라우트 실제 기능 체험 가이드 -->
+    <FinanceMultiRouteGuide
+      :is-visible="isMultiRouteGuideVisible"
+      @finish="closeMultiRouteGuide"
     />
 
     <!-- 이용 가이드 풀스크린 모달 -->
@@ -66,10 +76,11 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import FinanceGuideFullscreenModal from '@/components/finance/FinanceGuideFullscreenModal.vue';
 import FinanceDriverGuide from '@/components/finance/FinanceDriverGuide.vue';
-
+import FinanceMultiRouteGuide from '@/components/finance/FinanceMultiRouteGuide.vue';
 const router = useRouter();
 const isGuideModalVisible = ref(false);
 const isDriverGuideVisible = ref(false);
+const isMultiRouteGuideVisible = ref(false);
 
 // 가이드 이미지 배열 (실제 이미지 경로로 수정 필요)
 const guideImages = ref([
@@ -106,6 +117,14 @@ function showDriverGuide() {
 
 function closeDriverGuide() {
   isDriverGuideVisible.value = false;
+}
+
+function showMultiRouteGuide() {
+  isMultiRouteGuideVisible.value = true;
+}
+
+function closeMultiRouteGuide() {
+  isMultiRouteGuideVisible.value = false;
 }
 
 // 첫 방문 시 자동으로 단계별 가이드 시작 (선택사항)
