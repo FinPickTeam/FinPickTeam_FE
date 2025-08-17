@@ -23,7 +23,7 @@
     <!-- 수익률 정보 (오른쪽 정렬) -->
     <div class="return-section">
       <div class="return-label">수익률 (기준:3개월)</div>
-      <div class="return-value">{{ fund.fund3MonthReturn || 'N/A' }}</div>
+      <div class="return-value">{{ fund.fund3MonthReturn || 'N/A' }}%</div>
     </div>
 
     <!-- 하단 태그들 -->

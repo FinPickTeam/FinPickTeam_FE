@@ -71,6 +71,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { useMyDataStore } from '@/stores/MyData';
 
 // Props 정의
 const props = defineProps({
@@ -88,6 +89,7 @@ const props = defineProps({
   },
 });
 
+const myDataStore = useMyDataStore();
 const amountRaw = ref(props.formData?.amountRaw ?? 1000000);
 const period = ref(props.formData.period);
 const preferList = [
@@ -150,7 +152,7 @@ function handleAmountInput(event) {
     input.value = '';
     amountRaw.value = 0;
   }
-  
+
   // 입력값 길이에 따라 너비 조정
   adjustInputWidth(input);
 }
@@ -164,20 +166,20 @@ function adjustInputWidth(input) {
   span.style.whiteSpace = 'pre';
   span.style.font = window.getComputedStyle(input).font;
   span.textContent = input.value || '0';
-  
+
   document.body.appendChild(span);
   const textWidth = span.offsetWidth;
   document.body.removeChild(span);
-  
+
   // 패딩과 여백을 고려한 최종 너비 계산
   const padding = 24; // 좌우 패딩 (12px * 2)
   const margin = 4; // 좌우 마진 (2px * 2)
   const minWidth = 120;
   const maxWidth = 200;
-  
+
   let newWidth = Math.max(minWidth, textWidth + padding + margin);
   newWidth = Math.min(maxWidth, newWidth);
-  
+
   input.style.width = newWidth + 'px';
 }
 
@@ -231,6 +233,7 @@ onMounted(() => {
       adjustInputWidth(input);
     }
   });
+  ensurePreferForLinked();
 });
 
 // formattedAmount가 변경될 때마다 너비 조정
@@ -242,6 +245,15 @@ watch(formattedAmount, () => {
     }
   });
 });
+
+const AUTO_PREFER = ['급여 이체 실적 있음', '주택청약 보유'];
+
+function ensurePreferForLinked() {
+  if (!myDataStore.linked) return;
+  const set = new Set(selectedPrefer.value);
+  for (const p of AUTO_PREFER) set.add(p);
+  selectedPrefer.value = Array.from(set);
+}
 </script>
 
 <style scoped>
@@ -284,7 +296,6 @@ watch(formattedAmount, () => {
   font-weight: 600;
   outline: none;
   cursor: pointer;
-
 }
 
 .period-label {

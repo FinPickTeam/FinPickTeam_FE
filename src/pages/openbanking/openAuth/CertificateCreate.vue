@@ -58,7 +58,7 @@
     <!-- 하단 버튼 -->
     <div class="certificate-bottom">
       <button class="certificate-start-btn" @click="startCertificate">
-        인증서 만들기 시작
+        간편 비밀번호 만들기 시작
       </button>
     </div>
   </div>
