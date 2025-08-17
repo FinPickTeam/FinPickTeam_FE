@@ -144,68 +144,58 @@
       </div>
     </section>
 
-    <!-- 소비 성향 (심플 버전) -->
-    <section v-if="hasReport" class="report-section tendency-section">
-      <!-- 🔹 아이콘 + '소비 성향 : 감정소비형' 한 줄 -->
-      <div class="t-inline-head">
-        <i :class="['t-head-icon', patternIcon]"></i>
-        <span class="t-head-label">소비 성향</span>
-        <span class="t-head-colon">:</span>
-        <strong class="t-head-value">{{ patternPrimary || '—' }}</strong>
-      </div>
-
-      <!-- 2) 빨간 태그 1줄(가로, 넘치면 가로 스크롤) -->
-      <div v-if="metrics.length" class="t-badges-row">
-        <span class="badge alert" v-for="(m, i) in metrics" :key="m.label + i">
-          <i :class="m.icon"></i>
-          <span class="label">{{ m.label }}</span>
-          <span class="value">{{ m.valueText }}</span>
-        </span>
-      </div>
-
-      <!-- 3) 문장 줄바꿈 -->
-      <div v-if="feedbackLines.length" class="t-plain-lines">
-        <i class="fa-solid fa-comment-dots"></i>
-        <div class="lines">
-          <p v-for="(line, i) in feedbackLines" :key="'ln-' + i">{{ line }}</p>
+    <!-- 소비 성향 (v2: 2번 스샷 스타일) -->
+    <section v-if="hasReport" class="report-section profile-card-v2">
+      <div class="pcv2-row">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <div class="pcv2-text">
+          <div class="label">나의 소비 성향은</div>
+          <div class="pcv2-type">
+            <span class="type">{{ profileTypes }}</span
+            >이에요.
+          </div>
         </div>
       </div>
+
+      <p class="pcv2-tip">
+        다음 달엔 <b>{{ reco.category }}</b> 지출을 약
+        <b>{{ reco.percent }}%</b> 줄여보는 걸 추천해요.
+      </p>
+      <p v-if="feedbackLine" class="pcv2-feedback">{{ feedbackLine }}</p>
     </section>
 
-    <!-- 추천 챌린지 (그리드 카드) -->
+    <!-- 추천 챌린지 (v2: 간결 리스트) -->
     <section
       v-if="hasReport && computedChallenges.length"
-      class="report-section challenge-section"
+      class="report-section challenge-list-card"
     >
-      <div class="challenge-title">다음 달 추천 챌린지</div>
+      <div class="clc-head">
+        <h3>다음 달 추천 챌린지</h3>
+        <button
+          class="clc-add-btn"
+          type="button"
+          @click="goToChallengeCreate"
+          aria-label="챌린지 생성"
+        >
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
 
-      <div class="challenge-grid">
-        <div
-          class="challenge-card"
+      <ul class="clc-list">
+        <li
           v-for="(ch, i) in computedChallenges"
           :key="ch.title + '-' + i"
+          class="clc-item"
         >
-          <div class="challenge-left">
-            <div class="challenge-icon">
-              <!-- 로고 추측 금지: 공용 아이콘 하나로 고정 -->
-              <i :class="getChallengeIcon()"></i>
-            </div>
-            <div class="challenge-content">
-              <div class="challenge-text">{{ ch.title }}</div>
-              <div class="challenge-goal">{{ ch.description }}</div>
-            </div>
+          <div class="clc-emoji">
+            <i :class="getChallengeIconClass(ch)"></i>
           </div>
-          <div class="challenge-actions">
-            <button
-              class="challenge-edit-btn"
-              @click="goToChallengeCreate"
-              aria-label="챌린지 편집"
-            >
-              <i class="fa-solid fa-pen-to-square"></i>
-            </button>
+          <div class="clc-main">
+            <div class="clc-title">{{ ch.title }}</div>
+            <div class="clc-desc">{{ ch.description }}</div>
           </div>
-        </div>
-      </div>
+        </li>
+      </ul>
     </section>
   </div>
 </template>
@@ -214,6 +204,7 @@
 import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import { downloadElementAsPDF } from '@/components/openbanking/pdfDownload';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { categoryToLogo } from '@/components/openbanking/categoryLogo';
 import { getMonthReport } from '@/api/openbanking/monthReportApi.js';
 
@@ -353,10 +344,10 @@ const monthBars = computed(() => {
 
   const max = Math.max(...raw.map((b) => b.sum), 1);
   const avg = raw.reduce((s, b) => s + b.sum, 0) / raw.length; // 직전 6개월 평균
-  const EPS = 0.03; // ±5% 데드존
+  const EPS = 0.03; // ±3% 데드존
 
   return raw.map((b) => {
-    const isCurrent = b.ym === reportMonthStr.value;
+    const isCurrent = b.ym === reportMonthStr.value; // 필요하면 강조 클래스 추가
     let colorClass = '';
     if (b.sum > avg * (1 + EPS)) colorClass = 'bar-red';
     else if (b.sum < avg * (1 - EPS)) colorClass = 'bar-green';
@@ -365,6 +356,7 @@ const monthBars = computed(() => {
       ym: b.ym,
       height: Math.round((b.sum / max) * 100),
       colorClass,
+      isCurrent,
     };
   });
 });
@@ -415,7 +407,8 @@ const patternPrimary = computed(() => {
 });
 // 칩: patterns 배열 매핑
 const PATTERN_MAP = {
-  IMPULSE: '충동/감정소비',
+  IMPULSE: '감정소비형',
+  LATE_NIGHT: '심야지출형',
   FRUGAL: '절약형',
   STABLE: '안정형',
   OVERSPENDER: '과소비',
@@ -448,15 +441,17 @@ const feedbackText = computed(() => {
   return typeof raw === 'string' ? raw.trim() : '';
 });
 
-const feedbackLines = computed(() => {
-  const raw = (feedbackText.value || avgComment.value || '').toString().trim();
-  if (!raw) return [];
-  // 문장 단위로 깔끔히 쪼개기 (영문 구두점 + 흔한 한글 문장 끝)
-  const parts = raw
-    .split(/(?<=[.!?]|요\.|요!|요\?|니다\.|습니다\.)\s+/u)
-    .map((s) => s.replace(/\s+/g, ' ').trim())
+// ---- 한 줄 랜덤 선택 ----
+const feedbackLine = computed(() => {
+  const txt = feedbackText.value;
+  if (!txt) return '';
+  const parts = txt
+    .split(/[.!?]+/)
+    .map((s) => s.trim())
     .filter(Boolean);
-  return parts;
+  if (!parts.length) return '';
+  const idx = Math.floor(Math.random() * parts.length);
+  return parts[idx] + '.';
 });
 
 // 추천 챌린지(배열 우선, 없으면 nextGoal(JSON 문자열))
@@ -477,7 +472,7 @@ const computedChallenges = computed(() => {
   }
 });
 
-// 소비 성향 아이콘 (desc 기준)
+// 소비 성향 아이콘 (desc 기준) — v2 카드에선 직접 안 씀. 필요하면 사용.
 const patternIcon = computed(() => {
   const d = (patternPrimary.value || '').toString();
   let name = 'fa-face-meh';
@@ -489,7 +484,7 @@ const patternIcon = computed(() => {
   return `fa-solid ${name}`;
 });
 
-// 지표 뽑기
+// 지표 뽑기(필요 시 사용)
 const peerPct = computed(() =>
   Number(serverReport.value?.averageComparison?.totalDiffPct ?? 0)
 );
@@ -524,8 +519,46 @@ const metrics = computed(() => {
   return arr;
 });
 
-// 챌린지 아이콘(추측 금지: 고정)
+// 챌린지 아이콘(추측 금지: 고정) — v2에선 이모지로 대체
 const getChallengeIcon = () => 'fa-solid fa-list-check';
+
+// ---- 챌린지 아이콘 매핑 ----
+function getChallengeIconClass(ch) {
+  const text = ((ch.title || '') + ' ' + (ch.description || '')).toLowerCase();
+  if (/총지출|지출|total/.test(text)) return 'fa-solid fa-sack-dollar';
+  if (/편의|마트|잡화|쇼핑|market|mart/.test(text))
+    return 'fa-solid fa-cart-shopping';
+  if (/식비|카페|음식|food|meal|식료/.test(text)) return 'fa-solid fa-utensils';
+  if (/저축|saving|목표|저금/.test(text)) return 'fa-solid fa-piggy-bank';
+  if (/달력|스케줄|calendar|일정/.test(text))
+    return 'fa-solid fa-calendar-days';
+  return 'fa-solid fa-list-check';
+}
+
+/* ===== v2 전용 계산 ===== */
+// "감정적 소비형 + 외식 과다형" 형태로 합치기
+const profileTypes = computed(() => {
+  const p = serverReport.value?.spendingPatterns?.[0] || {};
+  const primary = (p.label || patternPrimary.value || '').trim();
+  const extra = patternChips.value?.[0] || '';
+  return [primary, extra].filter(Boolean).join(' + ');
+});
+
+// 추천 문구의 카테고리/퍼센트 추출(없으면 15%)
+const reco = computed(() => {
+  const foodLike = (computedChallenges.value || []).find((c) =>
+    /(식비|카페)/.test((c.title || '') + (c.description || ''))
+  );
+  const text = (
+    (foodLike?.title || '') +
+    ' ' +
+    (foodLike?.description || '')
+  ).trim();
+  const m = text.match(/(\d+)\s*%/);
+  const percent = m ? Number(m[1]) : 15;
+  const category = foodLike ? '식비와 카페' : topCategoryName.value || '주요';
+  return { category, percent };
+});
 
 // ===== PDF 다운로드 핸들러 =====
 const isDownloading = ref(false);
@@ -616,9 +649,6 @@ async function handleDownloadPdf() {
   align-items: center;
   gap: 8px;
 }
-.t-title-icon {
-  color: var(--color-main);
-}
 
 /* ===== 총 소비 ===== */
 .consumption-amount {
@@ -631,22 +661,14 @@ async function handleDownloadPdf() {
   color: #666;
   font-size: 14px;
 }
-.avg-compare {
-  margin-top: 6px;
-  font-size: 13px;
-  color: #444;
-}
-
 .accent-blue {
   color: var(--color-accent-2);
   font-weight: 700;
 }
-
 .accent-main {
   color: var(--color-main);
   font-weight: 700;
 }
-
 .accent-red {
   color: var(--color-accent);
   font-weight: 700;
@@ -682,9 +704,6 @@ async function handleDownloadPdf() {
 }
 .bar-green {
   background: var(--color-main-light);
-}
-.bar-purple {
-  background: var(--color-main);
 }
 .month-labels {
   display: flex;
@@ -829,178 +848,125 @@ async function handleDownloadPdf() {
   color: #222;
 }
 
-/* ===== 소비 성향 (정리본) ===== */
-.tendency-section {
-  padding: 22px 20px;
-}
-
-/* 1줄 헤더: 아이콘 + '소비 성향 : 감정소비형' */
-.t-inline-head {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.t-head-icon {
-  color: var(--color-main);
-  font-size: 18px;
-}
-.t-head-label {
-  font-size: 16px;
-  font-weight: 600;
-  color: #222;
-}
-.t-head-colon {
-  opacity: 0.5;
-}
-.t-head-value {
-  font-size: 16px;
-  font-weight: 800;
-  color: #1f1e37;
-}
-
-/* 🔴 빨간 배지: 1줄, 넘치면 각 배지 내부에서 말줄임 */
-.t-badges-row {
-  display: flex;
-  gap: 8px;
-  flex-wrap: nowrap;
-  margin: 6px 0 10px;
-}
-.t-badges-row .badge.alert {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1 1 0; /* 두 배지 균등 분배 */
-  min-width: 0; /* 축소 허용 */
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid #fecaca;
-  background: #fee2e2;
-  color: #b91c1c;
-  font-size: 12.5px;
-}
-.t-badges-row .badge.alert i {
-  flex: 0 0 auto;
-}
-.t-badges-row .badge.alert .label {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  opacity: 0.9;
-}
-.t-badges-row .badge.alert .value {
-  flex: 0 0 auto; /* 수치는 항상 보이게 */
-  font-weight: 800;
-  margin-left: 4px;
-  white-space: nowrap;
-}
-
-/* 말풍선 문장 블럭 */
-.t-plain-lines {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  color: #555;
-  margin-top: 12px;
-}
-.t-plain-lines i {
-  margin-top: 2px;
-  opacity: 0.85;
-}
-.t-plain-lines .lines {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.t-plain-lines p {
-  margin: 0;
-  line-height: 1.55;
-}
-
-/* ===== 챌린지 ===== */
-.challenge-section {
-  margin-bottom: 18px;
-  background: #fff;
+/* ===== 소비 성향 v2 ===== */
+.profile-card-v2 {
   border-radius: 16px;
-  padding: 20px;
-  border-top: 1px solid #e0e7ff;
+  padding: 18px;
+  background: #fff;
 }
-.challenge-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 12px;
-}
-.challenge-grid {
-  display: grid;
-  grid-template-columns: 1fr;
+
+/* 정렬: 아이콘 + 텍스트 컬럼 */
+.pcv2-row {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
-@media (min-width: 420px) {
-  .challenge-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-.challenge-card {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 12px;
-  border-radius: 14px;
-  background: linear-gradient(0deg, #ffffff, #ffffff), #fafaff;
-}
-.challenge-left {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-.challenge-icon {
-  width: 36px;
-  height: 36px;
+.pcv2-row i {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f4ff;
-  border-radius: 10px;
-  color: #4f46e5;
-  font-size: 16px;
+  border-radius: 50%;
+  background: #ece9ff;
+  font-size: 18px;
+  color: var(--color-main);
 }
-.challenge-content {
+
+.pcv2-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.pcv2-text .label {
+  font-weight: 600;
+}
+
+.pcv2-type {
+  font-size: 18px;
+}
+.pcv2-type .type {
+  color: var(--color-main);
+  font-weight: 800;
+}
+.pcv2-tip {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 12px;
+}
+/* 추가: 피드백 문구 */
+.pcv2-feedback {
+  margin-top: 4px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+/* ===== 추천 챌린지 v2 ===== */
+.challenge-list-card {
+  border-radius: 16px;
+  background: #fff;
+}
+
+/* 추가: 헤더 영역 정렬 및 버튼 스타일 */
+.clc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.clc-head h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+}
+.clc-add-btn {
+  background: none;
+  border: none;
+  color: var(--color-main);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+}
+.clc-add-btn:active {
+  transform: scale(0.9);
+}
+.clc-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.clc-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.clc-emoji {
+  color: var(--color-main);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+.clc-main {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-.challenge-text {
-  font-size: 0.95rem;
+.clc-title {
   font-weight: 700;
   color: #1f1e37;
+  font-size: 15px;
 }
-.challenge-goal {
-  font-size: 0.82rem;
+.clc-desc {
+  font-size: 13px;
   color: #5f5c80;
-  line-height: 1.2;
-}
-.challenge-actions {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-}
-.challenge-edit-btn {
-  background: #f6f7ff;
-  border: 1px solid #ebe9ff;
-  color: #4f46e5;
-  font-size: 16px;
-  cursor: pointer;
-  padding: 8px 10px;
-  border-radius: 10px;
-  transition: 0.15s;
-}
-.challenge-edit-btn:hover {
-  background: #eef2ff;
+  line-height: 1.3;
 }
 
 /* ===== 캡처 안정화 ===== */
