@@ -94,7 +94,7 @@
       </div>
 
       <div class="challenge-stats">
-        <span class="stat">
+        <span class="stat stat-deadline">
           <template
             v-if="
               statusUpper === 'RECRUITING' && getRecruitingRemainingDays() > 0
@@ -105,13 +105,15 @@
           <template v-else> D-{{ getRemainingDays() }} </template>
         </span>
         <!-- 카테고리 표시 -->
-        <span class="stat">{{ getCategoryName() }}</span>
+        <span class="stat stat-category">{{ getCategoryName() }}</span>
         <!-- 참여자 수 표시 (참여중인 챌린지 리스트 페이지에서만 표시, 개인 챌린지 제외) -->
-        <span v-if="isParticipating && typeUpper !== 'PERSONAL'" class="stat">{{
-          getStatText()
-        }}</span>
+        <span
+          v-if="isParticipating && typeUpper !== 'PERSONAL'"
+          class="stat stat-participants"
+          >{{ getStatText() }}</span
+        >
         <!-- 그룹 챌린지인 경우에만 공개 설정 표시 -->
-        <span v-if="typeUpper === 'GROUP'" class="stat">
+        <span v-if="typeUpper === 'GROUP'" class="stat stat-visibility">
           {{ challenge.usePassword ? '비공개' : '공개' }}
         </span>
         <!-- 내가 만든 챌린지 배지 (개인 챌린지 제외) -->
@@ -528,9 +530,33 @@ const handleCardClick = () =>
 }
 .stat {
   font-size: 12px;
-  color: #999;
-  background: #f5f5f5;
   padding: 4px 8px;
   border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.stat-deadline {
+  color: #d32f2f;
+  background: #ffebee;
+  border: 1px solid #ffcdd2;
+}
+
+.stat-category {
+  color: #1976d2;
+  background: #e3f2fd;
+  border: 1px solid #bbdefb;
+}
+
+.stat-participants {
+  color: #388e3c;
+  background: #e8f5e9;
+  border: 1px solid #c8e6c9;
+}
+
+.stat-visibility {
+  color: #f57c00;
+  background: #fff3e0;
+  border: 1px solid #ffcc02;
 }
 </style>

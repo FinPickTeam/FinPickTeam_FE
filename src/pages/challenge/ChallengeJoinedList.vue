@@ -187,15 +187,6 @@ const showFailModalExample = () => (showFailModal.value = true);
           empty-message="현재 참여중인 소그룹 챌린지가 없습니다."
           @cardClick="handleCardClick"
         />
-
-        <div class="test-buttons">
-          <button class="test-success-btn" @click="showSuccessModalExample">
-            성공 모달 테스트
-          </button>
-          <button class="test-fail-btn" @click="showFailModalExample">
-            실패 모달 테스트
-          </button>
-        </div>
       </template>
     </div>
   </div>
