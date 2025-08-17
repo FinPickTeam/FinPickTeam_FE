@@ -73,7 +73,7 @@ const ym = (d = new Date()) =>
 const currentMonth = computed(() => String(route.query.month ?? ym()));
 
 // ----- UI 표시 로직 그대로 -----
-const hideHeaderRoutes = [];
+const hideHeaderRoutes = ['OpenBankingHome'];
 const hideNavbarRoutes = [
   'AccountAgreement',
   'AccountLinkSelect',
