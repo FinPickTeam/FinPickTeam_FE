@@ -191,6 +191,8 @@ const searchKeyword = ref('');
 // 드롭다운 표시
 const showFilter = ref(false);
 
+const show = ref(false);
+
 // ✅ "적용된" 필터 (실제 리스트에 반영되는 값)
 const selectedTargets = ref([]); // 은행
 const selectedInterests = ref([]); // 금리 구간
