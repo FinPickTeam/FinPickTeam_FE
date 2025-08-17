@@ -249,6 +249,8 @@ const triggerShakeError = (message) => {
   position: relative;
   display: flex;
   flex-direction: column;
+  padding-bottom: 50px;
+  box-sizing: border-box;
 }
 
 .password-header {
@@ -263,6 +265,7 @@ const triggerShakeError = (message) => {
   position: sticky;
   top: 0;
   z-index: 100;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .password-back {
