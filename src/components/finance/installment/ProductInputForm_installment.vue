@@ -94,6 +94,7 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
+import { useMyDataStore } from '@/stores/MyData';
 
 // Props 정의
 const props = defineProps({
@@ -112,6 +113,7 @@ const props = defineProps({
   },
 });
 
+const myDataStore = useMyDataStore();
 const period = ref(props.formData.period);
 const amount = ref(props.formData.amount);
 const savingType = ref(props.formData.savingType);
@@ -256,6 +258,7 @@ onMounted(() => {
       adjustInputWidth(input);
     }
   });
+  ensurePreferForLinked();
 });
 
 // formattedAmount가 변경될 때마다 너비 조정
@@ -267,6 +270,15 @@ watch(formattedAmount, () => {
     }
   });
 });
+
+const AUTO_PREFER = ['급여/연금 이체', '주택청약통장 보유'];
+
+function ensurePreferForLinked() {
+  if (!myDataStore.linked) return;
+  const set = new Set(selectedPrefer.value);
+  for (const p of AUTO_PREFER) set.add(p);
+  selectedPrefer.value = Array.from(set);
+}
 </script>
 
 <style scoped>

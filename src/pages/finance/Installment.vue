@@ -152,6 +152,7 @@
         <p>검색 조건에 맞는 적금 상품이 없습니다.</p>
       </div>
     </div>
+    <MyData :open="show" @close="show = false" />
   </div>
 </template>
 
@@ -163,6 +164,8 @@ import ProductCardList from '../../components/finance/installment/ProductCardLis
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { getInstallmentList, getInstallmentRecommendList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
+import { useMyDataStore } from '@/stores/MyData';
+import MyData from '@/components/finance/deposit/MyData.vue';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
@@ -180,6 +183,7 @@ const formData = ref({
   selectedPrefer: [],
 });
 const fav = useFavoriteStore();
+const myDataStore = useMyDataStore();
 
 // 전체보기용 상태
 const searchKeyword = ref('');
@@ -235,6 +239,9 @@ const interestTags = ref([
 onMounted(() => {
   fetchInstallmentList();
   fav.syncIdSet('INSTALLMENT');
+  if (!myDataStore.linked) {
+    show.value = true;
+  }
 });
 
 // 적금 상품 목록 가져오기

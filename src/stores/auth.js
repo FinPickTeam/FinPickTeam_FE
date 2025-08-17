@@ -1,13 +1,14 @@
 // src/stores/auth.js
 import { defineStore } from 'pinia';
 import { loginApi, logoutApi } from '@/api/authApi';
+import { useMyDataStore } from '@/stores/MyData';
 import router from '@/router';
 import api from '@/api/instance';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
-    accessToken: null,   // AT: 메모리만
-    user: null,          // { id, email, role, nickname, ... } → localStorage
+    accessToken: null, // AT: 메모리만
+    user: null, // { id, email, role, nickname, ... } → localStorage
     loading: false,
     error: null,
     _bootstrapped: false,
@@ -17,8 +18,12 @@ export const useAuthStore = defineStore('auth', {
     isAdmin: (s) => (s.user?.role || 'USER').toUpperCase() === 'ADMIN',
   },
   actions: {
-    setTokens({ accessToken }) { this.accessToken = accessToken || null; },
-    clearTokens() { this.accessToken = null; },
+    setTokens({ accessToken }) {
+      this.accessToken = accessToken || null;
+    },
+    clearTokens() {
+      this.accessToken = null;
+    },
 
     async fetchMe() {
       try {
@@ -31,7 +36,9 @@ export const useAuthStore = defineStore('auth', {
           role: me.role || 'USER',
           authorities: me.authorities || [],
         };
-      } catch {/* 조용히 패스 */}
+      } catch {
+        /* 조용히 패스 */
+      }
     },
 
     async login({ email, password }) {
@@ -53,11 +60,11 @@ export const useAuthStore = defineStore('auth', {
           ...(payload?.user ?? {}),
           ...(this.user ?? {}),
           nickname:
-              payload?.nickname ??
-              payload?.nickName ??
-              payload?.NickName ??
-              this.user?.nickname ??
-              null,
+            payload?.nickname ??
+            payload?.nickName ??
+            payload?.NickName ??
+            this.user?.nickname ??
+            null,
         };
 
         // 3) 역할 동기화
@@ -66,9 +73,14 @@ export const useAuthStore = defineStore('auth', {
         // 4) 관리자면 바로 이동(원치 않으면 주석)
         if (this.isAdmin) router.replace('/admin');
 
+        // 5) 내 데이터 스토어 초기화
+        const mydata = useMyDataStore();
+        mydata.load();
+
         return true;
       } catch (err) {
-        this.error = err?.response?.data?.message || err?.message || '로그인 실패';
+        this.error =
+          err?.response?.data?.message || err?.message || '로그인 실패';
         return false;
       } finally {
         this.loading = false;
@@ -110,11 +122,17 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async serverLogout() {
-      try { await logoutApi(); } catch {/* 네트워크 실패는 무시 */}
+      try {
+        await logoutApi();
+      } catch {
+        /* 네트워크 실패는 무시 */
+      }
     },
 
     async logout(redirect = true) {
-      try { await this.serverLogout(); } catch {}
+      try {
+        await this.serverLogout();
+      } catch {}
       this.clearTokens();
       this.user = null;
       // localStorage.removeItem('auth');
@@ -127,15 +145,20 @@ export const useAuthStore = defineStore('auth', {
           const k = sessionStorage.key(i);
           if (!k) continue;
 
-          if (k.startsWith('ob:') || k.startsWith('admin:') || k === 'openBankingAuthenticated') removeKeys.push(k);
+          if (
+            k.startsWith('ob:') ||
+            k.startsWith('admin:') ||
+            k === 'openBankingAuthenticated'
+          )
+            removeKeys.push(k);
         }
-        removeKeys.forEach(k => sessionStorage.removeItem(k));
+        removeKeys.forEach((k) => sessionStorage.removeItem(k));
       } catch {}
 
       if (redirect) {
         router.push('/login');
       }
-    }
+    },
   },
 
   persist: {

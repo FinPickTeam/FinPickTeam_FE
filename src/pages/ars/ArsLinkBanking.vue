@@ -77,23 +77,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useMyDataStore } from '@/stores/MyData';
 
 const router = useRouter();
 const percent = ref(0);
 const visibleSteps = ref([false, false, false, false]);
 const isButtonActive = ref(false);
+const myDataStore = useMyDataStore();
 
 function goToOpenBanking() {
-  router.push("/openbanking/myhome");
+  router.push('/openbanking/myhome');
 }
 
 function goToCustomerSupport() {
-  router.push("/customer-support");
+  router.push('/customer-support');
 }
 
 onMounted(() => {
+  myDataStore.setLinked(true);
+  console.log('마이데이터 연동 상태:', myDataStore.linked);
   // 10초에 걸쳐 0%에서 100%까지 진행
   const progressInterval = setInterval(() => {
     if (percent.value < 100) {
