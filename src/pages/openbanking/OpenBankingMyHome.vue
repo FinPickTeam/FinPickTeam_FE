@@ -171,18 +171,17 @@ const fetchHomeData = async () => {
     // 1) 최신화
     await syncAllAccounts();
 
-    // 2) 계좌
+    // 2) 계좌 목록 불러오기
     const acc = await getAccountsWithTotal();
-    const d = acc?.data || {};
-    assetTotal.value = Number(d.accountTotal ?? 0);
-    const list = Array.isArray(d.accounts) ? d.accounts : [];
+    const list = Array.isArray(acc?.data?.accounts) ? acc.data.accounts : [];
 
-    // 2-1) 각 계좌의 최근 afterBalance 동시 로드
+    // 2-1) 각 계좌의 최신 afterBalance 동시 로드
     const afterMap = await loadLatestAfterMap(list);
 
+    // 2-2) 화면용 매핑
     accounts.value = list.map((a) => {
       const bank = guessBankFromText(a.productName || '');
-      const displayBalance = Number(afterMap[a.id] ?? a.balance ?? 0); // ✅ 밖에서도 after 우선
+      const displayBalance = Number(afterMap[a.id] ?? a.balance ?? 0); // ✅ 최신 잔액
       return {
         id: a.id,
         bank,
@@ -194,13 +193,19 @@ const fetchHomeData = async () => {
             ? '저축'
             : '투자',
         accountNumber: a.accountNumber || '****',
-        balance: Number(a.balance ?? 0),
-        displayBalance,
+        balance: Number(a.balance ?? 0), // DB 스냅샷(백업 용도)
+        displayBalance, // ✅ 화면 표시용 최신 잔액
         logo: bankLogo(bank),
       };
     });
 
-    // 3) 전월 대비 자산
+    // 2-3) ✅ 총 자산 = 최신 잔액 합계
+    assetTotal.value = accounts.value.reduce(
+      (sum, a) => sum + (Number(a.displayBalance) || 0),
+      0
+    );
+
+    // 3) 전월 대비(서버 응답과 섞되, 현재 합계가 우선 기준)
     const now = new Date();
     const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
       2,
@@ -219,7 +224,7 @@ const fetchHomeData = async () => {
       assetChangePercent.value = 0;
     }
 
-    // 4) 카드
+    // 4) 카드(이번 달)
     const card = await getCardsWithTotal({ month: ym });
     const listCard = Array.isArray(card?.data) ? card.data : [];
     cards.value = listCard.map((c) => {
@@ -235,6 +240,7 @@ const fetchHomeData = async () => {
       };
     });
 
+    // 타임스탬프
     stampNow();
   } catch (e) {
     console.error('홈 데이터 로드 실패:', e);
