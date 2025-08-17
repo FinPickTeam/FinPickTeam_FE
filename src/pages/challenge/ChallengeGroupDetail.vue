@@ -183,13 +183,30 @@
           class="password-section"
         >
           <div class="password-input-container">
-            <input
-              v-model="password"
-              type="password"
-              class="password-input"
-              placeholder="비밀번호 입력 (숫자 4자리)"
-              @keyup.enter="handlePasswordSubmit"
-            />
+            <div class="password-input-wrapper">
+              <input
+                v-model="password"
+                :type="showPassword ? 'text' : 'password'"
+                class="password-input"
+                :class="{ error: passwordError }"
+                placeholder="비밀번호 입력 (숫자 4자리)"
+                maxlength="4"
+                @input="handlePasswordInput"
+                @keyup.enter="handlePasswordSubmit"
+              />
+              <button
+                type="button"
+                class="password-toggle-btn"
+                @click="togglePasswordVisibility"
+              >
+                <i
+                  :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"
+                ></i>
+              </button>
+            </div>
+            <div v-if="passwordError" class="password-error-message">
+              {{ passwordError }}
+            </div>
           </div>
         </div>
       </div>
@@ -263,6 +280,8 @@ const challenge = ref(null);
 const showJoinModal = ref(false);
 const password = ref('');
 const isPasswordVerified = ref(false); // 비밀번호 검증 상태 추가
+const passwordError = ref(''); // 비밀번호 에러 메시지
+const showPassword = ref(false); // 비밀번호 표시/숨김 상태
 
 // participation limit modal
 const showParticipationLimitModal = ref(false);
@@ -391,9 +410,23 @@ const closeJoinModal = () => {
   showJoinModal.value = false;
 };
 
+const handlePasswordInput = (event) => {
+  // 숫자만 입력 허용
+  const value = event.target.value.replace(/\D/g, '');
+  // 4자리로 제한
+  password.value = value.slice(0, 4);
+};
+
+const togglePasswordVisibility = () => {
+  showPassword.value = !showPassword.value;
+};
+
 const handlePasswordSubmit = async () => {
+  // 에러 메시지 초기화
+  passwordError.value = '';
+
   if (!password.value.trim()) {
-    alert('비밀번호를 입력해주세요.');
+    passwordError.value = '비밀번호를 입력해주세요.';
     return;
   }
 
@@ -417,7 +450,8 @@ const handlePasswordSubmit = async () => {
     // 비밀번호 검증 성공 후 확인 모달 표시
     showJoinModal.value = true;
   } catch (e) {
-    alert(e?.response?.data?.message || '비밀번호가 올바르지 않습니다.');
+    passwordError.value =
+      e?.response?.data?.message || '비밀번호가 일치하지 않습니다.';
   }
 };
 
@@ -942,9 +976,16 @@ const categoryTheme = computed(() => {
   margin-bottom: 20px;
 }
 
+.password-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
 .password-input {
   width: 100%;
   padding: 16px;
+  padding-right: 50px; /* 아이콘 공간 확보 */
   border: 2px solid #e0e0e0;
   border-radius: 12px;
   font-size: 16px;
@@ -953,9 +994,42 @@ const categoryTheme = computed(() => {
   box-sizing: border-box;
 }
 
+.password-toggle-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: var(--color-main);
+}
+
+.password-toggle-btn i {
+  font-size: 16px;
+}
+
 .password-input:focus {
   outline: none;
   border-color: var(--color-main);
+}
+
+.password-input.error {
+  border-color: #ef4444;
+}
+
+.password-error-message {
+  color: #ef4444;
+  font-size: 14px;
+  margin-top: 8px;
+  text-align: center;
 }
 
 .joined-button {
