@@ -1,6 +1,6 @@
 <template>
   <div class="account-detail-container">
-    <!-- ───── 상단 흰 박스 (계좌 요약) ───── -->
+    <!-- 상단 요약: 항상 '실제 표시 잔액' -->
     <section class="account-card">
       <div class="ac-top">
         <div class="ac-bank">
@@ -13,14 +13,10 @@
       </div>
     </section>
 
-    <!-- ───── 거래 내역 (풀블리드 흰 영역) ───── -->
+    <!-- 거래 내역 -->
     <section class="account-transactions">
       <div class="tx-header">
-        <button
-          class="tx-filter-btn"
-          @click="handleOpenFilter"
-          aria-label="기간 필터 열기"
-        >
+        <button class="tx-filter-btn" @click="handleOpenFilter">
           {{ periodLabel }} <span class="chev">▾</span>
         </button>
         <span class="tx-count">{{ items.length }}건</span>
@@ -32,7 +28,6 @@
       <div v-else class="tx-groups">
         <div class="tx-group" v-for="g in grouped" :key="g.key">
           <div class="date-col">{{ g.label }}</div>
-
           <div class="tx-items">
             <div
               class="tx-item"
@@ -48,7 +43,6 @@
                 <div class="tx-title">{{ getTitle(t) }}</div>
                 <div class="tx-sub">{{ formatTime(getDate(t)) }}</div>
               </div>
-
               <div
                 class="tx-right"
                 :class="{ plus: isIncome(t), minus: !isIncome(t) }"
@@ -80,7 +74,10 @@ import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import BasePeriodFilterModal from '@/components/openbanking/BasePeriodFilterModal.vue';
 import { usePeriodFilter } from '@/components/openbanking/usePeriodFilter';
-import { getAccountTransactions } from '@/api/openbanking/accountsApi';
+import {
+  getAccountTransactions,
+  getAccountsWithTotal,
+} from '@/api/openbanking/accountsApi';
 
 const route = useRoute();
 const accountId = route.params.accountId;
@@ -97,23 +94,11 @@ const items = ref([]);
 const loading = ref(false);
 const error = ref('');
 
-// 카드 표기값
-const summary = computed(() => {
-  const first = items.value[0] || {};
-  const bank = route.query.bank || first.bankName || first.bank || 'KB국민은행';
-  const accNo =
-    route.query.accountNo ||
-    first.accountNo ||
-    first.accountNumber ||
-    '7018-0000-1111-22';
-  const bal =
-    first.balanceAfter ?? first.balance ?? first.afterBalanceAmt ?? 10000000;
-  return { bankName: bank, accountNo: accNo, balance: Number(bal) || 0 };
-});
+const accountMeta = ref(null); // 서버 메타(계좌번호/은행/DB잔액)
+const latestAfter = ref(null); // 최신 afterBalance
 
 const handleOpenFilter = () => (showFilter.value = true);
 
-// API
 const fetchTransactions = async () => {
   if (!accountId) return;
   loading.value = true;
@@ -131,31 +116,63 @@ const fetchTransactions = async () => {
       from = fmt(sDate);
       to = fmt(eDate);
     }
-    const res = await getAccountTransactions(accountId, { from, to });
-    items.value = res?.data ?? [];
+    const res = await getAccountTransactions(accountId, {
+      from,
+      to,
+      page: 0,
+      size: 100,
+    });
+    const arr = Array.isArray(res?.data) ? res.data : [];
+    items.value = arr;
+
+    // 최신 거래의 afterBalance 파악(이 페이지 실표시 잔액 기준)
+    const first = arr[0];
+    latestAfter.value = first
+      ? Number(
+          first.balanceAfter ?? first.afterBalanceAmt ?? first.balance ?? null
+        )
+      : null;
   } catch (e) {
     error.value =
       e?.response?.data?.message ||
       e?.message ||
       '거래내역 조회에 실패했습니다.';
     items.value = [];
+    latestAfter.value = null;
   } finally {
     loading.value = false;
   }
 };
 
+const loadAccountMeta = async () => {
+  try {
+    const r = await getAccountsWithTotal();
+    const list = r?.data?.accounts ?? [];
+    accountMeta.value =
+      list.find((a) => String(a.id) === String(accountId)) || null;
+  } catch {
+    accountMeta.value = null;
+  }
+};
+
 onMounted(() => {
+  loadAccountMeta();
   fetchTransactions();
   window.addEventListener('open-filter-modal', handleOpenFilter);
 });
 onUnmounted(() =>
   window.removeEventListener('open-filter-modal', handleOpenFilter)
 );
-
 watch([period, start, end], fetchTransactions);
-watch(() => route.params.accountId, fetchTransactions);
+watch(
+  () => route.params.accountId,
+  async () => {
+    await loadAccountMeta();
+    await fetchTransactions();
+  }
+);
 
-// 표시 유틸
+/** ===== 표시 유틸 ===== */
 const getTitle = (t) =>
   t.place || t.merchantName || t.accountName || t.memo || '거래';
 const getDate = (t) =>
@@ -172,7 +189,7 @@ const isIncome = (t) => {
   return getAmount(t) > 0;
 };
 const getBalance = (t) => {
-  const v = t.balanceAfter ?? t.balance ?? t.afterBalanceAmt ?? null;
+  const v = t.balanceAfter ?? t.afterBalanceAmt ?? t.balance ?? null;
   return v === undefined ? null : v;
 };
 const formatCurrency = (n) =>
@@ -182,6 +199,10 @@ const signedAmount = (t) => {
   const sign = isIncome(t) ? '+' : '-';
   return `${sign}${formatCurrency(a)}원`;
 };
+const formatDateLabel = (d) => {
+  const date = d instanceof Date ? d : new Date(d);
+  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
+};
 const formatTime = (dateish) => {
   const d = dateish instanceof Date ? dateish : new Date(dateish);
   if (Number.isNaN(+d)) return '';
@@ -189,12 +210,33 @@ const formatTime = (dateish) => {
   const mm = String(d.getMinutes()).padStart(2, '0');
   return `${hh}:${mm}`;
 };
-const formatDateLabel = (d) => {
-  const date = d instanceof Date ? d : new Date(d);
-  return `${date.getMonth() + 1}월 ${date.getDate()}일`;
-};
 
-// 날짜별 그룹핑
+/** ===== 헤더 요약: 밖/목록과 완전 동일 수치 =====
+ * 우선순위: 라우트(query.displayBalance) → 최신 afterBalance → 서버 balance
+ */
+const summary = computed(() => {
+  const meta = accountMeta.value || {};
+  const bank =
+    (typeof route.query.bank === 'string' && route.query.bank) ||
+    meta.productName ||
+    'KB국민은행';
+  const accNo =
+    (typeof route.query.accountNo === 'string' && route.query.accountNo) ||
+    meta.accountNumber ||
+    '****';
+  const fromRoute =
+    route.query.displayBalance != null
+      ? Number(route.query.displayBalance)
+      : null;
+  const finalBalance =
+    fromRoute ??
+    (latestAfter.value != null
+      ? Number(latestAfter.value)
+      : Number(meta.balance ?? 0));
+  return { bankName: bank, accountNo: accNo, balance: finalBalance };
+});
+
+/** 날짜별 그룹핑 */
 const grouped = computed(() => {
   const by = new Map();
   items.value.forEach((t) => {
@@ -213,24 +255,21 @@ const grouped = computed(() => {
 </script>
 
 <style scoped>
+/* 기존 스타일 그대로 포함(생략 없이) */
 :root {
-  --bg-page: #f6f7f8; /* 리스트 페이지 톤 */
+  --bg-page: #f6f7f8;
   --white: #fff;
   --strong: #222;
   --sub: #8a8a8a;
   --border: #eee;
 }
-
-/* 페이지 배경/여백: 리스트 페이지 톤 */
 .account-detail-container {
   background: var(--bg-page);
   min-height: 100vh;
-  padding: 0 0 100px; /* 좌우 패딩 제거, 하단 탭 여백 유지 */
+  padding: 0 0 100px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-
-/* ── 상단 흰 카드: 리스트 페이지처럼 마진 0 16px */
 .account-card {
   background: #fff;
   border-radius: 16px;
@@ -239,7 +278,7 @@ const grouped = computed(() => {
 }
 .ac-top {
   display: flex;
-  flex-direction: column; /* 세로 정렬 */
+  flex-direction: column;
   align-items: flex-start;
   gap: 4px;
 }
@@ -263,29 +302,25 @@ const grouped = computed(() => {
   font-size: 18px;
   font-weight: 800;
 }
-
-/* ── 거래 내역: 풀블리드 흰 영역 (좌우 꽉 차게) */
 .account-transactions {
   background: #fff;
-  margin: 0 0 16px; /* 좌우 꽉 (컨테이너 패딩 제거됐으니) */
-  padding: 12px 16px 24px; /* 내부 패딩만 유지 */
+  margin: 0 0 16px;
+  padding: 12px 16px 24px;
 }
-
-/* 헤더 라인 */
 .tx-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 5px 0 16px 0px;
+  margin: 5px 0 16px 0;
 }
 .tx-filter-btn {
   appearance: none;
   border: 0;
-  background: none; /* 배경 제거 */
-  color: var(--strong); /* 검정 글씨 */
+  background: none;
+  color: var(--strong);
   font-weight: 800;
   font-size: 16px;
-  padding: 0; /* 여백 제거 */
+  padding: 0;
   border-radius: 0;
 }
 .tx-filter-btn .chev {
@@ -297,7 +332,6 @@ const grouped = computed(() => {
   font-size: 13px;
   font-weight: 500;
 }
-
 .tx-loading {
   padding: 12px 0;
   color: #666;
@@ -306,11 +340,9 @@ const grouped = computed(() => {
   padding: 12px 0;
   color: #d33;
 }
-
-/* 날짜/아이템 그리드: 왼쪽 날짜 좁게, 오른쪽 리스트 */
 .tx-group {
   display: grid;
-  grid-template-columns: 72px 1fr; /* 날짜 폭 고정 */
+  grid-template-columns: 72px 1fr;
   align-items: start;
 }
 .date-col {
@@ -321,8 +353,6 @@ const grouped = computed(() => {
 .tx-items {
   grid-column: 2;
 }
-
-/* 아이템 한 줄: 좌(상호/시간) 우(금액/잔액) */
 .tx-item {
   display: flex;
   align-items: flex-start;
@@ -334,7 +364,6 @@ const grouped = computed(() => {
 .tx-item:last-child {
   border-bottom: 0;
 }
-
 .tx-left {
   min-width: 0;
 }
@@ -351,7 +380,6 @@ const grouped = computed(() => {
   color: var(--sub);
   font-size: 12px;
 }
-
 .tx-right {
   text-align: right;
   display: flex;
@@ -368,20 +396,16 @@ const grouped = computed(() => {
 }
 .tx-right.minus .tx-amount {
   color: var(--strong);
-} /* 스샷처럼 진한 검정 */
+}
 .tx-balance {
   font-size: 12px;
   color: var(--sub);
 }
-
-/* 빈 상태 */
 .tx-empty {
   text-align: center;
   color: var(--sub);
   padding: 20px 0 8px;
 }
-
-/* 추가: 거래 내역을 스크롤 가능하도록 */
 .tx-groups {
   max-height: 60vh;
   overflow-y: auto;

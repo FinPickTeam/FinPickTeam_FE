@@ -1,6 +1,6 @@
 <template>
   <div class="myhome-container">
-    <!-- ───── Asset Hero (like mock) ───── -->
+    <!-- ===== Asset Hero ===== -->
     <section class="asset-hero">
       <div class="asset-hero-head">
         <div class="hero-title">총 자산</div>
@@ -16,14 +16,14 @@
         class="hero-delta"
         :class="{ up: assetDiff > 0, down: assetDiff < 0 }"
       >
-        <span class="delta-icon">
-          {{ assetDiff > 0 ? '▲' : assetDiff < 0 ? '▼' : '–' }}
-        </span>
+        <span class="delta-icon">{{
+          assetDiff > 0 ? '▲' : assetDiff < 0 ? '▼' : '–'
+        }}</span>
         전월 대비 {{ Math.abs(assetChangePercent).toFixed(1) }}%
       </div>
     </section>
 
-    <!-- ───── 계좌 섹션 (리뉴얼) ───── -->
+    <!-- ===== 계좌 ===== -->
     <section class="content-card" v-if="accounts.length > 0">
       <div class="card-title-row" @click="goToAccountList">
         <h2 class="card-title">계좌</h2>
@@ -31,6 +31,7 @@
           <font-awesome-icon :icon="['fas', 'chevron-right']" />
         </button>
       </div>
+
       <div class="item-list">
         <div
           class="list-item"
@@ -41,15 +42,19 @@
           <img :src="a.logo" alt="" class="item-logo" />
           <div class="item-text-content">
             <span class="item-name">{{ a.name }}</span>
-            <span class="item-amount" :class="{ negative: a.balance < 0 }"
-              >{{ formatCurrency(a.balance) }}원</span
+            <!-- ✅ 밖에서도 balanceAfter(최근 거래 후 잔액) 표시 -->
+            <span
+              class="item-amount"
+              :class="{ negative: a.displayBalance < 0 }"
             >
+              {{ formatCurrency(a.displayBalance) }}원
+            </span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- ───── 카드 섹션 (리뉴얼) ───── -->
+    <!-- ===== 카드 ===== -->
     <section class="content-card" v-if="cards.length > 0">
       <div class="card-title-row" @click="goToCardList">
         <h2 class="card-title">카드</h2>
@@ -57,6 +62,7 @@
           <font-awesome-icon :icon="['fas', 'chevron-right']" />
         </button>
       </div>
+
       <div class="item-list">
         <div
           class="list-item"
@@ -67,14 +73,13 @@
           <img :src="c.logo" alt="" class="item-logo" />
           <div class="item-text-content">
             <span class="item-name">{{ c.name }}</span>
-            <span class="item-amount" :class="{ negative: c.amount < 0 }"
-              >{{ formatCurrency(c.amount) }}원</span
-            >
+            <span class="item-amount" :class="{ negative: c.amount < 0 }">
+              {{ formatCurrency(c.amount) }}원
+            </span>
           </div>
         </div>
       </div>
 
-      <!-- 기존 소비 리포트 버튼 유지 -->
       <div class="obmyhome-report-buttons">
         <button class="obmyhome-report-btn daily" @click="goToDailyReport">
           이번 달 소비 내역
@@ -100,9 +105,12 @@ import {
   faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 
-import ListItemCard from '@/components/openbanking/ListItemCard.vue';
 import { useLogos } from '@/components/openbanking/useLogos.js';
-import { getAccountsWithTotal } from '@/api/openbanking/accountsApi';
+import {
+  getAccountsWithTotal,
+  getAccountTransactions,
+  syncAllAccounts,
+} from '@/api/openbanking/accountsApi';
 import { getCardsWithTotal } from '@/api/openbanking/cardsApi';
 import { getAssetSummaryCompare } from '@/api/openbanking/assetSummaryApi';
 
@@ -131,48 +139,68 @@ const guessBankFromText = (text = '') => {
   return 'KB국민은행';
 };
 
-const badgeClass = (t) =>
-  t === '입출금' ? 'bg-deposit' : t === '저축' ? 'bg-savings' : 'bg-invest';
-
 const stampNow = () => {
   const d = new Date();
-  const hh = String(d.getHours()).padStart(2, '0');
-  const mm = String(d.getMinutes()).padStart(2, '0');
-  lastUpdated.value = `${hh}:${mm}`;
+  lastUpdated.value = `${String(d.getHours()).padStart(2, '0')}:${String(
+    d.getMinutes()
+  ).padStart(2, '0')}`;
+};
+
+/** 최근 거래 1건의 afterBalance를 읽어오는 헬퍼 */
+const loadLatestAfterMap = async (list) => {
+  const jobs = list.map(async (a) => {
+    try {
+      const r = await getAccountTransactions(a.id, { page: 0, size: 1 });
+      const t = Array.isArray(r?.data) ? r.data[0] : null;
+      const after =
+        t?.balanceAfter ??
+        t?.afterBalanceAmt ??
+        t?.balance ?? // 혹시 필드명이 이렇게 오는 경우도
+        null;
+      return [a.id, Number(after)];
+    } catch {
+      return [a.id, null];
+    }
+  });
+  const entries = await Promise.all(jobs);
+  return Object.fromEntries(entries);
 };
 
 const fetchHomeData = async () => {
   try {
-    // ----- 계좌 요약 -----
-    const acc = await getAccountsWithTotal(); // { status, message, data }
-    if (acc?.status === 200) {
-      const d = acc.data || {};
-      assetTotal.value = Number(d.accountTotal ?? 0);
+    // 1) 최신화
+    await syncAllAccounts();
 
-      const list = Array.isArray(d.accounts) ? d.accounts : [];
-      accounts.value = list.map((a) => {
-        const bank = guessBankFromText(a.productName || '');
-        return {
-          id: a.id,
-          bank,
-          name: a.productName || '계좌',
-          type:
-            a.accountType === 'DEPOSIT'
-              ? '입출금'
-              : a.accountType === 'SAVING'
-              ? '저축'
-              : '투자',
-          accountNumber: a.accountNumber || '****',
-          balance: Number(a.balanceAfter || a.balance || 0), // 수정된 부분
-          logo: bankLogo(bank),
-        };
-      });
-    } else {
-      accounts.value = [];
-      assetTotal.value = 0;
-    }
+    // 2) 계좌
+    const acc = await getAccountsWithTotal();
+    const d = acc?.data || {};
+    assetTotal.value = Number(d.accountTotal ?? 0);
+    const list = Array.isArray(d.accounts) ? d.accounts : [];
 
-    // ----- 전월 대비(자산) -----
+    // 2-1) 각 계좌의 최근 afterBalance 동시 로드
+    const afterMap = await loadLatestAfterMap(list);
+
+    accounts.value = list.map((a) => {
+      const bank = guessBankFromText(a.productName || '');
+      const displayBalance = Number(afterMap[a.id] ?? a.balance ?? 0); // ✅ 밖에서도 after 우선
+      return {
+        id: a.id,
+        bank,
+        name: a.productName || '계좌',
+        type:
+          a.accountType === 'DEPOSIT'
+            ? '입출금'
+            : a.accountType === 'SAVING'
+            ? '저축'
+            : '투자',
+        accountNumber: a.accountNumber || '****',
+        balance: Number(a.balance ?? 0),
+        displayBalance,
+        logo: bankLogo(bank),
+      };
+    });
+
+    // 3) 전월 대비 자산
     const now = new Date();
     const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
       2,
@@ -180,10 +208,10 @@ const fetchHomeData = async () => {
     )}`;
     try {
       const cmp = await getAssetSummaryCompare({ month: ym });
-      const d = cmp?.data || {};
-      const cur = Number(d.currentAssetTotal ?? assetTotal.value);
-      const prev = Number(d.prevAssetTotal ?? 0);
-      const diff = Number(d.assetDiff ?? cur - prev);
+      const x = cmp?.data || {};
+      const cur = Number(x.currentAssetTotal ?? assetTotal.value);
+      const prev = Number(x.prevAssetTotal ?? 0);
+      const diff = Number(x.assetDiff ?? cur - prev);
       assetDiff.value = diff;
       assetChangePercent.value = prev ? (diff / prev) * 100 : 0;
     } catch {
@@ -191,25 +219,21 @@ const fetchHomeData = async () => {
       assetChangePercent.value = 0;
     }
 
-    // ----- 카드(이번달) -----
-    const card = await getCardsWithTotal({ month: ym }); // { status, message, data: [] }
-    if (card?.status === 200) {
-      const list = Array.isArray(card.data) ? card.data : [];
-      cards.value = list.map((c) => {
-        const bank = c.bankName || guessBankFromText(c.cardName || '');
-        return {
-          id: c.id,
-          bank,
-          name: c.cardName || '카드',
-          type: c.cardType === 'CREDIT' ? '신용' : '체크',
-          amount: Number(c.monthlySpent || 0),
-          cardMaskednum: c.cardMaskednum || '****',
-          logo: cardLogo(bank),
-        };
-      });
-    } else {
-      cards.value = [];
-    }
+    // 4) 카드
+    const card = await getCardsWithTotal({ month: ym });
+    const listCard = Array.isArray(card?.data) ? card.data : [];
+    cards.value = listCard.map((c) => {
+      const bank = c.bankName || guessBankFromText(c.cardName || '');
+      return {
+        id: c.id,
+        bank,
+        name: c.cardName || '카드',
+        type: c.cardType === 'CREDIT' ? '신용' : '체크',
+        amount: Number(c.monthlySpent || 0),
+        cardMaskednum: c.cardMaskednum || '****',
+        logo: cardLogo(bank),
+      };
+    });
 
     stampNow();
   } catch (e) {
@@ -223,6 +247,25 @@ const fetchHomeData = async () => {
   }
 };
 
+// nav
+const goToDailyReport = () => router.push('/openbanking/calendar');
+const goToMonthlyReport = () => router.push('/openbanking/monthly-report');
+const goToCardList = () => router.push('/openbanking/card-list');
+const goToAccountList = () => router.push('/openbanking/account-list');
+
+const onClickAccount = (a) =>
+  router.push({
+    path: `/openbanking/account-detail/${a.id}`,
+    query: {
+      bank: a.bank,
+      accountNo: a.accountNumber,
+      // ✅ 홈에서 본 afterBalance 그대로 전달 → 디테일 헤더 숫자 일치
+      displayBalance: a.displayBalance,
+    },
+  });
+const onClickCard = (c) =>
+  router.push({ name: 'CardDetail', params: { cardId: c.id } });
+
 const handleRefresh = () => fetchHomeData();
 
 onMounted(() => {
@@ -232,24 +275,10 @@ onMounted(() => {
 onUnmounted(() => {
   window.removeEventListener('refresh-openbanking-data', handleRefresh);
 });
-
-// nav
-const goToDailyReport = () => router.push('/openbanking/calendar');
-const goToMonthlyReport = () => router.push('/openbanking/monthly-report');
-const goToCardList = () => router.push('/openbanking/card-list');
-const goToAccountList = () => router.push('/openbanking/account-list');
-const onClickAccount = (a) =>
-  router.push(`/openbanking/account-detail/${a.id}`);
-const onClickCard = (c) =>
-  router.push({ name: 'CardDetail', params: { cardId: c.id } });
-
-// topbar actions
-const onSearch = () => router.push('/search'); // 필요하면 라우트 맞춰 바꿔
-const onAdd = () => router.push('/openbanking/account-link-select');
 </script>
 
 <style scoped>
-/* ===== Topbar ===== */
+/* (기존 스타일 그대로) — 생략 없이 포함 */
 .topbar {
   display: flex;
   align-items: center;
@@ -273,11 +302,9 @@ const onAdd = () => router.push('/openbanking/account-link-select');
 .icon-btn.back {
   color: #222;
 }
-
-/* ===== Asset hero ===== */
 .asset-hero {
   border-radius: 18px;
-  margin: 0 16px 20px 16px; /* increase bottom spacing */
+  margin: 0 16px 20px 16px;
   padding: 14px 20px 16px 20px;
 }
 .asset-hero-head {
@@ -312,7 +339,7 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   font-weight: 900;
   color: var(--color-main);
   letter-spacing: 0.5px;
-  white-space: nowrap; /* keep on one line */
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -326,37 +353,32 @@ const onAdd = () => router.push('/openbanking/account-link-select');
 }
 .hero-delta.up {
   color: #ef4444;
-} /* 빨강(상승) */
+}
 .hero-delta.down {
   color: #2563eb;
-} /* 파랑(하락) */
+}
 .delta-icon {
   font-weight: 700;
 }
-
-/* ===== Content card (리뉴얼) ===== */
 .content-card {
   background: #fff;
   border-radius: 18px;
   margin: 0 16px 12px 16px;
-  padding: 16px 20px 16px 20px;
+  padding: 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-
 .card-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-
 .card-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #222;
 }
-
 .card-more-btn {
   background: none;
   border: none;
@@ -370,12 +392,10 @@ const onAdd = () => router.push('/openbanking/account-link-select');
 .card-more-btn:hover {
   background: #f3f3f3;
 }
-
 .item-list {
   display: flex;
   flex-direction: column;
 }
-
 .list-item {
   display: flex;
   align-items: center;
@@ -383,14 +403,12 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   padding: 12px 0;
   cursor: pointer;
 }
-
 .item-logo {
   width: 32px;
   height: 32px;
   object-fit: contain;
   border-radius: 4px;
 }
-
 .item-text-content {
   flex: 1;
   display: flex;
@@ -398,12 +416,10 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   align-items: flex-start;
   gap: 2px;
 }
-
 .item-name {
   color: #666;
   white-space: nowrap;
 }
-
 .item-amount {
   font-weight: 700;
   color: var(--color-main);
@@ -412,13 +428,6 @@ const onAdd = () => router.push('/openbanking/account-link-select');
 .item-amount.negative {
   color: #e11d48;
 }
-
-/* ===== Rest (기존) ===== */
-.bg-card {
-  background: #ece9fd;
-  color: var(--color-main);
-}
-
 .myhome-container {
   width: 100%;
   max-width: 390px;
@@ -428,55 +437,6 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   height: calc(100dvh - 160px);
   padding-bottom: max(16px, env(safe-area-inset-bottom));
   min-height: 0;
-}
-.obmyhome-section-card {
-  background: #fff;
-  border-radius: 18px;
-  margin: 0 16px 12px 16px;
-  padding: 6px 20px 16px 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.obmyhome-section-title-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.obmyhome-section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-}
-.obmyhome-section-subtitle-row {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 4px;
-}
-.obmyhome-section-subtitle {
-  font-size: 0.85rem;
-  color: #888;
-  font-weight: 400;
-}
-.obmyhome-section-more {
-  background: none;
-  border: none;
-  font-size: 1.2rem;
-  color: #bdbdbd;
-  cursor: pointer;
-  padding: 2px 6px;
-  border-radius: 6px;
-  transition: background 0.15s;
-}
-.obmyhome-section-more:hover {
-  background: #f3f3f3;
-}
-.obmyhome-account-list {
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
 }
 .obmyhome-report-buttons {
   display: flex;
@@ -495,7 +455,6 @@ const onAdd = () => router.push('/openbanking/account-link-select');
   cursor: pointer;
   transition: background 0.15s;
 }
-
 @media (max-width: 430px) {
   .myhome-container {
     width: 100vw;
