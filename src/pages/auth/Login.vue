@@ -46,7 +46,7 @@
         {{ auth.loading ? '로그인 중...' : '로그인' }}
       </button>
 
-      <p v-if="auth.error" class="error-text">{{ auth.error }}</p>
+      <!-- <p v-if="auth.error" class="error-text">{{ auth.error }}</p> -->
 
       <div class="signup-link">
         아직 계정이 없으신가요?
