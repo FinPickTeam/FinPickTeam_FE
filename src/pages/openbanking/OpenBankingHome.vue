@@ -1,7 +1,6 @@
 <template>
   <div class="openbankinghome-container">
-    <div class="ob-header"></div>
-
+    <Headerbar />
     <div class="banner-wrap">
       <img :src="bannerImage" alt="배너" class="banner-img" />
     </div>
@@ -42,6 +41,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faSearch, faBell } from '@fortawesome/free-solid-svg-icons';
 import bannerImage from './img/Openbanking_Banner.png';
+import Headerbar from '@/components/Headerbar.vue';
 // API 래퍼: r = { status, message, data: { accountTotal, accounts[] } }
 import { getAccountsWithTotal } from '@/api/openbanking/accountsApi';
 
@@ -129,27 +129,20 @@ onMounted(async () => {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  padding-top: 80px;
   overflow: hidden;
   position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
 }
-.ob-header {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 18px 0 18px;
-  background: #fff;
-}
+
 .banner-wrap {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 18px;
+  margin-top: 0;
+  padding-top: 80px;
 }
 .banner-img {
   width: 100%;
