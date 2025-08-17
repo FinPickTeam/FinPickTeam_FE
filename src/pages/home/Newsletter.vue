@@ -7,9 +7,9 @@
           <div class="header-content">
             <div class="header-text">
               <div class="header-title">
-                오늘의 금융 KEYWORD :
-                <span class="keyword-highlight">{{ keyword }}</span>
+                오늘의 금융 KEYWORD
               </div>
+              <span class="keyword-highlight">{{ keyword }}</span>
             </div>
           </div>
           <button class="close-btn" @click="emit('close')">
@@ -213,6 +213,7 @@ const fetchNewsletters = async () => {
 
       if (newsData && Array.isArray(newsData) && newsData.length > 0) {
         // 뉴스 데이터에 날짜 필드가 없으면 현재 시간으로 추가
+        keyword.value = newsData[0]?.keyword || '금융';
         const processedNewsData = newsData.map((article) => ({
           ...article,
           publishedAt:
@@ -375,7 +376,7 @@ const openArticle = (link) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 28px;
+  padding: 15px 28px;
   border-bottom: 1px solid #e5e7eb;
   background: white;
   color: #4318d1;
@@ -390,13 +391,15 @@ const openArticle = (link) => {
 
 .header-text {
   flex: 1;
+  text-align: center
 }
 
 .header-title {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 700;
   color: #000;
   text-align: center;
+  margin-bottom: 5px
 }
 
 .keyword-highlight {
