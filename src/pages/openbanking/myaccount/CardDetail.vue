@@ -1,17 +1,17 @@
 <template>
   <div class="card-detail-container">
-    <!-- ───── 상단 흰 박스 (카드 요약) ───── -->
+    <!-- ===== 상단 카드 요약: 진짜 카드 메타 + 이 기간 합계 ===== -->
     <section class="card-summary-card">
       <div class="cs-top">
-        <div class="cs-cardno">{{ summary.brand }} {{ summary.maskedNo }}</div>
-        <div class="cs-badge">{{ summary.badge }}</div>
+        <div class="cs-cardno">{{ header.brand }} {{ header.maskedNo }}</div>
+        <div class="cs-badge">{{ header.badge }}</div>
       </div>
       <div class="cs-amount">
-        {{ formatCurrency(summary.amount) }}<span class="cs-won">원</span>
+        {{ formatCurrency(header.amount) }}<span class="cs-won">원</span>
       </div>
     </section>
 
-    <!-- ───── 사용 내역 (풀블리드 흰 영역) ───── -->
+    <!-- ===== 승인 내역 ===== -->
     <section class="card-transaction-section">
       <div class="tx-header">
         <button class="tx-filter-btn" @click="handleOpenFilter">
@@ -25,10 +25,7 @@
 
       <div v-else class="tx-groups">
         <div class="tx-group" v-for="g in grouped" :key="g.key">
-          <!-- 왼쪽 날짜 고정 폭 -->
           <div class="date-col">{{ g.label }}</div>
-
-          <!-- 오른쪽 항목들 -->
           <div class="tx-items">
             <div
               class="tx-item"
@@ -40,6 +37,7 @@
                 <div class="tx-sub">{{ formatTime(t.approvedAt) }}</div>
               </div>
 
+              <!-- ✅ 환급/취소만 +, 나머지 전부 지출(-) -->
               <div
                 class="tx-right"
                 :class="{ plus: isRefund(t), minus: !isRefund(t) }"
@@ -50,7 +48,6 @@
             </div>
           </div>
         </div>
-
         <div v-if="!items.length" class="tx-empty">표시할 거래가 없어요.</div>
       </div>
     </section>
@@ -69,7 +66,10 @@ import { ref, watch, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import BasePeriodFilterModal from '@/components/openbanking/BasePeriodFilterModal.vue';
 import { usePeriodFilter } from '@/components/openbanking/usePeriodFilter';
-import { getCardTransactions } from '@/api/openbanking/cardsApi';
+import {
+  getCardTransactions,
+  getCardsWithTotal,
+} from '@/api/openbanking/cardsApi';
 
 const route = useRoute();
 const cardId = route.params.cardId;
@@ -86,7 +86,26 @@ const items = ref([]);
 const loading = ref(false);
 const error = ref('');
 
+const cardMeta = ref(null); // DB 기반 카드 메타(발급사/마스킹/유형/이번달합계)
+
+// --- 데이터 불러오기 ---
 const handleOpenFilter = () => (showFilter.value = true);
+
+const fetchCardMeta = async () => {
+  try {
+    // 목록 API에서 해당 cardId 찾기(백엔드에 단건 조회가 있으면 그걸 쓰세요)
+    const now = new Date();
+    const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      '0'
+    )}`;
+    const r = await getCardsWithTotal({ month: ym });
+    const list = Array.isArray(r?.data) ? r.data : [];
+    cardMeta.value = list.find((c) => String(c.id) === String(cardId)) || null;
+  } catch {
+    cardMeta.value = null;
+  }
+};
 
 const fetchTransactions = async () => {
   if (!cardId) return;
@@ -105,7 +124,7 @@ const fetchTransactions = async () => {
       from = fmt(s);
       to = fmt(e);
     }
-    const res = await getCardTransactions(cardId, { from, to }); // {data:[]}
+    const res = await getCardTransactions(cardId, { from, to });
     items.value = res?.data ?? [];
   } catch (e) {
     error.value =
@@ -118,21 +137,26 @@ const fetchTransactions = async () => {
   }
 };
 
-onMounted(() => {
-  fetchTransactions();
+onMounted(async () => {
+  await fetchCardMeta();
+  await fetchTransactions();
   window.addEventListener('open-filter-modal', handleOpenFilter);
 });
 onUnmounted(() =>
   window.removeEventListener('open-filter-modal', handleOpenFilter)
 );
-
 watch([period, start, end], fetchTransactions);
-watch(() => route.params.cardId, fetchTransactions);
+watch(
+  () => route.params.cardId,
+  async () => {
+    await fetchCardMeta();
+    await fetchTransactions();
+  }
+);
 
 // ===== 표시 유틸 =====
 const formatCurrency = (n) =>
   (Number(n) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 });
-
 const formatTime = (dateish) => {
   const d = dateish ? new Date(dateish) : null;
   if (!d || Number.isNaN(+d)) return '';
@@ -140,18 +164,14 @@ const formatTime = (dateish) => {
   const mm = String(d.getMinutes()).padStart(2, '0');
   return `${hh}:${mm}`;
 };
-
 const formatDateLabel = (d) => {
   const date = d instanceof Date ? d : new Date(d);
   return `${date.getMonth() + 1}월 ${date.getDate()}일`;
 };
-
-// 취소/환급만 +, 나머지는 모두 지출(-)로 표시
 const isRefund = (t) =>
   t?.isCancelled === true ||
   t?.cancelled === true ||
   /cancel|취소/i.test(t?.status || t?.payType || '');
-
 const signedAmount = (amount, t) => {
   const num =
     typeof amount === 'string'
@@ -160,7 +180,6 @@ const signedAmount = (amount, t) => {
   const sign = isRefund(t) ? '+' : '-';
   return `${sign}${formatCurrency(Math.abs(num))}원`;
 };
-// 결제 유형 보조 라벨 (일시불/할부/현금서비스/해외일시불/취소 등)
 const subLabel = (t) => {
   if (t.isCancelled || t.cancelled) return '취소';
   if (t.isCashAdvance || /cash/i.test(t.category || '')) return '현금서비스';
@@ -168,42 +187,52 @@ const subLabel = (t) => {
   if (t.installmentMonths && Number(t.installmentMonths) > 1) return '할부';
   return t.payType || t.transactionType || t.cardType || '일시불';
 };
-
-// 상단 카드 요약(브랜드/번호/표시 금액/뱃지)
 const mask = (no = '') =>
   no
     .replace(/\s+/g, '')
     .replace(/(\d{6})\d+(\d{4})$/, (_, a, b) => `${a}******${b}`);
 
-const summary = computed(() => {
-  const first = items.value[0] || {};
+// ===== 헤더: 진짜 카드 메타 + 기간 합계(지출은 음수 취급, 환급은 양수)
+const header = computed(() => {
+  const meta = cardMeta.value || {};
   const brand =
-    route.query.brand || first.cardBrand || first.cardCompany || 'KB국민카드';
-  const number =
-    route.query.cardNo ||
-    first.cardNo ||
-    first.cardNumber ||
-    '1234567890123456';
-  // 스샷처럼 큰 숫자는 “이용금액/이월잔액/청구예정” 등 중 택1 – 없으면 데모값
-  const amount = Number(
-    first.statementAmount ??
-      first.billingAmount ??
-      first.totalAmount ??
-      10000000
-  );
+    meta.bankName ||
+    meta.cardName?.split(' ')[0] ||
+    route.query.brand ||
+    '카드';
+  const masked =
+    meta.cardMaskednum ||
+    (route.query.cardNo ? mask(String(route.query.cardNo)) : '****');
+
+  // 이 기간 합계: 환급/취소는 +, 나머지는 - 로 누적
+  const sum = items.value.reduce((acc, t) => {
+    const v =
+      typeof t.amount === 'string'
+        ? Number(t.amount.replaceAll(',', ''))
+        : Number(t.amount || 0);
+    return acc + (isRefund(t) ? +Math.abs(v) : -Math.abs(v));
+  }, 0);
+
   return {
-    brand,
-    maskedNo: mask(String(number)),
-    amount,
-    badge: route.query.badge || '소액신용',
+    brand: brand + '카드',
+    maskedNo: masked,
+    badge:
+      meta.cardType === 'CREDIT'
+        ? '신용'
+        : meta.cardType === 'DEBIT'
+        ? '체크'
+        : route.query.badge || '카드',
+    amount: Number.isFinite(sum)
+      ? Math.abs(sum)
+      : Number(meta.monthlySpent || 0), // 화면엔 절대값
   };
 });
 
-// 날짜별 그룹핑 (최신 → 오래된)
+// 날짜별 그룹핑
 const grouped = computed(() => {
   const by = new Map();
   items.value.forEach((t) => {
-    const k = (t.approvedAt ?? '').toString().slice(0, 10); // YYYY-MM-DD
+    const k = (t.approvedAt ?? '').toString().slice(0, 10);
     if (!by.has(k)) by.set(k, []);
     by.get(k).push(t);
   });
@@ -217,24 +246,21 @@ const grouped = computed(() => {
 </script>
 
 <style scoped>
+/* (기존 스타일 유지) */
 :root {
-  --bg-page: #f6f7f8; /* 리스트 페이지 톤 */
+  --bg-page: #f6f7f8;
   --white: #fff;
   --strong: #222;
   --sub: #8a8a8a;
   --border: #eee;
 }
-
-/* 페이지 배경/여백: 리스트 페이지 톤과 동일 */
 .card-detail-container {
   background: var(--bg-page);
   min-height: 100vh;
-  padding: 0 0 100px; /* 좌우 패딩 제거, 하단 탭 여백 유지 */
+  padding: 0 0 100px;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
-
-/* ===== 상단 흰 카드 ===== */
 .card-summary-card {
   background: #fff;
   border-radius: 16px;
@@ -243,7 +269,7 @@ const grouped = computed(() => {
 }
 .cs-top {
   display: flex;
-  flex-direction: column; /* 세로 정렬 */
+  flex-direction: column;
   align-items: flex-start;
   gap: 4px;
 }
@@ -255,8 +281,7 @@ const grouped = computed(() => {
 .cs-badge {
   font-size: 13px;
   color: #666;
-} /* 우상단 '소액신용' */
-
+}
 .cs-amount {
   text-align: right;
   font-weight: 900;
@@ -268,30 +293,25 @@ const grouped = computed(() => {
   font-size: 18px;
   font-weight: 800;
 }
-
-/* ===== 사용 내역: 풀블리드 흰 영역 ===== */
 .card-transaction-section {
   background: #fff;
-  margin: 0 0 16px; /* 좌우 꽉 (컨테이너 패딩 제거됐으니) */
-  padding: 12px 16px 24px; /* 내부 패딩만 유지 */
+  margin: 0 0 16px;
+  padding: 12px 16px 24px;
 }
-
-/* 상단 라인: '전체 ▾' + 건수 */
-.card-transaction-header,
 .tx-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin: 5px 0 16px 0px;
+  margin: 5px 0 16px 0;
 }
 .tx-filter-btn {
   appearance: none;
   border: 0;
-  background: none; /* 배경 제거 */
-  color: var(--strong); /* 검정 글씨 */
+  background: none;
+  color: var(--strong);
   font-weight: 800;
   font-size: 16px;
-  padding: 0; /* 여백 제거 */
+  padding: 0;
   border-radius: 0;
 }
 .tx-filter-btn .chev {
@@ -303,7 +323,6 @@ const grouped = computed(() => {
   font-size: 13px;
   font-weight: 500;
 }
-
 .tx-loading {
   padding: 12px 0;
   color: #666;
@@ -312,11 +331,9 @@ const grouped = computed(() => {
   padding: 12px 0;
   color: #d33;
 }
-
-/* 날짜/아이템 그리드 */
 .tx-group {
   display: grid;
-  grid-template-columns: 72px 1fr; /* 날짜 고정폭 */
+  grid-template-columns: 72px 1fr;
   align-items: start;
 }
 .date-col {
@@ -327,8 +344,6 @@ const grouped = computed(() => {
 .tx-items {
   grid-column: 2;
 }
-
-/* 아이템: 좌(가맹점/시간) 우(금액/유형) */
 .tx-item {
   display: flex;
   align-items: flex-start;
@@ -340,7 +355,6 @@ const grouped = computed(() => {
 .tx-item:last-child {
   border-bottom: 0;
 }
-
 .tx-left {
   min-width: 0;
 }
@@ -357,7 +371,6 @@ const grouped = computed(() => {
   color: var(--sub);
   font-size: 12px;
 }
-
 .tx-right {
   text-align: right;
   display: flex;
@@ -374,20 +387,16 @@ const grouped = computed(() => {
 }
 .tx-right.minus .tx-amount {
   color: var(--strong);
-} /* 스샷처럼 검정 */
+}
 .tx-type {
   font-size: 12px;
   color: var(--sub);
 }
-
-/* 빈 상태 */
 .tx-empty {
   text-align: center;
   color: var(--sub);
   padding: 20px 0 8px;
 }
-
-/* 추가: 거래 내역을 스크롤 가능하게 */
 .tx-groups {
   max-height: 60vh;
   overflow-y: auto;

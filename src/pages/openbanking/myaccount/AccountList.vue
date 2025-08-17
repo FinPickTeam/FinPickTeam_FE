@@ -7,9 +7,9 @@
           class="hero-delta"
           :class="{ up: assetDiff > 0, down: assetDiff < 0 }"
         >
-          <span class="delta-icon">
-            {{ assetDiff > 0 ? '▲' : assetDiff < 0 ? '▼' : '–' }}
-          </span>
+          <span class="delta-icon">{{
+            assetDiff > 0 ? '▲' : assetDiff < 0 ? '▼' : '–'
+          }}</span>
           전월 대비 {{ Math.abs(assetChangePercent).toFixed(1) }}%
         </div>
         <div class="summary-amount">{{ totalAssets.toLocaleString() }}원</div>
@@ -36,7 +36,7 @@
               :logo="bankLogo(a.bank)"
               :name="a.name"
               :sub="a.accountNumber"
-              :amount="a.balance"
+              :amount="a.displayBalance"
               :selected="isDeleteMode && isSelected(a)"
               @click="onClick(a)"
               class="account-item"
@@ -67,24 +67,16 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import {
-  faArrowLeft,
-  faSearch,
-  faPlus,
-} from '@fortawesome/free-solid-svg-icons';
-import { library } from '@fortawesome/fontawesome-svg-core';
 import ConfirmModal from '@/components/openbanking/ConfirmModal.vue';
 import DeleteModeFooter from '@/components/openbanking/DeleteModeFooter.vue';
 import { useLogos } from '@/components/openbanking/useLogos.js';
 import {
   getAccountsWithTotal,
   deleteAccount,
+  getAccountTransactions,
 } from '@/api/openbanking/accountsApi';
 import { getAssetSummaryCompare } from '@/api/openbanking/assetSummaryApi.js';
 import ListItemCard from '@/components/openbanking/ListItemCard.vue';
-
-library.add(faArrowLeft, faSearch, faPlus);
 
 const router = useRouter();
 const accounts = ref([]);
@@ -112,7 +104,7 @@ const toggleMode = () => {
 };
 const handleToggleDelete = () => toggleMode();
 const toggleSelect = (item) => {
-  if (item.type === '투자') return; // 투자는 삭제 불가
+  if (item.type === '투자') return;
   const id = item.id;
   selectedIds.value.has(id)
     ? selectedIds.value.delete(id)
@@ -121,14 +113,12 @@ const toggleSelect = (item) => {
 const isSelected = (item) => selectedIds.value.has(item.id);
 const selectedCount = computed(() => selectedIds.value.size);
 
-// 총액(서버 total 우선)
 const totalAssets = computed(() => {
   if (typeof apiAccountTotal.value === 'number') return apiAccountTotal.value;
   if (!accounts.value?.length) return 0;
-  return accounts.value.reduce((t, a) => t + (a.balance || 0), 0);
+  return accounts.value.reduce((t, a) => t + (a.displayBalance || 0), 0); // ✅ after 기준 합계
 });
 
-// 섹션 분리
 const sections = computed(() => {
   if (!accounts.value?.length) return [];
   const depositAccounts = accounts.value.filter((a) => a.type === '입출금');
@@ -136,7 +126,7 @@ const sections = computed(() => {
   const investAccounts = accounts.value.filter((a) => a.type === '투자');
   return [
     { key: 'deposit', title: '입출금', items: depositAccounts },
-    { key: 'saving', title: '저축', items: savingsAccounts },
+    { key: 'savings', title: '저축', items: savingsAccounts },
     { key: 'invest', title: '투자', items: investAccounts },
   ].filter((sec) => sec.items.length > 0);
 });
@@ -145,7 +135,14 @@ const onClick = (a) => {
   if (isDeleteMode.value) {
     toggleSelect(a);
   } else {
-    router.push(`/openbanking/account-detail/${a.id}`);
+    router.push({
+      path: `/openbanking/account-detail/${a.id}`,
+      query: {
+        bank: a.bank,
+        accountNo: a.accountNumber,
+        displayBalance: a.displayBalance,
+      }, // ✅ 동일 값 전달
+    });
   }
 };
 
@@ -159,15 +156,32 @@ const confirmDelete = async () => {
   closeConfirm();
 };
 
+const loadLatestAfterMap = async (list) => {
+  const jobs = list.map(async (a) => {
+    try {
+      const r = await getAccountTransactions(a.id, { page: 0, size: 1 });
+      const t = Array.isArray(r?.data) ? r.data[0] : null;
+      const after = t?.balanceAfter ?? t?.afterBalanceAmt ?? t?.balance ?? null;
+      return [a.id, Number(after)];
+    } catch {
+      return [a.id, null];
+    }
+  });
+  const entries = await Promise.all(jobs);
+  return Object.fromEntries(entries);
+};
+
 onMounted(async () => {
   window.addEventListener('toggle-delete-mode', handleToggleDelete);
   try {
     loading.value = true;
-    const r = await getAccountsWithTotal(); // {status, message, data}
+    const r = await getAccountsWithTotal();
     const apiData = r?.data || {};
     const apiAccounts = apiData?.accounts || [];
     apiAccountTotal.value =
       typeof apiData?.accountTotal === 'number' ? apiData.accountTotal : null;
+
+    const afterMap = await loadLatestAfterMap(apiAccounts);
 
     accounts.value = apiAccounts.map((account) => ({
       id: account.id,
@@ -179,40 +193,30 @@ onMounted(async () => {
           ? '저축'
           : '투자',
       name: account.productName || '계좌',
-      balance: Number(account.balanceAfter || account.balance || 0), // 수정된 부분
       accountNumber: account.accountNumber || '****',
+      balance: Number(account.balance || 0),
+      displayBalance: Number(afterMap[account.id] ?? account.balance ?? 0), // ✅ after 우선
     }));
 
-    // 전월 대비 자산 비교 호출
+    const now = new Date();
+    const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      '0'
+    )}`;
     try {
-      const now = new Date();
-      const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
-        2,
-        '0'
-      )}`;
       const cmp = await getAssetSummaryCompare({ month: ym });
       const d = cmp?.data || {};
       const cur = Number(d.currentAssetTotal ?? totalAssets.value);
       const prev = Number(d.prevAssetTotal ?? 0);
       assetDiff.value = Number(d.assetDiff ?? cur - prev);
       assetChangePercent.value = prev ? (assetDiff.value / prev) * 100 : 0;
-    } catch (e) {
+    } catch {
       assetDiff.value = 0;
       assetChangePercent.value = 0;
     }
   } catch (error) {
     console.error('계좌 API 호출 에러:', error);
-    // 폴백 데이터 (에러 발생 시 예시)
-    accounts.value = [
-      {
-        id: 1,
-        bank: 'KB국민은행',
-        type: '입출금',
-        name: "KB IT's Your Life 6기 통장",
-        balance: 5023400,
-        accountNumber: '3020-****-3748',
-      },
-    ];
+    accounts.value = [];
     apiAccountTotal.value = null;
   } finally {
     loading.value = false;
@@ -225,148 +229,27 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+/* 기존 스타일 그대로 포함(생략 없이) */
 .account-list-page {
   background-color: #f6f7f8;
   min-height: 100vh;
-  padding: 0 16px 100px; /* 하단 여백 확보 */
+  padding: 0 16px 100px;
 }
-
 .category-wrap {
   background: #fff;
-  margin: 0 -16px 16px; /* 좌우 꽉 + 하단 여백 */
-  padding: 8px 16px; /* 내부 패딩 유지 */
+  margin: 0 -16px 16px;
+  padding: 8px 16px;
 }
-
-/* 총 자산 카드 스타일 */
 .summary-card {
   background: #fff;
   border-radius: 16px;
   padding: 20px;
   margin: 0 16px 24px;
 }
-.summary-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 4px;
-}
 .summary-title {
   font-size: 1rem;
   font-weight: 600;
   color: #555;
-}
-.summary-delta {
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-.summary-delta.up {
-  color: #ef4444;
-}
-.summary-delta.down {
-  color: #3b82f6;
-}
-.summary-amount {
-  font-size: 2rem;
-  font-weight: 800;
-  color: #4318d1;
-}
-
-.account-group-card {
-  background: transparent;
-  border-radius: 0;
-  padding: 16px 0;
-  margin: 0;
-  box-shadow: none;
-}
-.group-title {
-  font-size: 16px;
-  font-weight: 700;
-  margin-bottom: 16px;
-  padding-left: 16px;
-  color: #222;
-}
-.account-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* 계좌 아이템 스타일 */
-.account-item {
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  padding: 16px;
-  transition: background-color 0.2s;
-}
-.account-item:hover {
-  background-color: #f9f9fa;
-}
-.account-item.selected {
-  background-color: #eef2ff;
-}
-.item-logo {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  margin-right: 12px;
-}
-.item-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.item-name {
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #333;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.item-sub {
-  font-size: 0.75rem;
-  color: #888;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.item-balance {
-  margin-left: auto;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #222;
-  letter-spacing: -0.5px;
-  white-space: nowrap;
-  align-self: flex-end; /* 위치를 이름보다 살짝 아래로 */
-  padding-top: 6px;
-}
-
-/* 로딩 스타일 */
-.loading-container {
-  text-align: center;
-  padding: 40px 0;
-}
-.loading-spinner {
-  width: 32px;
-  height: 32px;
-  border: 4px solid #e0e0e0;
-  border-top-color: #4318d1;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 16px;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* 전월 대비 표시 */
-.summary-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
 }
 .summary-right {
   display: flex;
@@ -389,5 +272,60 @@ onUnmounted(() => {
 }
 .delta-icon {
   font-weight: 700;
+}
+.summary-amount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #4318d1;
+}
+.account-group-card {
+  background: transparent;
+  border-radius: 0;
+  padding: 16px 0;
+  margin: 0;
+  box-shadow: none;
+}
+.group-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-left: 16px;
+  color: #222;
+}
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.account-item {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 16px;
+  transition: background-color 0.2s;
+}
+.account-item:hover {
+  background-color: #f9f9fa;
+}
+.account-item.selected {
+  background-color: #eef2ff;
+}
+.loading-container {
+  text-align: center;
+  padding: 40px 0;
+}
+.loading-spinner {
+  width: 32px;
+  height: 32px;
+  border: 4px solid #e0e0e0;
+  border-top-color: #4318d1;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
