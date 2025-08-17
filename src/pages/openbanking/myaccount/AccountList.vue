@@ -136,7 +136,7 @@ const sections = computed(() => {
   const investAccounts = accounts.value.filter((a) => a.type === '투자');
   return [
     { key: 'deposit', title: '입출금', items: depositAccounts },
-    { key: 'savings', title: '저축', items: savingsAccounts },
+    { key: 'saving', title: '저축', items: savingsAccounts },
     { key: 'invest', title: '투자', items: investAccounts },
   ].filter((sec) => sec.items.length > 0);
 });
@@ -175,11 +175,11 @@ onMounted(async () => {
       type:
         account.accountType === 'DEPOSIT'
           ? '입출금'
-          : account.accountType === 'SAVINGS'
+          : account.accountType === 'SAVING'
           ? '저축'
           : '투자',
       name: account.productName || '계좌',
-      balance: Number(account.balance || 0),
+      balance: Number(account.balanceAfter || account.balance || 0), // 수정된 부분
       accountNumber: account.accountNumber || '****',
     }));
 

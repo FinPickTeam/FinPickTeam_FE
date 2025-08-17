@@ -1,12 +1,5 @@
 <template>
   <div class="category-select-container">
-    <!-- 상단 헤더 -->
-    <div class="category-header">
-      <button class="back-button" @click="goBack">
-        <font-awesome-icon :icon="['fas', 'angle-left']" />
-      </button>
-    </div>
-
     <!-- 제목 섹션 -->
     <div class="title-section">
       <h1>
@@ -68,15 +61,17 @@ const goBack = () => router.back();
 
 const selectCategory = async (c) => {
   const ledgerId = route.query.transactionId;
-  if (!ledgerId) return;
+  if (!ledgerId) {
+    console.error('transactionId가 없습니다.');
+    return;
+  }
   try {
     await patchLedgerCategory(ledgerId, c.id); // body: {categoryId: number}
-    // 상세화면 onActivated에서 바로 반영되도록 저장
     sessionStorage.setItem(`transaction_${ledgerId}_category`, c.name);
   } catch (e) {
     console.error('카테고리 수정 실패:', e);
   } finally {
-    router.back();
+    router.push({ name: 'CalendarDetail', params: { id: ledgerId } });
   }
 };
 </script>
@@ -133,7 +128,7 @@ const selectCategory = async (c) => {
 }
 
 .title-section .highlight {
-  color: #8b5cf6;
+  color: var(--color-main);
 }
 
 .title-section .normal {
@@ -152,10 +147,11 @@ const selectCategory = async (c) => {
 /* 카테고리 그리드 */
 .category-grid {
   flex: 1;
-  padding: 16px;
+  padding: 24px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 4px;
+  gap: 24px;
+  justify-content: center;
 }
 
 .category-item {
@@ -164,7 +160,9 @@ const selectCategory = async (c) => {
   align-items: center;
   gap: 8px;
   cursor: pointer;
-  padding: 16px 8px;
+  padding: 24px;
+  width: 120px;
+  height: 120px;
   background: #fff;
   border-radius: 12px;
   transition: background 0.15s;
@@ -178,16 +176,16 @@ const selectCategory = async (c) => {
 }
 
 .category-icon {
-  width: 56px;
-  height: 56px;
+  width: 72px;
+  height: 72px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .category-icon img {
-  width: 48px;
-  height: 48px;
+  width: 64px;
+  height: 64px;
   object-fit: contain;
 }
 

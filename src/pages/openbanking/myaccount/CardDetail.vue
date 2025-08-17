@@ -42,7 +42,7 @@
 
               <div
                 class="tx-right"
-                :class="{ plus: isPlus(t), minus: !isPlus(t) }"
+                :class="{ plus: isRefund(t), minus: !isRefund(t) }"
               >
                 <div class="tx-amount">{{ signedAmount(t.amount, t) }}</div>
                 <div class="tx-type">{{ subLabel(t) }}</div>
@@ -146,25 +146,20 @@ const formatDateLabel = (d) => {
   return `${date.getMonth() + 1}월 ${date.getDate()}일`;
 };
 
-const isPlus = (t) => {
-  // 취소/환급은 플러스 취급
-  if (t.isCancelled || t.cancelled || /cancel/i.test(t.status || ''))
-    return true;
-  if (typeof t.amount === 'number') return t.amount > 0;
-  if (typeof t.amount === 'string')
-    return Number(t.amount.replaceAll(',', '')) > 0;
-  return false;
-};
+// 취소/환급만 +, 나머지는 모두 지출(-)로 표시
+const isRefund = (t) =>
+  t?.isCancelled === true ||
+  t?.cancelled === true ||
+  /cancel|취소/i.test(t?.status || t?.payType || '');
 
 const signedAmount = (amount, t) => {
   const num =
     typeof amount === 'string'
       ? Number(amount.replaceAll(',', ''))
       : Number(amount || 0);
-  const sign = isPlus(t) ? '+' : '-';
+  const sign = isRefund(t) ? '+' : '-';
   return `${sign}${formatCurrency(Math.abs(num))}원`;
 };
-
 // 결제 유형 보조 라벨 (일시불/할부/현금서비스/해외일시불/취소 등)
 const subLabel = (t) => {
   if (t.isCancelled || t.cancelled) return '취소';
@@ -265,7 +260,7 @@ const grouped = computed(() => {
 .cs-amount {
   text-align: right;
   font-weight: 900;
-  font-size: 40px;
+  font-size: 2rem;
   color: #4318d1;
 }
 .cs-won {

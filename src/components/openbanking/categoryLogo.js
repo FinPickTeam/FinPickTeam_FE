@@ -32,6 +32,9 @@ const normalize = (label) => {
 export const categoryToLogo = (label) => {
   const normalized = normalize(label);
   const key = `/src/assets/spending_logo/${normalized}.png`;
+  if (!logos[key]) {
+    console.warn(`로고를 찾을 수 없습니다: ${key}`);
+  }
   return logos[key] || logos['/src/assets/spending_logo/기타.png'];
 };
 

@@ -138,7 +138,7 @@ const goBack = () => router.back();
 const goToDictionary = () => router.push('/dictionary');
 const goToCategorySelect = () => {
   const id = route.params.id;
-  router.push(`/openbanking/daily-report-select?transactionId=${id}`);
+  router.push({ name: 'CalendarSelect', query: { transactionId: id } });
 };
 
 // 메모

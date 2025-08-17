@@ -255,7 +255,7 @@ const grouped = computed(() => {
 .ac-balance {
   text-align: right;
   font-weight: 900;
-  font-size: 40px;
+  font-size: 2rem;
   color: #4318d1;
 }
 .ac-won {

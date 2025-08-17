@@ -72,29 +72,3 @@ export const getMonthReport = (month) => {
       throw error;
     });
 };
-
-// 월 리포트 내보내기 (blob)
-export const exportMonthReportPdf = ({ month, format = 'pdf' } = {}) => {
-  const params = { month, format };
-  console.log('GET /monthreport/export 요청:', params);
-  return api
-    .get('/monthreport/export', { params, responseType: 'blob' })
-    .then((res) => {
-      console.log('GET /monthreport/export 응답(blob):', {
-        status: res.status,
-        contentType: res.headers?.['content-type'],
-        contentLength: res.headers?.['content-length'],
-      });
-      return res; // blob은 원본 필요
-    })
-    .catch((error) => {
-      console.log('GET /monthreport/export 에러:', {
-        status: error.response?.status ?? error.response?.data?.status,
-        message:
-          error.response?.data?.message ??
-          error.message ??
-          '월간 리포트 PDF 다운로드 실패',
-      });
-      throw error;
-    });
-};
