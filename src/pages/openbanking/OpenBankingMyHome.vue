@@ -163,7 +163,7 @@ const fetchHomeData = async () => {
               ? '저축'
               : '투자',
           accountNumber: a.accountNumber || '****',
-          balance: Number(a.balance || 0),
+          balance: Number(a.balanceAfter || a.balance || 0), // 수정된 부분
           logo: bankLogo(bank),
         };
       });

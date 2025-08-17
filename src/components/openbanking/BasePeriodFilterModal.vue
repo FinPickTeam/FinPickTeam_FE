@@ -162,23 +162,11 @@ watch(
 </script>
 
 <style scoped>
-/* ---- Overlay (유리/그라디언트) ---- */
+/* ---- Overlay ---- */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: radial-gradient(
-      1200px 600px at 10% -10%,
-      rgba(67, 24, 209, 0.14),
-      transparent 60%
-    ),
-    radial-gradient(
-      1000px 600px at 110% 110%,
-      rgba(67, 24, 209, 0.12),
-      transparent 60%
-    ),
-    rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  background: rgba(0, 0, 0, 0.5);
   display: grid;
   place-items: center;
   z-index: 1000;
@@ -202,24 +190,22 @@ watch(
 @keyframes pop-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.98);
+    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translateY(0);
   }
 }
 
 /* ---- Card ---- */
 .modal-content.filter-modal {
-  background: rgba(255, 255, 255, 0.9);
-  -webkit-backdrop-filter: saturate(140%) blur(6px);
-  backdrop-filter: saturate(140%) blur(6px);
-  border: 1px solid rgba(67, 24, 209, 0.1);
-  border-radius: 20px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   width: min(560px, 92vw);
   max-height: 86vh;
-  overflow: hidden; /* sticky header/footer */
+  overflow: hidden;
   outline: none;
 }
 
@@ -227,22 +213,18 @@ watch(
 .modal-header,
 .modal-footer {
   padding: 14px 18px;
-  background: linear-gradient(
-    180deg,
-    rgba(255, 255, 255, 0.9),
-    rgba(255, 255, 255, 0.75)
-  );
+  background: #f9f9f9;
 }
 .modal-header.sticky {
   position: sticky;
   top: 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid #ddd;
   z-index: 2;
 }
 .modal-footer.sticky {
   position: sticky;
   bottom: 0;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-top: 1px solid #ddd;
   z-index: 2;
   display: flex;
   gap: 10px;
@@ -257,7 +239,6 @@ watch(
 .modal-header h3 {
   font-size: 18px;
   font-weight: 700;
-  letter-spacing: -0.2px;
   color: #16181d;
 }
 
@@ -267,10 +248,10 @@ watch(
   place-items: center;
   width: 36px;
   height: 36px;
-  border-radius: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  border: 1px solid #ddd;
   background: #fff;
-  transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
+  transition: transform 0.08s ease, box-shadow 0.12s ease;
 }
 .icon-btn:hover {
   transform: translateY(-1px);
@@ -282,23 +263,23 @@ watch(
 .modal-btn {
   border: 0;
   padding: 10px 16px;
-  border-radius: 12px;
+  border-radius: 8px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.06s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+  transition: transform 0.06s ease, box-shadow 0.12s ease;
 }
 .modal-btn:active {
   transform: translateY(1px);
 }
 
 .modal-btn.subtle {
-  background: #f5f6f8;
+  background: #f5f5f5;
   color: #222;
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  border: 1px solid #ddd;
 }
 
 .modal-btn.primary {
-  background: linear-gradient(135deg, #5a35f0, var(--color-main));
+  background: #4318d1;
   color: #fff;
 }
 
@@ -324,25 +305,19 @@ watch(
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  border: 1px solid #ddd;
   background: #fff;
   padding: 12px 12px;
-  border-radius: 14px;
+  border-radius: 8px;
   cursor: pointer;
   user-select: none;
-  transition: border-color 0.12s ease, box-shadow 0.12s ease,
-    transform 0.06s ease, background 0.12s ease;
+  transition: border-color 0.12s ease, transform 0.06s ease;
 }
 .option-card:hover {
   transform: translateY(-1px);
 }
 .option-card.active {
-  border-color: rgba(67, 24, 209, 0.55); /* keep semi-transparent */
-  background: linear-gradient(
-    0deg,
-    rgba(67, 24, 209, 0.05),
-    rgba(67, 24, 209, 0)
-  );
+  border-color: #4318d1;
 }
 
 .option-card .sr-only {
@@ -354,44 +329,40 @@ watch(
   width: 14px;
   height: 14px;
   border-radius: 999px;
-  border: 2px solid rgba(0, 0, 0, 0.28);
+  border: 2px solid #ddd;
   flex: 0 0 auto;
-  transition: border-color 0.12s ease, background 0.12s ease;
+  transition: border-color 0.12s ease;
 }
 .option-card.active .dot {
-  border-color: var(--color-main);
-  background: var(--color-main);
+  border-color: #4318d1;
+  background: #4318d1;
 }
 .option-card .label {
   font-weight: 700;
   color: #101317;
-  letter-spacing: -0.2px;
 }
 .option-card .check {
   margin-left: auto;
   width: 20px;
   height: 20px;
   opacity: 0;
-  color: var(--color-main);
-  transition: opacity 0.12s ease, transform 0.12s ease;
+  color: #4318d1;
+  transition: opacity 0.12s ease;
 }
 .option-card.active .check {
   opacity: 1;
-  transform: scale(1.02);
 }
 
 /* ---- Custom date area ---- */
 .custom-date.well {
   margin-top: 16px;
-  border: 1px dashed rgba(0, 0, 0, 0.12);
-  border-radius: 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   padding: 14px;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.02), rgba(0, 0, 0, 0.01));
-  transition: opacity 0.12s ease, filter 0.12s ease, border-color 0.12s ease;
+  background: #f9f9f9;
 }
 .custom-date.well.disabled {
   opacity: 0.6;
-  filter: grayscale(0.1);
 }
 
 .date-input-row {
@@ -411,20 +382,19 @@ watch(
 }
 
 .date-input {
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
   padding: 10px 12px;
   background: #fff;
-  transition: border-color 0.12s ease, box-shadow 0.12s ease;
   font-weight: 600;
   color: #0f172a;
 }
 .date-input:focus {
   outline: none;
-  border-color: rgba(67, 24, 209, 0.6);
+  border-color: #4318d1;
 }
 .date-input:disabled {
-  background: #f7f7fb;
+  background: #f7f7f7;
   color: #9aa0aa;
   cursor: not-allowed;
 }

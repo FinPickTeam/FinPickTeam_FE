@@ -179,7 +179,7 @@ onMounted(async () => {
           ? '저축'
           : '투자',
       name: account.productName || '계좌',
-      balance: Number(account.balance || 0),
+      balance: Number(account.balanceAfter || account.balance || 0), // 수정된 부분
       accountNumber: account.accountNumber || '****',
     }));
 
