@@ -29,12 +29,11 @@ export const registerAccount = (payload) => {
   console.log('POST /accounts/register 요청:', payload);
   return api
     .post('/accounts/register', payload)
-    .then((res) => {
-      const r = res.data;
+    .then((r) => {
       console.log('POST /accounts/register 응답:', {
-        status: r.status,
-        message: r.message,
-        data: r.data,
+        status: r?.status,
+        message: r?.message,
+        data: r?.data,
       });
       return r;
     })

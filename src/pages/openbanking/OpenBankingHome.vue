@@ -21,9 +21,11 @@
       </template>
     </div>
 
-    <button class="ob-btn" @click="goToAgreement" :disabled="loading">
+    <!-- 🔹 여기서 바로 register/sync-all 시작 + 곧바로 라우팅 -->
+    <button class="ob-btn" @click="onPrimaryGoConcurrent" :disabled="loading">
       {{ primaryLabel }}
     </button>
+
     <button
       v-if="hasAccounts"
       class="ob-btn my-assets-btn"
@@ -36,16 +38,24 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faSearch, faBell } from '@fortawesome/free-solid-svg-icons';
 import bannerImage from './img/Openbanking_Banner.png';
-// API 래퍼: r = { status, message, data: { accountTotal, accounts[] } }
-import { getAccountsWithTotal } from '@/api/openbanking/accountsApi';
 
-library.add(faSearch, faBell);
+/** ✅ accountsApi: 너가 이미 가진 래퍼 */
+import {
+  getAccountsWithTotal,
+  registerAccount,
+  syncAllAccounts,
+} from '@/api/openbanking/accountsApi';
+
+/** ✅ cardsApi: 아래에 예시 추가. 파일 없으면 생성해서 import 경로 맞춰줘 */
+import { registerCard, syncAllCards } from '@/api/openbanking/cardsApi';
+
+/** (선택) 리포트/자산요약 초기화 API가 있으면 import 해서 쓰기
+ * import { initMonthReport } from '@/api/openbanking/reportApi';
+ * import { getAssetTotal } from '@/api/openbanking/assetsApi';
+ */
 
 const router = useRouter();
 
@@ -55,48 +65,48 @@ const accountTotal = ref(0);
 const accountCount = ref(0);
 
 const hasAccounts = computed(() => accountCount.value > 0);
-
 const primaryLabel = computed(() =>
   hasAccounts.value ? '연동 추가하기' : '자산 연동하기'
 );
 
-function goToAgreement() {
-  router.push('/openbanking/account-link-select');
-}
 function goToMyAssets() {
   router.push('/openbanking/myhome');
 }
-function onPrimaryClick() {
-  if (loading.value) return;
 
+/** 🔹 눌러서 곧바로 이동 + 백그라운드로 등록/동기화 */
+function onPrimaryGoConcurrent() {
+  if (loading.value) return;
   loading.value = true;
   error.value = '';
 
+  // 백그라운드 연동 킥오프(기다리지 않음)
   (async () => {
     try {
-      // 전체 계좌 및 카드 동기화
-      await syncAllAccounts();
-      await syncAllCards();
+      await Promise.allSettled([
+        // DTO 비우면 서버에서 MOCK+온보딩 경로 태울 수 있게 해놨던 로직 그대로 활용
+        registerAccount({}),
+        registerCard({}),
+      ]);
 
-      // 월간 리포트 초기화
+      await Promise.allSettled([syncAllAccounts(), syncAllCards()]);
       await initMonthReport();
-
-      // 자산 요약 초기화
-      const assetSummary = await getAssetTotal();
-      console.log('자산 요약 초기화 완료:', assetSummary);
-
-      // 성공 메시지
-      alert('연동 및 초기화가 완료되었습니다.');
-    } catch (e) {
-      error.value =
-        e?.response?.data?.message || e?.message || '연동 및 초기화 실패';
+      await getAssetTotal();
+    } catch (_) {
+      // 화면은 이미 이동했을 수 있으니 조용히 스킵
     } finally {
       loading.value = false;
     }
   })();
+
+  // 즉시 이동
+  router.push('/openbanking/account-link-select');
 }
 
+/** 🔁 이 페이지 진입 시 자산 요약 로드 */
 onMounted(async () => {
+  // 🔸 이 페이지에서만 흰 헤더 오버라이드를 적용
+  document.body.classList.add('ob-white-page');
+
   try {
     loading.value = true;
     error.value = '';
@@ -106,7 +116,6 @@ onMounted(async () => {
     accountCount.value = list.length;
     accountTotal.value = Number(d.accountTotal ?? 0);
   } catch (e) {
-    // 실패해도 기본 문구로 진행
     error.value =
       e?.response?.data?.message || e?.message || '연동 상태 조회 실패';
     accountCount.value = 0;
@@ -114,6 +123,11 @@ onMounted(async () => {
   } finally {
     loading.value = false;
   }
+});
+
+onUnmounted(() => {
+  // 🔸 페이지 이탈 시 원복
+  document.body.classList.remove('ob-white-page');
 });
 </script>
 
@@ -195,5 +209,78 @@ onMounted(async () => {
 .my-assets-btn:hover {
   background: var(--color-main);
   color: #fff;
+}
+</style>
+
+<!-- 🔹 글로벌 오버라이드(흰 헤더). scoped 아님! -->
+<style>
+/* 이 페이지 전용 화이트 톤 + 헤더 경계선 제거 - 강력한 오버라이드 */
+body.ob-white-page .ob-header,
+body.ob-white-page .openbanking-header,
+body.ob-white-page .openbanking-layout .header,
+body.ob-white-page header.openbanking-header,
+body.ob-white-page .openbanking-layout header,
+body.ob-white-page .base-header,
+body.ob-white-page header,
+body.ob-white-page .header,
+body.ob-white-page .app-header,
+body.ob-white-page .main-header,
+body.ob-white-page .page-header {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+  background: #fff !important;
+  border: none !important;
+}
+
+/* 일부 레이아웃은 얇은 선을 ::after 로 그림 - 모든 가능한 ::after 제거 */
+body.ob-white-page .ob-header::after,
+body.ob-white-page .openbanking-header::after,
+body.ob-white-page .openbanking-layout .header::after,
+body.ob-white-page .base-header::after,
+body.ob-white-page header::after,
+body.ob-white-page .header::after,
+body.ob-white-page .app-header::after,
+body.ob-white-page .main-header::after,
+body.ob-white-page .page-header::after {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+}
+
+/* 헤더 내부 요소들도 흰색으로 */
+body.ob-white-page .base-header .title,
+body.ob-white-page header .title,
+body.ob-white-page .header .title {
+  color: #222 !important;
+  font-weight: 700 !important;
+}
+body.ob-white-page .base-header .icon,
+body.ob-white-page header .icon,
+body.ob-white-page .header .icon {
+  color: #4318d1 !important;
+}
+
+/* 추가 헤더 클래스들도 커버 */
+body.ob-white-page header,
+body.ob-white-page .header,
+body.ob-white-page .app-header {
+  background: #fff !important;
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+/* 전체 페이지 흰색 강제 */
+body.ob-white-page,
+body.ob-white-page #app,
+body.ob-white-page .app {
+  background: #fff !important;
+}
+
+/* v-calendar container global override */
+.custom-calendar.vc-container {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
 }
 </style>

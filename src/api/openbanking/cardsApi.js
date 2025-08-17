@@ -30,12 +30,11 @@ export const registerCard = (payload) => {
   console.log('POST /cards/register 요청:', payload);
   return api
     .post('/cards/register', payload)
-    .then((res) => {
-      const r = res.data;
+    .then((r) => {
       console.log('POST /cards/register 응답:', {
-        status: r.status,
-        message: r.message,
-        data: r.data,
+        status: r?.status,
+        message: r?.message,
+        data: r?.data,
       });
       return r;
     })
