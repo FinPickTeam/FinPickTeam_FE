@@ -21,7 +21,7 @@
       </template>
     </div>
 
-    <button class="ob-btn" @click="onPrimaryClick" :disabled="loading">
+    <button class="ob-btn" @click="goToAgreement" :disabled="loading">
       {{ primaryLabel }}
     </button>
     <button
