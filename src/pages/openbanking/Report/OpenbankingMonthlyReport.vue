@@ -2,10 +2,25 @@
   <div class="monthly-report-container" ref="reportContainer">
     <!-- 월 선택 네비게이션 -->
     <div class="report-header">
-      <button class="nav-arrow" @click="goPrevMonth">◀</button>
+      <button
+        class="nav-arrow"
+        type="button"
+        @click="goPrevMonth"
+        aria-label="이전 달"
+      >
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+
       <span class="report-title">{{ currentYear }}년 {{ currentMonth }}월</span>
-      <button class="nav-arrow" @click="goNextMonth" :disabled="isNextDisabled">
-        ▶
+
+      <button
+        class="nav-arrow"
+        type="button"
+        @click="goNextMonth"
+        :disabled="isNextDisabled"
+        aria-label="다음 달"
+      >
+        <i class="fa-solid fa-chevron-right"></i>
       </button>
     </div>
 
@@ -18,66 +33,58 @@
       <div class="consumption-amount">
         {{ totalConsumption.toLocaleString() }}원
       </div>
+
       <div class="consumption-diff">
         <template v-if="lastMonthDiff > 0">
-          <span class="accent-red">
-            지난달보다 {{ Math.abs(lastMonthDiff).toLocaleString() }}원 더
-            썼어요!
-          </span>
+          <span class="accent-red"
+            >지난달보다 {{ Math.abs(lastMonthDiff).toLocaleString() }}원 더
+            썼어요!</span
+          >
         </template>
         <template v-else-if="lastMonthDiff < 0">
-          <span class="accent-blue">
-            지난달보다 {{ Math.abs(lastMonthDiff).toLocaleString() }}원 덜
-            썼어요!
-          </span>
+          <span class="accent-blue"
+            >지난달보다 {{ Math.abs(lastMonthDiff).toLocaleString() }}원 덜
+            썼어요!</span
+          >
         </template>
         <template v-else>
-          <span class="accent-gray">지난달보다 같은 금액을 썼어요!</span>
+          <span class="accent-gray">지난달과 동일해요.</span>
         </template>
       </div>
     </section>
 
-    <!-- 지난달 비교 -->
+    <!-- 지난 6개월 소비 -->
     <section v-if="hasReport" class="report-section compare-section">
-      <div class="compare-title">
-        지난달보다
-        <span class="accent-blue" v-if="lastMonthDiff < 0">
-          {{ Math.round(Math.abs(lastMonthDiff) / 10000) }}만원 덜
-        </span>
-        <span class="accent-red" v-else-if="lastMonthDiff > 0">
-          {{ Math.round(lastMonthDiff / 10000) }}만원 더
-        </span>
-        <span class="accent-gray" v-else> 같은 금액을 </span>
-        썼어요.
-      </div>
+      <div class="compare-title">지난 6개월 소비</div>
       <div class="compare-bar-graph">
         <div
-          v-for="(bar, idx) in monthBarHeights"
-          :key="idx"
-          :class="['bar', bar.isCurrent ? 'bar-accent' : '', bar.colorClass]"
-          :style="{ height: bar.height + 'px' }"
-        ></div>
+          v-for="b in monthBars"
+          :key="b.ym"
+          :class="['bar', b.colorClass]"
+          :style="{ height: b.height + 'px' }"
+        />
       </div>
       <div class="month-labels">
         <span
-          v-for="(bar, idx) in monthBarHeights"
-          :key="idx"
-          :class="['month-label', bar.isCurrent ? 'month-label-current' : '']"
+          v-for="b in monthBars"
+          :key="b.ym + '-label'"
+          :class="[
+            'month-label',
+            b.ym === reportMonthStr ? 'month-label-current' : '',
+          ]"
         >
-          {{ getMonthLabel(idx) }}
+          {{ monthNum(b.ym) }}월
         </span>
       </div>
     </section>
 
-    <!-- 카테고리 요약 (TOP3 기준) -->
+    <!-- 카테고리 요약 -->
     <section v-if="hasReport" class="report-section category-section">
       <div class="category-title">
-        이번 달은
-        <span class="accent-blue">{{ topCategoryName || '식비' }}</span
+        이번 달은 <span class="accent-main">{{ topCategoryName || '—' }}</span
         >에 가장 많이 썼어요.
       </div>
 
-      <!-- TOP1/2/3 + 그 외 -->
       <div class="category-bar">
         <div
           class="seg seg-1"
@@ -109,14 +116,18 @@
     <!-- 이번 달 지출 TOP 3 -->
     <section v-if="hasReport" class="report-section top3-section">
       <div class="section-title">
-        이번 달 지출 <span class="accent-blue">TOP 3</span>
+        이번 달 지출 <span class="accent-main">TOP 3</span>
       </div>
       <div class="top3-list">
-        <div class="top3-item" v-for="(item, idx) in top3" :key="item.label">
+        <div
+          class="top3-item"
+          v-for="(item, idx) in top3"
+          :key="item.label + '-' + idx"
+        >
           <div class="top3-rank">{{ idx + 1 }}위</div>
           <div class="top3-icon">
             <img
-              :src="getSpendingLogo(item.label)"
+              :src="categoryToLogo(item.label)"
               :alt="item.label + ' 로고'"
             />
           </div>
@@ -133,69 +144,86 @@
       </div>
     </section>
 
-    <!-- 소비 성향 -->
-    <section v-if="hasReport" class="report-section tendency-section">
-      <div class="tendency-row">
-        <span class="tendency-icon">🔍</span>
-        <span>
-          나의 소비 성향은
-          <span class="accent-blue">{{ spendingPatternLabels }}</span
-          >이에요.
-        </span>
+    <!-- 소비 성향 (v2: 2번 스샷 스타일) -->
+    <section v-if="hasReport" class="report-section profile-card-v2">
+      <div class="pcv2-row">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <div class="pcv2-text">
+          <div class="label">나의 소비 성향은</div>
+          <div class="pcv2-type">
+            <span class="type">{{ profileTypes }}</span
+            >이에요.
+          </div>
+        </div>
       </div>
-      <div class="tendency-desc">
-        {{ spendingPatternFeedbackText }}
-      </div>
+
+      <p class="pcv2-tip">
+        다음 달엔 <b>{{ reco.category }}</b> 지출을 약
+        <b>{{ reco.percent }}%</b> 줄여보는 걸 추천해요.
+      </p>
+      <p v-if="feedbackLine" class="pcv2-feedback">{{ feedbackLine }}</p>
     </section>
 
-    <!-- 다음 달 추천 챌린지 -->
-    <section v-if="hasReport" class="report-section challenge-section">
-      <div class="challenge-title">다음 달 추천 챌린지</div>
-      <div class="challenge-item">
-        <div class="challenge-icon"><i class="fas fa-coins"></i></div>
-        <div class="challenge-content">
-          <div class="challenge-text">저축률 회복하기</div>
-          <div class="challenge-goal">최소 450,000원 저축해보아요.</div>
-        </div>
-        <div class="challenge-edit">
-          <button class="challenge-edit-btn" @click="goToChallengeCreate">
-            <i class="fa-solid fa-pen-to-square"></i>
-          </button>
-        </div>
+    <!-- 추천 챌린지 (v2: 간결 리스트) -->
+    <section
+      v-if="hasReport && computedChallenges.length"
+      class="report-section challenge-list-card"
+    >
+      <div class="clc-head">
+        <h3>다음 달 추천 챌린지</h3>
+        <button
+          class="clc-add-btn"
+          type="button"
+          @click="goToChallengeCreate"
+          aria-label="챌린지 생성"
+        >
+          <i class="fa-solid fa-plus"></i>
+        </button>
       </div>
+
+      <ul class="clc-list">
+        <li
+          v-for="(ch, i) in computedChallenges"
+          :key="ch.title + '-' + i"
+          class="clc-item"
+        >
+          <div class="clc-emoji">
+            <i :class="getChallengeIconClass(ch)"></i>
+          </div>
+          <div class="clc-main">
+            <div class="clc-title">{{ ch.title }}</div>
+            <div class="clc-desc">{{ ch.description }}</div>
+          </div>
+        </li>
+      </ul>
     </section>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
-
-// r = { status, message, data } 형태
-import {
-  getMonthReport,
-  exportMonthReportPdf,
-} from '@/api/openbanking/monthReportApi.js';
+import { downloadElementAsPDF } from '@/components/openbanking/pdfDownload';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { categoryToLogo } from '@/components/openbanking/categoryLogo';
+import { getMonthReport } from '@/api/openbanking/monthReportApi.js';
 
 const reportContainer = ref(null);
 const router = useRouter();
 const goToChallengeCreate = () => router.push('/challenge/create');
 
-// ── 월 상태: 오늘 기준 '지난달'을 기본값 ─────────────────────────────
+// ── 기본 월: 오늘 기준 '지난달' ──
 const today = new Date();
 const defaultYear =
   today.getMonth() === 0 ? today.getFullYear() - 1 : today.getFullYear();
 const defaultMonth = today.getMonth() === 0 ? 12 : today.getMonth(); // 1~12
-
 const currentYear = ref(defaultYear);
 const currentMonth = ref(defaultMonth);
 const monthStr = computed(
   () => `${currentYear.value}-${String(currentMonth.value).padStart(2, '0')}`
 );
 
-// 네비게이션 제한
+// 네비 제한
 const isMaxMonth = computed(
   () => currentYear.value === defaultYear && currentMonth.value === defaultMonth
 );
@@ -214,7 +242,7 @@ const goNextMonth = () => {
 };
 const isNextDisabled = computed(() => isMaxMonth.value);
 
-// ── 서버 리포트 상태 ────────────────────────────────────────────────
+// ── 서버 리포트 상태 ──
 const serverReport = ref(null);
 const loading = ref(false);
 const error = ref(null);
@@ -233,12 +261,11 @@ const noReportMessage = computed(() =>
     : `${monthStr.value} 월간 리포트가 존재하지 않습니다.`
 );
 
-// ✅ 먼저 선언(hoist 안되는 const 회피)
-const fetchReport = async () => {
+async function fetchReport() {
   try {
     loading.value = true;
     error.value = null;
-    const r = await getMonthReport(monthStr.value); // {status, message, data}
+    const r = await getMonthReport(monthStr.value);
     if (r?.status === 200) serverReport.value = r.data || null;
     else {
       serverReport.value = null;
@@ -246,120 +273,95 @@ const fetchReport = async () => {
     }
   } catch (e) {
     serverReport.value = null;
-    if (e?.response?.status === 404) error.value = null; // 리포트 없음
-    else error.value = e?.response?.data?.message || e.message;
+    if (e?.response?.status !== 404)
+      error.value = e?.response?.data?.message || e.message;
   } finally {
     loading.value = false;
   }
-};
-
-// 이벤트 리스너에서 쓸 핸들러는 함수 선언문으로(호이스팅)
-function handleDownloadPdf() {
-  captureAndDownloadPDF();
 }
 
-// mount & 월 변경 시 재조회
+// 이벤트 연결 + 월 변경시 재조회
 onMounted(() => {
-  fetchReport();
   window.addEventListener('download-monthly-pdf', handleDownloadPdf);
+  fetchReport();
 });
-onUnmounted(() =>
-  window.removeEventListener('download-monthly-pdf', handleDownloadPdf)
-);
+onUnmounted(() => {
+  window.removeEventListener('download-monthly-pdf', handleDownloadPdf);
+});
 watch(monthStr, fetchReport);
 
-// ── “리포트 기준 월”로 정확 비교 ─────────────────────────────────────
-// 서버 리포트의 기준 월 (YYYY-MM). 없으면 현재 선택 월로 폴백
-const reportMonthStr = computed(() => {
-  const m = serverReport.value?.month;
-  return typeof m === 'string' && /^\d{4}-\d{2}$/.test(m) ? m : monthStr.value;
+// ── 헬퍼 ──
+const monthNum = (ym) => Number(String(ym).split('-')[1] || 0);
+const byMonth = computed(() => {
+  const list = Array.isArray(serverReport.value?.sixMonthChart)
+    ? serverReport.value.sixMonthChart
+    : [];
+  return new Map(list.map((x) => [String(x.month), Number(x.amount || 0)]));
 });
-
-// reportMonthStr의 "지난달" (YYYY-MM)
-const reportPrevMonthStr = computed(() => {
-  const [y, m] = reportMonthStr.value.split('-').map(Number);
-  const d = new Date(y, m - 2, 1); // m-1(지난달), JS 월은 0부터라 -2
-  const yy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
-  return `${yy}-${mm}`;
-});
-
-// last7Months / sixMonthChart를 (ym, sum) 쌍으로 통일
-const seriesPairs = computed(() => {
-  const pairs = [];
-  if (Array.isArray(serverReport.value?.last7Months)) {
-    for (const b of serverReport.value.last7Months) {
-      const ym = b.ym || b.month;
-      const sum = b.sum ?? b.amount ?? 0;
-      if (ym) pairs.push([String(ym), Number(sum)]);
-    }
-  }
-  if (Array.isArray(serverReport.value?.sixMonthChart)) {
-    for (const b of serverReport.value.sixMonthChart) {
-      const ym = b.month;
-      const sum = b.amount ?? 0;
-      if (ym) pairs.push([String(ym), Number(sum)]);
-    }
-  }
-  return pairs;
-});
-const getAmountByMonth = (ym) => {
-  const hit = seriesPairs.value.find(([k]) => k === ym);
-  return hit ? hit[1] : 0;
+const reportMonthStr = computed(
+  () => serverReport.value?.month || monthStr.value
+);
+const prevOf = (ym) => {
+  const [y, m] = ym.split('-').map(Number);
+  const d = new Date(y, m - 2, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 };
 
-// ── 합계/증감 ───────────────────────────────────────────────────────
-// 이번 달(= 서버 리포트 month)의 총 지출
+// ── 합계/증감 ──
 const totalConsumption = computed(() =>
-  Number(
-    serverReport.value?.totalExpense ??
-      serverReport.value?.totalConsumption ??
-      getAmountByMonth(reportMonthStr.value) ??
-      0
-  )
+  Number(serverReport.value?.totalExpense ?? 0)
 );
-
-// 지난달(= reportMonthStr의 직전 월) 총 지출
-const prevMonthConsumption = computed(() => {
-  const cmp = serverReport.value?.compareExpense;
-  if (cmp && typeof cmp.prevExpense === 'number')
-    return Number(cmp.prevExpense);
-  if (cmp && typeof cmp.prevAssetTotal === 'number')
-    return Number(cmp.prevAssetTotal);
-  return getAmountByMonth(reportPrevMonthStr.value);
+const lastMonthDiff = computed(() => {
+  const cur = byMonth.value.get(reportMonthStr.value) || 0;
+  const prev = byMonth.value.get(prevOf(reportMonthStr.value)) || 0;
+  return cur - prev;
 });
 
-// 지난달 대비 증감
-const lastMonthDiff = computed(
-  () => totalConsumption.value - prevMonthConsumption.value
-);
-
-// ── 보조 함수 ───────────────────────────────────────────────────────
-const normalize = (s = '') =>
-  String(s).trim().replace(/\s+/g, '').replace(/,/g, '/');
-
-// 로고
-const getSpendingLogo = (label = '') => {
-  const n = normalize(label);
-  const file = n.includes('식비')
-    ? '식비.png'
-    : n.includes('카페') || n.includes('간식')
-    ? '카페, 간식.png'
-    : n.includes('쇼핑') ||
-      n.includes('미용') ||
-      n.includes('편의점') ||
-      n.includes('마트') ||
-      n.includes('잡화')
-    ? '쇼핑, 미용.png'
-    : '기타.png';
-  try {
-    return new URL(`/src/assets/spending_logo/${file}`, import.meta.url).href;
-  } catch {
-    return new URL('/src/assets/spending_logo/기타.png', import.meta.url).href;
+// 평균/비교 코멘트
+const avgComment = computed(() => {
+  const c = serverReport.value?.averageComparison?.comment;
+  if (typeof c === 'string' && c.trim()) return c.trim();
+  const pct = Number(serverReport.value?.averageComparison?.totalDiffPct);
+  if (!Number.isNaN(pct) && pct !== 0) {
+    return pct > 0
+      ? `동일 연령대 평균보다 ${pct}% 더 썼어요.`
+      : `동일 연령대 평균보다 ${Math.abs(pct)}% 덜 썼어요.`;
   }
-};
+  const sp = serverReport.value?.spendingPatternFeedback;
+  if (typeof sp === 'string' && sp.trim()) return sp.trim();
+  return '';
+});
 
-// ── TOP3: 서버 우선, 없으면 categoryChart로 계산 ────────────────────
+// ── 6개월 막대 ──
+const monthBars = computed(() => {
+  const raw = Array.isArray(serverReport.value?.sixMonthChart)
+    ? serverReport.value.sixMonthChart.map((b) => ({
+        ym: String(b.month),
+        sum: Number(b.amount || 0),
+      }))
+    : [];
+  if (!raw.length) return [];
+
+  const max = Math.max(...raw.map((b) => b.sum), 1);
+  const avg = raw.reduce((s, b) => s + b.sum, 0) / raw.length; // 직전 6개월 평균
+  const EPS = 0.03; // ±3% 데드존
+
+  return raw.map((b) => {
+    const isCurrent = b.ym === reportMonthStr.value; // 필요하면 강조 클래스 추가
+    let colorClass = '';
+    if (b.sum > avg * (1 + EPS)) colorClass = 'bar-red';
+    else if (b.sum < avg * (1 - EPS)) colorClass = 'bar-green';
+
+    return {
+      ym: b.ym,
+      height: Math.round((b.sum / max) * 100),
+      colorClass,
+      isCurrent,
+    };
+  });
+});
+
+// ── TOP3(서버 우선) ──
 const top3 = computed(() => {
   if (
     Array.isArray(serverReport.value?.top3Spending) &&
@@ -374,7 +376,6 @@ const top3 = computed(() => {
       .sort((a, b) => b.amount - a.amount)
       .slice(0, 3);
   }
-
   const list = Array.isArray(serverReport.value?.categoryChart)
     ? serverReport.value.categoryChart
     : [];
@@ -389,17 +390,7 @@ const top3 = computed(() => {
       percent: total ? (Number(it.amount || 0) / total) * 100 : 0,
     }));
 });
-
-// TOP1 이름(타이틀)
-const topCategoryName = computed(
-  () =>
-    top3.value?.[0]?.label ||
-    (serverReport.value?.mainCategory?.name ??
-      serverReport.value?.mainCategory ??
-      '')
-);
-
-// 범례용 '그 외' 퍼센트 (소수 1자리 반올림)
+const topCategoryName = computed(() => top3.value?.[0]?.label || '');
 const etcPercent = computed(() => {
   const p1 = top3.value?.[0]?.percent ?? 0;
   const p2 = top3.value?.[1]?.percent ?? 0;
@@ -407,121 +398,206 @@ const etcPercent = computed(() => {
   return Math.max(0, Math.round((100 - (p1 + p2 + p3)) * 10) / 10);
 });
 
-// ── 월별 막대 (sixMonthChart/last7Months 모두 지원) ─────────────────
-const monthBarHeights = computed(() => {
-  const raw = Array.isArray(serverReport.value?.last7Months)
-    ? serverReport.value.last7Months.map((b) => ({
-        ym: String(b.ym || b.month),
-        sum: Number(b.sum ?? b.amount ?? 0),
-      }))
-    : Array.isArray(serverReport.value?.sixMonthChart)
-    ? serverReport.value.sixMonthChart.map((b) => ({
-        ym: String(b.month),
-        sum: Number(b.amount ?? 0),
-      }))
-    : [];
-  if (!raw.length) return [];
-  const max = Math.max(...raw.map((b) => b.sum), 1);
-  return raw.map((b) => ({
-    ym: b.ym,
-    height: Math.round((b.sum / max) * 100),
-    colorClass:
-      b.sum > 1_000_000
-        ? 'bar-red'
-        : b.sum < 500_000
-        ? 'bar-green'
-        : 'bar-purple',
-    // ✅ 서버 리포트 월과 동일하면 강조
-    isCurrent: b.ym === reportMonthStr.value,
-  }));
+// ── 소비 성향(★ label 무시, desc만 사용) ──
+const patternPrimary = computed(() => {
+  const p = Array.isArray(serverReport.value?.spendingPatterns)
+    ? serverReport.value.spendingPatterns[0]
+    : null;
+  return (p?.desc || '').toString();
 });
-const getMonthLabel = (idx) => {
-  const bars = monthBarHeights.value;
-  const b = bars[idx];
-  if (b?.ym) {
-    const m = Number(String(b.ym).split('-')[1] || 0);
-    return `${m}월`;
-  }
-  const center = Math.floor(bars.length / 2);
-  const base = new Date(currentYear.value, currentMonth.value - 1, 1);
-  const d = new Date(base.getFullYear(), base.getMonth() + (idx - center), 1);
-  return `${d.getMonth() + 1}월`;
+// 칩: patterns 배열 매핑
+const PATTERN_MAP = {
+  IMPULSE: '감정소비형',
+  LATE_NIGHT: '심야지출형',
+  FRUGAL: '절약형',
+  STABLE: '안정형',
+  OVERSPENDER: '과소비',
+  VOLATILE: '변동성 큼',
 };
-
-// 소비 성향 라벨 (null-safe, 배열/문자열 모두 대응)
-const spendingPatternLabels = computed(() => {
-  const p = serverReport.value?.spendingPatterns;
-
-  // 배열 형태: [{ label: '...' }, ...]
-  if (Array.isArray(p) && p.length) {
-    const labels = p.map((x) => x?.label).filter(Boolean);
-    return labels.length ? labels.join(' + ') : '일반형';
-  }
-
-  // 문자열 형태로 오는 경우
-  if (typeof p === 'string' && p.trim()) return p.trim();
-
-  // 아무 것도 없으면 기본값
-  return '일반형';
+const patternChips = computed(() => {
+  const p = Array.isArray(serverReport.value?.spendingPatterns)
+    ? serverReport.value.spendingPatterns[0]
+    : null;
+  const arr = Array.isArray(p?.patterns) ? p.patterns : [];
+  return arr.map((k) => PATTERN_MAP[k] || k);
 });
 
-// 소비 성향 피드백 (키 변화/누락 대비, 기본 안내 문구 제공)
-const spendingPatternFeedbackText = computed(() => {
-  const fb =
-    (typeof serverReport.value?.spendingPatternFeedback === 'string'
-      ? serverReport.value.spendingPatternFeedback
-      : '') ||
-    (typeof serverReport.value?.feedback === 'string'
-      ? serverReport.value.feedback
-      : '');
-
-  return fb || '안정적인 소비를 유지해보세요.';
-});
-
-// ── PDF(클라 캡처) ─────────────────────────────────────────────────
-const captureAndDownloadPDF = async () => {
-  if (!reportContainer.value) return;
-  const canvas = await html2canvas(reportContainer.value, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: true,
-    backgroundColor: '#ffffff',
-    width: reportContainer.value.scrollWidth,
-    height: reportContainer.value.scrollHeight,
-  });
-  const img = canvas.toDataURL('image/png', 1.0);
-  const pdfW = 210;
-  const pdfH = (canvas.height * pdfW) / canvas.width;
-  const pdf = new jsPDF('p', 'mm', [pdfW, pdfH]);
-  pdf.addImage(img, 'PNG', 0, 0, pdfW, pdfH);
-  pdf.save(`${monthStr.value}-월보고서.pdf`);
-};
-
-// (선택) 서버 PDF 다운로드
-const downloadServerPdf = async () => {
+// 피드백(JSON/문자열 모두 대응)
+const feedbackArray = computed(() => {
+  const raw = serverReport.value?.spendingPatternFeedback;
+  if (!raw || typeof raw !== 'string') return [];
   try {
-    const res = await exportMonthReportPdf({
-      month: monthStr.value,
-      format: 'pdf',
-    });
-    const blob = new Blob([res.data], {
-      type: res.headers['content-type'] || 'application/pdf',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${monthStr.value}-월보고서.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-  } catch (e) {
-    console.error('서버 PDF 다운로드 실패:', e);
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr)
+      ? arr.filter((x) => x?.title || x?.description)
+      : [];
+  } catch {
+    return [];
   }
-};
+});
+const feedbackText = computed(() => {
+  if (feedbackArray.value.length) return '';
+  const raw = serverReport.value?.spendingPatternFeedback;
+  return typeof raw === 'string' ? raw.trim() : '';
+});
+
+// ---- 한 줄 랜덤 선택 ----
+const feedbackLine = computed(() => {
+  const txt = feedbackText.value;
+  if (!txt) return '';
+  const parts = txt
+    .split(/[.!?]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!parts.length) return '';
+  const idx = Math.floor(Math.random() * parts.length);
+  return parts[idx] + '.';
+});
+
+// 추천 챌린지(배열 우선, 없으면 nextGoal(JSON 문자열))
+const computedChallenges = computed(() => {
+  if (
+    Array.isArray(serverReport.value?.recommendedChallenges) &&
+    serverReport.value.recommendedChallenges.length
+  ) {
+    return serverReport.value.recommendedChallenges;
+  }
+  const raw = serverReport.value?.nextGoal;
+  if (!raw || typeof raw !== 'string') return [];
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((x) => x?.title) : [];
+  } catch {
+    return [];
+  }
+});
+
+// 소비 성향 아이콘 (desc 기준) — v2 카드에선 직접 안 씀. 필요하면 사용.
+const patternIcon = computed(() => {
+  const d = (patternPrimary.value || '').toString();
+  let name = 'fa-face-meh';
+  if (d.includes('감정') || d.includes('충동')) name = 'fa-bolt';
+  else if (d.includes('절약') || d.includes('검소')) name = 'fa-piggy-bank';
+  else if (d.includes('안정')) name = 'fa-scale-balanced';
+  else if (d.includes('과소비') || d.includes('낭비')) name = 'fa-sack-dollar';
+  else if (d.includes('변동') || d.includes('불안정')) name = 'fa-wave-square';
+  return `fa-solid ${name}`;
+});
+
+// 지표 뽑기(필요 시 사용)
+const peerPct = computed(() =>
+  Number(serverReport.value?.averageComparison?.totalDiffPct ?? 0)
+);
+const trendPct = computed(() => {
+  const raw = (serverReport.value?.spendingPatternFeedback || '').toString();
+  const m = raw.match(/최근\s*3개월\s*평균\s*대비\s*([+-]?\d+)%/);
+  return m ? Number(m[1]) : null;
+});
+const metrics = computed(() => {
+  const arr = [];
+  if (trendPct.value !== null) {
+    arr.push({
+      label: '최근 3개월 대비',
+      valueNum: trendPct.value,
+      valueText: (trendPct.value > 0 ? '+' : '') + trendPct.value + '%',
+      icon:
+        trendPct.value > 0
+          ? 'fa-solid fa-arrow-trend-up'
+          : trendPct.value < 0
+          ? 'fa-solid fa-arrow-trend-down'
+          : 'fa-solid fa-minus',
+    });
+  }
+  if (!Number.isNaN(peerPct.value) && peerPct.value !== 0) {
+    arr.push({
+      label: '또래 평균 대비',
+      valueNum: peerPct.value,
+      valueText: (peerPct.value > 0 ? '+' : '') + peerPct.value + '%',
+      icon: 'fa-solid fa-user-group',
+    });
+  }
+  return arr;
+});
+
+// 챌린지 아이콘(추측 금지: 고정) — v2에선 이모지로 대체
+const getChallengeIcon = () => 'fa-solid fa-list-check';
+
+// ---- 챌린지 아이콘 매핑 ----
+function getChallengeIconClass(ch) {
+  const text = ((ch.title || '') + ' ' + (ch.description || '')).toLowerCase();
+  if (/총지출|지출|total/.test(text)) return 'fa-solid fa-sack-dollar';
+  if (/편의|마트|잡화|쇼핑|market|mart/.test(text))
+    return 'fa-solid fa-cart-shopping';
+  if (/식비|카페|음식|food|meal|식료/.test(text)) return 'fa-solid fa-utensils';
+  if (/저축|saving|목표|저금/.test(text)) return 'fa-solid fa-piggy-bank';
+  if (/달력|스케줄|calendar|일정/.test(text))
+    return 'fa-solid fa-calendar-days';
+  return 'fa-solid fa-list-check';
+}
+
+/* ===== v2 전용 계산 ===== */
+// "감정적 소비형 + 외식 과다형" 형태로 합치기
+const profileTypes = computed(() => {
+  const p = serverReport.value?.spendingPatterns?.[0] || {};
+  const primary = (p.label || patternPrimary.value || '').trim();
+  const extra = patternChips.value?.[0] || '';
+  return [primary, extra].filter(Boolean).join(' + ');
+});
+
+// 추천 문구의 카테고리/퍼센트 추출(없으면 15%)
+const reco = computed(() => {
+  const foodLike = (computedChallenges.value || []).find((c) =>
+    /(식비|카페)/.test((c.title || '') + (c.description || ''))
+  );
+  const text = (
+    (foodLike?.title || '') +
+    ' ' +
+    (foodLike?.description || '')
+  ).trim();
+  const m = text.match(/(\d+)\s*%/);
+  const percent = m ? Number(m[1]) : 15;
+  const category = foodLike ? '식비와 카페' : topCategoryName.value || '주요';
+  return { category, percent };
+});
+
+// ===== PDF 다운로드 핸들러 =====
+const isDownloading = ref(false);
+async function handleDownloadPdf() {
+  if (isDownloading.value || !reportContainer.value) return;
+  if (!hasReport.value) {
+    alert('이 달은 리포트가 없어서 PDF를 만들 수 없어요.');
+    return;
+  }
+
+  isDownloading.value = true;
+  const el = reportContainer.value;
+  el.classList.add('capturing');
+  await nextTick();
+  setTimeout(async () => {
+    try {
+      await downloadElementAsPDF({
+        element: el,
+        filename: `${monthStr.value}-월보고서.pdf`,
+        format: 'a4',
+        marginMm: 10,
+        scale: Math.min(2, window.devicePixelRatio || 1),
+        imageType: 'JPEG',
+        imageQuality: 0.92,
+        slicePx: 4096,
+        mode: 'auto',
+      });
+    } finally {
+      el.classList.remove('capturing');
+      isDownloading.value = false;
+    }
+  }, 60);
+}
 </script>
 
 <style scoped>
+/* ===== 공통 레이아웃 ===== */
 .monthly-report-container {
-  padding: 16px;
+  padding: 0 16px 16px 16px;
   background: var(--color-bg-light);
   height: calc(100dvh - 160px);
   overflow-y: auto;
@@ -534,7 +610,6 @@ const downloadServerPdf = async () => {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 16px 0 8px;
   margin-bottom: 16px;
 }
 .report-title {
@@ -543,14 +618,17 @@ const downloadServerPdf = async () => {
   color: #222;
 }
 .nav-arrow {
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
   border: none;
   color: var(--color-main);
-  font-size: 22px;
+  border-radius: 999px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: background 0.15s;
+  transition: background 0.15s, color 0.15s, transform 0.05s;
 }
 .nav-arrow:hover {
   background: #f3f3f3;
@@ -561,14 +639,18 @@ const downloadServerPdf = async () => {
   border-radius: 18px;
   margin: 0 0 16px;
   padding: 18px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
 }
 .section-title {
   font-size: 1.1rem;
   font-weight: 600;
   color: #222;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+
+/* ===== 총 소비 ===== */
 .consumption-amount {
   font-size: 24px;
   font-weight: 700;
@@ -580,11 +662,15 @@ const downloadServerPdf = async () => {
   font-size: 14px;
 }
 .accent-blue {
+  color: var(--color-accent-2);
+  font-weight: 700;
+}
+.accent-main {
   color: var(--color-main);
   font-weight: 700;
 }
 .accent-red {
-  color: #e74c3c;
+  color: var(--color-accent);
   font-weight: 700;
 }
 .accent-gray {
@@ -592,6 +678,7 @@ const downloadServerPdf = async () => {
   font-weight: 700;
 }
 
+/* ===== 6개월 비교 ===== */
 .compare-title {
   font-size: 18px;
   font-weight: 600;
@@ -607,22 +694,16 @@ const downloadServerPdf = async () => {
   justify-content: center;
 }
 .bar {
-  width: 28px;
-  background: #e0e7ff;
+  width: 34px;
+  background: var(--color-main-light-2);
   border-radius: 8px 8px 0 0;
   transition: height 0.3s, background 0.3s;
 }
-.bar-accent {
-  background: var(--color-main);
-}
 .bar-red {
-  background: #e74c3c !important;
+  background: var(--color-main-dark);
 }
 .bar-green {
-  background: #27ae60 !important;
-}
-.bar-purple {
-  background: #8e44ad !important;
+  background: var(--color-main-light);
 }
 .month-labels {
   display: flex;
@@ -632,7 +713,7 @@ const downloadServerPdf = async () => {
   margin-top: 8px;
 }
 .month-label {
-  width: 28px;
+  width: 34px;
   height: 20px;
   text-align: center;
   font-size: 12px;
@@ -645,11 +726,11 @@ const downloadServerPdf = async () => {
   transition: 0.3s;
 }
 .month-label-current {
-  background: var(--color-main);
-  color: #fff;
-  font-weight: 700;
+  color: #222;
+  font-weight: 600;
 }
 
+/* ===== 카테고리 ===== */
 .category-title {
   font-size: 16px;
   font-weight: 600;
@@ -667,24 +748,18 @@ const downloadServerPdf = async () => {
   height: 100%;
   display: block;
 }
-
-/* 색상 톤 단계 (1위 짙게 → 3위 옅게, 그 외 회색) */
 .seg-1 {
-  background: #574cff;
-} /* 진보라 */
-.seg-2 {
-  background: #7c6afd;
-} /* 중보라 */
-.seg-3 {
-  background: #b7a9ff;
-} /* 연보라 */
-.seg-etc {
-  background: #d9dbe1;
-} /* 회색 */
-.category-bar-item {
-  height: 100%;
+  background: var(--color-main);
 }
-
+.seg-2 {
+  background: var(--color-main-light);
+}
+.seg-3 {
+  background: var(--color-main-light-2);
+}
+.seg-etc {
+  background: var(--color-bg-accent);
+}
 .category-legend {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -702,17 +777,19 @@ const downloadServerPdf = async () => {
   margin-right: 6px;
 }
 .dot-1 {
-  background: #574cff;
+  background: var(--color-main);
 }
 .dot-2 {
-  background: #7c6afd;
+  background: var(--color-main-light);
 }
 .dot-3 {
-  background: #b7a9ff;
+  background: var(--color-main-light-2);
 }
 .dot-etc {
-  background: #d9dbe1;
+  background: var(--color-bg-accent);
 }
+
+/* ===== TOP3 ===== */
 .top3-section {
   margin-bottom: 18px;
 }
@@ -730,6 +807,12 @@ const downloadServerPdf = async () => {
 }
 .top3-item:last-child {
   border-bottom: none;
+}
+.top3-rank {
+  width: 32px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-main);
 }
 .top3-icon {
   width: 36px;
@@ -765,79 +848,136 @@ const downloadServerPdf = async () => {
   color: #222;
 }
 
-.tendency-section {
-  margin-bottom: 18px;
-}
-.tendency-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  margin-bottom: 4px;
-  color: #222;
-}
-.tendency-icon {
-  color: var(--color-main);
-  font-size: 18px;
-}
-.tendency-desc {
-  font-size: 13px;
-  color: #666;
+/* ===== 소비 성향 v2 ===== */
+.profile-card-v2 {
+  border-radius: 16px;
+  padding: 18px;
+  background: #fff;
 }
 
-.challenge-section {
-  margin-bottom: 18px;
-  background: #fff;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.07);
-  border-top: 1px solid #e0e7ff;
-}
-.challenge-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #222;
-  margin-bottom: 16px;
-}
-.challenge-item {
+/* 정렬: 아이콘 + 텍스트 컬럼 */
+.pcv2-row {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-.challenge-icon {
-  width: 32px;
-  height: 32px;
+.pcv2-row i {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fef3c7;
-  border-radius: 8px;
-  color: #d97706;
-  font-size: 16px;
-}
-.challenge-text {
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: 50%;
+  background: #ece9ff;
+  font-size: 18px;
   color: var(--color-main);
 }
-.challenge-goal {
-  font-size: 0.8rem;
-  color: #666;
+
+.pcv2-text {
+  display: flex;
+  flex-direction: column;
 }
-.challenge-edit-btn {
+
+.pcv2-text .label {
+  font-weight: 600;
+}
+
+.pcv2-type {
+  font-size: 18px;
+}
+.pcv2-type .type {
+  color: var(--color-main);
+  font-weight: 800;
+}
+.pcv2-tip {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 12px;
+}
+/* 추가: 피드백 문구 */
+.pcv2-feedback {
+  margin-top: 4px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+/* ===== 추천 챌린지 v2 ===== */
+.challenge-list-card {
+  border-radius: 16px;
+  background: #fff;
+}
+
+/* 추가: 헤더 영역 정렬 및 버튼 스타일 */
+.clc-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.clc-head h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #222;
+}
+.clc-add-btn {
   background: none;
   border: none;
   color: var(--color-main);
   font-size: 18px;
   cursor: pointer;
-  padding: 8px;
-  border-radius: 8px;
-  transition: background 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 4px;
 }
-.challenge-edit-btn:hover {
-  background: #f3f4f6;
+.clc-add-btn:active {
+  transform: scale(0.9);
+}
+.clc-list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.clc-item {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 10px;
+  align-items: center;
+}
+.clc-emoji {
+  color: var(--color-main);
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+}
+.clc-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.clc-title {
+  font-weight: 700;
+  color: #1f1e37;
+  font-size: 15px;
+}
+.clc-desc {
+  font-size: 13px;
+  color: #5f5c80;
+  line-height: 1.3;
+}
+
+/* ===== 캡처 안정화 ===== */
+.monthly-report-container.capturing {
+  height: auto !important;
+  overflow: visible !important;
+}
+.monthly-report-container.capturing,
+.monthly-report-container.capturing * {
+  animation: none !important;
+  transition: none !important;
+  box-shadow: none !important;
 }
 </style>

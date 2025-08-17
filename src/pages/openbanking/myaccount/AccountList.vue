@@ -233,9 +233,8 @@ onUnmounted(() => {
 
 .category-wrap {
   background: #fff;
-  margin: 0 -16px; /* 좌우 꽉 차게 */
-  padding: 8px 16px; /* 내부 패딩만 유지 */
-  border-radius: 0;
+  margin: 0 -16px 16px; /* 좌우 꽉 + 하단 여백 */
+  padding: 8px 16px; /* 내부 패딩 유지 */
 }
 
 /* 총 자산 카드 스타일 */
@@ -243,7 +242,7 @@ onUnmounted(() => {
   background: #fff;
   border-radius: 16px;
   padding: 20px;
-  margin-bottom: 24px;
+  margin: 0 16px 24px;
 }
 .summary-header {
   display: flex;
