@@ -265,7 +265,7 @@ const grouped = computed(() => {
 .cs-amount {
   text-align: right;
   font-weight: 900;
-  font-size: 40px;
+  font-size: 2rem;
   color: #4318d1;
 }
 .cs-won {
