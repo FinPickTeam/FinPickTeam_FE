@@ -55,11 +55,6 @@
             <div class="ring ring--3"></div>
           </div>
         </div>
-        <div class="prompt-button-container">
-          <button class="prompt-action-button" @click="goToInvestmentTest">
-            투자성향 검사 완료하기
-          </button>
-        </div>
       </div>
 
       <!-- 투자성향이 완전한 경우 -->
