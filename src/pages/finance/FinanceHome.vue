@@ -186,13 +186,15 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: calc(100vh - 80px - 68px); /* 헤더와 네비바 높이를 제외한 전체 높이 */
+  width: 390px;
+  max-width: 390px;
   padding: 20px;
   background: var(--color-bg-light, #f8f9fa);
   box-sizing: border-box;
   position: absolute;
   top: 80px; /* 헤더 높이만큼 아래로 이동 */
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .button-grid {
@@ -294,6 +296,7 @@ onMounted(() => {
   margin-top: 24px;
   width: 100%;
   max-width: 400px;
+  align-items: center;
 }
 
 .guide-section {
@@ -339,7 +342,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 8px 8px;
   background: rgba(107, 70, 193, 0.08);
   border: 1px solid rgba(107, 70, 193, 0.15);
   border-radius: 20px;
@@ -394,7 +397,7 @@ onMounted(() => {
 }
 
 .hashtag-btn span {
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.5px;
 }
 
@@ -403,6 +406,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: center;
 }
 
 .guide-btn {
@@ -419,6 +423,7 @@ onMounted(() => {
   border: none;
   position: relative;
   overflow: hidden;
+  width: 320px;
 }
 
 .guide-btn::before {
@@ -502,7 +507,7 @@ onMounted(() => {
   }
 
   .hashtag-btn {
-    padding: 6px 12px;
+    padding: 6px 8px;
     font-size: 11px;
   }
 
