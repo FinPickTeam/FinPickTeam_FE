@@ -78,6 +78,8 @@ function onPrimaryGoConcurrent() {
   loading.value = true;
   error.value = '';
 
+  const myDataStore = useMyDataStore();
+
   // 백그라운드 연동 킥오프(기다리지 않음)
   (async () => {
     try {
@@ -90,6 +92,9 @@ function onPrimaryGoConcurrent() {
       await Promise.allSettled([syncAllAccounts(), syncAllCards()]);
       await initMonthReport();
       await getAssetTotal();
+
+      // 연동 완료 후 상태 업데이트
+      myDataStore.setLinked(true);
     } catch (_) {
       // 화면은 이미 이동했을 수 있으니 조용히 스킵
     } finally {
