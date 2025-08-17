@@ -147,6 +147,7 @@
         <p>검색 조건에 맞는 상품이 없습니다.</p>
       </div>
     </div>
+    <MyData :open="show" @close="show = false" />
   </div>
 </template>
 
@@ -158,6 +159,8 @@ import ProductCardList_deposit from '@/components/finance/deposit/ProductCardLis
 import LoadingSpinner from '@/components/LoadingSpinner.vue';
 import { getDepositList, getDepositRecommendList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
+import { useMyDataStore } from '@/stores/MyData';
+import MyData from '@/components/finance/deposit/MyData.vue';
 
 const router = useRouter();
 const activeSubtab = ref('추천');
@@ -174,6 +177,8 @@ const formData = ref({
   selectedPrefer: [],
 });
 const fav = useFavoriteStore();
+
+const myDataStore = useMyDataStore();
 
 // 검색/필터 UI 상태
 const searchKeyword = ref('');
@@ -227,9 +232,12 @@ const interestTags = ref([
   { value: '5% 이상', label: '5% 이상' },
 ]);
 
+const show = ref(false);
+
 onMounted(async () => {
   fetchDepositList();
   fav.syncIdSet('DEPOSIT');
+  if (!myDataStore.linked) show.value = true;
 });
 
 const fetchDepositList = async () => {
@@ -402,6 +410,15 @@ function applyFilter() {
   selectedInterests.value = [...pendingInterests.value];
   showFilter.value = false;
 }
+
+// 요약 표시용
+const preferSummary = computed(() => {
+  const raw = formData.value.selectedPrefer || [];
+  const arr = [...new Set(raw.filter(Boolean).map((s) => String(s).trim()))];
+  if (arr.length === 0) return '';
+  if (arr.length === 1) return arr[0];
+  return `${arr[0]} 외 ${arr.length - 1}건`;
+});
 </script>
 
 <style scoped>
