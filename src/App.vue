@@ -6,7 +6,22 @@ import Navbar from '@/components/Navbar.vue';
 const route = useRoute();
 
 // 네비바를 숨길 라우트 이름들
-const hideNavbarRoutes = ['Login', 'Signup', 'SignupComplete'];
+const hideNavbarRoutes = [
+  'Login',
+  'Signup',
+  'SignupComplete',
+  'ProfileStep1',
+  'ProfileStep2',
+  'ProfileStep3',
+  'ProfileStep4',
+  'ProfileStep5',
+  'ProfileStep6',
+  'ProfileStep7',
+  'ProfileStep8',
+  'ProfileStep9',
+  'ProfileStep10',
+  'ProfileComplete',
+];
 
 // 현재 라우트에서 네비바를 숨길지 결정
 const shouldHideNavbar = computed(() => {
