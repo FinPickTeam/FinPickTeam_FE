@@ -36,14 +36,16 @@
           />
 
           <!-- 중복확인 -->
-          <!-- <button
-              type="button"
-              class="check-btn"
-              @click="handleEmailDuplicateCheck"
-              :disabled="submitting || !form.email || !!errors.email || isEmailVerified"
+          <button
+            type="button"
+            class="check-btn"
+            @click="handleEmailDuplicateCheck"
+            :disabled="
+              submitting || !form.email || !!errors.email || isEmailVerified
+            "
           >
             중복확인
-          </button> -->
+          </button>
 
           <!-- 인증요청 / 재전송 -->
           <button
