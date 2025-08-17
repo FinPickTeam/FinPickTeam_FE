@@ -58,29 +58,29 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { useProfileStore } from "@/stores/profile.js";
+import { computed } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { useProfileStore } from '@/stores/profile.js';
 
 const router = useRouter();
 const route = useRoute();
 const profileStore = useProfileStore();
 
 const investmentType = computed(
-  () => profileStore.resultType || "분석 결과 없음"
+  () => profileStore.resultType || '분석 결과 없음'
 );
 const investmentDescription = computed(
-  () => profileStore.resultExplain || "결과를 불러오는 데 실패했습니다."
+  () => profileStore.resultExplain || '결과를 불러오는 데 실패했습니다.'
 );
 
 const buttonText = computed(() => {
   const from = route.query.from;
-  if (from === "fund") {
-    return "펀드 시작하기";
-  } else if (from === "mypage") {
-    return "투자성향 재설정 완료";
+  if (from === 'fund') {
+    return '펀드 시작하기';
+  } else if (from === 'mypage') {
+    return '투자성향 재설정 완료';
   } else {
-    return "핀픽 시작하기"; // 기본값
+    return '핀픽 시작하기'; // 기본값
   }
 });
 
@@ -114,25 +114,26 @@ const investmentTypeData = {
 
 const detailedAnalysis = computed(() => {
   const type = investmentType.value; // Pinia에서 가져온 현재 성향 타입
-  const data = investmentTypeData[type] || investmentTypeData["안정형"];
+  const data = investmentTypeData[type] || investmentTypeData['안정형'];
   return [
-    { label: "위험 감수 능력", value: data.riskTolerance },
-    { label: "투자 경험", value: data.experience },
-    { label: "투자 기간", value: data.period },
-    { label: "수익 기대치", value: data.expectedReturn },
+    { label: '위험 감수 능력', value: data.riskTolerance },
+    { label: '투자 경험', value: data.experience },
+    { label: '투자 기간', value: data.period },
+    { label: '수익 기대치', value: data.expectedReturn },
   ];
 });
 
 // 홈으로 이동
 const goToHome = () => {
-  const from = route.query.from || "signup";
+  const from = route.query.from || 'signup';
   profileStore.resetAnswers();
-  if (from === "mypage") {
-    router.push("/mypage");
-  } else if (from === "fund") {
-    router.push("/finance/fund");
+  if (from === 'mypage') {
+    router.push('/mypage');
+  } else if (from === 'fund') {
+    router.push('/finance/fund');
   } else {
-    router.push("/");
+    // 회원가입 완료 후 홈으로 이동할 때 가입축하 모달을 표시하기 위한 쿼리 파라미터 추가
+    router.push('/?from=profile-complete');
   }
 };
 </script>
@@ -142,7 +143,7 @@ const goToHome = () => {
   min-height: 100vh;
   background-color: #f8fafc;
   padding: 40px 16px 24px 16px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   display: flex;
   flex-direction: column;
 }
@@ -154,7 +155,7 @@ const goToHome = () => {
 }
 
 .logo-title {
-  font-family: "JalnanGothic", sans-serif !important;
+  font-family: 'JalnanGothic', sans-serif !important;
   font-size: 32px;
   font-weight: 900;
   letter-spacing: 1px;
@@ -221,7 +222,7 @@ const goToHome = () => {
 }
 
 .card-icon::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 50%;
   left: 50%;
@@ -332,7 +333,7 @@ const goToHome = () => {
 }
 
 .progress-bar::after {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: 0;
@@ -387,7 +388,7 @@ const goToHome = () => {
 }
 
 .progress-fill::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   left: -100%;
