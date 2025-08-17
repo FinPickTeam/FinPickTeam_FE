@@ -579,10 +579,8 @@ const fetchFundRecommendedList = async () => {
 
 /* ===== Incomplete Propensity CTA Card ===== */
 .propensity-card {
-  display: grid;
-  grid-template-columns: 1fr 96px;
-  align-items: center;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   margin-top: 16px;
   padding: 16px;
@@ -590,12 +588,14 @@ const fetchFundRecommendedList = async () => {
   background: linear-gradient(135deg, #f7f5ff 0%, #ffffff 60%);
   border: 1px solid var(--color-bg-border);
   box-shadow: 0 6px 14px rgba(93, 68, 201, 0.06);
+  position: relative;
 }
 
 .propensity-card__left {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: relative;
 }
 
 .propensity-badge {
@@ -675,13 +675,17 @@ const fetchFundRecommendedList = async () => {
   margin: 0;
   font-size: 12px;
   color: #8b8ea0;
+  text-align: center;
 }
 
 /* 오른쪽 장식 링(비주얼) */
 .propensity-card__right {
-  position: relative;
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 96px;
   height: 96px;
+  margin: 8px;
 }
 
 .ring {
