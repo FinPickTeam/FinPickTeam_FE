@@ -206,6 +206,14 @@
         </button>
       </div>
 
+      <!-- 공유하기 버튼 -->
+      <div class="share-section" v-if="challenge">
+        <button class="share-button" @click="shareChallenge">
+          <i class="fas fa-share-alt"></i>
+          공유하기
+        </button>
+      </div>
+
       <!-- 일반 참여 버튼 (공개 챌린지이거나 이미 참여중인 경우) -->
       <div
         class="join-section"
@@ -442,6 +450,42 @@ const handleResultConfirm = async () => {
   showFailModal.value = false;
   challengeResult.value = null;
   await fetchDetail();
+};
+
+// 공유하기 기능
+const shareChallenge = async () => {
+  try {
+    const currentUrl = window.location.href;
+
+    // Web Share API 지원 여부 확인
+    if (navigator.share) {
+      await navigator.share({
+        title: challenge.value?.title || '챌린지',
+        text: challenge.value?.description || '함께 참여해보세요!',
+        url: currentUrl,
+      });
+    } else {
+      // Web Share API를 지원하지 않는 경우 클립보드에 복사
+      await navigator.clipboard.writeText(currentUrl);
+      alert('링크가 클립보드에 복사되었습니다!');
+    }
+  } catch (error) {
+    console.error('공유하기 실패:', error);
+
+    // 클립보드 복사가 실패한 경우 fallback
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = window.location.href;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('링크가 클립보드에 복사되었습니다!');
+    } catch (fallbackError) {
+      console.error('Fallback 복사도 실패:', fallbackError);
+      alert('링크 복사에 실패했습니다. 브라우저를 확인해주세요.');
+    }
+  }
 };
 
 const formatDate = (d) => {
@@ -830,6 +874,40 @@ const categoryTheme = computed(() => {
 
 .join-button:hover {
   transform: translateY(-2px);
+}
+
+/* 공유하기 버튼 스타일 */
+.share-section {
+  padding: 0 0 20px 0;
+  width: 100%;
+  max-width: 500px;
+}
+
+.share-button {
+  width: 100%;
+  padding: 14px;
+  background: #f8f9fa;
+  color: #666;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.share-button:hover {
+  background: #e9ecef;
+  border-color: #dee2e6;
+  transform: translateY(-1px);
+}
+
+.share-button i {
+  font-size: 14px;
 }
 
 /* 비밀번호 입력 섹션 스타일 */

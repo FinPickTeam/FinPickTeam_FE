@@ -79,8 +79,23 @@ export const useAuthStore = defineStore('auth', {
 
         return true;
       } catch (err) {
-        this.error =
+        // 비밀번호 불일치 에러 처리
+        const errorMessage =
           err?.response?.data?.message || err?.message || '로그인 실패';
+
+        // 비밀번호 관련 에러 메시지들을 "비밀번호가 일치하지 않습니다."로 통일
+        if (
+          errorMessage.includes('비밀번호') ||
+          errorMessage.includes('password') ||
+          errorMessage.includes('Password') ||
+          errorMessage.includes('잘못') ||
+          errorMessage.includes('틀렸') ||
+          errorMessage.includes('일치하지 않')
+        ) {
+          this.error = '비밀번호가 일치하지 않습니다.';
+        } else {
+          this.error = errorMessage;
+        }
         return false;
       } finally {
         this.loading = false;

@@ -55,11 +55,7 @@
 
       <div class="guide-section">
         <div class="other-guide-buttons">
-          <div class="guide-btn primary" @click="showDriverGuide">
-            <i class="fa-solid fa-play"></i>
-            <span>단계별 가이드</span>
-          </div>
-          <div class="guide-btn secondary" @click="showGuideModal">
+          <div class="guide-btn secondary" @click="showDriverGuide">
             <i class="fa-solid fa-circle-info"></i>
             <span>이용 가이드</span>
           </div>
