@@ -1,7 +1,6 @@
 <template>
   <div class="openbankinghome-container">
-    <div class="ob-header"></div>
-
+    <Headerbar />
     <div class="banner-wrap">
       <img :src="bannerImage" alt="배너" class="banner-img" />
     </div>
@@ -143,27 +142,20 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   box-sizing: border-box;
-  padding-top: 80px;
   overflow: hidden;
   position: fixed;
   top: 0;
   left: 50%;
   transform: translateX(-50%);
 }
-.ob-header {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 24px 18px 0 18px;
-  background: #fff;
-}
+
 .banner-wrap {
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-top: 18px;
+  margin-top: 0;
+  padding-top: 80px;
 }
 .banner-img {
   width: 100%;
