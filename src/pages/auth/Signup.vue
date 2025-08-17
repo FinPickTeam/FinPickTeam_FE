@@ -35,18 +35,6 @@
             :disabled="submitting || isEmailVerified"
           />
 
-          <!-- 중복확인 -->
-          <button
-            type="button"
-            class="check-btn"
-            @click="handleEmailDuplicateCheck"
-            :disabled="
-              submitting || !form.email || !!errors.email || isEmailVerified
-            "
-          >
-            중복확인
-          </button>
-
           <!-- 인증요청 / 재전송 -->
           <button
             type="button"
@@ -71,20 +59,22 @@
 
         <!-- 인증 코드 입력/타이머 영역 -->
         <div v-if="showVerifyBox" class="verify-box">
-          <input
-            v-model.trim="code"
-            maxlength="6"
-            placeholder="6자리 인증코드"
-            @input="onCodeInput"
-          />
-          <button
-            type="button"
-            class="check-btn"
-            @click="handleEmailVerifyConfirm"
-            :disabled="verifying || code.length !== 6"
-          >
-            {{ verifying ? '확인중...' : '인증확인' }}
-          </button>
+          <div class="verify-input-group">
+            <input
+              v-model.trim="code"
+              maxlength="6"
+              placeholder="6자리 인증코드"
+              @input="onCodeInput"
+            />
+            <button
+              type="button"
+              class="check-btn"
+              @click="handleEmailVerifyConfirm"
+              :disabled="verifying || code.length !== 6"
+            >
+              {{ verifying ? '확인중...' : '인증확인' }}
+            </button>
+          </div>
           <div class="verify-hint">남은 시간: {{ minutes }}:{{ seconds }}</div>
         </div>
       </div>
@@ -332,39 +322,59 @@ const validateConfirmPassword = () => {
 };
 
 // ── 이메일 중복확인/인증 로직 ──────────────────────
-const handleEmailDuplicateCheck = async () => {
-  if (!form.email || errors.email) return;
-  try {
-    const response = await checkEmailDuplicate(form.email);
-    if (response.status === 200) {
-      isEmailChecked.value = true;
-      emailCheckMessage.value = '사용 가능한 이메일입니다.';
-      emailCheckMessageClass.value = 'success';
-    } else if (response.status === 409) {
-      isEmailChecked.value = false;
-      emailCheckMessage.value = '중복된 이메일입니다.';
-      emailCheckMessageClass.value = 'error';
-    } else {
-      isEmailChecked.value = false;
-      emailCheckMessage.value = '예상치 못한 응답입니다.';
-      emailCheckMessageClass.value = 'error';
-    }
-  } catch {
-    isEmailChecked.value = false;
-    emailCheckMessage.value = '중복된 이메일입니다.';
-    emailCheckMessageClass.value = 'error';
-  }
-};
+// 중복확인 함수 (현재는 handleEmailVerifyRequest에서 통합 처리)
+// const handleEmailDuplicateCheck = async () => {
+//   if (!form.email || errors.email) return;
+//   try {
+//     const response = await checkEmailDuplicate(form.email);
+//     if (response.status === 200) {
+//       isEmailChecked.value = true;
+//       emailCheckMessage.value = '사용 가능한 이메일입니다.';
+//       emailCheckMessageClass.value = 'success';
+//     } else if (response.status === 409) {
+//       isEmailChecked.value = false;
+//       emailCheckMessage.value = '중복된 이메일입니다.';
+//       emailCheckMessageClass.value = 'error';
+//     } else {
+//       isEmailChecked.value = false;
+//       emailCheckMessage.value = '예상치 못한 응답입니다.';
+//       emailCheckMessageClass.value = 'error';
+//     }
+//   } catch {
+//     isEmailChecked.value = false;
+//     emailCheckMessage.value = '중복된 이메일입니다.';
+//     emailCheckMessageClass.value = 'error';
+//   }
+// };
 
 const handleEmailVerifyRequest = async () => {
   if (!form.email || errors.email)
     return showWarning('올바른 이메일을 입력해주세요.');
-  if (!isEmailChecked.value && REQUIRE_EMAIL_CHECK) {
-    return showWarning('이메일 중복확인 후 인증요청을 해주세요.');
-  }
 
   try {
-    // 백엔드: /api/user/email/verify/request
+    // 1단계: 중복확인 API 호출
+    const duplicateResponse = await checkEmailDuplicate(form.email);
+
+    if (duplicateResponse.status === 409) {
+      // 중복된 이메일인 경우
+      isEmailChecked.value = false;
+      emailCheckMessage.value = '중복된 이메일입니다.';
+      emailCheckMessageClass.value = 'error';
+      return;
+    } else if (duplicateResponse.status !== 200) {
+      // 예상치 못한 응답
+      isEmailChecked.value = false;
+      emailCheckMessage.value = '예상치 못한 응답입니다.';
+      emailCheckMessageClass.value = 'error';
+      return;
+    }
+
+    // 중복확인 성공
+    isEmailChecked.value = true;
+    emailCheckMessage.value = '사용 가능한 이메일입니다.';
+    emailCheckMessageClass.value = 'success';
+
+    // 2단계: 인증요청 API 호출
     await requestEmailVerification(form.email);
 
     // 인증 상태/타이머 초기화 및 시작
@@ -377,8 +387,15 @@ const handleEmailVerifyRequest = async () => {
       '인증 코드가 발송되었습니다. 메일함을 확인해주세요.';
     emailCheckMessageClass.value = 'success';
   } catch (e) {
-    const msg = e?.response?.data?.message || '인증코드 발송 실패';
-    showWarning(msg);
+    // 중복확인 실패 시에도 중복된 이메일로 처리
+    if (e?.response?.status === 409) {
+      isEmailChecked.value = false;
+      emailCheckMessage.value = '중복된 이메일입니다.';
+      emailCheckMessageClass.value = 'error';
+    } else {
+      const msg = e?.response?.data?.message || '인증코드 발송 실패';
+      showWarning(msg);
+    }
   }
 };
 
@@ -679,15 +696,66 @@ input.error {
 
 .verify-box {
   display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.verify-input-group {
+  display: flex;
   gap: 12px;
   align-items: center;
-  margin-top: 8px;
 }
+
 .verify-box input {
-  max-width: 160px;
+  max-width: 100%;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  background: #fff;
+  border: 2px solid #e9ecef;
+  transition: all 0.2s ease;
 }
+
+.verify-box input:focus {
+  border-color: var(--color-main);
+  box-shadow: 0 0 0 3px rgba(107, 70, 193, 0.1);
+}
+
+.verify-box .check-btn {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--color-main);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.verify-box .check-btn:hover:not(:disabled) {
+  background: var(--color-main-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(107, 70, 193, 0.3);
+}
+
+.verify-box .check-btn:disabled {
+  background: #e9ecef;
+  color: #6b7280;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .verify-hint {
   font-size: 13px;
   color: #6b7280;
+  font-weight: 500;
+  margin-top: 8px;
+  text-align: center;
 }
 </style>
