@@ -16,17 +16,24 @@
       <!-- <div class="question-desc">총 자산 규모(순자산)</div> -->
       <div class="options">
         <div
-            v-for="(option, idx) in options"
-            :key="idx"
-            :class="['option', { selected: profileStore.answers.question10 === option }]"
-            @click="profileStore.answers.question10 = option"
+          v-for="(option, idx) in options"
+          :key="idx"
+          :class="[
+            'option',
+            { selected: profileStore.answers.question10 === option },
+          ]"
+          @click="profileStore.answers.question10 = option"
         >
           {{ option }}
         </div>
       </div>
     </div>
     <!-- 완료 버튼 -->
-    <button class="next-btn" :disabled="profileStore.answers.question10 === null || isLoading" @click="goNext">
+    <button
+      class="next-btn"
+      :disabled="profileStore.answers.question10 === null || isLoading"
+      @click="goNext"
+    >
       {{ isLoading ? '처리 중...' : '완료' }}
     </button>
   </div>
@@ -35,11 +42,11 @@
 <script setup>
 import { ref } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import {useProfileStore} from "@/stores/profile.js";
+import { useProfileStore } from '@/stores/profile.js';
 import ProfileStepHeader from '@/components/auth/ProfileStepHeader.vue';
-import {submitFullProfile} from "@/api/index.js";
+import { submitFullProfile } from '@/api/index.js';
 
-const profileStore=useProfileStore();
+const profileStore = useProfileStore();
 const router = useRouter();
 const route = useRoute();
 const options = [
@@ -77,7 +84,6 @@ const submitResults = async () => {
     // 모든 작업이 성공적으로 끝난 후, 여기서 페이지를 이동합니다.
     const from = route.query.from || 'mypage';
     await router.push(`/profile-complete?from=${from}`);
-
   } catch (error) {
     console.error('결과 전송 실패:', error);
     alert('오류가 발생했습니다.');
@@ -149,14 +155,14 @@ const submitResults = async () => {
   transition: border-color 0.2s, background 0.2s;
 }
 .option.selected {
-  border-color: #8e74e3;
+  border-color: var(--color-main-dark);
   background: #f3f0fa;
   color: #6c4cf1;
   font-weight: 600;
 }
 .next-btn {
   width: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 10px;

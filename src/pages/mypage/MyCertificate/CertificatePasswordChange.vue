@@ -5,7 +5,7 @@
       <button class="password-back" @click="goBack">
         <font-awesome-icon :icon="['fas', 'angle-left']" />
       </button>
-      <span class="password-title center-title">비밀번호 변경</span>
+      <span class="password-title center-title">간편 비밀번호 변경</span>
     </div>
 
     <!-- 메인 콘텐츠 -->
@@ -52,12 +52,18 @@
               ></div>
             </div>
           </div>
-          <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+          <div class="password-match">
+            <p v-if="errorMessage" class='text-error'>{{ errorMessage }}</p>
+          </div>
         </div>
 
         <!-- 숫자 패드 -->
         <div class="number-pad">
-          <div class="number-row" v-for="row in numberPad" :key="row.join('')">
+          <div
+            class="number-row"
+            v-for="(row, index) in numberPad.slice(0, 3)"
+            :key="index"
+          >
             <button
               v-for="number in row"
               :key="number"
@@ -74,9 +80,10 @@
             </button>
             <button
               class="number-btn"
-              @click="addNumber(3)"
+              @click="addNumber(numberPad[3])"
               :disabled="currentPassword.length >= 6"
             >
+              {{ numberPad[3] }}
             </button>
             <button class="number-btn delete-btn" @click="deleteNumber">
               <font-awesome-icon :icon="['fas', 'backspace']" />
@@ -89,16 +96,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import {
-  faAngleLeft,
-  faTimes,
-  faBackspace,
-} from "@fortawesome/free-solid-svg-icons";
-import { pinLogin } from "@/api/authApi.js";
+import {computed, ref} from "vue";
+import {useRouter} from "vue-router";
+import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
+import {library} from "@fortawesome/fontawesome-svg-core";
+import {faAngleLeft, faBackspace, faTimes,} from "@fortawesome/free-solid-svg-icons";
+import {pinLogin} from "@/api/authApi.js";
 
 library.add(faAngleLeft, faTimes, faBackspace);
 
@@ -108,12 +111,21 @@ const isLoading = ref(false);
 const errorMessage = ref("");
 const shakeError = ref(false);
 
-// 숫자 패드 배열을 이미지와 동일하게 고정
-const numberPad = ref([
-  [0, 4, 6],
-  [2, 5, 7],
-  [8, 1, 9],
-]);
+// 숫자 패드 배열을 랜덤하게 생성하는 함수
+const generateRandomNumberPad = () => {
+  const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  const shuffled = [...numbers].sort(() => Math.random() - 0.5);
+
+  return [
+    [shuffled[0], shuffled[1], shuffled[2]],
+    [shuffled[3], shuffled[4], shuffled[5]],
+    [shuffled[6], shuffled[7], shuffled[8]],
+    shuffled[9], // 10번째 숫자
+  ];
+};
+
+// 숫자 패드 배열을 랜덤하게 생성
+const numberPad = ref(generateRandomNumberPad());
 
 // 비밀번호 유효성 검사 (6자리 숫자)
 const isPasswordValid = computed(() => {
@@ -147,7 +159,7 @@ const verifyPassword = async () => {
   isLoading.value = true;
   try {
     // 실제 pinLogin API를 호출합니다.
-    await pinLogin(parseInt(currentPassword.value,10));
+    await pinLogin(parseInt(currentPassword.value, 10));
     // 인증 성공 시 다음 단계로 이동합니다.
     await router.push({
       name: "certificate-password-change-new",
@@ -155,7 +167,9 @@ const verifyPassword = async () => {
     });
   } catch (error) {
     // 인증 실패 시 API 응답에서 에러 메시지를 가져옵니다.
-    errorMessage.value = error.response?.data?.message || "인증에 실패했습니다.";
+    console.log("CATCH BLOCK TRIGGERED - ERROR OBJECT:", error);
+    errorMessage.value =
+      error.response?.data?.message || "인증에 실패했습니다.";
     triggerShakeError();
   } finally {
     isLoading.value = false;
@@ -167,6 +181,8 @@ const triggerShakeError = () => {
   setTimeout(() => {
     shakeError.value = false;
     clearPassword();
+    // 에러 발생 시 숫자 패드를 다시 랜덤하게 생성
+    numberPad.value = generateRandomNumberPad();
   }, 800); // 애니메이션 시간(0.5s) 후 초기화
 };
 
@@ -184,7 +200,6 @@ const clearPassword = () => {
 const goBack = () => {
   router.back();
 };
-
 </script>
 
 <style scoped>
@@ -250,8 +265,9 @@ const goBack = () => {
 .progress-steps {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  /*justify-content: center;*/
+  gap: 0;
+  width: 100%;
 }
 
 .step {
@@ -259,6 +275,7 @@ const goBack = () => {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  flex: 1;
 }
 
 .step-number {
@@ -427,5 +444,31 @@ const goBack = () => {
 
 .delete-btn {
   color: #333;
+}
+
+.empty-btn {
+  background: transparent;
+  cursor: default;
+}
+
+.empty-btn:hover {
+  background: transparent;
+}
+
+.password-match {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.text-success {
+  color: var(--color-success);
+}
+
+.text-error {
+  color: #f44336;
 }
 </style>

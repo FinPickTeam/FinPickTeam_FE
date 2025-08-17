@@ -176,12 +176,11 @@
               :class="{ 'disabled-text': !item.isAvailable }"
               >{{ item.name }}</span
             >
-            <span v-if="!item.isAvailable" class="item-requirement">
-              {{ item.requirementText }}
-            </span>
           </div>
           <div class="item-status">
-            <span v-if="!item.isAvailable" class="disabled-badge">잠김</span>
+            <span v-if="!item.isAvailable" class="disabled-badge">
+              <font-awesome-icon :icon="['fas', 'lock']" />
+            </span>
             <span
               v-else-if="isWearing(item.itemId, 'level')"
               class="wearing-badge"
@@ -326,7 +325,7 @@
     </div>
 
     <!-- 기프티콘 탭 내용 -->
-    <div v-if="activeTab === 'gifticon'" class="tab-content">
+    <div v-if="activeTab === 'gifticon'" class="tab-content gifticon-tab">
       <!-- 영화 쿠폰 섹션 -->
       <div class="item-category">
         <span class="category-icon">🎬</span> 영화 쿠폰
@@ -478,9 +477,8 @@
         </div>
       </div>
     </div>
-
     <!-- 아바타 착용 버튼 -->
-    <div class="avatar-wear-section">
+    <div v-if="activeTab === 'avatar'" class="avatar-wear-section">
       <button
         class="avatar-wear-btn"
         :disabled="!selectedItemForWear || wearLoading"
@@ -524,9 +522,10 @@ import {
   faAngleLeft,
   faTshirt,
   faSpinner,
+  faLock,
 } from "@fortawesome/free-solid-svg-icons";
 
-library.add(faAngleLeft, faTshirt, faSpinner);
+library.add(faAngleLeft, faTshirt, faSpinner, faLock);
 
 export default {
   name: "AvatarShop2",
@@ -893,7 +892,7 @@ export default {
     const getLevelRequirementText = (levelName) => {
       const requirement = getLevelRequirement(levelName);
       if (requirement === 0) return "";
-      return `누적 ${requirement.toLocaleString()} 포인트 이상`;
+      return `누적\n${requirement.toLocaleString()}\n포인트 이상`;
     };
 
     // 타입별 아이템 필터링 (중복 제거)
@@ -1484,7 +1483,9 @@ export default {
   font-weight: 600;
   text-align: center;
   padding: 4px;
+  white-space: pre-line;
   line-height: 1.2;
+  white-space: pre-line;
 }
 
 .avatar-loading,
@@ -1641,16 +1642,17 @@ export default {
 .item-list {
   display: flex;
   gap: 6px;
-  margin: 0 0 12px 24px;
+  margin: 0 0 12px 5px;
   justify-content: flex-start;
-  max-width: 390px;
-  margin-left: 24px;
-  margin-right: auto;
+  max-width: none;
+  margin-left: 5px;
+  margin-right: 5px;
   flex-wrap: nowrap; /* Ensures items stay in a single row */
   overflow-x: auto; /* Enables horizontal scrolling */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none; /* IE and Edge */
   scroll-behavior: smooth; /* Smooth scrolling */
+  align-items: flex-start; /* 좌측 정렬을 위한 추가 */
 }
 
 .item-list::-webkit-scrollbar {
@@ -1666,6 +1668,8 @@ export default {
   border: 2px solid transparent;
   position: relative;
   overflow: hidden;
+  min-width: 83px;
+  flex-shrink: 0;
 }
 
 .item-card:hover {
@@ -1713,7 +1717,9 @@ export default {
   align-items: center;
   justify-content: center;
   margin-bottom: 10px;
+  margin-top: 30px;
   border-radius: 8px;
+  /* padding-bottom: 5px; */
   overflow: hidden;
 }
 
@@ -1792,6 +1798,12 @@ export default {
 .disabled-badge {
   background-color: #6c757d;
   color: white;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
 }
 
 .modal-overlay {
@@ -1936,6 +1948,24 @@ export default {
   margin-top: 5px;
 }
 
+/* 기프티콘 탭 특별 스타일 */
+.gifticon-tab .item-list {
+  justify-content: flex-start !important;
+  align-items: flex-start !important;
+  margin-left: 5px !important;
+  margin-right: 5px !important;
+  max-width: none !important;
+  overflow-x: auto !important;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scroll-behavior: smooth !important;
+  flex-wrap: nowrap !important;
+}
+
+.gifticon-tab .item-list::-webkit-scrollbar {
+  display: none !important;
+}
+
 /* 기프티콘 구매 성공 모달 스타일 */
 .success-modal {
   text-align: center;
@@ -2024,7 +2054,9 @@ export default {
 @media (max-width: 768px) {
   .item-list {
     gap: 8px;
-    max-width: 350px;
+    max-width: none;
+    margin-left: 5px;
+    margin-right: 5px;
   }
 
   .item-card {

@@ -26,22 +26,66 @@
           <font-awesome-icon :icon="['fas', 'angle-left']" />
           취소
         </button>
-        <button class="btn withdraw" @click="handleWithdraw">회원 탈퇴</button>
+        <button
+          class="btn withdraw"
+          @click="handleWithdraw"
+          :disabled="isWithdrawing"
+        >
+          {{ isWithdrawing ? "처리 중..." : "회원 탈퇴" }}
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { useAuthStore } from "@/stores/auth";
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
 import { faAngleLeft } from "@fortawesome/free-solid-svg-icons";
+import { withdrawUser } from "@/api/mypage/withdraw";
+
 library.add(faAngleLeft);
+
 const router = useRouter();
-const handleWithdraw = () => {
-  router.push("/withdraw-success");
+const authStore = useAuthStore();
+const isWithdrawing = ref(false);
+
+const handleWithdraw = async () => {
+  if (isWithdrawing.value) return;
+
+  try {
+    isWithdrawing.value = true;
+
+    // 회원탈퇴 API 호출
+    const response = await withdrawUser();
+
+    if (response && response.status === 0) {
+      // 로컬스토리지에서 사용자 정보 삭제
+      localStorage.removeItem("username");
+      localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      localStorage.removeItem("refreshToken");
+      sessionStorage.clear();
+
+      // Pinia 스토어 초기화
+      authStore.$reset();
+
+      // 성공 페이지로 이동
+      router.push("/withdraw-success");
+    } else {
+      throw new Error("회원탈퇴 처리 중 오류가 발생했습니다.");
+    }
+  } catch (error) {
+    console.error("회원탈퇴 실패:", error);
+    alert("회원탈퇴 중 오류가 발생했습니다. 다시 시도해주세요.");
+  } finally {
+    isWithdrawing.value = false;
+  }
 };
+
 function goBack() {
   router.back();
 }
@@ -170,5 +214,12 @@ function goBack() {
 }
 .btn.withdraw:hover {
   background: #d32f2f;
+}
+.btn.withdraw:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+.btn.withdraw:disabled:hover {
+  background: #ccc;
 }
 </style>

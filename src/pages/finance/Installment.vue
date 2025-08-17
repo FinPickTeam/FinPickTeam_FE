@@ -42,25 +42,16 @@
           <div class="summary-info">
             <div class="summary-text-container">
               <div class="summary-item-box">
-                <span class="summary-item-value">{{ formData.period }}</span>
+                <span class="summary-item-value">{{ periodText }}</span>
               </div>
               <div class="summary-item-box">
-                <span class="summary-item-value"
-                  >월 {{ formData.amount.toLocaleString() }}원</span
-                >
+                <span class="summary-item-value">월 {{ amountText }}원</span>
               </div>
               <div class="summary-item-box">
-                <span class="summary-item-value">{{
-                  formData.savingType
-                }}</span>
+                <span class="summary-item-value">{{ savingTypeText }}</span>
               </div>
-              <div
-                v-if="formData.selectedPrefer.length > 0"
-                class="summary-item-box"
-              >
-                <span class="summary-item-value">{{
-                  formData.selectedPrefer.join(', ')
-                }}</span>
+              <div v-if="preferSummary" class="summary-item-box">
+                <span class="summary-item-value">{{ preferSummary }}</span>
               </div>
             </div>
           </div>
@@ -72,15 +63,19 @@
       <div v-if="isLoadingRecommend">
         <LoadingSpinner message="추천 상품을 불러오는 중..." />
       </div>
-
-      <ProductCardList
-        v-if="showResults && !isLoadingRecommend"
-        :products="recommendProducts"
-      />
-      <span v-if="showResults && !isLoadingRecommend" class="subtab info-text">
-        선택한 우대 조건과 사용자의 투자 성향을 <br />
-        종합 분석해 선정한 상품입니다.
-      </span>
+      <div class="recommend-product-container">
+        <ProductCardList
+          v-if="showResults && !isLoadingRecommend"
+          :products="recommendProducts"
+        />
+        <span
+          v-if="showResults && !isLoadingRecommend"
+          class="subtab info-text"
+        >
+          선택한 우대 조건과 사용자의 투자 성향을 <br />
+          종합 분석해 선정한 상품입니다.
+        </span>
+      </div>
     </div>
 
     <!-- 전체 보기 탭일 때 -->
@@ -93,12 +88,12 @@
             type="text"
             placeholder="적금 상품명을 검색해보세요"
           />
-          <button class="filter-btn" @click="showFilter = !showFilter">
+          <button class="filter-btn" @click="openFilter">
             <i class="fa-solid fa-filter"></i>
           </button>
         </div>
 
-        <!-- 태그 필터 -->
+        <!-- 태그 필터 (드롭다운) -->
         <div v-if="showFilter" class="filter-dropdown">
           <!-- 은행 섹션 -->
           <div class="filter-section">
@@ -108,8 +103,8 @@
                 v-for="tag in targetTags"
                 :key="tag.value"
                 class="filter-tag"
-                :class="{ active: selectedTargets.includes(tag.value) }"
-                @click="toggleTargetTag(tag.value)"
+                :class="{ active: pendingTargets.includes(tag.value) }"
+                @click="togglePendingTag('bank', tag.value)"
               >
                 {{ tag.label }}
               </button>
@@ -124,17 +119,18 @@
                 v-for="tag in interestTags"
                 :key="tag.value"
                 class="filter-tag"
-                :class="{ active: selectedInterests.includes(tag.value) }"
-                @click="toggleInterestTag(tag.value)"
+                :class="{ active: pendingInterests.includes(tag.value) }"
+                @click="togglePendingTag('interest', tag.value)"
               >
                 {{ tag.label }}
               </button>
             </div>
           </div>
 
-          <!-- 선택 완료 버튼 -->
-          <div class="filter-complete-section">
-            <button class="complete-btn" @click="closeFilter">선택 완료</button>
+          <!-- 버튼 영역: 초기화 / 확인 -->
+          <div class="filter-actions">
+            <button class="reset-btn" @click="resetPending">초기화</button>
+            <button class="apply-btn" @click="applyFilter">확인</button>
           </div>
         </div>
       </div>
@@ -187,14 +183,28 @@ const fav = useFavoriteStore();
 
 // 전체보기용 상태
 const searchKeyword = ref('');
+
+// 드롭다운 표시
 const showFilter = ref(false);
-const selectedTargets = ref([]);
-const selectedInterests = ref([]);
+
+// ✅ "적용된" 필터 (실제 리스트에 반영되는 값)
+const selectedTargets = ref([]); // 은행
+const selectedInterests = ref([]); // 금리 구간
+
+// ✅ "대기(pending) 중" 필터 (드롭다운에서 임시 선택)
+const pendingTargets = ref([]);
+const pendingInterests = ref([]);
+
+const periodText = computed(() => formData.value.period || '-');
+const amountText = computed(() =>
+  Number(formData.value.amount ?? 0).toLocaleString()
+);
+const savingTypeText = computed(() => formData.value.savingType || '-');
 
 // 태그 데이터
 const targetTags = ref([
   { value: 'KB국민은행', label: 'KB국민은행' },
-  { value: 'NH농협은행', label: 'NH농협은행' },
+  { value: '농협은행', label: 'NH농협은행' },
   { value: 'IBK기업은행', label: 'IBK기업은행' },
   { value: 'KDB산업은행', label: 'KDB산업은행' },
   { value: 'SC제일은행', label: 'SC제일은행' },
@@ -227,7 +237,7 @@ onMounted(() => {
   fav.syncIdSet('INSTALLMENT');
 });
 
-//적금 상품 목록 가져오기
+// 적금 상품 목록 가져오기
 const fetchInstallmentList = async (params) => {
   isLoadingAll.value = true;
   try {
@@ -240,10 +250,9 @@ const fetchInstallmentList = async (params) => {
   }
 };
 
-//적금 추천 목록 가져오기
+// 적금 추천 목록 가져오기
 const fetchInstallmentRecommendation = async (receivedFormData) => {
   isLoadingRecommend.value = true;
-  console.log(receivedFormData.value);
   try {
     const params = {
       amount: receivedFormData.amount,
@@ -269,19 +278,43 @@ const fetchInstallmentRecommendation = async (receivedFormData) => {
   }
 };
 
-// 전체보기 필터링된 데이터
+// 🔎 전체보기 필터링된 데이터
 const filteredAllInstallment = computed(() => {
   const list = Array.isArray(allProducts.value) ? allProducts.value : [];
+
+  // 1) 키워드
   const q = (searchKeyword.value ?? '').toLowerCase().replace(/\s+/g, '');
-  if (!q) return list;
-  return list.filter((d) =>
-    (d.installmentProductName ?? '')
-      .toLowerCase()
-      .replace(/\s+/g, '')
-      .includes(q)
-  );
+  let out = q
+    ? list.filter((d) =>
+        (d.installmentProductName ?? '')
+          .toLowerCase()
+          .replace(/\s+/g, '')
+          .includes(q)
+      )
+    : list;
+
+  // 2) 은행 필터 (확인 눌러 반영된 selectedTargets)
+  if (selectedTargets.value.length > 0) {
+    out = out.filter((d) => {
+      const bank = getBankName(d);
+      return selectedTargets.value.includes(bank);
+    });
+  }
+
+  // 3) 금리 구간 필터 (확인 눌러 반영된 selectedInterests)
+  if (selectedInterests.value.length > 0) {
+    out = out.filter((d) => {
+      const rate = getMaxRate(d); // 숫자(% 제외)로 파싱
+      return interestRangeMatch(rate, selectedInterests.value);
+    });
+  }
+
+  return out;
 });
 
+// ===== Helper =====
+
+// 기간 문자열 → 개월 수
 function toMonths(periodLabel) {
   if (typeof periodLabel === 'number') return periodLabel;
   const m = String(periodLabel).match(/(\d+)/);
@@ -300,31 +333,8 @@ function changeSubtab(tabName) {
 
 function showSearchResults(receivedFormData) {
   showResults.value = true;
-
-  // 폼 데이터 저장
   formData.value = receivedFormData;
-
-  // 요약 텍스트 생성
-  const preferText =
-    receivedFormData.selectedPrefer.length > 0
-      ? receivedFormData.selectedPrefer.length === 1
-        ? receivedFormData.selectedPrefer[0]
-        : receivedFormData.selectedPrefer.length === 2
-        ? receivedFormData.selectedPrefer.join('+')
-        : receivedFormData.selectedPrefer[0] +
-          '+' +
-          receivedFormData.selectedPrefer[1] +
-          ' 외 ' +
-          (receivedFormData.selectedPrefer.length - 2) +
-          '건'
-      : '';
-
-  summaryText.value = `${
-    receivedFormData.period
-  } | 월 ${receivedFormData.amount.toLocaleString()}원 | ${
-    receivedFormData.savingType
-  }${preferText ? ' | ' + preferText : ''}`;
-
+  summaryText.value = 'show'; // 표시 트리거만
   fetchInstallmentRecommendation(receivedFormData);
 }
 
@@ -340,28 +350,85 @@ function toggleSummaryMode() {
   }
 }
 
-// 태그 토글 함수들
-function toggleTargetTag(tagValue) {
-  const index = selectedTargets.value.indexOf(tagValue);
-  if (index > -1) {
-    selectedTargets.value.splice(index, 1);
-  } else {
-    selectedTargets.value.push(tagValue);
-  }
+// ====== 필터 드롭다운 동작 (임시 선택 → 확인 시 반영) ======
+
+function openFilter() {
+  // 현재 적용된 값 → 임시 선택 복사
+  pendingTargets.value = [...selectedTargets.value];
+  pendingInterests.value = [...selectedInterests.value];
+  showFilter.value = true;
 }
 
-function toggleInterestTag(tagValue) {
-  const index = selectedInterests.value.indexOf(tagValue);
-  if (index > -1) {
-    selectedInterests.value.splice(index, 1);
-  } else {
-    selectedInterests.value.push(tagValue);
-  }
+function togglePendingTag(kind, value) {
+  const arr = kind === 'bank' ? pendingTargets.value : pendingInterests.value;
+  const idx = arr.indexOf(value);
+  if (idx > -1) arr.splice(idx, 1);
+  else arr.push(value);
+}
+
+function resetPending() {
+  pendingTargets.value = [];
+  pendingInterests.value = [];
+}
+
+function applyFilter() {
+  // 임시 선택을 실제 적용 값으로 복사
+  selectedTargets.value = [...pendingTargets.value];
+  selectedInterests.value = [...pendingInterests.value];
+  closeFilter();
 }
 
 function closeFilter() {
   showFilter.value = false;
 }
+
+// ====== 데이터 파싱/매칭 유틸 ======
+
+function getBankName(d) {
+  return d.installmentBankName;
+}
+
+function getMaxRate(d) {
+  const raw = d.installmentBasicRate;
+  if (typeof raw === 'number') return raw;
+  // "5.2%" 같은 문자열 → 5.2
+  const matched = String(raw).match(/[\d.]+/);
+  return matched ? Number(matched[0]) : 0;
+}
+
+function interestRangeMatch(rate, ranges) {
+  if (rate == null || isNaN(rate)) return false;
+
+  const inRange = (label) => {
+    switch (label) {
+      case '1% 미만':
+        return rate < 1;
+      case '1~2%':
+        return rate >= 1 && rate < 2;
+      case '2~3%':
+        return rate >= 2 && rate < 3;
+      case '3~4%':
+        return rate >= 3 && rate < 4;
+      case '4~5%':
+        return rate >= 4 && rate < 5;
+      case '5% 이상':
+        return rate >= 5;
+      default:
+        return true;
+    }
+  };
+
+  return ranges.some(inRange);
+}
+
+// 요약 표시용
+const preferSummary = computed(() => {
+  const raw = formData.value.selectedPrefer || [];
+  const arr = [...new Set(raw.filter(Boolean).map((s) => String(s).trim()))];
+  if (arr.length === 0) return '';
+  if (arr.length === 1) return arr[0];
+  return `${arr[0]} 외 ${arr.length - 1}건`;
+});
 </script>
 
 <style scoped>
@@ -370,7 +437,7 @@ function closeFilter() {
   margin: 0 auto;
   padding: 0px 16px;
   font-family: var(--font-main);
-  height: calc(100vh - 56px); /* 전체 화면 높이 - 헤더/탭 높이 */
+  height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
 }
@@ -389,7 +456,6 @@ function closeFilter() {
   cursor: pointer;
   padding-bottom: 4px;
 }
-
 .tab.active {
   color: var(--color-main);
   font-weight: var(--font-weight-bold);
@@ -401,7 +467,6 @@ function closeFilter() {
   width: 100%;
   margin-bottom: 10px;
 }
-
 .subtab {
   flex: 1 1 0;
   text-align: center;
@@ -410,9 +475,7 @@ function closeFilter() {
   padding-bottom: 2px;
   border-bottom: 2px solid transparent;
   font-size: 15px;
-  /* 필요하다면 높이, 라인하이트 등 추가 */
 }
-
 .subtab.active {
   color: var(--color-main-light);
   border-bottom: 2px solid var(--color-main-light);
@@ -421,49 +484,42 @@ function closeFilter() {
 .scroll-area {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 100px; /* 네비게이션바 가리는 문제 방지 */
-  /* 스크롤바 숨기기 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE, Edge */
+  padding-bottom: 100px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scroll-area::-webkit-scrollbar {
+  display: none;
 }
 
-.scroll-area::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
-}
 .info-text {
   position: relative;
-  top: -12px;
   display: flex;
   justify-content: center;
 }
-
 .emoji {
   font-size: 20px;
   vertical-align: middle;
 }
 
 .summary-text-box {
-  margin-top: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 .summary-content {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto;
   align-items: center;
-  width: 100%;
+  gap: 8px;
 }
-
 .summary-info {
   display: flex;
   align-items: center;
   gap: 8px;
   flex: 1;
-  min-width: 0; /* flex 아이템이 축소될 수 있도록 */
+  min-width: 0;
 }
-
 .summary-text-container {
   display: flex;
   align-items: center;
@@ -473,15 +529,12 @@ function closeFilter() {
   flex: 1;
   min-width: 0;
   padding-right: 8px;
-  /* 스크롤바 숨기기 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE, Edge */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-
 .summary-text-container::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
-
 .summary-item-box {
   display: flex;
   flex-direction: column;
@@ -493,7 +546,6 @@ function closeFilter() {
   min-width: 30px;
   flex-shrink: 0;
 }
-
 .summary-item-label {
   font-size: 11px;
   color: #6c757d;
@@ -501,7 +553,6 @@ function closeFilter() {
   margin-bottom: 2px;
   text-align: center;
 }
-
 .summary-item-value {
   font-size: 12px;
   color: #333;
@@ -509,7 +560,6 @@ function closeFilter() {
   text-align: center;
   line-height: 1.2;
 }
-
 .edit-btn {
   background-color: var(--color-main);
   color: white;
@@ -524,7 +574,6 @@ function closeFilter() {
   height: 32px;
   flex-shrink: 0;
 }
-
 .edit-btn:hover {
   background-color: var(--color-main-dark);
 }
@@ -535,14 +584,12 @@ function closeFilter() {
   margin-bottom: 16px;
   z-index: 1000;
 }
-
 .search-filter-row {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
 }
-
 .search-bar {
   flex: 1;
   padding: 8px 12px;
@@ -551,7 +598,6 @@ function closeFilter() {
   font-size: 15px;
   background: var(--color-bg);
 }
-
 .filter-btn {
   background: var(--color-bg-light);
   border: none;
@@ -579,26 +625,8 @@ function closeFilter() {
 .products-list-container {
   width: 100%;
 }
-
-.filter-group {
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-group label {
-  min-width: 48px;
-  font-size: 14px;
-  color: #555;
-}
-
-.filter-group select {
-  flex: 1;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  font-size: 14px;
+.recommend-product-container {
+  margin-top: 16px;
 }
 
 .no-results {
@@ -607,7 +635,6 @@ function closeFilter() {
   color: #888;
   font-size: 16px;
 }
-
 .no-results i {
   font-size: 24px;
   margin-bottom: 8px;
@@ -618,7 +645,6 @@ function closeFilter() {
 .filter-section {
   margin-bottom: 20px;
 }
-
 .filter-section-title {
   font-size: 14px;
   font-weight: 600;
@@ -626,7 +652,6 @@ function closeFilter() {
   margin-bottom: 12px;
   margin-top: 0;
 }
-
 .tag-container {
   display: flex;
   flex-wrap: wrap;
@@ -647,38 +672,47 @@ function closeFilter() {
   transition: border 0.2s, color 0.2s, background 0.2s;
   white-space: nowrap;
 }
-
 .filter-tag:hover {
   border-color: var(--color-main);
   color: var(--color-main);
 }
-
 .filter-tag.active {
   border: 1.5px solid var(--color-main);
   color: var(--color-main);
   background: #f3f0fa;
 }
 
-.filter-complete-section {
-  margin-top: 20px;
-  padding-top: 16px;
-  text-align: center;
+/* 버튼 영역 */
+.filter-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 12px;
 }
-
+.reset-btn,
 .complete-btn {
-  background: var(--color-main);
-  color: white;
-  border: none;
+  flex: 1;
+  padding: 10px 0;
   border-radius: 8px;
-  padding: 10px 24px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  border: none;
   transition: background-color 0.2s ease;
-  width: 100%;
 }
 
-.complete-btn:hover {
+.reset-btn {
+  background: #f1f3f5;
+  color: #333;
+}
+.reset-btn:hover {
+  background: #e9ecef;
+}
+.apply-btn {
+  background: var(--color-main);
+  color: #fff;
+}
+.apply-btn:hover {
   background: var(--color-main-dark);
 }
 </style>

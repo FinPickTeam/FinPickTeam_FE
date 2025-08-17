@@ -44,18 +44,16 @@ export const getCommonChallengeRank = (challengeId) =>
 export const refreshCommonChallengeRank = (challengeId) =>
   api.post(`/challenge/rank/${challengeId}/refresh`).then((res) => res.data);
 
-// 사용자 챌린지 히스토리 조회 (참여한 모든 챌린지)
-export const getUserChallengeHistory = () =>
+// 미확인 결과 존재 여부
+export function hasUnconfirmedChallengeResult() {
+  return api.get("/challenge/has-unconfirmed");
+}
+
+// 챌린지 히스토리 조회
+export const getChallengeHistory = () =>
   api
-    .get("/challenge/list", {
-      params: { participating: true, status: "COMPLETED" },
-    })
+    .get("/challenge/history")
     .then((res) => res.data?.data)
     .catch((err) => {
       throw err;
     });
-
-// 미확인 결과 존재 여부
-export function hasUnconfirmedChallengeResult() {
-    return api.get('/challenge/has-unconfirmed');
-}

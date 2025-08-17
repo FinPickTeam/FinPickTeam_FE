@@ -49,9 +49,8 @@
       <div class="notice-section">
         <h3 class="notice-title">주의사항</h3>
         <ul class="notice-list">
-          <li>인증서 비밀번호는 안전한 곳에 보관해주세요</li>
-          <li>인증서는 개인정보이므로 타인과 공유하지 마세요</li>
-          <li>비밀번호 분실 시 재발급이 필요합니다</li>
+          <li>간편 비밀번호는 안전한 곳에 보관해주세요</li>
+          <li>간편 비밀번호는 개인정보이므로 타인과 공유하지 마세요</li>
         </ul>
       </div>
     </div>
@@ -292,7 +291,7 @@ const startCertificate = () => {
   transform: translateX(-50%);
   width: 100%;
   max-width: 390px;
-  padding: 16px;
+  padding: 16px 16px 80px 16px;
   z-index: 1000;
 }
 
@@ -300,12 +299,13 @@ const startCertificate = () => {
   width: 100%;
   padding: 16px 0;
   border: none;
+  background: #3a16b8;
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  color: #fff;
+  /* color: #fff; */
   box-shadow: none;
   outline: none;
 }

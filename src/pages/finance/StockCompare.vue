@@ -8,9 +8,8 @@
   <!-- 본문 -->
   <div v-show="!isLoading" class="container">
     <div class="wrap">
-      <div class="stock-name"></div>
       <div class="stock-chart-wrap">
-        <div class="title-content">
+        <div class="chart-title-content">
           <div class="title-text">가격 차트</div>
           <div class="return-content">3개월</div>
         </div>
@@ -19,6 +18,10 @@
       <div class="financial-wrap">
         <div class="title-content">
           <div class="title-text">핵심 지표 비교</div>
+          <div class="help-button" @click="openCore()">
+            <i class="fa-solid fa-circle-info"></i>
+          </div>
+          <MetricExplainModal v-model:open="coreOpen" type="core" />
         </div>
         <div class="metric-main">
           <div class="metric-header-row metric-content">
@@ -100,6 +103,10 @@
       <div class="financial-wrap">
         <div class="title-content">
           <div class="title-text">투자 지표</div>
+          <div class="help-button" @click="openInvestment()">
+            <i class="fa-solid fa-circle-info"></i>
+          </div>
+          <MetricExplainModal v-model:open="investOpen" type="investment" />
         </div>
         <div class="metric-main">
           <div class="metric-header-row metric-content">
@@ -205,6 +212,7 @@
         </div>
       </div>
     </div>
+    <MetricExplainModal v-model:open="explainOpen" :type="explainType" />
   </div>
 </template>
 <script setup>
@@ -213,6 +221,7 @@ import { useRoute } from 'vue-router';
 import { ref, computed, onMounted } from 'vue';
 import Chart from 'chart.js/auto';
 import MetricRow from '@/components/finance/stock/MetricRow.vue';
+import MetricExplainModal from '@/components/finance/stock/MetricExplainModal.vue';
 
 const route = useRoute();
 
@@ -241,6 +250,10 @@ const compareCount = computed(
   () => (Array.isArray(compareIds) ? compareIds.length : 0) + 1
 );
 
+const coreOpen = ref(false);
+const investOpen = ref(false);
+const openCore = () => (coreOpen.value = true);
+const openInvestment = () => (investOpen.value = true);
 // 데이터 로드
 async function loadAll() {
   isLoading.value = true;
@@ -271,7 +284,7 @@ async function loadAll() {
     stock2CompareData.value = sc2;
     stock3CompareData.value = sc3;
 
-    creatChart();
+    createChart();
   } finally {
     isLoading.value = false;
   }
@@ -284,7 +297,7 @@ const getCumulativeReturn = (arr) => {
 };
 
 let chart = null;
-const creatChart = () => {
+const createChart = () => {
   if (!chartCanvas.value) return;
 
   const labels = stock1ChartData.value.map((item) => item.date);
@@ -337,7 +350,6 @@ const creatChart = () => {
         duration: 1200,
         easing: 'easeInOutExpo',
       },
-      layout: {},
       plugins: {
         legend: {
           position: 'bottom',
@@ -394,7 +406,6 @@ const creatChart = () => {
 
 onMounted(async () => {
   loadAll();
-  creatChart();
 });
 
 // 주식 데이터 가져오기
@@ -550,9 +561,6 @@ const colorByName = computed(() => {
   color: #666;
   margin: 0;
 }
-.spinning {
-  animation: spin 0.9s linear infinite;
-}
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -577,12 +585,20 @@ const colorByName = computed(() => {
   padding: 12px;
   background-color: white;
 }
-.title-content {
+.chart-title-content {
   display: flex;
   height: 25px;
   margin-bottom: 12px;
   align-items: center;
   justify-content: space-between;
+}
+.title-content {
+  display: flex;
+  height: 25px;
+  margin-bottom: 12px;
+  align-items: center;
+  text-align: center;
+  justify-content: left;
 }
 .title-text {
   font-size: var(--font-size-title);
@@ -598,10 +614,6 @@ const colorByName = computed(() => {
   border-radius: 6px;
   background-color: var(--color-main);
   font-size: var(--font-size-caption);
-}
-.canvas {
-  width: 100%;
-  height: 100%;
 }
 .financial-wrap {
   width: 100%;
@@ -627,11 +639,6 @@ const colorByName = computed(() => {
   justify-content: space-between;
   align-items: center;
 }
-.metric--title {
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-regular);
-  color: #666666;
-}
 .metric-stock-name {
   width: 100%;
   display: flex;
@@ -646,14 +653,6 @@ const colorByName = computed(() => {
   width: 100px;
   min-width: 60px;
   max-width: 100px;
-}
-.best-content-wrap {
-  width: 100%;
-  height: auto;
-  margin-top: 16px;
-  border-radius: 12px;
-  padding: 12px;
-  background-color: white;
 }
 .best-content {
   width: 100%;
@@ -675,5 +674,23 @@ const colorByName = computed(() => {
   margin-top: 10px;
   font-size: var(--font-size-caption);
   color: #666666;
+}
+
+.help-button {
+  font-size: 14px;
+  color: #888;
+  font-family: var(--font-main);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding-left: 8px;
+  gap: 6px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.help-button i {
+  font-family: 'Font Awesome 6 Free' !important;
+  font-weight: 900;
 }
 </style>

@@ -181,7 +181,7 @@ input:focus {
 }
 .login-btn {
   width: 100%;
-  background: #8e74e3;
+  background: var(--color-main-dark);
   color: #fff;
   border: none;
   border-radius: 10px;

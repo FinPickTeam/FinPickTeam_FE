@@ -117,6 +117,8 @@ export const useAuthStore = defineStore('auth', {
       try { await this.serverLogout(); } catch {}
       this.clearTokens();
       this.user = null;
+      // localStorage.removeItem('auth');
+      localStorage.removeItem('userName');
 
       // 선택: 세션 스토리지에 쌓아둔 캐시(오픈뱅킹 등) 정리
       try {
@@ -124,7 +126,8 @@ export const useAuthStore = defineStore('auth', {
         for (let i = 0; i < sessionStorage.length; i++) {
           const k = sessionStorage.key(i);
           if (!k) continue;
-          if (k.startsWith('ob:') || k.startsWith('admin:')) removeKeys.push(k);
+
+          if (k.startsWith('ob:') || k.startsWith('admin:') || k === 'openBankingAuthenticated') removeKeys.push(k);
         }
         removeKeys.forEach(k => sessionStorage.removeItem(k));
       } catch {}

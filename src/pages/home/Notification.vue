@@ -68,7 +68,7 @@ const notifications = ref([
     desc: '오늘의 금융 퀴즈가 업데이트되었습니다. 정답을 맞추고 포인트를 획득하세요!',
     time: '5시간 전',
     date: new Date(), // 오늘
-    icon: 'fas fa-question-circle',
+    icon: 'fa-solid fa-lightbulb',
     read: false,
   },
   // 최근 7일
@@ -115,7 +115,7 @@ const notifications = ref([
     desc: '오늘의 금융 퀴즈가 업데이트되었습니다. 정답을 맞추고 포인트를 획득하세요!',
     time: '2주 전',
     date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
-    icon: 'fas fa-question-circle',
+    icon: 'fa-solid fa-lightbulb',
     read: true,
   },
 ]);
@@ -159,11 +159,12 @@ function markAllAsRead() {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 18px 20px 10px 10px;
+  padding: 18px 20px 0px 10px;
   background: #fff;
   position: relative;
-  height: 80px;
+  min-height: 80px;
   box-sizing: border-box;
+  flex-shrink: 0;
 }
 
 .notification-content-wrapper {
@@ -197,7 +198,6 @@ function markAllAsRead() {
 }
 .mark-all-btn {
   align-self: flex-end;
-  margin-top: 8px;
   background: none;
   border: none;
   color: #7c3aed;

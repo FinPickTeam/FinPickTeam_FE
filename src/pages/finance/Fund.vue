@@ -33,24 +33,52 @@
 
       <!-- 투자성향이 불완전한 경우 -->
       <div v-else-if="hasIncompletePropensity">
-        <div class="button-container">
-          <button class="check-btn incomplete" @click="goToInvestmentTest">
+        <div class="propensity-card">
+          <div class="propensity-card__left">
+            <div class="propensity-badge">STEP</div>
+            <h3 class="propensity-title">
+              투자 성향 검사를<br />완료해 주세요
+            </h3>
+            <p class="propensity-desc">
+              📝 펀드 추천을 받기 위해선 추가적인 조사가 필요해요!<br />
+              이를 통해 더 나은 결과를 드릴 수 있어요
+            </p>
+            <button class="cta-btn" @click="goToInvestmentTest">
+              투자성향 검사 완료하기
+              <span class="cta-arrow" aria-hidden="true">→</span>
+            </button>
+            <p class="cta-help">약 1~2분 소요 • 언제든 다시 수정할 수 있어요</p>
+          </div>
+          <div class="propensity-card__right" aria-hidden="true">
+            <div class="ring ring--1"></div>
+            <div class="ring ring--2"></div>
+            <div class="ring ring--3"></div>
+          </div>
+        </div>
+        <div class="prompt-button-container">
+          <button class="prompt-action-button" @click="goToInvestmentTest">
             투자성향 검사 완료하기
           </button>
-        </div>
-        <div class="info-text">
-          <span class="emoji">📝</span>
-          <br />
-          투자성향 검사를 완료하면<br />맞춤형 펀드를 추천받을 수 있어요!
         </div>
       </div>
 
       <!-- 투자성향이 완전한 경우 -->
-      <div v-else-if="!hasIncompletePropensity">
-        <div class="button-container">
-          <button class="check-btn" @click="fetchFundRecommendedList">
-            투자 성향에 맞는 상품 확인하기
+      <div v-else class="recommend-container">
+        <div class="recommend-content">
+          <button
+            class="btn-outline with-icon"
+            @click="fetchFundRecommendedList"
+            :disabled="isLoadingRecommend"
+            :aria-busy="isLoadingRecommend ? 'true' : 'false'"
+          >
+            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+            <span>투자 성향에 맞는 상품 확인하기</span>
           </button>
+
+          <!-- 처음 한 번만 보이고, 누르면 영구히 숨김 -->
+          <p v-if="!hasRequestedRecommend" class="recommend-hint">
+            지금 버튼을 누르면 맞춤 상품을 바로 확인할 수 있어요.
+          </p>
         </div>
       </div>
 
@@ -65,6 +93,10 @@
         class="products-container"
       >
         <ProductCardList_fund :funds="fundRecommendData || []" />
+        <span class="subtab info-text">
+          시장 흐름과 상품 특성을 고려하여,<br />
+          사용자의 투자 성향에 맞게 선별된 추천 결과입니다.
+        </span>
       </div>
     </div>
 
@@ -85,7 +117,6 @@
 
         <!-- 태그 필터 -->
         <div v-if="showFilter" class="filter-dropdown">
-          <!-- 펀드 타입 섹션 -->
           <div class="filter-section">
             <h4 class="filter-section-title">펀드 타입</h4>
             <div class="tag-container">
@@ -101,7 +132,6 @@
             </div>
           </div>
 
-          <!-- 위험도 섹션 -->
           <div class="filter-section">
             <h4 class="filter-section-title">위험도</h4>
             <div class="tag-container">
@@ -117,7 +147,6 @@
             </div>
           </div>
 
-          <!-- 선택 완료 버튼 -->
           <div class="filter-complete-section">
             <button class="complete-btn" @click="closeFilter">선택 완료</button>
           </div>
@@ -172,6 +201,9 @@ const investmentPropensity = ref(null);
 const hasIncompletePropensity = ref(false);
 const isLoadingPropensity = ref(false);
 
+// 추천 안내 문구 노출 제어(클릭 후 영구 숨김)
+const hasRequestedRecommend = ref(false);
+
 // 확정된(실제로 목록을 거르는) 값
 const selectedFundTypes = ref([]);
 const selectedRisks = ref([]);
@@ -190,27 +222,23 @@ const initializeRecommendTab = async () => {
   isLoadingPropensity.value = true;
   investmentPropensity.value = null;
   try {
-    // 1. 설문 완료 여부를 '한 번만' 확인합니다.
     const completionResponse = await checkSurveyCompletion();
 
     if (completionResponse.data === false) {
-      // 2a. 설문이 미완료 상태이면, 즉시 설문 페이지로 보냅니다.
-      console.log('설문 미완료 상태. 추가 설문 페이지로 이동합니다.');
+      hasIncompletePropensity.value = true;
+      try {
+        const profileResponse = await getProfileByUserId();
+        profile.loadAnswers(profileResponse.data);
+      } catch (_) {}
+    } else {
+      hasIncompletePropensity.value = false;
       const profileResponse = await getProfileByUserId();
+      investmentPropensity.value = profileResponse.data;
       profile.loadAnswers(profileResponse.data);
-      router.push('/profile-step-6?from=fund');
-      return; // 여기서 함수 실행을 중단하여 더 이상 진행하지 않도록 합니다.
     }
-
-    // 2b. 설문을 완료했다면, 상세 정보를 가져옵니다.
-    hasIncompletePropensity.value = false;
-    const profileResponse = await getProfileByUserId();
-    investmentPropensity.value = profileResponse.data;
-    console.log('투자성향 상세 정보:', investmentPropensity.value);
   } catch (error) {
     console.error('투자성향 정보 확인 중 오류 발생', error);
-    // 에러 발생 시에도 설문 페이지로 보내는 것이 안전합니다.
-    router.push('/profile-step-6?from=fund');
+    hasIncompletePropensity.value = true;
   } finally {
     isLoadingPropensity.value = false;
   }
@@ -235,9 +263,8 @@ function goTo(path) {
 const activeSubtab = ref('추천');
 function changeSubtab(tabName) {
   activeSubtab.value = tabName;
-  showProducts.value = false; // 추천 탭 누르면 초기화
+  showProducts.value = false;
 
-  // 추천 탭으로 돌아올 때 투자성향 재확인
   if (tabName === '추천') {
     fetchInvestmentPropensity();
   }
@@ -273,7 +300,6 @@ const riskTags = ref([
 // 전체보기 필터링된 데이터
 const filteredAllFunds = computed(() => {
   let list = Array.isArray(fundAllData.value) ? fundAllData.value : [];
-  // 🔍 키워드 검색
   if (searchKeyword.value) {
     list = list.filter((fund) =>
       fund.fundProductName
@@ -283,20 +309,17 @@ const filteredAllFunds = computed(() => {
     );
   }
 
-  // 🏦 펀드 타입 필터
   if (selectedFundTypes.value.length > 0) {
     list = list.filter((fund) =>
       selectedFundTypes.value.includes(fund.fundType || '')
     );
   }
 
-  // ⚠️ 위험도 필터
   if (selectedRisks.value.length > 0) {
     list = list.filter((fund) =>
       selectedRisks.value.includes(fund.fundRiskLevel || '')
     );
   }
-  console.log('전체 데이터 확인', list);
   return list;
 });
 
@@ -312,50 +335,43 @@ function closeFilter() {
   showFilter.value = false;
 }
 
-// 투자성향 조회 및 null 값 체크
+// 투자성향 조회 (추천 탭 복귀 시 사용)
 const fetchInvestmentPropensity = async () => {
-  // 로딩 상태 시작 및 이전 데이터 초기화
   isLoadingPropensity.value = true;
   investmentPropensity.value = null;
 
   try {
-    // 10문항 설문 완료 여부를 먼저 API로 확인
     const completionResponse = await checkSurveyCompletion();
 
-    // 서버 응답에 따라 분기 처리
     if (completionResponse.data === true) {
-      // 설문을 완료했다면, 미완료 상태를 'false'로 설정
       hasIncompletePropensity.value = false;
-
-      // 추가로 '내 투자성향 상세 정보'를 API로 조회
       const profileResponse = await getProfileByUserId();
       investmentPropensity.value = profileResponse.data;
-      console.log('투자성향 상세 정보:', investmentPropensity.value);
+      profile.loadAnswers(profileResponse.data);
     } else {
-      //3-1 설문을 완료하지 않았다면, 미완료 상태를 'true'로 설정
       hasIncompletePropensity.value = true;
-      console.log('투자성향 미완료 상태입니다.');
+      try {
+        const profileResponse = await getProfileByUserId();
+        profile.loadAnswers(profileResponse.data);
+      } catch (_) {}
     }
   } catch (error) {
-    //API 호출 중 에러 발생 시 처리
     console.error('투자성향 정보 확인 중 오류 발생', error);
-    //에러 발생 시에도 사용자가 다음 행동을 할 수 있도록 미완료 상태로 처리
     hasIncompletePropensity.value = true;
   } finally {
-    //모든 과정이 끝나면 로딩 상태 종료
     isLoadingPropensity.value = false;
   }
 };
 
 // 투자성향 검사 페이지로 이동
 const goToInvestmentTest = () => {
-  router.push('/mypage/financetest/profile-step-6?from=fund');
+  router.push('/profile-step-6?from=fund');
 };
 
 const fetchFundRecommendedList = async () => {
+  hasRequestedRecommend.value = true; // ← 클릭 즉시 안내문구 영구 숨김
   isLoadingRecommend.value = true;
   try {
-    console.log('투자 성향에 맞는 상품 확인하기 클릭됨');
     const res = await getFundRecommendedList();
     fundRecommendData.value = res.data ?? [];
     showProducts.value = true;
@@ -373,7 +389,7 @@ const fetchFundRecommendedList = async () => {
   margin: 0 auto;
   padding: 0px 16px;
   font-family: var(--font-main);
-  height: calc(100vh - 56px); /* 전체 화면 높이 - 헤더/탭 높이 */
+  height: calc(100vh - 56px);
   display: flex;
   flex-direction: column;
 }
@@ -381,14 +397,12 @@ const fetchFundRecommendedList = async () => {
 .scroll-area {
   flex: 1;
   overflow-y: auto;
-  padding-bottom: 100px; /* 네비게이션바 가리는 문제 방지 */
-  /* 스크롤바 숨기기 */
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE, Edge */
+  padding-bottom: 100px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
-
 .scroll-area::-webkit-scrollbar {
-  display: none; /* Chrome, Safari */
+  display: none;
 }
 
 .tab-row {
@@ -439,33 +453,8 @@ const fetchFundRecommendedList = async () => {
   margin-top: 20px;
 }
 
-.check-btn {
-  width: 220px;
-  background: var(--color-main);
-  color: #fff;
-  border: none;
-  border-radius: 10px;
-  padding: 4px 0;
-  font-size: var(--font-size-body);
-  font-weight: var(--font-weight-regular);
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.check-btn:hover {
-  background: var(--color-main-dark);
-}
-
-.check-btn.incomplete {
-  background: var(--color-main);
-}
-
-.check-btn.incomplete:hover {
-  background: var(--color-main-dark);
-}
-
 .products-container {
-  margin-top: 20px;
+  margin-top: 10px;
   width: 100%;
 }
 
@@ -518,54 +507,6 @@ const fetchFundRecommendedList = async () => {
 
 .products-list-container {
   width: 100%;
-}
-
-.filter-group {
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.filter-group label {
-  min-width: 48px;
-  font-size: 14px;
-  color: #555;
-}
-
-.filter-group select {
-  flex: 1;
-  padding: 4px 8px;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  font-size: 14px;
-}
-
-.no-results {
-  margin-top: 40px;
-  text-align: center;
-  color: #888;
-  font-size: 16px;
-}
-
-.no-results i {
-  font-size: 24px;
-  margin-bottom: 8px;
-  display: block;
-}
-
-.info-text {
-  margin-top: 36px;
-  font-size: 17px;
-  color: #222;
-  text-align: center;
-  font-weight: 500;
-  line-height: 1.6;
-}
-
-.emoji {
-  font-size: 20px;
-  vertical-align: middle;
 }
 
 /* 태그 필터 스타일 */
@@ -631,8 +572,203 @@ const fetchFundRecommendedList = async () => {
   transition: background-color 0.2s ease;
   width: 100%;
 }
+.info-text {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
 
 .complete-btn:hover {
   background: var(--color-main-dark);
+}
+
+/* ===== Incomplete Propensity CTA Card ===== */
+.propensity-card {
+  display: grid;
+  grid-template-columns: 1fr 96px;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #f7f5ff 0%, #ffffff 60%);
+  border: 1px solid var(--color-bg-border);
+  box-shadow: 0 6px 14px rgba(93, 68, 201, 0.06);
+}
+
+.propensity-card__left {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.propensity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #6f5de7;
+  background: #edeaff;
+  border: 1px solid #ddd7ff;
+  padding: 6px 10px;
+  border-radius: 20px;
+}
+
+.propensity-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.35;
+  color: #1e1e1e;
+  font-weight: 800;
+}
+
+.propensity-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #585a66;
+}
+
+.cta-btn {
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  color: #fff;
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
+  box-shadow: 0 6px 18px rgba(111, 93, 231, 0.28);
+  transition: transform 0.08s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.cta-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(111, 93, 231, 0.35);
+}
+
+.cta-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(111, 93, 231, 0.22);
+}
+
+.cta-arrow {
+  display: inline-block;
+  transform: translateX(0);
+  transition: transform 0.15s ease;
+}
+
+.cta-btn:hover .cta-arrow {
+  transform: translateX(2px);
+}
+
+.cta-help {
+  margin: 0;
+  font-size: 12px;
+  color: #8b8ea0;
+}
+
+/* 오른쪽 장식 링(비주얼) */
+.propensity-card__right {
+  position: relative;
+  width: 96px;
+  height: 96px;
+}
+
+.ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(111, 93, 231, 0.15);
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+.ring--2 {
+  inset: 10px;
+  border-color: rgba(111, 93, 231, 0.2);
+  animation-delay: 0.6s;
+}
+
+.ring--3 {
+  inset: 20px;
+  border-color: rgba(111, 93, 231, 0.28);
+  animation-delay: 1.2s;
+}
+
+@keyframes ringPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+}
+
+/* 추천 CTA + 안내 문구 */
+.recommend-container {
+  display: flex;
+  justify-content: center;
+}
+.recommend-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+.recommend-hint {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+  text-align: center;
+}
+
+/* 추천 버튼: 메인 컬러 */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 240px;
+  height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: none;
+  background: var(--color-main);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  transition: background-color 0.15s ease, transform 0.06s ease;
+}
+.btn-outline.with-icon i {
+  font-size: 16px;
+}
+.btn-outline:hover {
+  background: var(--color-main-dark);
+}
+.btn-outline:active {
+  transform: translateY(1px);
+}
+.btn-outline[disabled],
+.btn-outline[aria-busy='true'] {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>
