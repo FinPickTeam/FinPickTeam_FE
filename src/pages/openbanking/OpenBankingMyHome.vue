@@ -159,7 +159,7 @@ const fetchHomeData = async () => {
           type:
             a.accountType === 'DEPOSIT'
               ? '입출금'
-              : a.accountType === 'SAVINGS'
+              : a.accountType === 'SAVING'
               ? '저축'
               : '투자',
           accountNumber: a.accountNumber || '****',
