@@ -4,15 +4,6 @@
     <BaseHeader v-if="showHeader" class="print-hide">
       <template #right>
         <button
-          v-if="showFilterButton"
-          class="obmyhome-icon-btn"
-          @click="openFilter"
-          aria-label="필터"
-          title="필터"
-        >
-          <font-awesome-icon :icon="['fas', 'sliders']" />
-        </button>
-        <button
           v-if="showRefreshButton"
           class="obmyhome-icon-btn"
           @click="refreshData"
@@ -96,16 +87,17 @@ const hideNavbarRoutes = [
 ];
 const showHeader = computed(() => !hideHeaderRoutes.includes(route.name));
 const showNavbar = computed(() => !hideNavbarRoutes.includes(route.name));
-const showFilterButton = computed(() =>
-  ['AccountDetail', 'CardDetail'].includes(route.name)
-);
 const showDeleteButton = computed(() =>
   ['AccountList', 'CardList'].includes(route.name)
 );
 const showRefreshButton = computed(() =>
-  ['OpenBankingMyHome', 'OpenbankingCalendar', 'CalendarDetail'].includes(
-    route.name
-  )
+  [
+    'OpenBankingMyHome',
+    'OpenbankingCalendar',
+    'CalendarDetail',
+    'AccountDetail',
+    'CardDetail',
+  ].includes(route.name)
 );
 const showAddButton = computed(() =>
   [

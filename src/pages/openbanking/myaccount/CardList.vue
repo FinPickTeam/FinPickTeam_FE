@@ -259,7 +259,7 @@ onUnmounted(() => {
 .list-wrap {
   background: #fff;
   padding: 20px 16px;
-  margin: 0 -16px;
+  margin: 0 -16px 16px; /* 좌우 꽉 + 하단 여백 */
 }
 .group-title {
   font-size: 16px;
