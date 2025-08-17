@@ -24,6 +24,9 @@
           연동하기
         </button>
         <button class="btn-secondary" @click="close">나중에 하기</button>
+        <button class="btn-dont-show" @click="dontShowAgain">
+          다시 보지 않기
+        </button>
       </div>
     </div>
   </div>
@@ -31,11 +34,14 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { useMyDataStore } from '@/stores/MyData';
+
 const props = defineProps({
   open: { type: Boolean, default: false },
 });
 const emits = defineEmits(['close']);
 const router = useRouter();
+const myDataStore = useMyDataStore();
 
 function close() {
   emits('close');
@@ -44,6 +50,11 @@ function close() {
 function goToOpenBanking() {
   close();
   router.push('/openbanking');
+}
+
+function dontShowAgain() {
+  myDataStore.setHideModal(true);
+  close();
 }
 </script>
 
@@ -191,6 +202,24 @@ function goToOpenBanking() {
 .btn-secondary:hover {
   background: #e5e7eb;
   color: #374151;
+}
+
+.btn-dont-show {
+  background: transparent;
+  color: #9ca3af;
+  padding: 8px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: underline;
+}
+
+.btn-dont-show:hover {
+  color: #6b7280;
+  background: #f9fafb;
 }
 
 @keyframes fadeIn {

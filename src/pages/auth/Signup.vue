@@ -504,6 +504,7 @@ const handleSignup = async () => {
 .signup-logo {
   text-align: center;
   margin-bottom: 40px;
+  margin-top: 20px;
 }
 .signup-logo h1 {
   margin-bottom: 8px;
