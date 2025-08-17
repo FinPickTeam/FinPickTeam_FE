@@ -8,7 +8,14 @@
     </div>
 
     <div class="card-header">
-      <h3 class="challenge-title">{{ challenge.title || '제목 없음' }}</h3>
+      <div class="title-container">
+        <i
+          v-if="isCreatorFlag && typeUpper !== 'PERSONAL'"
+          class="fas fa-crown creator-icon"
+          title="내가 생성한 챌린지"
+        ></i>
+        <h3 class="challenge-title">{{ challenge.title || '제목 없음' }}</h3>
+      </div>
 
       <div class="status-area" v-if="!isRecruitingPage">
         <span
@@ -33,6 +40,12 @@
           class="badge badge-recruiting"
           >모집중</span
         >
+        <!-- 그룹 챌린지인 경우에만 비공개 아이콘 표시 -->
+        <i
+          v-if="typeUpper === 'GROUP' && challenge.usePassword"
+          class="fas fa-lock visibility-icon"
+          title="비공개 챌린지"
+        ></i>
       </div>
     </div>
 
@@ -111,17 +124,6 @@
           v-if="isParticipating && typeUpper !== 'PERSONAL'"
           class="stat stat-participants"
           >{{ getStatText() }}</span
-        >
-        <!-- 그룹 챌린지인 경우에만 공개 설정 표시 -->
-        <span v-if="typeUpper === 'GROUP'" class="stat stat-visibility">
-          {{ challenge.usePassword ? '비공개' : '공개' }}
-        </span>
-        <!-- 내가 만든 챌린지 배지 (개인 챌린지 제외) -->
-        <span
-          v-if="isCreatorFlag && typeUpper !== 'PERSONAL'"
-          class="badge badge-owner"
-          title="내가 생성한 챌린지"
-          >내가 만든</span
         >
       </div>
     </div>
@@ -240,7 +242,7 @@ const getRecruitingRemainingDays = () => {
   const diff = Math.ceil((start - today) / (1000 * 60 * 60 * 24));
   return Math.max(0, diff);
 };
-const getStatText = () => `${curParticipants.value}명 참여`;
+const getStatText = () => `${curParticipants.value} / 6`;
 
 // 카테고리 이름 반환 함수
 const getCategoryName = (categoryId) => {
@@ -345,6 +347,30 @@ const handleCardClick = () =>
   margin-bottom: 12px;
   gap: 8px;
 }
+
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+}
+
+.creator-icon {
+  color: #ffd700;
+  font-size: 16px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+  animation: crown-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes crown-glow {
+  from {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2)) brightness(1);
+  }
+  to {
+    filter: drop-shadow(0 1px 4px rgba(255, 215, 0, 0.4)) brightness(1.1);
+  }
+}
+
 .challenge-title {
   font-size: 16px;
   font-weight: 700;
@@ -408,11 +434,7 @@ const handleCardClick = () =>
   align-items: center;
   justify-content: center;
 }
-.badge-owner {
-  background: #e8f0fe;
-  color: #1a73e8;
-  font-weight: 700;
-}
+
 .card-content {
   display: flex;
   flex-direction: column;
@@ -554,9 +576,16 @@ const handleCardClick = () =>
   border: 1px solid #c8e6c9;
 }
 
-.stat-visibility {
+.visibility-icon {
   color: #f57c00;
-  background: #fff3e0;
-  border: 1px solid #ffcc02;
+  font-size: 14px;
+  margin-left: 4px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+  transition: all 0.2s ease;
+}
+
+.visibility-icon:hover {
+  transform: scale(1.1);
+  filter: drop-shadow(0 2px 4px rgba(245, 124, 0, 0.3));
 }
 </style>
