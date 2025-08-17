@@ -645,8 +645,7 @@ router.beforeEach(async (to,from) => {
   // }
 
   const openBankingProtectedRoutes = new Set([
-    "OpenBankingHome", "OpenBankingMyHome", "AccountList", "CardList",
-    "AccountDetail", "CardDetail", "OpenbankingCalendar", "OpenbankingMonthlyReport",
+    "OpenBankingHome", "OpenBankingMyHome"
   ]);
 
   if (openBankingProtectedRoutes.has(to.name)) {
