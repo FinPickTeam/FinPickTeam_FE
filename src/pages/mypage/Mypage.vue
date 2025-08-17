@@ -86,7 +86,22 @@
 
       <div class="stat">
         <div class="stat-label">레벨</div>
-        <div class="stat-value">{{ levelText }}</div>
+        <div class="stat-value">
+          <template v-if="loadingCoin">
+            <span class="skeleton skeleton-text"></span>
+          </template>
+          <template v-else-if="coinError">
+            <span class="error">-</span>
+          </template>
+          <template v-else>
+            <div class="level-info">
+              <div class="level-title">{{ levelText }}</div>
+              <div class="level-detail">
+                누적 {{ formatNumber(coinStatus.cumulativeAmount) }}P
+              </div>
+            </div>
+          </template>
+        </div>
       </div>
     </section>
 
@@ -197,8 +212,25 @@ const avatarStore = useAvatarStore();
 const profileStore = useProfileStore();
 const { coin } = storeToRefs(avatarStore);
 
-// 레벨 텍스트(임시)
-const levelText = computed(() => "금융 새싹");
+// 레벨 계산 로직
+const getCurrentLevel = computed(() => {
+  const cumulativePoints = coinStatus.value.cumulativeAmount || 0;
+  if (cumulativePoints >= 60000) return 4;
+  if (cumulativePoints >= 40000) return 3;
+  if (cumulativePoints >= 20000) return 2;
+  return 1;
+});
+
+const getCurrentLevelTitle = computed(() => {
+  const cumulativePoints = coinStatus.value.cumulativeAmount || 0;
+  if (cumulativePoints >= 60000) return "금융도사";
+  if (cumulativePoints >= 40000) return "금융법사";
+  if (cumulativePoints >= 20000) return "금융견습";
+  return "금융새싹";
+});
+
+// 레벨 텍스트
+const levelText = computed(() => getCurrentLevelTitle.value);
 
 // 포인트 상태
 const coinStatus = ref({
@@ -255,6 +287,11 @@ const wearingGlasses = computed(() =>
     .map((i) => i.itemId)
 );
 
+// 숫자 포맷팅 함수
+const formatNumber = (num) => {
+  return Number(num || 0).toLocaleString();
+};
+
 // API: 아바타/아이템
 const fetchAvatarAndItemData = async () => {
   try {
@@ -299,6 +336,7 @@ const fetchCurrentCoin = async () => {
         updatedAt: c.updatedAt || null,
       };
       avatarStore.setCoin(coinStatus.value.amount);
+      avatarStore.setCumulativePoints(coinStatus.value.cumulativeAmount);
     } else {
       coinError.value = "코인 상태 데이터를 가져오는데 실패했습니다.";
     }
@@ -597,6 +635,24 @@ onMounted(() => {
 .error {
   color: #ef4444;
   font-weight: 700;
+}
+
+/* ===== 레벨 정보 ===== */
+.level-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+.level-title {
+  font-weight: 700;
+  color: var(--color-main);
+  font-size: 16px;
+}
+.level-detail {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
 }
 
 /* ===== 확인 모달 ===== */
