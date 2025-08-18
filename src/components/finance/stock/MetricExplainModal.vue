@@ -193,6 +193,9 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+* {
+  font-family: var(--font-main);
+}
 @media (prefers-reduced-motion: reduce) {
   .modal-fade-enter-active,
   .modal-fade-leave-active,

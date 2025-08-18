@@ -51,6 +51,9 @@ const valueClass = (v) => {
 </script>
 
 <style scoped>
+* {
+  font-family: var(--font-main);
+}
 .metric-content {
   display: flex;
   width: 100%;
