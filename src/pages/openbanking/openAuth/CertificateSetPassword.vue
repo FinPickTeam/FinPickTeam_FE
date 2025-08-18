@@ -74,21 +74,21 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faAngleLeft,
   faTimes,
   faBackspace,
-} from "@fortawesome/free-solid-svg-icons";
+} from '@fortawesome/free-solid-svg-icons';
 
 library.add(faAngleLeft, faTimes, faBackspace);
 
 const router = useRouter();
 
-const password = ref("");
+const password = ref('');
 
 // 숫자 패드 배열을 랜덤하게 생성하는 함수
 const generateRandomNumberPad = () => {
@@ -131,7 +131,7 @@ const deleteNumber = () => {
 };
 
 const clearPassword = () => {
-  password.value = "";
+  password.value = '';
 };
 
 const goBack = () => {
@@ -140,8 +140,8 @@ const goBack = () => {
 
 const nextStep = () => {
   if (isPasswordValid.value) {
-    sessionStorage.setItem("certificatePassword", password.value);
-    router.push("/openbanking/confirm-certificate-password");
+    sessionStorage.setItem('certificatePassword', password.value);
+    router.push('/openbanking/confirm-certificate-password');
   }
 };
 </script>
@@ -153,7 +153,7 @@ const nextStep = () => {
   margin: 0 auto;
   background: #f3f4f6;
   min-height: 100vh;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -161,7 +161,7 @@ const nextStep = () => {
 
 .password-header {
   width: 100%;
-  height: 56px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -282,9 +282,10 @@ const nextStep = () => {
 .number-row {
   display: flex;
   gap: 0;
-  margin-bottom: 0;
+  margin-bottom: 8px;
   justify-content: space-between;
   width: 100%;
+  height: 70px;
 }
 
 .number-row:last-child {

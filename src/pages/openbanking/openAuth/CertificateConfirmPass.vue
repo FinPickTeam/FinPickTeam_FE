@@ -56,8 +56,8 @@
             >
               {{
                 isPasswordMatch
-                  ? "비밀번호가 일치합니다"
-                  : "비밀번호가 일치하지 않습니다"
+                  ? '비밀번호가 일치합니다'
+                  : '비밀번호가 일치하지 않습니다'
               }}
             </span>
           </div>
@@ -98,24 +98,24 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
+import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faAngleLeft,
   faCheck,
   faTimes,
   faBackspace,
-} from "@fortawesome/free-solid-svg-icons";
-import {pinSet} from "@/api/index.js";
+} from '@fortawesome/free-solid-svg-icons';
+import { pinSet } from '@/api/index.js';
 
 library.add(faAngleLeft, faCheck, faTimes, faBackspace);
 
 const router = useRouter();
 
-const confirmPassword = ref("");
-const originalPassword = ref("");
+const confirmPassword = ref('');
+const originalPassword = ref('');
 const isLoading = ref(false);
 
 // 숫자 패드 배열을 이미지와 동일하게 고정
@@ -152,15 +152,15 @@ const deleteNumber = () => {
 };
 
 const clearPassword = () => {
-  confirmPassword.value = "";
+  confirmPassword.value = '';
 };
 
 onMounted(() => {
   // 세션스토리지에서 원본 비밀번호 가져오기
-  const storedPassword = sessionStorage.getItem("certificatePassword");
+  const storedPassword = sessionStorage.getItem('certificatePassword');
   if (!storedPassword) {
     // 비밀번호가 없으면 1단계로 돌아가기
-    router.push("/openbanking/create-certificate");
+    router.push('/openbanking/create-certificate');
     return;
   }
   originalPassword.value = storedPassword;
@@ -172,29 +172,33 @@ const goBack = () => {
 
 const completeCertificate = async () => {
   // 유효성 검사 또는 로딩 중일 경우 함수 실행 방지
-  if (!isPasswordMatch.value || confirmPassword.value.length === 0 || isLoading.value) {
+  if (
+    !isPasswordMatch.value ||
+    confirmPassword.value.length === 0 ||
+    isLoading.value
+  ) {
     return;
   }
 
   isLoading.value = true; // API 요청 시작, 로딩 상태로 변경
 
   try {
-
     const response = await pinSet(confirmPassword.value);
 
-    console.log("간편 비밀번호 설정이 성공적으로 완료되었습니다.");
+    console.log('간편 비밀번호 설정이 성공적으로 완료되었습니다.');
 
     // 세션스토리지에서 비밀번호 제거
-    sessionStorage.removeItem("certificatePassword");
+    sessionStorage.removeItem('certificatePassword');
 
     // 완료 페이지로 이동
-    await router.push("/openbanking/certificate-complete");
-
+    await router.push('/openbanking/certificate-complete');
   } catch (error) {
     // 3. API 요청 실패 시 에러 처리
-    console.error("간편 비밀번호 설정 API 호출 중 오류가 발생했습니다:", error);
-    alert(error.response?.data?.message || "비밀번호 설정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-
+    console.error('간편 비밀번호 설정 API 호출 중 오류가 발생했습니다:', error);
+    alert(
+      error.response?.data?.message ||
+        '비밀번호 설정 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.'
+    );
   } finally {
     // 4. 요청 성공/실패와 관계없이 로딩 상태 해제
     isLoading.value = false;
@@ -209,7 +213,7 @@ const completeCertificate = async () => {
   margin: 0 auto;
   background: #f3f4f6;
   min-height: 100vh;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -217,7 +221,7 @@ const completeCertificate = async () => {
 
 .confirm-header {
   width: 100%;
-  height: 56px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -363,9 +367,10 @@ const completeCertificate = async () => {
 .number-row {
   display: flex;
   gap: 0;
-  margin-bottom: 0;
+  margin-bottom: 8px;
   justify-content: space-between;
   width: 100%;
+  height: 70px;
 }
 
 .number-row:last-child {

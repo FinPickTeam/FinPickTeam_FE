@@ -39,6 +39,7 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
+import Headerbar from '@/components/Headerbar.vue';
 import bannerImage from './img/Openbanking_Banner.png';
 
 /** ✅ accountsApi: 너가 이미 가진 래퍼 */

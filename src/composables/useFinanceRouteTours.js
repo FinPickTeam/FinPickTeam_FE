@@ -224,7 +224,7 @@ export function useFinanceRouteTours() {
       {
         element: '.product-card:first-child',
         popover: {
-          title: '💳 상품 카드 디자인',
+          title: '💳 예금 상품 카드',
           description:
             '은행 로고, 상품명, 금리 정보가 한눈에 보기 쉽게 구성되어 있어요!',
           side: 'left',

@@ -10,7 +10,6 @@
 
     <!-- 메인 콘텐츠 -->
     <div class="password-content">
-
       <div class="progress-section">
         <div class="progress-steps">
           <div class="step active">
@@ -92,23 +91,23 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
+import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faAngleLeft,
   faTimes,
   faBackspace,
-} from "@fortawesome/free-solid-svg-icons";
+} from '@fortawesome/free-solid-svg-icons';
 
 library.add(faAngleLeft, faTimes, faBackspace);
 
 const router = useRouter();
 const route = useRoute();
 
-const newPassword = ref("");
-const currentPassword = ref("");
+const newPassword = ref('');
+const currentPassword = ref('');
 
 // 숫자 패드 배열을 랜덤하게 생성하는 함수
 const generateRandomNumberPad = () => {
@@ -132,7 +131,7 @@ const isPasswordValid = computed(() => {
 });
 
 onMounted(() => {
-  currentPassword.value = route.query.currentPassword || "";
+  currentPassword.value = route.query.currentPassword || '';
 });
 
 const addNumber = (number) => {
@@ -155,7 +154,7 @@ const deleteNumber = () => {
 };
 
 const clearPassword = () => {
-  newPassword.value = "";
+  newPassword.value = '';
 };
 
 const goBack = () => {
@@ -165,7 +164,7 @@ const goBack = () => {
 const nextStep = () => {
   if (isPasswordValid.value) {
     router.push({
-      name: "certificate-password-change-confirm",
+      name: 'certificate-password-change-confirm',
       query: {
         currentPassword: currentPassword.value,
         newPassword: newPassword.value,
@@ -182,7 +181,7 @@ const nextStep = () => {
   margin: 0 auto;
   background: #f3f4f6;
   min-height: 100vh;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -192,7 +191,7 @@ const nextStep = () => {
 
 .password-header {
   width: 100%;
-  height: 56px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -314,9 +313,10 @@ const nextStep = () => {
 .number-row {
   display: flex;
   gap: 0;
-  margin-bottom: 0;
+  margin-bottom: 8px;
   justify-content: space-between;
   width: 100%;
+  height: 70px;
 }
 
 .number-row:last-child {
