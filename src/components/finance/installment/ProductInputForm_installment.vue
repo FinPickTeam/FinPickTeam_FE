@@ -26,7 +26,14 @@
     </div>
 
     <!-- 적립방식 -->
-    <div class="section-label">적립방식</div>
+    <div class="section-container">
+      <div class="section-label">적립방식</div>
+      <div class="help-button" @click="openCore()">
+        <i class="fa-solid fa-circle-info"></i>
+      </div>
+      <InstallmentHelper v-model:open="coreOpen" />
+    </div>
+
     <div class="saving-type-row">
       <button
         type="button"
@@ -95,6 +102,7 @@
 <script setup>
 import { ref, computed, watch, onMounted, nextTick } from 'vue';
 import { useMyDataStore } from '@/stores/MyData';
+import InstallmentHelper from './InstallmentHelper.vue';
 
 // Props 정의
 const props = defineProps({
@@ -112,6 +120,9 @@ const props = defineProps({
     }),
   },
 });
+
+const coreOpen = ref(false);
+const openCore = () => (coreOpen.value = true);
 
 const myDataStore = useMyDataStore();
 const period = ref(props.formData.period);
@@ -293,7 +304,6 @@ function ensurePreferForLinked() {
   font-size: var(--font-size-body);
   font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 8px;
 }
 .period-amount-card {
   background: var(--color-bg);
@@ -483,5 +493,27 @@ function ensurePreferForLinked() {
   font-size: var(--font-size-body);
   font-weight: var(--font-weight-medium);
   color: var(--color-text);
+}
+.section-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.help-button {
+  font-size: 14px;
+  color: #888;
+  font-family: var(--font-main);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding-left: 4px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.help-button i {
+  font-family: 'Font Awesome 6 Free' !important;
+  font-weight: 900;
 }
 </style>
