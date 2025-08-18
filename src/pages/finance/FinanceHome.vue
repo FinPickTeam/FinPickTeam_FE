@@ -186,13 +186,15 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   height: calc(100vh - 80px - 68px); /* 헤더와 네비바 높이를 제외한 전체 높이 */
+  width: 390px;
+  max-width: 390px;
   padding: 20px;
   background: var(--color-bg-light, #f8f9fa);
   box-sizing: border-box;
   position: absolute;
   top: 80px; /* 헤더 높이만큼 아래로 이동 */
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .button-grid {
@@ -294,6 +296,7 @@ onMounted(() => {
   margin-top: 24px;
   width: 100%;
   max-width: 400px;
+  align-items: center;
 }
 
 .guide-section {
@@ -339,7 +342,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 8px 8px;
   background: rgba(107, 70, 193, 0.08);
   border: 1px solid rgba(107, 70, 193, 0.15);
   border-radius: 20px;
@@ -394,7 +397,7 @@ onMounted(() => {
 }
 
 .hashtag-btn span {
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: 0.5px;
 }
 
@@ -403,6 +406,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: center;
 }
 
 .guide-btn {
@@ -419,6 +423,7 @@ onMounted(() => {
   border: none;
   position: relative;
   overflow: hidden;
+  width: 320px;
 }
 
 .guide-btn::before {
@@ -470,86 +475,5 @@ onMounted(() => {
 
 .guide-btn i {
   font-size: 14px;
-}
-
-/* 반응형 디자인 */
-@media (max-width: 480px) {
-  .finance-container {
-    padding: 16px;
-  }
-
-  .button-grid {
-    width: 280px;
-    height: 280px;
-    gap: 20px;
-  }
-
-  .grid-icon {
-    width: 70px;
-  }
-
-  .btn-text {
-    font-size: 15px;
-  }
-
-  .guide-buttons {
-    max-width: 100%;
-    gap: 20px;
-  }
-
-  .hashtag-container {
-    gap: 6px;
-  }
-
-  .hashtag-btn {
-    padding: 6px 12px;
-    font-size: 11px;
-  }
-
-  .hashtag-btn i {
-    font-size: 10px;
-  }
-
-  .guide-btn {
-    padding: 10px 12px;
-    font-size: 13px;
-  }
-}
-
-/* 접근성 개선 */
-@media (prefers-reduced-motion: reduce) {
-  .grid-btn,
-  .grid-icon,
-  .hashtag-btn,
-  .guide-btn {
-    transition: none;
-  }
-
-  .grid-btn:hover,
-  .hashtag-btn:hover,
-  .guide-btn:hover {
-    transform: none;
-  }
-
-  .grid-btn:hover .grid-icon,
-  .hashtag-btn:hover i {
-    transform: none;
-  }
-
-  .guide-btn::before,
-  .hashtag-btn::before {
-    display: none;
-  }
-}
-
-/* 고대비 모드 지원 */
-@media (prefers-contrast: high) {
-  .grid-btn {
-    border: 2px solid #333;
-  }
-
-  .guide-text {
-    border: 1px solid #333;
-  }
 }
 </style>

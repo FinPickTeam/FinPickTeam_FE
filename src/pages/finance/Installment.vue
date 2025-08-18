@@ -241,7 +241,8 @@ const interestTags = ref([
 onMounted(() => {
   fetchInstallmentList();
   fav.syncIdSet('INSTALLMENT');
-  if (!myDataStore.linked) {
+  // MyData가 연동되지 않았고, 모달을 숨기지 않았다면 모달 표시
+  if (!myDataStore.linked && !myDataStore.hideModal) {
     show.value = true;
   }
 });

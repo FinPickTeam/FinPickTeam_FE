@@ -9,17 +9,19 @@
 
     <div class="pin-auth-content">
       <h1 class="main-title">간편 비밀번호 입력</h1>
-      <p class="description-text">오픈뱅킹 서비스를 이용하려면<br />간편 비밀번호 6자리를 입력해주세요.</p>
+      <p class="description-text">
+        오픈뱅킹 서비스를 이용하려면<br />간편 비밀번호 6자리를 입력해주세요.
+      </p>
 
       <div class="password-form">
         <div class="input-group">
           <div class="password-display">
             <div class="password-dots">
               <div
-                  v-for="i in 6"
-                  :key="i"
-                  class="password-dot"
-                  :class="{ filled: i <= password.length }"
+                v-for="i in 6"
+                :key="i"
+                class="password-dot"
+                :class="{ filled: i <= password.length }"
               ></div>
             </div>
           </div>
@@ -27,14 +29,30 @@
         </div>
 
         <div class="number-pad">
-          <div class="number-row" v-for="(row, index) in numberPad.slice(0, 3)" :key="index">
-            <button v-for="number in row" :key="number" class="number-btn" @click="addNumber(number)" :disabled="password.length >= 6">
+          <div
+            class="number-row"
+            v-for="(row, index) in numberPad.slice(0, 3)"
+            :key="index"
+          >
+            <button
+              v-for="number in row"
+              :key="number"
+              class="number-btn"
+              @click="addNumber(number)"
+              :disabled="password.length >= 6"
+            >
               {{ number }}
             </button>
           </div>
           <div class="number-row">
-            <button class="number-btn clear-btn" @click="clearPassword">전체삭제</button>
-            <button class="number-btn" @click="addNumber(numberPad[3])" :disabled="password.length >= 6">
+            <button class="number-btn clear-btn" @click="clearPassword">
+              전체삭제
+            </button>
+            <button
+              class="number-btn"
+              @click="addNumber(numberPad[3])"
+              :disabled="password.length >= 6"
+            >
               {{ numberPad[3] }}
             </button>
             <button class="number-btn delete-btn" @click="deleteNumber">
@@ -48,21 +66,21 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
-import { faAngleLeft, faBackspace } from "@fortawesome/free-solid-svg-icons";
-import { pinLogin } from "@/api/authApi.js";
+import { ref } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faAngleLeft, faBackspace } from '@fortawesome/free-solid-svg-icons';
+import { pinLogin } from '@/api/authApi.js';
 
 library.add(faAngleLeft, faBackspace);
 
 const router = useRouter();
 const route = useRoute();
 
-const password = ref("");
+const password = ref('');
 const isLoading = ref(false);
-const errorMessage = ref("");
+const errorMessage = ref('');
 const shakeError = ref(false);
 
 const generateRandomNumberPad = () => {
@@ -79,7 +97,7 @@ const numberPad = ref(generateRandomNumberPad());
 
 const addNumber = (number) => {
   if (password.value.length >= 6) return;
-  errorMessage.value = "";
+  errorMessage.value = '';
   password.value += number.toString();
   if (password.value.length === 6) {
     setTimeout(() => {
@@ -93,16 +111,19 @@ const verifyPassword = async () => {
   try {
     await pinLogin(parseInt(password.value, 10));
     sessionStorage.setItem('openBankingAuthenticated', 'true');
-    const redirectPath = route.query.redirect || { name: "OpenBankingMyHome" };
+    const redirectPath = route.query.redirect || { name: 'OpenBankingMyHome' };
     await router.replace(redirectPath);
   } catch (error) {
     const response = error.response;
     if (response?.data?.status === 200) {
       sessionStorage.setItem('openBankingAuthenticated', 'true');
-      const redirectPath = route.query.redirect || { name: "OpenBankingMyHome" };
+      const redirectPath = route.query.redirect || {
+        name: 'OpenBankingMyHome',
+      };
       await router.replace(redirectPath);
     } else {
-      errorMessage.value = response?.data?.message || error.message || "인증에 실패했습니다.";
+      errorMessage.value =
+        response?.data?.message || error.message || '인증에 실패했습니다.';
       triggerShakeError();
     }
   } finally {
@@ -126,8 +147,8 @@ const deleteNumber = () => {
 };
 
 const clearPassword = () => {
-  password.value = "";
-  errorMessage.value = "";
+  password.value = '';
+  errorMessage.value = '';
 };
 
 const goBack = () => {
@@ -142,7 +163,7 @@ const goBack = () => {
   margin: 0 auto;
   background: #f3f4f6;
   min-height: 100vh;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -151,7 +172,7 @@ const goBack = () => {
 }
 .pin-auth-header {
   width: 100%;
-  height: 56px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -246,6 +267,8 @@ const goBack = () => {
 .number-row {
   display: flex;
   justify-content: space-between;
+  height: 70px;
+  margin-bottom: 8px;
 }
 .number-btn {
   width: 33.333%;

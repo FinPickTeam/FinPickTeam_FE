@@ -53,7 +53,7 @@
             </div>
           </div>
           <div class="password-match">
-            <p v-if="errorMessage" class='text-error'>{{ errorMessage }}</p>
+            <p v-if="errorMessage" class="text-error">{{ errorMessage }}</p>
           </div>
         </div>
 
@@ -96,19 +96,23 @@
 </template>
 
 <script setup>
-import {computed, ref} from "vue";
-import {useRouter} from "vue-router";
-import {FontAwesomeIcon} from "@fortawesome/vue-fontawesome";
-import {library} from "@fortawesome/fontawesome-svg-core";
-import {faAngleLeft, faBackspace, faTimes,} from "@fortawesome/free-solid-svg-icons";
-import {pinLogin} from "@/api/authApi.js";
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import {
+  faAngleLeft,
+  faBackspace,
+  faTimes,
+} from '@fortawesome/free-solid-svg-icons';
+import { pinLogin } from '@/api/authApi.js';
 
 library.add(faAngleLeft, faTimes, faBackspace);
 
 const router = useRouter();
-const currentPassword = ref("");
+const currentPassword = ref('');
 const isLoading = ref(false);
-const errorMessage = ref("");
+const errorMessage = ref('');
 const shakeError = ref(false);
 
 // 숫자 패드 배열을 랜덤하게 생성하는 함수
@@ -141,7 +145,7 @@ const addNumber = (number) => {
   }
 
   // 사용자가 다시 입력을 시작하면 에러 메시지를 초기화합니다.
-  errorMessage.value = "";
+  errorMessage.value = '';
 
   if (currentPassword.value.length < 6) {
     currentPassword.value += number.toString();
@@ -162,14 +166,14 @@ const verifyPassword = async () => {
     await pinLogin(parseInt(currentPassword.value, 10));
     // 인증 성공 시 다음 단계로 이동합니다.
     await router.push({
-      name: "certificate-password-change-new",
+      name: 'certificate-password-change-new',
       query: { currentPassword: currentPassword.value },
     });
   } catch (error) {
     // 인증 실패 시 API 응답에서 에러 메시지를 가져옵니다.
-    console.log("CATCH BLOCK TRIGGERED - ERROR OBJECT:", error);
+    console.log('CATCH BLOCK TRIGGERED - ERROR OBJECT:', error);
     errorMessage.value =
-      error.response?.data?.message || "인증에 실패했습니다.";
+      error.response?.data?.message || '인증에 실패했습니다.';
     triggerShakeError();
   } finally {
     isLoading.value = false;
@@ -193,8 +197,8 @@ const deleteNumber = () => {
 };
 
 const clearPassword = () => {
-  currentPassword.value = "";
-  errorMessage.value = ""; // 수정: 에러 메시지 초기화
+  currentPassword.value = '';
+  errorMessage.value = ''; // 수정: 에러 메시지 초기화
 };
 
 const goBack = () => {
@@ -209,7 +213,7 @@ const goBack = () => {
   margin: 0 auto;
   background: #f3f4f6;
   min-height: 100vh;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -219,7 +223,7 @@ const goBack = () => {
 
 .password-header {
   width: 100%;
-  height: 56px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -401,9 +405,10 @@ const goBack = () => {
 .number-row {
   display: flex;
   gap: 0;
-  margin-bottom: 0;
+  margin-bottom: 8px;
   justify-content: space-between;
   width: 100%;
+  height: 70px;
 }
 
 .number-row:last-child {

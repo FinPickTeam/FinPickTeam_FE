@@ -113,7 +113,15 @@
         <!-- 태그 필터 -->
         <div v-if="showFilter" class="filter-dropdown">
           <div class="filter-section">
-            <h4 class="filter-section-title">펀드 타입</h4>
+            <div class="filter-title-content">
+              <h4 class="filter-section-title">펀드 타입</h4>
+              <div class="help-button" @click="openfund()">
+                <i class="fa-solid fa-circle-info"></i>
+              </div>
+            </div>
+
+            <FundHelper v-model:open="fundOpen" />
+
             <div class="tag-container">
               <button
                 v-for="tag in fundTypeTags"
@@ -128,7 +136,10 @@
           </div>
 
           <div class="filter-section">
-            <h4 class="filter-section-title">위험도</h4>
+            <div class="filter-title-content">
+              <h4 class="filter-section-title">위험도</h4>
+            </div>
+
             <div class="tag-container">
               <button
                 v-for="tag in riskTags"
@@ -181,6 +192,7 @@ import {
 } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
 import { useProfileStore } from '@/stores/profile.js';
+import FundHelper from '@/components/finance/fund/FundHelper.vue';
 
 const router = useRouter();
 const showProducts = ref(false);
@@ -206,6 +218,9 @@ const selectedRisks = ref([]);
 // 드래프트(팝업에서만 바뀌는 임시 값)
 const draftFundTypes = ref([]);
 const draftRisks = ref([]);
+
+const fundOpen = ref(false);
+const openfund = () => (fundOpen.value = true);
 
 onMounted(async () => {
   await initializeRecommendTab();
@@ -503,24 +518,24 @@ const fetchFundRecommendedList = async () => {
 .products-list-container {
   width: 100%;
 }
-
-/* 태그 필터 스타일 */
-.filter-section {
-  margin-bottom: 20px;
+.filter-title-content {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: left;
+  margin-bottom: 12px;
 }
-
 .filter-section-title {
   font-size: 14px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 12px;
-  margin-top: 0;
 }
 
 .tag-container {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-bottom: 12px;
 }
 
 .filter-tag {
@@ -579,10 +594,8 @@ const fetchFundRecommendedList = async () => {
 
 /* ===== Incomplete Propensity CTA Card ===== */
 .propensity-card {
-  display: grid;
-  grid-template-columns: 1fr 96px;
-  align-items: center;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   margin-top: 16px;
   padding: 16px;
@@ -590,12 +603,14 @@ const fetchFundRecommendedList = async () => {
   background: linear-gradient(135deg, #f7f5ff 0%, #ffffff 60%);
   border: 1px solid var(--color-bg-border);
   box-shadow: 0 6px 14px rgba(93, 68, 201, 0.06);
+  position: relative;
 }
 
 .propensity-card__left {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: relative;
 }
 
 .propensity-badge {
@@ -675,13 +690,17 @@ const fetchFundRecommendedList = async () => {
   margin: 0;
   font-size: 12px;
   color: #8b8ea0;
+  text-align: center;
 }
 
 /* 오른쪽 장식 링(비주얼) */
 .propensity-card__right {
-  position: relative;
+  position: absolute;
+  top: 0;
+  right: 0;
   width: 96px;
   height: 96px;
+  margin: 8px;
 }
 
 .ring {
@@ -765,5 +784,21 @@ const fetchFundRecommendedList = async () => {
 .btn-outline[aria-busy='true'] {
   opacity: 0.6;
   cursor: not-allowed;
+}
+.help-button {
+  font-size: 14px;
+  color: #888;
+  font-family: var(--font-main);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding-left: 4px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.help-button i {
+  font-family: 'Font Awesome 6 Free' !important;
+  font-weight: 900;
 }
 </style>

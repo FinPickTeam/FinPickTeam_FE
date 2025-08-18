@@ -224,7 +224,7 @@ export function useFinanceRouteTours() {
       {
         element: '.product-card:first-child',
         popover: {
-          title: '💳 상품 카드 디자인',
+          title: '💳 예금 상품 카드',
           description:
             '은행 로고, 상품명, 금리 정보가 한눈에 보기 쉽게 구성되어 있어요!',
           side: 'left',
@@ -252,6 +252,9 @@ export function useFinanceRouteTours() {
           },
         },
       ]);
+
+      // 예금 상세 페이지 설명 완료 후 FinanceHome으로 돌아가기
+      await goAndWait(router, { name: 'FinanceHome' }, [SELECTORS.tab.deposit]);
     }
   };
 
@@ -404,6 +407,11 @@ export function useFinanceRouteTours() {
           },
         },
       ]);
+
+      // 적금 상세 페이지 설명 완료 후 FinanceHome으로 돌아가기
+      await goAndWait(router, { name: 'FinanceHome' }, [
+        SELECTORS.tab.installment,
+      ]);
     }
   };
 
@@ -545,6 +553,9 @@ export function useFinanceRouteTours() {
           },
         },
       ]);
+
+      // 펀드 상세 페이지 설명 완료 후 FinanceHome으로 돌아가기
+      await goAndWait(router, { name: 'FinanceHome' }, [SELECTORS.tab.fund]);
     }
   };
 
@@ -676,6 +687,9 @@ export function useFinanceRouteTours() {
           },
         },
       ]);
+
+      // 주식 상세 페이지 설명 완료 후 FinanceHome으로 돌아가기
+      await goAndWait(router, { name: 'FinanceHome' }, [SELECTORS.tab.stock]);
     }
   };
 

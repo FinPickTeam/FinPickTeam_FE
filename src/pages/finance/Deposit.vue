@@ -237,7 +237,10 @@ const show = ref(false);
 onMounted(async () => {
   fetchDepositList();
   fav.syncIdSet('DEPOSIT');
-  if (!myDataStore.linked) show.value = true;
+  // MyData가 연동되지 않았고, 모달을 숨기지 않았다면 모달 표시
+  if (!myDataStore.linked && !myDataStore.hideModal) {
+    show.value = true;
+  }
 });
 
 const fetchDepositList = async () => {

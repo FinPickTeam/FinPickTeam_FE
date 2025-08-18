@@ -76,8 +76,8 @@
             >
               {{
                 isPasswordMatch
-                  ? "비밀번호가 성공적으로 변경되었습니다"
-                  : "비밀번호가 일치하지 않습니다"
+                  ? '비밀번호가 성공적으로 변경되었습니다'
+                  : '비밀번호가 일치하지 않습니다'
               }}
             </span>
           </div>
@@ -122,28 +122,28 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
-import { useRouter, useRoute } from "vue-router";
-import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
+import { ref, computed, onMounted } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { library } from '@fortawesome/fontawesome-svg-core';
 import {
   faAngleLeft,
   faCheck,
   faTimes,
   faBackspace,
-} from "@fortawesome/free-solid-svg-icons";
-import { pinReset } from "@/api/authApi.js";
+} from '@fortawesome/free-solid-svg-icons';
+import { pinReset } from '@/api/authApi.js';
 
 library.add(faAngleLeft, faCheck, faTimes, faBackspace);
 
 const router = useRouter();
 const route = useRoute();
 
-const confirmPassword = ref("");
-const currentPassword = ref("");
-const newPassword = ref("");
+const confirmPassword = ref('');
+const currentPassword = ref('');
+const newPassword = ref('');
 const isLoading = ref(false);
-const errorMessage = ref("");
+const errorMessage = ref('');
 const shakeError = ref(false);
 
 // 숫자 패드 배열을 랜덤하게 생성하는 함수
@@ -168,10 +168,10 @@ const isPasswordMatch = computed(() => {
 });
 
 onMounted(() => {
-  currentPassword.value = route.query.currentPassword || "";
-  newPassword.value = route.query.newPassword || "";
+  currentPassword.value = route.query.currentPassword || '';
+  newPassword.value = route.query.newPassword || '';
   if (!newPassword.value) {
-    alert("비밀번호 정보가 없습니다. 이전 단계로 돌아갑니다.");
+    alert('비밀번호 정보가 없습니다. 이전 단계로 돌아갑니다.');
     router.go(-2); // 정보 없으면 1단계로
   }
 });
@@ -198,7 +198,7 @@ const deleteNumber = () => {
 };
 
 const clearPassword = () => {
-  confirmPassword.value = "";
+  confirmPassword.value = '';
 };
 
 const goBack = () => {
@@ -213,17 +213,17 @@ const completePasswordChange = async () => {
     await pinReset(parseInt(newPassword.value, 10));
 
     // 성공 시 사용자에게 알림 후 페이지 이동
-    await router.push("/mypage");
+    await router.push('/mypage');
   } catch (error) {
     // API 호출 실패 시 에러 처리
     const message =
-      error.response?.data?.message || "비밀번호 변경에 실패했습니다.";
+      error.response?.data?.message || '비밀번호 변경에 실패했습니다.';
     triggerShakeError(message);
   } finally {
     isLoading.value = false;
   }
   // 완료 페이지로 이동
-  await router.push("/mypage");
+  await router.push('/mypage');
 };
 
 const triggerShakeError = (message) => {
@@ -245,7 +245,7 @@ const triggerShakeError = (message) => {
   margin: 0 auto;
   background: #f3f4f6;
   min-height: 100vh;
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -255,7 +255,7 @@ const triggerShakeError = (message) => {
 
 .password-header {
   width: 100%;
-  height: 56px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -402,9 +402,10 @@ const triggerShakeError = (message) => {
 .number-row {
   display: flex;
   gap: 0;
-  margin-bottom: 0;
+  margin-bottom: 8px;
   justify-content: space-between;
   width: 100%;
+  height: 70px;
 }
 
 .number-row:last-child {
@@ -508,4 +509,5 @@ const triggerShakeError = (message) => {
   width: 20px;
   height: 1px;
   background: #e0e0e0;
-}</style>
+}
+</style>

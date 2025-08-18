@@ -86,8 +86,8 @@ const goNext = () => {
 <style scoped>
 .profile-step-container {
   min-height: 100vh;
-  background: #fff;
-  padding: 0 20px 32px 20px;
+  background: linear-gradient(135deg, #f8f7ff 0%, #ffffff 100%);
+  padding: 0 8px 32px 8px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -97,42 +97,89 @@ const goNext = () => {
   margin: 0 0 32px 0;
   padding: 0 8px;
 }
+
 .progress {
   flex: 1;
-  height: 4px;
-  border-radius: 2px;
+  height: 6px;
+  border-radius: 3px;
   background: #e5e7eb;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
+
+.progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(
+    90deg,
+    var(--color-main) 0%,
+    var(--color-main-light) 100%
+  );
+  transition: width 0.3s ease;
+}
+
 .progress.active {
-  background: #6c4cf1;
+  background: linear-gradient(
+    90deg,
+    var(--color-main) 0%,
+    var(--color-main-light) 100%
+  );
+  box-shadow: 0 2px 8px rgba(67, 24, 209, 0.2);
 }
+
+.progress.active::after {
+  width: 100%;
+}
+
 .question-section {
   margin-top: 24px;
   margin-bottom: 40px;
+  padding: 0 8px;
+  animation: fadeInUp 0.6s ease-out;
 }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .question-title {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 14px;
   color: #222;
 }
+
 .question-desc {
   font-size: 18px;
-  font-weight: bold;
-  color: #222;
+  font-weight: 600;
+  color: var(--color-text);
   margin-bottom: 8px;
 }
+
 .question-subtitle {
   font-size: 16px;
-  color: #222;
+  color: var(--color-text-light);
   margin-bottom: 24px;
 }
+
 .options {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
+
 .option {
   border: 1px solid #e5e7eb;
   border-radius: 12px;
@@ -144,38 +191,113 @@ const goNext = () => {
   cursor: pointer;
   transition: border-color 0.2s, background 0.2s;
 }
+
+.option:hover {
+  border-color: var(--color-main-light);
+}
+
 .option.selected {
   border-color: var(--color-main-dark);
   background: #f3f0fa;
   color: #6c4cf1;
-  font-weight: 600;
 }
+
 .next-btn {
-  width: 100%;
-  background: var(--color-main-dark);
+  width: calc(100% - 16px);
+  background: linear-gradient(
+    135deg,
+    var(--color-main) 0%,
+    var(--color-main-dark) 100%
+  );
   color: #fff;
   border: none;
-  border-radius: 10px;
-  padding: 14px 0;
+  border-radius: 16px;
+  padding: 18px 0;
   font-size: 18px;
-  font-weight: bold;
-  margin-top: 48px;
+  font-weight: 700;
+  margin: 48px 8px 0 8px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(67, 24, 209, 0.3);
 }
+
+.next-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.next-btn:hover::before {
+  left: 100%;
+}
+
+.next-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(67, 24, 209, 0.4);
+}
+
+.next-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 15px rgba(67, 24, 209, 0.3);
+}
+
 .next-btn:disabled {
-  background-color: #9ca3af;
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-.next-btn:hover {
-  background: #6c4cf1;
-}
+
 @media (max-width: 480px) {
   .profile-step-container {
     padding: 0 8px 16px 8px;
   }
+
+  .question-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+
+  .option {
+    padding: 16px 20px;
+    font-size: 15px;
+  }
+
   .next-btn {
     margin-top: 32px;
+    padding: 16px 0;
+    font-size: 16px;
   }
+}
+
+/* 스크롤바 스타일링 */
+.profile-step-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profile-step-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.profile-step-container::-webkit-scrollbar-thumb {
+  background: var(--color-main-light);
+  border-radius: 3px;
+}
+
+.profile-step-container::-webkit-scrollbar-thumb:hover {
+  background: var(--color-main);
 }
 </style>

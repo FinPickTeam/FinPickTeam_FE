@@ -35,7 +35,11 @@
             :disabled="isLoadingRecommend"
             :aria-busy="isLoadingRecommend ? 'true' : 'false'"
           >
-            <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+            <i
+              class="fa-solid fa-chart-line"
+              aria-hidden="true"
+              style="font-family: 'Font Awesome 6 Free'; font-weight: 900"
+            ></i>
             <span>투자 성향에 맞는 상품 확인하기</span>
           </button>
 
@@ -74,7 +78,10 @@
             placeholder="주식명을 검색해보세요"
           />
           <button class="filter-btn" @click="showFilter = !showFilter">
-            <i class="fa-solid fa-filter"></i>
+            <i
+              class="fa-solid fa-filter"
+              style="font-family: 'Font Awesome 6 Free'; font-weight: 900"
+            ></i>
           </button>
         </div>
 
@@ -82,7 +89,15 @@
         <div v-if="showFilter" class="filter-dropdown">
           <!-- 시장 섹션 -->
           <div class="filter-section">
-            <h4 class="filter-section-title">시장</h4>
+            <div class="filter-title-content">
+              <h4 class="filter-section-title market">시장</h4>
+              <div class="help-button" @click="openStock()">
+                <i class="fa-solid fa-circle-info"></i>
+              </div>
+            </div>
+
+            <StockHelper v-model:open="stockOpen" />
+
             <div class="tag-container">
               <button
                 v-for="tag in marketTags"
@@ -187,6 +202,7 @@ import { getStockList, getStockRecommendedList } from '@/api';
 import { useFavoriteStore } from '@/stores/favorite';
 import StockBottomSheet from '@/components/finance/stock/StockBottomSheet.vue';
 import CompareImg from '@/assets/icons/stock-compare-btn.png';
+import StockHelper from '@/components/finance/stock/StockHelper.vue';
 
 const router = useRouter();
 const showProducts = ref(false);
@@ -295,6 +311,9 @@ const selectedMarkets = ref([]);
 const selectedChangeRates = ref([]);
 const selectedSortType = ref('');
 const selectedOrderType = ref('');
+
+const stockOpen = ref(false);
+const openStock = () => (stockOpen.value = true);
 
 // 태그 데이터
 const marketTags = ref([
@@ -414,6 +433,9 @@ const filteredAllProducts = computed(() => {
 </script>
 
 <style scoped>
+* {
+  font-family: var(--font-main);
+}
 .stock-container {
   max-width: 390px;
   margin: 0 auto;
@@ -652,26 +674,55 @@ const filteredAllProducts = computed(() => {
   opacity: 0.6;
   cursor: not-allowed;
 }
+.market {
+  margin-bottom: 0px;
+}
 
 /* 비교 버튼(FAB) */
 .compare-button {
   position: fixed;
-  bottom: 80px;
-  right: 10px;
-  width: 60px;
-  height: 60px;
+  bottom: 100px;
+  right: 20px;
+  width: 55px;
+  height: 55px;
   background: var(--color-main);
   color: white;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 6px 12px rgba(0, 0, 0, 0.25);
+
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .compare-button img {
-  width: 52px;
-  height: 52px;
+  width: 34px;
+  height: 34px;
   filter: brightness(0) invert(1);
+}
+.filter-title-content {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: left;
+  margin-bottom: 12px;
+}
+.help-button {
+  font-size: 14px;
+  color: #888;
+  font-family: var(--font-main);
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  padding-left: 4px;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.help-button i {
+  font-family: 'Font Awesome 6 Free' !important;
+  font-weight: 900;
 }
 </style>
