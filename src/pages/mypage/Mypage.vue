@@ -86,22 +86,7 @@
 
       <div class="stat">
         <div class="stat-label">레벨</div>
-        <div class="stat-value">
-          <template v-if="loadingCoin">
-            <span class="skeleton skeleton-text"></span>
-          </template>
-          <template v-else-if="coinError">
-            <span class="error">-</span>
-          </template>
-          <template v-else>
-            <div class="level-info">
-              <div class="level-title">{{ levelText }}</div>
-              <div class="level-detail">
-                누적 {{ formatNumber(coinStatus.cumulativeAmount) }}P
-              </div>
-            </div>
-          </template>
-        </div>
+        <div class="stat-value">{{ levelText }}</div>
       </div>
     </section>
 
@@ -286,11 +271,6 @@ const wearingGlasses = computed(() =>
     .filter((i) => i.type === "accessory" && i.wearing)
     .map((i) => i.itemId)
 );
-
-// 숫자 포맷팅 함수
-const formatNumber = (num) => {
-  return Number(num || 0).toLocaleString();
-};
 
 // API: 아바타/아이템
 const fetchAvatarAndItemData = async () => {
@@ -635,24 +615,6 @@ onMounted(() => {
 .error {
   color: #ef4444;
   font-weight: 700;
-}
-
-/* ===== 레벨 정보 ===== */
-.level-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-.level-title {
-  font-weight: 700;
-  color: var(--color-main);
-  font-size: 16px;
-}
-.level-detail {
-  font-size: 12px;
-  color: #6b7280;
-  font-weight: 500;
 }
 
 /* ===== 확인 모달 ===== */
