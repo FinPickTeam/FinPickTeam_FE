@@ -223,6 +223,13 @@
         </button>
       </div>
 
+      <ModalAssetLink
+        :open="open"
+        @close="open = false"
+        @confirm="handleConfirm"
+        @skip="handleSkip"
+      />
+
       <!-- 공유하기 버튼 -->
       <div class="share-section" v-if="challenge">
         <button class="share-button" @click="shareChallenge">
@@ -269,6 +276,8 @@ import ChallengeParticipationLimitModal from '@/components/challenge/ChallengePa
 import ChallengeInsufficientPointsModal from '@/components/challenge/ChallengeInsufficientPointsModal.vue';
 import AvatarStack from '@/components/avatar/AvatarStack.vue';
 import { useChallengeStore } from '@/stores/challenge';
+import ModalAssetLink from '@/components/challenge/ModalAssetLink.vue';
+const open = ref(false);
 
 const route = useRoute();
 const challengeStore = useChallengeStore();
@@ -424,6 +433,7 @@ const togglePasswordVisibility = () => {
 const handlePasswordSubmit = async () => {
   // 에러 메시지 초기화
   passwordError.value = '';
+  open.value = true;
 
   if (!password.value.trim()) {
     passwordError.value = '비밀번호를 입력해주세요.';
