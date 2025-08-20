@@ -133,11 +133,10 @@ onMounted(async () => {
   try {
     await favoriteStore.syncAllIdSets();
 
-    await delay(300); // UX용 살짝 대기 (선택)
     const res = await getWishlist();
 
     // 항상 객체가 되도록 안전 파싱
-    const lists = res?.data?.data ?? res?.data ?? res ?? {};
+    const lists = res.data ?? [];
 
     depositFavorites.value = lists.depositList ?? [];
     installmentFavorites.value =
